@@ -2,6 +2,7 @@
 using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -124,7 +125,7 @@ namespace EmpyrionScripting
 
         public static readonly HandlebarsHelper BGColorHelper = (TextWriter output, dynamic context, object[] arguments) =>
         {
-            if (arguments.Length != 1) throw new HandlebarsException("{{bgcolor}} helper must have exactly one argument: '@root (rgb hex)'");
+            if (arguments.Length != 2) throw new HandlebarsException("{{bgcolor}} helper must have exactly two argument: '@root (rgb hex)'");
 
             try
             {
@@ -140,7 +141,7 @@ namespace EmpyrionScripting
 
         public static readonly HandlebarsHelper FontSizeHelper = (TextWriter output, dynamic context, object[] arguments) =>
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{fontsize}} helper must have exactly one argument: @root (number)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{fontsize}} helper must have exactly two argument: @root (number)");
 
             try
             {
@@ -173,14 +174,16 @@ namespace EmpyrionScripting
 
         public static readonly HandlebarsBlockHelper DeviceBlockHelper = (TextWriter output, HelperOptions options, dynamic context, object[] arguments) =>
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{device entity names}} helper must have exactly two argument: (entity) (name;name*;name)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{device structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
-            var entity =  arguments[0] as EntityData;
-            var names  = (arguments[1] as string).Split(';');
+            var structure   = arguments[0] as StructureData;
+            var namesSearch = arguments[1] as string;
 
             try
             {
-                var devices = names.Select(N => entity.GetCurrent().Structure.GetDevice<IDevice>(N)).ToArray();
+                var uniqueNames = GetUniqueNames(structure, namesSearch);
+
+                var devices = uniqueNames.Values.Select(N => structure.GetCurrent().GetDevice<IDevice>(N)).ToArray();
                 if(devices.Length > 0)  options.Template(output, devices);
                 else                    options.Inverse (output, context as object);
             }
@@ -192,55 +195,76 @@ namespace EmpyrionScripting
 
         public static readonly HandlebarsBlockHelper ItemsBlockHelper = (TextWriter output, HelperOptions options, dynamic context, object[] arguments) =>
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{items entity names}} helper must have exactly two argument: (entity) (name;name*;name)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{items structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
-            var entity = arguments[0] as EntityData;
-            var names = (arguments[1] as string).Split(';').Select(N => N.Trim());
+            var structure   = arguments[0] as StructureData;
+            var namesSearch = arguments[1] as string;
 
             try
             {
-                var container = names.Select(N =>
-                {
-                    try{ return entity.GetCurrent().Structure.GetDevice<Eleon.Modding.IContainer>(N); }
-                    catch { return null; }
-                }).Where(C => C != null).ToArray();
+                var uniqueNames = GetUniqueNames(structure, namesSearch);
 
                 var allItems = new ConcurrentDictionary<int, ItemsData>();
-                container?
+                structure.Items
                     .AsParallel()
-                    .ForAll(C => C
-                        .GetContent()
-                        .AsParallel()
-                        .ForAll(I => {
-                            EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(I.id, out ItemInfo details);
-                            allItems.AddOrUpdate(I.id,
-                            new ItemsData()
-                            {
-                                Source = new[] { C }.ToList(),
-                                Id     = I.id,
-                                Count  = I.count,
-                                Key    = details == null ? I.id.ToString() : details.Key,
-                                Name   = details == null ? I.id.ToString() : details.Name,
-                            },
-                            (K, U) => U.AddCount(I.count, C));
-                    }));
+                    .SelectMany(I => I.Source.Where(S => S.CustomName != null && uniqueNames.ContainsKey(S.CustomName)))
+                    .ForAll(I =>
+                    {
+                        ItemInfo details = null;
+                        EmpyrionScripting.ItemInfos?.ItemInfo.TryGetValue(I.Id, out details);
+                        allItems.AddOrUpdate(I.Id,
+                        new ItemsData()
+                        {
+                            Source  = new[] { I }.ToList(),
+                            Id      = I.Id,
+                            Count   = I.Count,
+                            Key     = details == null ? I.Id.ToString() : details.Key,
+                            Name    = details == null ? I.Id.ToString() : details.Name,
+                        },
+                        (K, U) => U.AddCount(I.Count, I));
+                    });
 
 
                 if (allItems.Count > 0) allItems.Values.OrderBy(I => I.Id).ForEach(I => options.Template(output, I));
-                else                    options.Inverse (output, context as object);
+                else                    options.Inverse(output, context as object);
             }
             catch (Exception error)
             {
-                output.Write("{{items}} error " + error.Message);
+                output.Write("{{items}} error " + error.ToString());
             }
         };
+
+        public static Dictionary<string, string> GetUniqueNames(StructureData structure, string namesSearch)
+        {
+            var names = new List<string>();
+
+            namesSearch
+                .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(N => N.Trim())
+                .ForEach(N =>
+                {
+                    if (N == "*") names.AddRange(structure.AllCustomDeviceNames);
+                    else if (N.EndsWith("*"))
+                    {
+                        var startsWith = N.Substring(0, N.Length - 1);
+                        names.AddRange(structure.AllCustomDeviceNames.Where(SN => SN.StartsWith(startsWith)));
+                    }
+                    else names.AddRange(structure.AllCustomDeviceNames.Where(SN => SN == N));
+                });
+
+            return names.GroupBy(N => N).ToDictionary(N => N.Key, N => N.Key);
+        }
 
         public static readonly HandlebarsBlockHelper ItemListBlockHelper = (TextWriter output, HelperOptions options, dynamic context, object[] arguments) =>
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{itemlist list ids}} helper must have exactly two argument: (list) (id1;id2;id3)");
 
             var items = arguments[0] as ItemsData[];
-            var ids   = (arguments[1] as string).Split(';').Select(N => int.TryParse(N, out int i) ? i : 0).Where(i => i != 0).ToArray();
+            var ids   = (arguments[1] as string)
+                            .Split(';')
+                            .Select(N => int.TryParse(N, out int i) ? i : 0)
+                            .Where(i => i != 0)
+                            .ToArray();
 
             try
             {
@@ -267,6 +291,51 @@ namespace EmpyrionScripting
                 output.Write("{{itemlist}} error " + error.Message);
             }
         };
+
+        public static readonly HandlebarsHelper ItemMoveHelper = (TextWriter output, dynamic context, object[] arguments) =>
+        {
+            if (arguments.Length != 3) throw new HandlebarsException("{{move item structure names}} helper must have exactly three argument: (item) (structure) (name;name*;*;name)");
+
+            try
+            {
+                var item        = arguments[0] as ItemsData;
+                var structure   = arguments[1] as StructureData;
+                var namesSearch = arguments[2] as string;
+
+                var uniqueNames = GetUniqueNames(structure, namesSearch);
+                item.Source
+                    .ForEach(S => {
+                        var count = S.Container.RemoveItems(S.Id, int.MaxValue);
+                        uniqueNames.Values.ForEach(N => count = MoveItem(S, N, structure, count));
+                        if(count > 0) S.Container.AddItems(S.Id, count);
+                    });
+            }
+            catch (Exception error)
+            {
+                output.Write("{{move}} error " + error.Message);
+            }
+        };
+
+        private static int MoveItem(ItemsSource S, string N, StructureData structure, int count)
+        {
+            var target = structure.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
+            return target == null ? count : target.AddItems(S.Id, count);
+        }
+
+        public static readonly HandlebarsHelper FormatHelper = (TextWriter output, dynamic context, object[] arguments) =>
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{format data format}} helper must have exactly two argument: (data) (format)");
+
+            try
+            {
+                output.Write(string.Format(arguments[1] as string, arguments[0]).Replace(" ", "\u2007\u2009"));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{format}} error " + error.Message);
+            }
+        };
+
 
         public static readonly HandlebarsBlockHelper ScrollBlockHelper = (TextWriter output, HelperOptions options, dynamic context, object[] arguments) =>
         {

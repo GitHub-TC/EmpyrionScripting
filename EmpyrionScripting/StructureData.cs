@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,16 +43,16 @@ namespace EmpyrionScripting
                     .AsParallel()
                     .ForAll(I => {
                         EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(I.id, out ItemInfo details);
+                        var source = new ItemsSource() { Id = I.id, Container = container, CustomName = block.CustomName, Count = I.count };
                         allItems.AddOrUpdate(I.id,
                         new ItemsData() {
-                            Source      = new[] { container         }.ToList(),
-                            SourceNames = new[] { block.CustomName  }.ToList(),
+                            Source      = new[] { source }.ToList(),
                             Id          = I.id,
                             Count       = I.count,
-                            Key         = details  == null ? I.id.ToString() : details.Key,
+                            Key         = details == null ? I.id.ToString() : details.Key,
                             Name        = details == null ? I.id.ToString() : details.Name,
                         },
-                        (K, U) => U.AddCount(I.count, container, block.CustomName));
+                        (K, U) => U.AddCount(I.count, source));
                     });
             });
 
@@ -60,5 +61,7 @@ namespace EmpyrionScripting
                 .OrderBy(I => I.Id)
                 .ToArray();
         }
+
+        public IStructure GetCurrent() => structure;
     }
 }

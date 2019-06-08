@@ -14,7 +14,8 @@ namespace EmpyrionScripting
         public static event EventHandler StopApplicationEvent;
 
         private const string TargetsKeyword = "Targets:";
-        private const string CR_LF = "\n";
+        private const string ScriptKeyword = "Script:";
+
         ModGameAPI legacyApi;
 
         ConcurrentDictionary<string, Func<object, string>> LcdCompileCache = new ConcurrentDictionary<string, Func<object, string>>();
@@ -58,6 +59,8 @@ namespace EmpyrionScripting
 
         private void RegisterHelper()
         {
+            Handlebars.Configuration.TextEncoder = null;
+
             Handlebars.RegisterHelper("test",       CustomHelpers.TestBlockHelper);
             Handlebars.RegisterHelper("datetime",   CustomHelpers.DateTimeHelper);
             Handlebars.RegisterHelper("i18n",       CustomHelpers.I18NHelper);
@@ -69,6 +72,9 @@ namespace EmpyrionScripting
             Handlebars.RegisterHelper("items",      CustomHelpers.ItemsBlockHelper);
             Handlebars.RegisterHelper("itemlist",   CustomHelpers.ItemListBlockHelper);
             Handlebars.RegisterHelper("scroll",     CustomHelpers.ScrollBlockHelper);
+            Handlebars.RegisterHelper("format",     CustomHelpers.FormatHelper);
+            Handlebars.RegisterHelper("move",       CustomHelpers.ItemMoveHelper);
+            
         }
 
         private void Application_OnPlayfieldLoaded(string playfieldName)
@@ -109,9 +115,11 @@ namespace EmpyrionScripting
 
             try
             {
-                var data = new ScriptRootData(ModApi.Playfield, entity);
+                var entityScriptData = new ScriptRootData(ModApi.Playfield, entity);
 
-                var deviceNames = data.S.AllCustomDeviceNames.Where(N => N.StartsWith("Script:"));
+                var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword)).ToArray();
+                //ModApi.Log($"UpdateLCDs ({entity.Id}/{entity.Name}):LCDs: {deviceNames.Aggregate(string.Empty, (N, S) => N + ";" + S)}");
+
                 Parallel.ForEach(deviceNames, N =>
                 {
                     var lcd = entity.Structure.GetDevice<ILcd>(N);
@@ -120,7 +128,14 @@ namespace EmpyrionScripting
                     //ModApi.Log($"UpdateLCDs Test ({entity.Id}/{entity.Name}/{entity.Type}):[{i}]{lcdText}");// + entity.Structure.GetDeviceTypeNames().Aggregate("", (s, l) => s + "\n" + l));
                     try
                     {
-                        ProcessScript(data, entity.Structure, lcd?.GetText());
+                        var data = new ScriptRootData(entityScriptData)
+                        {
+                            Script = lcd.GetText()
+                        };
+
+                        AddTargets(data, N.Substring(ScriptKeyword.Length));
+                        ProcessInTextTargets(data);
+                        ProcessScript(data);
                     }
                     catch //(Exception lcdError)
                     {
@@ -134,25 +149,24 @@ namespace EmpyrionScripting
             }
         }
 
-        private void ProcessScript(ScriptRootData dataPreset, IStructure structure, string lcdText)
+        private void ProcessInTextTargets(ScriptRootData data)
         {
-            var data = new ScriptRootData(dataPreset);
-            var lcdScript = lcdText;
-            ILcd[] lcdTargets = null;
+            if (!data.Script.StartsWith(TargetsKeyword)) return;
+            var firstLineEndPos = data.Script.IndexOf('\n');
+            AddTargets(data, data.Script.Substring(TargetsKeyword.Length, firstLineEndPos - TargetsKeyword.Length));
+            data.Script = data.Script.Substring(firstLineEndPos + 1);
+        }
 
-            if (lcdScript.StartsWith(TargetsKeyword))
-            {
-                var firstLineEndPos = lcdScript.IndexOf('\n');
-                data.LcdTargets = lcdText.Substring(TargetsKeyword.Length, firstLineEndPos - TargetsKeyword.Length)
-                    .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(T => T.Trim())
-                    .ToArray();
+        private void AddTargets(ScriptRootData data, string targets)
+        {
+            data.LcdTargets.AddRange(CustomHelpers.GetUniqueNames(data.E.S, targets).Values.Where(N => !N.StartsWith(ScriptKeyword)));
+        }
 
-                lcdTargets = data.LcdTargets.Select(T => structure.GetDevice<ILcd>(T)).Where(T => T != null).ToArray();
-                lcdScript = lcdText.Substring(firstLineEndPos + 1);
-            }
+        private void ProcessScript(ScriptRootData data)
+        {
+            var lcdTargets = data.LcdTargets.Select(T => data.E.S.GetCurrent().GetDevice<ILcd>(T)).Where(T => T != null).ToArray();
 
-            if (lcdTargets != null)
+            if (lcdTargets.Length > 0)
             {
                 data.FontSize        = lcdTargets[0].GetFontSize();
                 data.Color           = lcdTargets[0].GetColor();
@@ -163,18 +177,19 @@ namespace EmpyrionScripting
             var initColor           = data.Color;
             var initBackgroundColor = data.BackgroundColor;
 
-            //structure.GetDevice<ILcd>("LCDDebugInfo")?.SetText($"Targets:" + lcdTargets.Aggregate("", (s, c) => $"{c};{s}"));
+            data.ScriptDebugLcd?.SetText("");
+            data.ScriptDebugLcd?.SetText(data.ScriptDebugLcd?.GetText() + $"\nTargets:" + data.LcdTargets.Aggregate("", (s, c) => $"{s};{c}"));
 
             try
             {
-                string result = ExecuteHandlebarScript(data, lcdScript);
+                string result = ExecuteHandlebarScript(data, data.Script);
 
                 data.LcdTargets.ForEach(T =>
                 {
-                    var targetLCD = structure.GetDevice<ILcd>(T);
+                    var targetLCD = data.E.S.GetCurrent().GetDevice<ILcd>(T);
                     if (targetLCD == null) return;
 
-                    targetLCD.SetText(result);
+                    targetLCD.SetText(string.Join("\n", result.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)));
                     if (initColor           != data.Color)              targetLCD.SetColor     (data.Color);
                     if (initBackgroundColor != data.BackgroundColor)    targetLCD.SetBackground(data.BackgroundColor);
                     if (initFontSize        != data.FontSize)           targetLCD.SetFontSize  (data.FontSize);
@@ -183,16 +198,17 @@ namespace EmpyrionScripting
             catch (Exception ctrlError)
             {
                 ModApi.LogError(ctrlError.ToString());
-                data.LcdTargets.ForEach(T => structure.GetDevice<ILcd>(T)?.SetText($"{ctrlError.Message} {DateTime.Now.ToLongTimeString()}"));
+                data.ScriptDebugLcd?.SetText(data.ScriptDebugLcd?.GetText() + $"\n{ctrlError.Message} {DateTime.Now.ToLongTimeString()}");
+                data.LcdTargets.ForEach(T => data.E.S.GetCurrent().GetDevice<ILcd>(T)?.SetText($"{ctrlError.Message} {DateTime.Now.ToLongTimeString()}"));
             }
         }
 
-        public string ExecuteHandlebarScript<T>(T data, string lcdFormat)
+        public string ExecuteHandlebarScript<T>(T data, string script)
         {
-            if(!LcdCompileCache.TryGetValue(lcdFormat, out Func<object, string> generator))
+            if(!LcdCompileCache.TryGetValue(script, out Func<object, string> generator))
             {
-                generator = Handlebars.Compile(lcdFormat);
-                LcdCompileCache.TryAdd(lcdFormat, generator);
+                generator = Handlebars.Compile(script);
+                LcdCompileCache.TryAdd(script, generator);
             }
 
             return generator(data);

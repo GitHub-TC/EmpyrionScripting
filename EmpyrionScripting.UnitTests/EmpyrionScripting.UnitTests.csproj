@@ -72,13 +72,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EmpyrionScripting\EmpyrionScripting.csproj">
-      <Project>{dc79fd9d-5e85-4588-a4bd-46f7ed62150f}</Project>
-      <Name>EmpyrionLCDInfo</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\EmpyrionScripting\EmpyrionScripting.csproj">
+      <Project>{dc79fd9d-5e85-4588-a4bd-46f7ed62150f}</Project>
+      <Name>EmpyrionScripting</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace EmpyrionScripting
@@ -16,14 +17,18 @@ namespace EmpyrionScripting
         {
             this.playfield = playfield;
             this.entity = entity;
+
+            ScriptDebugLcd = entity?.Structure?.GetDevice<ILcd>("ScriptDebugInfo");
         }
 
         public ScriptRootData(ScriptRootData data) : this(data.playfield, data.entity)
         {
             _p = data._p;
             _e = data._e;
-            _s = data._s;
+            ScriptDebugLcd = data.ScriptDebugLcd;
         }
+
+        public ILcd ScriptDebugLcd { get; }
 
         public PlayfieldData P { get => _p == null ? _p = new PlayfieldData(playfield) : _p; set => _p = value; }
         private PlayfieldData _p;
@@ -31,14 +36,10 @@ namespace EmpyrionScripting
         public EntityData E { get => _e == null ? _e = new EntityData(entity) : _e; set => _e = value; }
         private EntityData _e;
 
-        public StructureData S { get => _s == null ? _s = new StructureData(entity.Structure) : _s; set => _s = value; }
-        private StructureData _s;
-
-        public string[] DeviceNames => entity.Structure.GetDeviceTypeNames();
-
-        public string[] LcdTargets { get; set; }
+        public List<string> LcdTargets { get; set; } = new List<string>();
         public int FontSize { get; set; }
         public Color Color { get; set; }
         public Color BackgroundColor { get; set; }
+        public string Script { get; set; }
     }
 }

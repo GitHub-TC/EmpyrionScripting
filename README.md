@@ -31,7 +31,7 @@ YouTube video;
 ## Beispiele
 Allgemein: 
 Benötigt werden mindestens 2 LCD und mindestens 1 Container
-1. LCD 1 (Eingabe) wird mit der Abfrage programmiert siehe Beispiele unten
+1. LCD 1 (Eingabe) wird mit der Abfrage programmiert siehe Beispiele unten. Der Namen des LCDs im ControlPanel MUSS mit "Script:" beginnen.
 1. LCD 2 (Ausgabe) Muss eindeutigen Namen haben z.B. "LCD Alle Erze"
 1. Jeder Kontainer der eine Information ausgeben soll, muss einen eindeutigen Namen haben
 
@@ -41,9 +41,13 @@ Unten stehen die ID Nummer für Erze und Barren.<br/>
 Einige Funktionen benötigen ein Komma"," andere benötigen Simikolon ";".<br/>
 Alles in "" sind Texte und nicht mit anzugeben.<br/>
 Einzelne ' sind mit anzugeben.<br/>
-Man kann eine Information auch auf 2 LCD's anzeigen lassen dann bei LCDInfo:"Name LCD";"Name CD2"<br/>
+Man kann eine Information auch auf 2 LCD's anzeigen lassen dann bei Targets:Name LCD;Name LCD2<br/>
+Man kann eine Information auch auf n LCD's anzeigen lassen dann bei Targets:LCDAusgabe*<br/>
+Man kann eine Information auch auf n LCD's anzeigen lassen welche schon im ScriptLCD Namen angegeben sind Script:LCDAusgabe*<br/>
 Man kann auf einem LCD auch den Inhalt verschiedner Kisten anzeigen lassen!<br/>
  
+Eine Debugausgabe erhält man mit einem LCD das den Namen "ScriptDebugInfo" hat.
+
  ---
 ## Was ist in der Kiste/Container/ContainerController/MunitionsKiste/Kühlschrank
 
@@ -51,7 +55,7 @@ Eingabe im LCD 1 (alles ohne "")
 ```
 LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT Optional"
-{{items E '"Name der Kiste"'}}
+{{items E.S '"Name der Kiste"'}}
 {{Count}}{{Name}}
 {{/items}}
 ```
@@ -59,7 +63,7 @@ Bsp:
 ```
 LCDInfo:LCD Alle Erze
 Meine Erze
-{{#items E 'Alle Erze'}}
+{{#items E.S 'Alle Erze'}}
 {{Count}}{{i18 Key 'Deutsch'}}
 {{/items}}
 ```
@@ -79,7 +83,7 @@ Bsp:
 ```
 LCDInfo:LCD Alle Erze
 Meine Erze
-{{#each S.Items}}
+{{#each E.S.Items}}
 {{#test Id in '2248,2249,2250,2251,2252,2253,2269,2270,2284,2297,2280,2254'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/test}}
@@ -92,7 +96,7 @@ Eingabe im LCD (alles ohne "")
 ```
 LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#each S.Items}}
+{{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/test}}
@@ -102,7 +106,7 @@ Bsp:
 ```
 LCDInfo:LCD Barren
 Alle meine Barren in der Basis:
-{{#each S.Items}}
+{{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/test}}
@@ -114,7 +118,7 @@ Eingabe im LCD (alles ohne "")
 ```
 LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#itemlist S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
+{{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/itemlist}}
 ```
@@ -122,7 +126,7 @@ Bsp:
 ```
 LCDInfo:LCD Alle Barren im Spiel
 Alle Barren im Spiel:
-{{#itemlist S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
+{{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/itemlist}}
 ```
@@ -132,7 +136,7 @@ Alle Barren im Spiel:
 Eingabe im LCD (alles ohne "")
 LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#itemlist S.Items '2249'}}
+{{#itemlist E.S.Items '2249'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/itemlist}}
 ```
@@ -140,7 +144,7 @@ Bsp:
 ```
 LCDInfo:LCD EISEN ERZ
 Meine EisenErz und Barren
-{{#itemlist S.Items '2249;2272'}}
+{{#itemlist E.S.Items '2249;2272'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/itemlist}}
 ```
@@ -149,7 +153,7 @@ Meine EisenErz und Barren
 
 Hier werden alle Erze angezeigt wo nur 1-1000 auf der Basis vorhanden ist.
 ```
-{{#itemlist S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
+{{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
 {{#test Count geq 1}}
 {{#test Count leq 1000}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -160,7 +164,7 @@ Hier werden alle Erze angezeigt wo nur 1-1000 auf der Basis vorhanden ist.
 ---
 ## Hier werden alle Erze angezeigt die nicht mehr auf der Basis sind
 ```
-{#itemlist S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
+{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
 {{#test Count leq 0}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/test}}
@@ -214,19 +218,19 @@ Wenn zu viele Produkte nicht angzeigt werden können, dann kann man auch Scrolle
 Hier werden 5 Produkte angezeigt mit 2 Sekunden Scrollgeschwindigkeit, wenn mehr als 5 Items zur Verfügung stehen. 
 ```
 {{#scroll 5 2}}
-{{#items E '"Name der Kiste"'}}
+{{#items E.S '"Name der Kiste"'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 ```
 Bsp.
 ```
 {{#scroll 5 2}}
-{{#items E 'Kühlschrank 1'}}
+{{#items E.S 'Kühlschrank 1'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 
 {{#scroll 10 1}}
-{{#each S.Items}}
+{{#each E.S.Items}}
  - [{{Id}}]:{{Name}}
 {{/each}}
 {{/scroll}}
@@ -246,12 +250,12 @@ oder hier sind sind 2 Kisten die abwechselnd angezeigt werden.
 ```
 {{#intervall 2}}
 "Text optional"
-{{#items E '"Name der Kiste"'}}
+{{#items E.S '"Name der Kiste"'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 {{else}}
 "Text optional"
-{{#items E '"Name der Kiste2"'}}
+{{#items E.S '"Name der Kiste2"'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 {{/intervall}}
@@ -262,14 +266,14 @@ Bsp.
 
 Kühlschrank 1:
 
-{{#items E 'Kühlschrank 1'}}
+{{#items E.S 'Kühlschrank 1'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 {{else}}
 
 Kühlschrank 2:
 
-{{#items E 'Kühlschrank 2'}}
+{{#items E.S 'Kühlschrank 2'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 {{/intervall}}
@@ -287,21 +291,21 @@ Welt
 {{/intervall}}
 
 {{#intervall 5}}
-{{fontsize 8}}
+{{fontsize @root 8}}
 {{else}}
-{{fontsize 15}}
+{{fontsize @root 15}}
 {{/intervall}}
 
 {{#intervall 1}}
-{{color 'ff0000'}}
+{{color @root 'ff0000'}}
 {{else}}
-{{color '00ff00'}}
+{{color @root '00ff00'}}
 {{/intervall}}
 
 {{#intervall 1}}
-{{bgcolor 'ffff00'}}
+{{bgcolor @root 'ffff00'}}
 {{else}}
-{{bgcolor '000000'}}
+{{bgcolor @root '000000'}}
 {{/intervall}}
 ```
 ----------------------------------------------------
@@ -373,6 +377,7 @@ Welt
 # Technical
 Syntaxdocu:
 + http://handlebarsjs.com/
++ http://handlebarsjs.com/reference.html#data
 + https://github.com/rexm/Handlebars.Net
 
 ### CustomHelpers (test)
@@ -471,7 +476,7 @@ Eingabe im LCD 1 (alles ohne "")
 ```
 LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT Optional"
-{{items E '"Name der Kiste"'}}
+{{items E.S '"Name der Kiste"'}}
 {{Count}}{{Name}}
 {{/items}}
 ```
@@ -479,7 +484,7 @@ Bsp:
 ```
 LCDInfo:LCD Alle Erze
 Meine Erze
-{{#items E 'Alle Erze'}}
+{{#items E.S 'Alle Erze'}}
 {{Count}}{{i18 Key 'Deutsch'}}
 {{/items}}
 ```
@@ -499,7 +504,7 @@ Bsp:
 ```
 LCDInfo:LCD Alle Erze
 Meine Erze
-{{#each S.Items}}
+{{#each E.S.Items}}
 {{#test Id in '2248,2249,2250,2251,2252,2253,2269,2270,2284,2297,2280,2254'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/test}}
@@ -512,7 +517,7 @@ Input on the LCD (everything without "")
 ```
 LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#each S.Items}}
+{{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/test}}
@@ -522,7 +527,7 @@ Bsp:
 ```
 LCDInfo:LCD Barren
 Alle meine Barren in der Basis:
-{{#each S.Items}}
+{{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/test}}
@@ -534,7 +539,7 @@ Input on the LCD (everything without "")
 ```
 LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#itemlist S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
+{{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/itemlist}}
 ```
@@ -542,7 +547,7 @@ Bsp:
 ```
 LCDInfo:LCD Alle Barren im Spiel
 Alle Barren im Spiel:
-{{#itemlist S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
+{{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/itemlist}}
 ```
@@ -553,7 +558,7 @@ Input on the LCD (everything without "")
 ```
 LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#itemlist S.Items '2249'}}
+{{#itemlist E.S.Items '2249'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/itemlist}}
 ```
@@ -561,7 +566,7 @@ Bsp:
 ```
 LCDInfo:LCD EISEN ERZ
 Meine EisenErz und Barren
-{{#itemlist S.Items '2249;2272'}}
+{{#itemlist E.S.Items '2249;2272'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/itemlist}}
 ```
@@ -570,7 +575,7 @@ Meine EisenErz und Barren
 
 Here all ores are displayed where only 1-1000 exists on the basis.
 ```
-{{#itemlist S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
+{{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
 {{#test Count geq 1}}
 {{#test Count leq 1000}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -581,7 +586,7 @@ Here all ores are displayed where only 1-1000 exists on the basis.
 ---
 ## Here all ores are displayed that are no longer based
 ```
-{#itemlist S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
+{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
 {{#test Count leq 0}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/test}}
@@ -635,14 +640,14 @@ If too many products can not be displayed, then you can also scroll
 5 products are shown here with 2 seconds scrolling speed if more than 5 items are available.
 ```
 {{#scroll 5 2}}
-{{#items E '"Name der Kiste"'}}
+{{#items E.S '"Name der Kiste"'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 ```
 Bsp.
 ```
 {{#scroll 5 2}}
-{{#items E 'Kühlschrank 1'}}
+{{#items E.S 'Kühlschrank 1'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 
@@ -667,12 +672,12 @@ or here are 2 boxes that are displayed alternately.
 ```
 {{#intervall 2}}
 "Text optional"
-{{#items E '"Name der Kiste"'}}
+{{#items E.S '"Name der Kiste"'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 {{else}}
 "Text optional"
-{{#items E '"Name der Kiste2"'}}
+{{#items E.S '"Name der Kiste2"'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 {{/intervall}}
@@ -683,14 +688,14 @@ Bsp.
 
 Kühlschrank 1:
 
-{{#items E 'Kühlschrank 1'}}
+{{#items E.S 'Kühlschrank 1'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 {{else}}
 
 Kühlschrank 2:
 
-{{#items E 'Kühlschrank 2'}}
+{{#items E.S 'Kühlschrank 2'}}
 {{Count}} {{i18n Key 'Deutsch'}}
 {{/items}}
 {{/intervall}}
@@ -708,21 +713,21 @@ Welt
 {{/intervall}}
 
 {{#intervall 5}}
-{{fontsize 8}}
+{{fontsize @root 8}}
 {{else}}
-{{fontsize 15}}
+{{fontsize @root 15}}
 {{/intervall}}
 
 {{#intervall 1}}
-{{color 'ff0000'}}
+{{color @root 'ff0000'}}
 {{else}}
-{{color '00ff00'}}
+{{color @root '00ff00'}}
 {{/intervall}}
 
 {{#intervall 1}}
-{{bgcolor 'ffff00'}}
+{{bgcolor @root 'ffff00'}}
 {{else}}
-{{bgcolor '000000'}}
+{{bgcolor @root '000000'}}
 {{/intervall}}
 ```
 ----------------------------------------------------
@@ -794,6 +799,7 @@ Welt
 # Technical
 Syntaxdocu:
 + http://handlebarsjs.com/
++ http://handlebarsjs.com/reference.html#data
 + https://github.com/rexm/Handlebars.Net
 
 ### CustomHelpers (test)
