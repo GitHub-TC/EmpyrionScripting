@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.645
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmpyrionScripting", "EmpyrionScripting\EmpyrionScripting.csproj", "{DC79FD9D-5E85-4588-A4BD-46F7ED62150F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmpyrionScripting.UnitTests", "EmpyrionScripting.UnitTests\EmpyrionScripting.UnitTests.csproj", "{6B6A2588-D72C-497D-BD81-187F2E359306}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ACDE2554-23D4-45F7-9EB3-7D727E8C651C}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC79FD9D-5E85-4588-A4BD-46F7ED62150F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC79FD9D-5E85-4588-A4BD-46F7ED62150F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC79FD9D-5E85-4588-A4BD-46F7ED62150F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC79FD9D-5E85-4588-A4BD-46F7ED62150F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B6A2588-D72C-497D-BD81-187F2E359306}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B6A2588-D72C-497D-BD81-187F2E359306}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B6A2588-D72C-497D-BD81-187F2E359306}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B6A2588-D72C-497D-BD81-187F2E359306}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A1B504BD-A21A-4EE4-A378-6AF1D6CF319F}
+	EndGlobalSection
+EndGlobal

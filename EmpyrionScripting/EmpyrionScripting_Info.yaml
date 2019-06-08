@@ -1,0 +1,11 @@
+# all parameters are optional
+
+Name: EmpyrionScripting
+Description: Displays dynamic/real LCD Stuff
+Author: ASTIC/TC
+Version: 1.0.0
+Website: https://github.com/GitHub-TC/EmpyrionScripting
+
+# Possible targets: None, Dedi, PfServer, Client (the latter three can be combined)
+# Note: If not set 'Dedi' is the default
+ModTargets: PfServer,Client
