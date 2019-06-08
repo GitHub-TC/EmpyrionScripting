@@ -1,5 +1,4 @@
-﻿using System;
-using Eleon.Modding;
+﻿using Eleon.Modding;
 using UnityEngine;
 
 namespace EmpyrionScripting
