@@ -59,7 +59,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomHelpers.cs" />
+    <Compile Include="CustomHelpers\BlockHelpers.cs" />
+    <Compile Include="CustomHelpers\ConveyorHelpers.cs" />
+    <Compile Include="CustomHelpers\EffectHelpers.cs" />
+    <Compile Include="CustomHelpers\ExternalDataHelpers.cs" />
+    <Compile Include="CustomHelpers\FormatHelpers.cs" />
+    <Compile Include="CustomHelpers\HelpersTools.cs" />
+    <Compile Include="CustomHelpers\ItemAccessHelpers.cs" />
+    <Compile Include="CustomHelpers\LogicHelpers.cs" />
     <Compile Include="EmpyrionScripting.cs" />
     <Compile Include="EntityData.cs" />
     <Compile Include="EnumerableExtensions.cs" />

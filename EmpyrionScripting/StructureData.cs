@@ -7,29 +7,33 @@ namespace EmpyrionScripting
 {
     public class StructureData
     {
-        private IStructure structure;
-
         public StructureData()
         {
         }
 
-        public StructureData(IStructure structure)
+        public StructureData(EntityData entity)
         {
-            this.structure = structure;
+            E = entity;
         }
 
-        public bool IsPowerd => structure.IsPowered;
+        public virtual EntityData E { get; }
 
-        public string[] AllCustomDeviceNames { get => _n == null ? _n = structure.GetAllCustomDeviceNames() : _n; set => _n = value; }
+        public bool IsPowerd => GetCurrent().IsPowered;
+
+        public string[] AllCustomDeviceNames { get => _n == null ? _n = GetCurrent().GetAllCustomDeviceNames() : _n; set => _n = value; }
         string[] _n;
 
-        public ItemsData[] Items { get => _i == null ? _i = CollectAllItems(structure) : _i; set => _i = value; }
+        public ItemsData[] Items { get => _i == null ? _i = CollectAllItems(GetCurrent()) : _i; set => _i = value; }
         private ItemsData[] _i;
+
+        public EntityData[] DockedE { get => _d == null ? _d = new[] { E } : _d; set => _d = value; }
+        private EntityData[] _d;
 
         private ItemsData[] CollectAllItems(IStructure structure)
         {
             var allItems = new ConcurrentDictionary<int, ItemsData>();
             var devices = structure.GetDevices("Container");
+            if (devices == null || devices.Count == 0) return new ItemsData[] { };
 
             Parallel.For(0, devices.Count, i =>
             {
@@ -41,7 +45,7 @@ namespace EmpyrionScripting
                     .AsParallel()
                     .ForAll(I => {
                         EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(I.id, out ItemInfo details);
-                        var source = new ItemsSource() { Id = I.id, Container = container, CustomName = block.CustomName, Count = I.count };
+                        var source = new ItemsSource() { E = E, Id = I.id, Container = container, CustomName = block.CustomName, Count = I.count };
                         allItems.AddOrUpdate(I.id,
                         new ItemsData() {
                             Source      = new[] { source }.ToList(),
@@ -60,6 +64,6 @@ namespace EmpyrionScripting
                 .ToArray();
         }
 
-        public IStructure GetCurrent() => structure;
+        virtual public IStructure GetCurrent() => E.GetCurrent().Structure;
     }
 }

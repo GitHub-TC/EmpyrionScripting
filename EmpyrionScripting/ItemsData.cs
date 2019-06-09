@@ -5,6 +5,7 @@ namespace EmpyrionScripting
 {
     public class ItemsSource
     {
+        public EntityData E { get; set; }
         public IContainer Container { get; set; }
         public string CustomName { get; set; }
         public int Id { get; set; }

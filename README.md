@@ -378,6 +378,7 @@ Welt
 Syntaxdocu:
 + http://handlebarsjs.com/
 + http://handlebarsjs.com/reference.html#data
++ https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
 
 ### CustomHelpers (test)
@@ -394,28 +395,40 @@ Syntaxdocu:
 
 ### CustomHelpers (intervall)
 * {{#intervall sec}}
-  * intervall in seconds
+  * Intervall in (sec) Sekunden
 
 ### CustomHelpers (scroll)
 * {{#scroll lines delay}}
-  * Text scroll block with (lines) od text, scrolls with (delay) seconds
+  * Text scrollen mit (lines) Zeilen und einer Verzögerung von (delay) Sekunden
 
 ### CustomHelpers (itemlist)
-* {{#itemlist list 'id1;id2;id3'}}
-  * Itemlist the the selected items (ids) even if they don't in the list (list)
+* {{#itemlist list 'id1;id2;id3,...'}}
+  * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
+    Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
 
 ### CustomHelpers (i18n)
 * {{#i18n Select 'Language'}}
   * Language: English,Deutsch,Français,Italiano,Spanish,...
-    look at \[ESG\]\\Content\\Extras\\Localization.csv at the first line
+    das Sprachkürzel kann hier, aus der ersten Zeile, entnommen werden \[ESG\]\\Content\\Extras\\Localization.csv
 
 ### CustomHelpers (datetime)
-+ {{datetime}} = Display the Datetime
-+ {{datetime 'format'}} = uses the formatstring
-+ {{datetime 'format' '+5'}} = adds N hours
++ {{datetime}} = Datum und Uhrzeit anzeigen
++ {{datetime 'format'}} = gemäß dem 'format' ausgeben
++ {{datetime 'format' '+5'}} = N Stunden addieren
 
 DateTime format:
 + https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8#System_DateTime_ToString_System_String_
+
+### CustomHelpers (items)
++ {{#items structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln
+
+### CustomHelpers (format)
++ {{format data format}} = Daten (data) gemäß dem Format (format) ausgeben
+  + https://docs.microsoft.com/de-de/dotnet/api/system.string.format?view=netframework-4.8#remarks-top
+
+### CustomHelpers (move)
++ {{move item structure names}}
+  + Item (item) in die Struktur (structure) in die Container mit den Namen (names) verschieben
 
 ### Whats next?
 
@@ -800,6 +813,7 @@ Welt
 Syntaxdocu:
 + http://handlebarsjs.com/
 + http://handlebarsjs.com/reference.html#data
++ https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
 
 ### CustomHelpers (test)

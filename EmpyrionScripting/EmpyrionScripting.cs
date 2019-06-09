@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.CustomHelpers;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
@@ -59,19 +60,25 @@ namespace EmpyrionScripting
         {
             Handlebars.Configuration.TextEncoder = null;
 
-            Handlebars.RegisterHelper("test",       CustomHelpers.TestBlockHelper);
-            Handlebars.RegisterHelper("datetime",   CustomHelpers.DateTimeHelper);
-            Handlebars.RegisterHelper("i18n",       CustomHelpers.I18NHelper);
-            Handlebars.RegisterHelper("intervall",  CustomHelpers.IntervallBlockHelper);
-            Handlebars.RegisterHelper("color",      CustomHelpers.ColorHelper);
-            Handlebars.RegisterHelper("bgcolor",    CustomHelpers.BGColorHelper);
-            Handlebars.RegisterHelper("fontsize",   CustomHelpers.FontSizeHelper);
-            Handlebars.RegisterHelper("device",     CustomHelpers.DeviceBlockHelper);
-            Handlebars.RegisterHelper("items",      CustomHelpers.ItemsBlockHelper);
-            Handlebars.RegisterHelper("itemlist",   CustomHelpers.ItemListBlockHelper);
-            Handlebars.RegisterHelper("scroll",     CustomHelpers.ScrollBlockHelper);
-            Handlebars.RegisterHelper("format",     CustomHelpers.FormatHelper);
-            Handlebars.RegisterHelper("move",       CustomHelpers.ItemMoveHelper);
+            Handlebars.RegisterHelper("test",       LogicHelpers.TestBlockHelper);
+
+            Handlebars.RegisterHelper("datetime",   ExternalDataHelpers.DateTimeHelper);
+
+            Handlebars.RegisterHelper("i18n",       FormatHelpers.I18NHelper);
+            Handlebars.RegisterHelper("format",     FormatHelpers.FormatHelper);
+
+            Handlebars.RegisterHelper("intervall",  EffectHelpers.IntervallBlockHelper);
+            Handlebars.RegisterHelper("color",      EffectHelpers.ColorHelper);
+            Handlebars.RegisterHelper("bgcolor",    EffectHelpers.BGColorHelper);
+            Handlebars.RegisterHelper("fontsize",   EffectHelpers.FontSizeHelper);
+            Handlebars.RegisterHelper("scroll",     EffectHelpers.ScrollBlockHelper);
+
+            Handlebars.RegisterHelper("device",     BlockHelpers.DeviceBlockHelper);
+
+            Handlebars.RegisterHelper("items",      ItemAccessHelpers.ItemsBlockHelper);
+            Handlebars.RegisterHelper("itemlist",   ItemAccessHelpers.ItemListBlockHelper);
+
+            Handlebars.RegisterHelper("move",       ConveyorHelpers.ItemMoveHelper);
             
         }
 
@@ -157,7 +164,7 @@ namespace EmpyrionScripting
 
         private void AddTargets(ScriptRootData data, string targets)
         {
-            data.LcdTargets.AddRange(CustomHelpers.GetUniqueNames(data.E.S, targets).Values.Where(N => !N.StartsWith(ScriptKeyword)));
+            data.LcdTargets.AddRange(data.E.S.GetUniqueNames(targets).Values.Where(N => !N.StartsWith(ScriptKeyword)));
         }
 
         private void ProcessScript(ScriptRootData data)

@@ -16,17 +16,17 @@ namespace EmpyrionScripting
             this.entity = entity;
         }
 
-        public StructureData S { get => _s == null ? _s = new StructureData(entity.Structure) : _s; set => _s = value; }
+        public StructureData S { get => _s == null ? _s = new StructureData(this) : _s; set => _s = value; }
         private StructureData _s;
 
         public string[] DeviceNames => entity.Structure.GetDeviceTypeNames();
 
         public int Id => entity.Id;
-        public string Name => entity.Name;
+        public virtual string Name => entity.Name;
         public EntityType EntityType => entity.Type;
 
         public Vector3 Pos => entity.Position;
 
-        public IEntity GetCurrent() => entity;
+        public virtual IEntity GetCurrent() => entity;
     }
 }
