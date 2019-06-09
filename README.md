@@ -448,6 +448,11 @@ English-Version:
 
 NOTE: This is an EARLY A10 mod with the new ModAPI !!! both are heavily WorkInProgress !!!
 
+#### Installation for SinglePlayer
+1. Download the ZIP file from https://github.com/GitHub-TC/EmpyrionScripting/releases
+1. UnZip the file in the directory Content\\Mods directory
+1. The game MUST then be started without EAC so the mods are loaded
+
 ### Whats for?
 ![](Screenshots/DemoShipScreen.png)
 
