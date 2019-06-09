@@ -6,8 +6,10 @@ using System.Linq;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    [HandlebarHelpers]
     public static class LogicHelpers
     {
+        [HandlebarTag("test")]
         public static void TestBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments) {
             if (arguments.Length != 3) throw new HandlebarsException("{{test}} helper must have exactly three argument: (testvalue) 'eq'|'le'|'leq'|'ge'|'geq'|'in' (compareto)");
 

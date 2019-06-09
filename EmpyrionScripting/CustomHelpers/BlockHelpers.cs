@@ -6,9 +6,11 @@ using System.Linq;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    [HandlebarHelpers]
     public class BlockHelpers
     {
-        public static readonly HandlebarsBlockHelper DeviceBlockHelper = (TextWriter output, HelperOptions options, dynamic context, object[] arguments) =>
+        [HandlebarTag("device")]
+        public static void DeviceBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{device structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
@@ -27,6 +29,7 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 output.Write("{{device}} error " + error.Message);
             }
-        };
+        }
+
     }
 }

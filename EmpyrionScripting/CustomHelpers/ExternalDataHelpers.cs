@@ -3,8 +3,10 @@ using System.IO;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    [HandlebarHelpers]
     public static class ExternalDataHelpers
     {
+        [HandlebarTag("datetime")]
         public static void DateTimeHelper(TextWriter output, dynamic context, object[] arguments)
         {
             var format = arguments.Length > 0 ? arguments[0] as string : null;

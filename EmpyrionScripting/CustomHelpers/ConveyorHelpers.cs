@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    [HandlebarHelpers]
     public static class ConveyorHelpers
     {
         public class ItemMoveInfo
@@ -18,6 +19,7 @@ namespace EmpyrionScripting.CustomHelpers
             public int Count { get; set; }
         }
 
+        [HandlebarTag("move")]
         public static void ItemMoveHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{move item structure names}} helper must have exactly three argument: (item) (structure) (name;name*;*;name)");

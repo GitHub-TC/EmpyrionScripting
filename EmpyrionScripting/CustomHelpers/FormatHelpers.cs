@@ -4,8 +4,10 @@ using System.IO;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    [HandlebarHelpers]
     public static class FormatHelpers
     {
+        [HandlebarTag("i18n")]
         public static void I18NHelper(TextWriter output, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{i18n}} helper must have exactly two argument: (key|id) (language)");
@@ -28,6 +30,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("format")]
         public static void FormatHelper(TextWriter output, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{format data format}} helper must have exactly two argument: (data) (format)");

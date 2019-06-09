@@ -6,9 +6,11 @@ using System.Linq;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    [HandlebarHelpers]
     public class ItemAccessHelpers
     {
-        public static readonly HandlebarsBlockHelper ItemsBlockHelper = (TextWriter output, HelperOptions options, dynamic context, object[] arguments) =>
+        [HandlebarTag("items")]
+        public static void ItemsBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{items structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
@@ -45,11 +47,12 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{items}} error " + error.ToString());
+                output.Write("{{items}} error " + error.Message);
             }
-        };
+        }
 
-        public static readonly HandlebarsBlockHelper ItemListBlockHelper = (TextWriter output, HelperOptions options, dynamic context, object[] arguments) =>
+        [HandlebarTag("itemlist")]
+        public static void ItemListBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{itemlist list ids}} helper must have exactly two argument: (list) (id1;id2;id3)");
 
@@ -84,7 +87,7 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 output.Write("{{itemlist}} error " + error.Message);
             }
-        };
+        }
 
     }
 }

@@ -31,7 +31,7 @@ namespace EmpyrionScripting
             ModApi.Log("EmpyrionScripting Mod started: IModApi");
             try
             {
-                RegisterHelper();
+                SetupHandlebarsComponent();
 
                 Localization = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content));
                 ItemInfos    = new ItemInfos   (ModApi.Application?.GetPathFor(AppFolder.Content), Localization);
@@ -54,33 +54,13 @@ namespace EmpyrionScripting
 
         public EmpyrionScripting()
         {
-            RegisterHelper();
+            SetupHandlebarsComponent();
         }
 
-        private void RegisterHelper()
+        private void SetupHandlebarsComponent()
         {
             Handlebars.Configuration.TextEncoder = null;
-
-            Handlebars.RegisterHelper("test",       LogicHelpers.TestBlockHelper);
-
-            Handlebars.RegisterHelper("datetime",   ExternalDataHelpers.DateTimeHelper);
-
-            Handlebars.RegisterHelper("i18n",       FormatHelpers.I18NHelper);
-            Handlebars.RegisterHelper("format",     FormatHelpers.FormatHelper);
-
-            Handlebars.RegisterHelper("intervall",  EffectHelpers.IntervallBlockHelper);
-            Handlebars.RegisterHelper("color",      EffectHelpers.ColorHelper);
-            Handlebars.RegisterHelper("bgcolor",    EffectHelpers.BGColorHelper);
-            Handlebars.RegisterHelper("fontsize",   EffectHelpers.FontSizeHelper);
-            Handlebars.RegisterHelper("scroll",     EffectHelpers.ScrollBlockHelper);
-
-            Handlebars.RegisterHelper("device",     BlockHelpers.DeviceBlockHelper);
-
-            Handlebars.RegisterHelper("items",      ItemAccessHelpers.ItemsBlockHelper);
-            Handlebars.RegisterHelper("itemlist",   ItemAccessHelpers.ItemListBlockHelper);
-
-            Handlebars.RegisterHelper("move",       ConveyorHelpers.ItemMoveHelper);
-            
+            HelpersTools.ScanHandlebarHelpers();
         }
 
         private void Application_OnPlayfieldLoaded(string playfieldName)

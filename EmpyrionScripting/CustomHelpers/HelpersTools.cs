@@ -1,11 +1,53 @@
-﻿using System;
+﻿using HandlebarsDotNet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    public class HandlebarHelpersAttribute : Attribute { }
+
+    public class HandlebarTagAttribute : Attribute
+    {
+        public HandlebarTagAttribute(string tag)
+        {
+            Tag = tag;
+        }
+
+        public string Tag { get; }
+    }
+
     public static class HelpersTools
     {
+        public static void ScanHandlebarHelpers()
+        {
+            var helperTypes = typeof(HelpersTools).Assembly.GetTypes()
+                .Where(T => T.GetCustomAttributes(typeof(HandlebarHelpersAttribute), true).Length > 0);
+
+            helperTypes.ForEach(T =>
+                T.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public)
+                .ForEach(M =>
+                {
+                    try
+                    {
+                        Handlebars.RegisterHelper(
+                            ((HandlebarTagAttribute)Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute))).Tag,
+                            (HandlebarsHelper)Delegate.CreateDelegate(typeof(HandlebarsHelper), M));
+                    }
+                    catch { }
+
+                    try
+                    {
+                        Handlebars.RegisterHelper(
+                            ((HandlebarTagAttribute)Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute))).Tag,
+                            (HandlebarsBlockHelper)Delegate.CreateDelegate(typeof(HandlebarsBlockHelper), M));
+                    }
+                    catch { }
+                })
+            );
+        }
+
         public static Dictionary<string, string> GetUniqueNames(this StructureData structure, string namesSearch)
         {
             var names = new List<string>();

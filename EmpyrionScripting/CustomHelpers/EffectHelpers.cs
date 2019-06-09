@@ -7,8 +7,10 @@ using UnityEngine;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    [HandlebarHelpers]
     public static class EffectHelpers
     {
+        [HandlebarTag("intervall")]
         public static void IntervallBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{intervall seconds}} helper must have exactly one argument: (value)");
@@ -26,6 +28,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("scroll")]
         public static void ScrollBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{scroll lines delay}} helper must have exactly two argument: (lines) (delay)");
@@ -55,6 +58,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("color")]
         public static void ColorHelper(TextWriter output, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{color}} helper must have exactly two argument: '@root (rgb hex)'");
@@ -71,6 +75,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("bgcolor")]
         public static void BGColorHelper(TextWriter output, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{bgcolor}} helper must have exactly two argument: '@root (rgb hex)'");
@@ -87,6 +92,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("fontsize")]
         public static void FontSizeHelper(TextWriter output, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{fontsize}} helper must have exactly two argument: @root (number)");

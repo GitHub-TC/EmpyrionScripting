@@ -27,6 +27,7 @@ YouTube video;
 * https://youtu.be/XzYKNevK0bs
 * https://youtu.be/SOnZ_mzytA4
 * https://youtu.be/oDOSbllwqSw
+* https://youtu.be/qhOnj2D3ejo
 
 ## Beispiele
 Allgemein: 
@@ -430,6 +431,40 @@ DateTime format:
 + {{move item structure names}}
   + Item (item) in die Struktur (structure) in die Container mit den Namen (names) verschieben
 
+### CustomHelpers (lights)
++ {{lights structure names}}
+  + Lichter der Struktur (structure) mit den Namen (names) auswählen
+
+### CustomHelpers (lightcolor)
++ {{lightcolor light color}}
+  + Bei Licht (light) die Farbe (color rgb hex) auswählen
+
+### CustomHelpers (lightblink)
++ {{lightblink light interval length offset}}
+  + Bei Licht (light) das Intervall (intervall) die Intervalllänge (length) und den Intervalloffset (offset) einstellen
+
+### CustomHelpers (lightintensity)
++ {{lightintensity light intensity}}
+  + Bei Licht (light) die Lichtintensität (intensity) einstellen
+
+### CustomHelpers (lightrange)
++ {{lightrange light range}}
+  + Bei Licht (light) die Lichtreichweite (range) einstellen
+
+### CustomHelpers (lightspotangle)
++ {{lightspotangle light spotangle}}
+  + Bei Licht (light) die Lichtspotwinkel (spotangle) einstellen
+
+### CustomHelpers (lighttype)
++ {{lighttype light type}}
+  + Bei Licht (light) die Lichttyp (type) einstellen
+	+	Spot
+	+	Directional
+	+	Point
+	+	Area
+	+	Rectangle
+	+	Disc
+
 ### Whats next?
 
 
@@ -470,6 +505,7 @@ YouTube video;
 * https://youtu.be/XzYKNevK0bs
 * https://youtu.be/SOnZ_mzytA4
 * https://youtu.be/oDOSbllwqSw
+* https://youtu.be/qhOnj2D3ejo
 
 ## Examples
 General:
@@ -858,6 +894,43 @@ Syntaxdocu:
 DateTime format:
 + https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8#System_DateTime_ToString_System_String_
 
+### CustomHelpers (move)
++ {move item structure names}}
+   + Item (item) into the structure (structure) in the container with the names (names) move
+
+### CustomHelpers (lights)
++ {lightsign names}}
+  + Select lights of the structure with names
+
+### CustomHelpers (lightcolor)
++ {{light color light color}}
+  + For light, select the color (color rgb hex)
+
+### CustomHelpers (lightblink)
++ {lightblink light interval length offset}}
+  + In the case of light, set the interval (interval), the interval length (length) and the interval offset (offset)
+
+### CustomHelpers (light intensity)
++ {light intensity light}
+  + Set the light intensity for light
+
+### CustomHelpers (lightrange)
++ {lightrange light range}}
+  + In the case of light, set the light range
+
+### CustomHelpers (lightspotangle)
++ {{lightspotangle light spotangle}}
+  + Set the light spot angle (spotangle) for light
+
+### CustomHelpers (lighttype)
++ {lighttype light type}}
+  + For light, set the type of light
++ spot
++ Directional
++ Point
++ Area
++ rectangle
++ disc
 ### Whats next?
 
 

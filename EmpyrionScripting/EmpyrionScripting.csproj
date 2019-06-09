@@ -66,6 +66,7 @@
     <Compile Include="CustomHelpers\FormatHelpers.cs" />
     <Compile Include="CustomHelpers\HelpersTools.cs" />
     <Compile Include="CustomHelpers\ItemAccessHelpers.cs" />
+    <Compile Include="CustomHelpers\LightsHelpers.cs" />
     <Compile Include="CustomHelpers\LogicHelpers.cs" />
     <Compile Include="DisplayOutputConfiguration.cs" />
     <Compile Include="EmpyrionScripting.cs" />
