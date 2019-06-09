@@ -26,6 +26,7 @@ namespace EmpyrionScripting
             _p = data._p;
             _e = data._e;
             ScriptDebugLcd = data.ScriptDebugLcd;
+            DisplayType    = data.DisplayType;
         }
 
         public ILcd ScriptDebugLcd { get; }
@@ -41,5 +42,6 @@ namespace EmpyrionScripting
         public Color Color { get; set; }
         public Color BackgroundColor { get; set; }
         public string Script { get; set; }
+        public DisplayOutputConfiguration DisplayType { get; set; }
     }
 }

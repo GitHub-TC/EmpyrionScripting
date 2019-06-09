@@ -3,6 +3,7 @@ using EmpyrionScripting.CustomHelpers;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -138,7 +139,7 @@ namespace EmpyrionScripting
                             Script = lcd.GetText()
                         };
 
-                        AddTargets(data, N.Substring(ScriptKeyword.Length));
+                        AddTargetsAndDisplayType(data, N.Substring(ScriptKeyword.Length));
                         ProcessInTextTargets(data);
                         ProcessScript(data);
                     }
@@ -158,12 +159,26 @@ namespace EmpyrionScripting
         {
             if (!data.Script.StartsWith(TargetsKeyword)) return;
             var firstLineEndPos = data.Script.IndexOf('\n');
-            AddTargets(data, data.Script.Substring(TargetsKeyword.Length, firstLineEndPos - TargetsKeyword.Length));
+            AddTargetsAndDisplayType(data, data.Script.Substring(TargetsKeyword.Length, firstLineEndPos - TargetsKeyword.Length));
             data.Script = data.Script.Substring(firstLineEndPos + 1);
         }
 
-        private void AddTargets(ScriptRootData data, string targets)
+        private void AddTargetsAndDisplayType(ScriptRootData data, string targets)
         {
+            if (targets.StartsWith("["))
+            {
+                var typeEnd = targets.IndexOf(']');
+                if(typeEnd > 0)
+                {
+                    var s = targets.Substring(1, typeEnd - 1);
+                    var appendAtEnd = s.EndsWith("+");
+                    int.TryParse(appendAtEnd ? s.Substring(0, s.Length - 1) : s.Substring(1), out int Lines);
+                    data.DisplayType = new DisplayOutputConfiguration() { AppendAtEnd = appendAtEnd, Lines = Lines };
+
+                    targets = targets.Substring(typeEnd + 1);
+                }
+            }
+
             data.LcdTargets.AddRange(data.E.S.GetUniqueNames(targets).Values.Where(N => !N.StartsWith(ScriptKeyword)));
         }
 
@@ -194,7 +209,18 @@ namespace EmpyrionScripting
                     var targetLCD = data.E.S.GetCurrent().GetDevice<ILcd>(T);
                     if (targetLCD == null) return;
 
-                    targetLCD.SetText(string.Join("\n", result.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)));
+                    if (data.DisplayType == null) targetLCD.SetText(string.Join("\n", result.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)));
+                    else
+                    {
+                        var text    = targetLCD.GetText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                        var addText = result             .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        targetLCD.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
+                                ? text   .Concat(addText).TakeLast(data.DisplayType.Lines)
+                                : addText.Concat(text   ).Take    (data.DisplayType.Lines)
+                            ));
+                    }
+
                     if (initColor           != data.Color)              targetLCD.SetColor     (data.Color);
                     if (initBackgroundColor != data.BackgroundColor)    targetLCD.SetBackground(data.BackgroundColor);
                     if (initFontSize        != data.FontSize)           targetLCD.SetFontSize  (data.FontSize);

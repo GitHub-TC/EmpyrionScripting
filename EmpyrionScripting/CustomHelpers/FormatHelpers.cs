@@ -1,12 +1,6 @@
 ﻿using HandlebarsDotNet;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -16,13 +10,15 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{i18n}} helper must have exactly two argument: (key|id) (language)");
 
-            var data = arguments.Length > 0 ? arguments[0] as string : null;
-            var language = arguments.Length > 1 ? arguments[1] as string : null;
+            var data     = arguments[0] as string;
+            var language = arguments[1] as string;
 
             try
             {
-                if (int.TryParse(data, out int itemId) &&
-                   EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(itemId, out ItemInfo details)) data = details.Key;
+                if(arguments[0] is int &&
+                    EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue((int)arguments[0], out ItemInfo details1)) data = details1.Key;
+                else if (int.TryParse(data, out int itemId) &&
+                    EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(itemId, out ItemInfo details2)) data = details2.Key;
 
                 output.Write(EmpyrionScripting.Localization.GetName(data, language));
             }

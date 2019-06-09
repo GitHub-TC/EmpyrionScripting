@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -35,7 +33,8 @@ namespace EmpyrionScripting.CustomHelpers
                 var uniqueNames = structure.GetUniqueNames(namesSearch);
                 item.Source
                     .ForEach(S => {
-                        var count = S.Container.RemoveItems(S.Id, int.MaxValue);
+                        var count = S.Count;
+                        count -= S.Container.RemoveItems(S.Id, count);
                         if(count > 0) uniqueNames.Values
                                         .Where(N => N != S.CustomName)
                                         .ForEach(N => {
