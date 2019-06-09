@@ -428,8 +428,9 @@ DateTime format:
   + https://docs.microsoft.com/de-de/dotnet/api/system.string.format?view=netframework-4.8#remarks-top
 
 ### CustomHelpers (move)
-+ {{move item structure names}}
++ {{move item structure names [maxLimit]}}
   + Item (item) in die Struktur (structure) in die Container mit den Namen (names) verschieben
+  + [maxLimit] ist ein optionaler Parameter der die Anzahl im Zielcontainer begrenzt
 
 ### CustomHelpers (lights)
 + {{lights structure names}}
@@ -895,8 +896,9 @@ DateTime format:
 + https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8#System_DateTime_ToString_System_String_
 
 ### CustomHelpers (move)
-+ {move item structure names}}
-   + Item (item) into the structure (structure) in the container with the names (names) move
++ {move item structure names [maxLimit]}}
+  + Item (item) into the structure (structure) in the container with the names (names) move
+  + [maxLimit] is an optional parameter which one is limited the amount in the target container
 
 ### CustomHelpers (lights)
 + {lightsign names}}

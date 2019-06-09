@@ -22,13 +22,15 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("move")]
         public static void ItemMoveHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 3) throw new HandlebarsException("{{move item structure names}} helper must have exactly three argument: (item) (structure) (name;name*;*;name)");
+            if (arguments.Length < 3) throw new HandlebarsException("{{move item structure names [max]}} helper must have at least three argument: (item) (structure) (name;name*;*;name) [max count targets]");
 
             try
             {
                 var item        = arguments[0] as ItemsData;
                 var structure   = arguments[1] as StructureData;
                 var namesSearch = arguments[2] as string;
+
+                int? maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? limit : (int?)null;
 
                 var moveInfos = new List<ItemMoveInfo>();
 
@@ -41,7 +43,7 @@ namespace EmpyrionScripting.CustomHelpers
                                         .Where(N => N != S.CustomName)
                                         .ForEach(N => {
                                             var startCount = count;
-                                            count = MoveItem(S, N, structure, count);
+                                            count = MoveItem(S, N, structure, count, maxLimit);
                                             if(startCount != count) moveInfos.Add(new ItemMoveInfo() {
                                                 Id              = S.Id,
                                                 Count           = startCount - count,
@@ -65,10 +67,17 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        private static int MoveItem(ItemsSource S, string N, StructureData structure, int count)
+        private static int MoveItem(ItemsSource S, string N, StructureData structure, int count, int? maxLimit)
         {
             var target = structure.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
-            return target == null ? count : target.AddItems(S.Id, count);
+            if (target == null) return count;
+
+            if (maxLimit.HasValue) {
+                var stock    = target.GetTotalItems(S.Id);
+                var transfer = Math.Min(count, maxLimit.Value - stock);
+                return target.AddItems(S.Id, transfer) + (count - transfer);
+            }
+            else return target.AddItems(S.Id, count);
         }
 
     }
