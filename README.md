@@ -441,7 +441,7 @@ English-Version:
 
 ---
 
-# Empyrion LCD Info
+# Empyrion Scripting
 ## Installation
 1. Download the ZIP file from https://github.com/GitHub-TC/EmpyrionScripting/releases
 1. unzip the file in the Content\\Mods directory
