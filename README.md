@@ -379,6 +379,7 @@ Welt
 Syntaxdocu:
 + http://handlebarsjs.com/
 + http://handlebarsjs.com/reference.html#data
++ https://zordius.github.io/HandlebarsCookbook/index.html
 + https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
 
@@ -465,6 +466,11 @@ DateTime format:
 	+	Area
 	+	Rectangle
 	+	Disc
+
+### CustomHelpers (steps)
++ {steps start end \[step\] \[delay\]}}
+  + Von (start) nach (end) mit optional einer Schrittweite von (step) und einer (delay)-Sekunden geänderten Zeitbasis
+
 
 ### Whats next?
 
@@ -855,6 +861,7 @@ Welt
 Syntaxdocu:
 + http://handlebarsjs.com/
 + http://handlebarsjs.com/reference.html#data
++ https://zordius.github.io/HandlebarsCookbook/index.html
 + https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
 
@@ -927,12 +934,17 @@ DateTime format:
 ### CustomHelpers (lighttype)
 + {lighttype light type}}
   + For light, set the type of light
-+ spot
-+ Directional
-+ Point
-+ Area
-+ rectangle
-+ disc
+  + spot
+  + Directional
+  + Point
+  + Area
+  + rectangle
+  + disc
+
+### CustomHelpers (steps)
++ {steps start end \[step\] \[delay\]}}
+  + From (start) to (end) with optional (step)-width and (delay) extends the 1 second per 1 counter add
+
 ### Whats next?
 
 

@@ -62,6 +62,7 @@
     <Compile Include="CustomHelpers\BlockHelpers.cs" />
     <Compile Include="CustomHelpers\ConveyorHelpers.cs" />
     <Compile Include="CustomHelpers\EffectHelpers.cs" />
+    <Compile Include="CustomHelpers\LoopHelpers.cs" />
     <Compile Include="CustomHelpers\ExternalDataHelpers.cs" />
     <Compile Include="CustomHelpers\FormatHelpers.cs" />
     <Compile Include="CustomHelpers\HelpersTools.cs" />

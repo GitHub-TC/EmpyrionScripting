@@ -22,8 +22,14 @@ namespace EmpyrionScripting
 
         public ItemsData AddCount(int count, ItemsSource source)
         {
-            Source.Add(source);
-            Count += count;
+            if(Source == null) Source = new List<ItemsSource>();
+            if(source == null) return this;
+
+            lock (Source)
+            {
+                Source.Add(source);
+                Count += count;
+            }
             return this;
         }
     }
