@@ -1,14 +1,21 @@
 ﻿using Eleon.Modding;
+using EmpyrionNetAPITools;
 using EmpyrionScripting.CustomHelpers;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace EmpyrionScripting
 {
+    public class Configuration
+    {
+        public int InGameScriptsIntervallMS { get; set; } = 1000;
+        public int SaveGameScriptsIntervallMS { get; set; } = 1000;
+    }
+
     public class EmpyrionScripting : ModInterface, IMod
     {
         public static event EventHandler StopApplicationEvent;
@@ -21,8 +28,16 @@ namespace EmpyrionScripting
         ConcurrentDictionary<string, Func<object, string>> LcdCompileCache = new ConcurrentDictionary<string, Func<object, string>>();
 
         public static ItemInfos ItemInfos { get; set; }
+        public string SaveGameModPath { get; set; }
+        public ConfigurationManager<Configuration> Configuration { get; private set; }
         public static Localization Localization { get; set; }
         public static IModApi ModApi { get; private set; }
+
+        public EmpyrionScripting()
+        {
+            EmpyrionConfiguration.ModName = "EmpyrionScripting";
+            SetupHandlebarsComponent();
+        }
 
         public void Init(IModApi modAPI)
         {
@@ -34,7 +49,10 @@ namespace EmpyrionScripting
                 SetupHandlebarsComponent();
 
                 Localization = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content));
-                ItemInfos    = new ItemInfos   (ModApi.Application?.GetPathFor(AppFolder.Content), Localization);
+                ItemInfos = new ItemInfos(ModApi.Application?.GetPathFor(AppFolder.Content), Localization);
+                SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);
+
+                LoadConfiguration();
 
                 ModApi.Application.OnPlayfieldLoaded += Application_OnPlayfieldLoaded;
                 ModApi.Application.OnPlayfieldUnloaded += Application_OnPlayfieldUnloaded;
@@ -48,13 +66,19 @@ namespace EmpyrionScripting
 
         }
 
-        public void Shutdown()
+        private void LoadConfiguration()
         {
+            ConfigurationManager<Configuration>.Log = ModApi.Log;
+            Configuration = new ConfigurationManager<Configuration>()
+            {
+                ConfigFilename = Path.Combine(SaveGameModPath, "Configuration.json")
+            };
+            Configuration.Load();
+            Configuration.Save();
         }
 
-        public EmpyrionScripting()
+        public void Shutdown()
         {
-            SetupHandlebarsComponent();
         }
 
         private void SetupHandlebarsComponent()
@@ -65,7 +89,8 @@ namespace EmpyrionScripting
 
         private void Application_OnPlayfieldLoaded(string playfieldName)
         {
-            TaskTools.Intervall(1000, UpdateLCDs);
+            TaskTools.Intervall(Configuration.Current.InGameScriptsIntervallMS,   () => UpdateScripts(ProcessAllInGameScripts));
+            TaskTools.Intervall(Configuration.Current.SaveGameScriptsIntervallMS, () => UpdateScripts(ProcessAllSaveGameScripts));
         }
 
         private void Application_OnPlayfieldUnloaded(string playfieldName)
@@ -81,7 +106,7 @@ namespace EmpyrionScripting
             legacyApi?.Console_Write("EmpyrionScripting Mod started: Game_Start");
         }
 
-        private void UpdateLCDs()
+        private void UpdateScripts(Action<IEntity> process)
         {
             if (ModApi.Playfield          == null) return;
             if (ModApi.Playfield.Entities == null) return;
@@ -93,10 +118,10 @@ namespace EmpyrionScripting
                             E.Type == EntityType.SV || 
                             E.Type == EntityType.HV)
                 .AsParallel()
-                .ForAll(ProcessAllScripts);
+                .ForAll(process);
         }
 
-        private void ProcessAllScripts(IEntity entity)
+        private void ProcessAllInGameScripts(IEntity entity)
         {
 
             try
@@ -120,7 +145,6 @@ namespace EmpyrionScripting
                         };
 
                         AddTargetsAndDisplayType(data, N.Substring(ScriptKeyword.Length));
-                        ProcessInTextTargets(data);
                         ProcessScript(data);
                     }
                     catch //(Exception lcdError)
@@ -135,12 +159,48 @@ namespace EmpyrionScripting
             }
         }
 
-        private void ProcessInTextTargets(ScriptRootData data)
+        private void ProcessAllSaveGameScripts(IEntity entity)
         {
-            if (!data.Script.StartsWith(TargetsKeyword)) return;
-            var firstLineEndPos = data.Script.IndexOf('\n');
-            AddTargetsAndDisplayType(data, data.Script.Substring(TargetsKeyword.Length, firstLineEndPos - TargetsKeyword.Length));
-            data.Script = data.Script.Substring(firstLineEndPos + 1);
+
+            try
+            {
+                var entityScriptData = new ScriptSaveGameRootData(ModApi.Playfield, entity)
+                {
+                    MainScriptPath = Path.Combine(SaveGameModPath, "Scripts")
+                };
+
+                ExecFoundSaveGameScripts(entityScriptData, 
+                    Path.Combine(SaveGameModPath, "Scripts", Enum.GetName(typeof(EntityType), entity.Type)),
+                    Path.Combine(SaveGameModPath, "Scripts", entity.Name),
+                    Path.Combine(SaveGameModPath, "Scripts", ModApi.Playfield.Name),
+                    Path.Combine(SaveGameModPath, "Scripts", ModApi.Playfield.Name, Enum.GetName(typeof(EntityType), entity.Type)),
+                    Path.Combine(SaveGameModPath, "Scripts", ModApi.Playfield.Name, entity.Name),
+                    Path.Combine(SaveGameModPath, "Scripts", entity.Id.ToString())
+                    );
+            }
+            catch (Exception error)
+            {
+                ModApi.Log($"SaveGameScript ({entity.Id}/{entity.Name}):{error}");
+            }
+        }
+
+        private void ExecFoundSaveGameScripts(ScriptSaveGameRootData entityScriptData, params string[] scriptLocations)
+        {
+            scriptLocations
+                .AsParallel()
+                .ForAll(S =>
+                {
+                    if (File.Exists(S + ".hbs")) ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
+                        Script     = File.ReadAllText(S + ".hbs"),
+                        ScriptPath = Path.GetDirectoryName(S)
+                    });
+                    else if (Directory.Exists(S)) Directory.GetFiles(S, "*.hbs")
+                        .AsParallel()
+                        .ForEach(F => ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
+                            Script     = File.ReadAllText(F),
+                            ScriptPath = Path.GetDirectoryName(F)
+                        }));
+                });
         }
 
         private void AddTargetsAndDisplayType(ScriptRootData data, string targets)
@@ -164,40 +224,45 @@ namespace EmpyrionScripting
 
         private void ProcessScript(ScriptRootData data)
         {
-            var lcdTargets = data.LcdTargets.Select(T => data.E.S.GetCurrent().GetDevice<ILcd>(T)).Where(T => T != null).ToArray();
-
-            if (lcdTargets.Length > 0)
-            {
-                data.FontSize        = lcdTargets[0].GetFontSize();
-                data.Color           = lcdTargets[0].GetColor();
-                data.BackgroundColor = lcdTargets[0].GetBackground();
-            }
-
-            var initFontSize        = data.FontSize;
-            var initColor           = data.Color;
-            var initBackgroundColor = data.BackgroundColor;
-
             data.ScriptDebugLcd?.SetText("");
             data.ScriptDebugLcd?.SetText(data.ScriptDebugLcd?.GetText() + $"\nTargets:" + data.LcdTargets.Aggregate("", (s, c) => $"{s};{c}"));
 
             try
             {
-                string result = ExecuteHandlebarScript(data, data.Script);
+                var result = ExecuteHandlebarScript(data, data.Script).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (result.Length > 0 && result[0].StartsWith(TargetsKeyword))
+                {
+                    AddTargetsAndDisplayType(data, result[0].Substring(TargetsKeyword.Length));
+                    result = result.Skip(1).ToArray();
+                }
+
+                var lcdTargets = data.LcdTargets.Select(T => data.E.S.GetCurrent().GetDevice<ILcd>(T)).Where(T => T != null).ToArray();
+
+                if (lcdTargets.Length > 0)
+                {
+                    data.FontSize = lcdTargets[0].GetFontSize();
+                    data.Color = lcdTargets[0].GetColor();
+                    data.BackgroundColor = lcdTargets[0].GetBackground();
+                }
+
+                var initFontSize = data.FontSize;
+                var initColor = data.Color;
+                var initBackgroundColor = data.BackgroundColor;
 
                 data.LcdTargets.ForEach(T =>
                 {
                     var targetLCD = data.E.S.GetCurrent().GetDevice<ILcd>(T);
                     if (targetLCD == null) return;
 
-                    if (data.DisplayType == null) targetLCD.SetText(string.Join("\n", result.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)));
+                    if (data.DisplayType == null) targetLCD.SetText(string.Join("\n", result));
                     else
                     {
                         var text    = targetLCD.GetText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                        var addText = result             .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                         targetLCD.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
-                                ? text   .Concat(addText).TakeLast(data.DisplayType.Lines)
-                                : addText.Concat(text   ).Take    (data.DisplayType.Lines)
+                                ? text  .Concat(result).TakeLast(data.DisplayType.Lines)
+                                : result.Concat(text  ).Take    (data.DisplayType.Lines)
                             ));
                     }
 

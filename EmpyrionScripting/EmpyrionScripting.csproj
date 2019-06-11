@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EmpyrionNetAPI, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\EmpyrionNetAPI.3.1.6\lib\net461\EmpyrionNetAPI.dll</HintPath>
+    </Reference>
     <Reference Include="Handlebars, Version=1.10.1.0, Culture=neutral, PublicKeyToken=22225d0bf33cd661, processorArchitecture=MSIL">
       <HintPath>..\packages\Handlebars.Net.1.10.1\lib\net452\Handlebars.dll</HintPath>
     </Reference>
@@ -44,6 +47,9 @@
     <Reference Include="ModApi">
       <HintPath>..\dependencies\ModApi.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -57,6 +63,9 @@
       <HintPath>..\dependencies\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="YamlDotNet, Version=6.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.6.0.0\lib\net45\YamlDotNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomHelpers\BlockHelpers.cs" />
@@ -69,6 +78,7 @@
     <Compile Include="CustomHelpers\ItemAccessHelpers.cs" />
     <Compile Include="CustomHelpers\LightsHelpers.cs" />
     <Compile Include="CustomHelpers\LogicHelpers.cs" />
+    <Compile Include="CustomHelpers\SaveGameScriptHelpers.cs" />
     <Compile Include="DisplayOutputConfiguration.cs" />
     <Compile Include="EmpyrionScripting.cs" />
     <Compile Include="EntityData.cs" />
@@ -80,6 +90,7 @@
     <Compile Include="PlayerData.cs" />
     <Compile Include="PlayfieldData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScriptSaveGameRootData.cs" />
     <Compile Include="StructureData.cs" />
     <Compile Include="TaskExtensions.cs" />
   </ItemGroup>

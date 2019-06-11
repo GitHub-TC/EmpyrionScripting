@@ -18,7 +18,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var left    = arguments[0];
                 var op      = HandlebarsUtils.IsUndefinedBindingResult(arguments[1]) 
                                 ? arguments[1].GetType().GetField("Value").GetValue(arguments[1])
-                                : arguments[1] as string;
+                                : arguments[1]?.ToString();
                 var right   = arguments[2];
 
                 var renderTemplate = false;

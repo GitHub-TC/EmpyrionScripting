@@ -15,7 +15,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{intervall seconds}} helper must have exactly one argument: (value)");
 
-            double.TryParse(arguments[0] as string, out double intervall);
+            double.TryParse(arguments[0]?.ToString(), out double intervall);
 
             try
             {

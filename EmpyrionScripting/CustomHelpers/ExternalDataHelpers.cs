@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HandlebarsDotNet;
+using System;
 using System.IO;
 
 namespace EmpyrionScripting.CustomHelpers
@@ -9,8 +10,8 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("datetime")]
         public static void DateTimeHelper(TextWriter output, dynamic context, object[] arguments)
         {
-            var format = arguments.Length > 0 ? arguments[0] as string : null;
-            var add    = arguments.Length > 1 ? arguments[1] as string : null;
+            var format = arguments.Length > 0 ? arguments[0]?.ToString() : null;
+            var add    = arguments.Length > 1 ? arguments[1]?.ToString() : null;
 
             try
             {
@@ -24,6 +25,27 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 output.Write("{{datetime}} error " + error.Message);
+            }
+        }
+
+        [HandlebarTag("random")]
+        public static void RandomHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{random start end}} helper must have two argument: (start) (end)");
+
+            var format = arguments.Length > 0 ? arguments[0]?.ToString() : null;
+            var add    = arguments.Length > 1 ? arguments[1]?.ToString() : null;
+
+            try
+            {
+                int.TryParse(arguments[0]?.ToString(), out var start);
+                int.TryParse(arguments[0]?.ToString(), out var end);
+
+                options.Template(output, new Random().Next(start, end));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{random}} error " + error.Message);
             }
         }
 

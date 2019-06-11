@@ -471,6 +471,33 @@ DateTime format:
 + {steps start end \[step\] \[delay\]}}
   + Von (start) nach (end) mit optional einer Schrittweite von (step) und einer (delay)-Sekunden geänderten Zeitbasis
 
+### CustomHelpers (random)
++ {random start end}}
+  + Zufallswert zwischen (start) und (end) liefern und in den Block als {{this}} hereinreichen
+
+## SaveGame Scripte
+Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
+\[SaveGame\]\\Mods\\EmpyrionScripting\\Scripts
+
+in diesem Verzeichnis werden nach folgendem Muster Scriptdateien mit der Endung *.hbs gesucht
+* EntityType
+* EntityName
+* PlayfieldName
+* PlayfieldName\\EntityType
+* PlayfieldName\\EntityName
+* EntityId
+
+Hinweis: EntityType ist BA,CV,SV or HV
+
+### CustomHelpers-SaveGameScripts (readfile)
++ {{readfile @root dir filename}} 
+  + (dir)\\(filename) Dateiinhalt wird als ZeilenArray geliefert
+  + Falls die Datei nicht existiert wird der {{else}} Teil ausgeführt
+
+### CustomHelpers-SaveGameScripts (writefile)
++ {{writefile @root dir filename}} 
+  + (dir)\\(filename) Inhalt des Blockes wird in die Datei geschrieben
+
 
 ### Whats next?
 
@@ -944,6 +971,33 @@ DateTime format:
 ### CustomHelpers (steps)
 + {steps start end \[step\] \[delay\]}}
   + From (start) to (end) with optional (step)-width and (delay) extends the 1 second per 1 counter add
+
+### CustomHelpers (random)
++ {random start end}}
+   + Deliver a random value between (start) and (end) and submit to the block as {{this}}
+
+## SaveGame scripts
+This special form of scripts can be stored in the SaveGame. The basic path for this is the
+\[Savegame\]\\Mods\\EmpyrionScripting\\Scripts
+
+in this directory script files with the extension *.hbs are searched for according to the following pattern
+* EntityType
+* EntityName
+* PlayfieldName
+* PlayfieldName\\EntityType
+* PlayfieldName\\EntityName
+* EntityId
+
+Note: EntityType is BA,CV,SV or HV
+
+### CustomHelpers-SaveGameScripts (readfile)
++ {{readfile @root dir filename}}
+   + (dir)\\(filename) file content is supplied as a LineArray
+   + If the file does not exist, the {{else}} part will be executed
+
+### CustomHelpers-SaveGameScripts (writefile)
++ {{writefile @root dir filename}}
+   + (dir)\\(filename) Content of the block is written to the file
 
 ### Whats next?
 

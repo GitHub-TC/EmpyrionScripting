@@ -12,7 +12,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{i18n}} helper must have exactly two argument: (key|id) (language)");
 
-            var data     = arguments[0] as string;
+            var data     = arguments[0]?.ToString();
             var language = arguments[1] as string;
 
             try
@@ -37,7 +37,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                output.Write(string.Format(arguments[1] as string, arguments[0]).Replace(" ", "\u2007\u2009"));
+                output.Write(string.Format(arguments[1]?.ToString(), arguments[0]).Replace(" ", "\u2007\u2009"));
             }
             catch (Exception error)
             {

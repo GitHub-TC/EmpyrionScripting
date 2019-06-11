@@ -1,12 +1,9 @@
 ﻿using Eleon.Modding;
 using HandlebarsDotNet;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace EmpyrionScripting.CustomHelpers
@@ -20,7 +17,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2) throw new HandlebarsException("{{lights structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
             var structure   = arguments[0] as StructureData;
-            var namesSearch = arguments[1] as string;
+            var namesSearch = arguments[1]?.ToString();
 
             try
             {
