@@ -50,6 +50,7 @@ namespace EmpyrionScripting.CustomHelpers
                 {
                     var skip = (TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds % (delay * overlapp)) / delay;
                     output.Write(string.Join("\n", textlines.Skip((int)skip).Take(lines)));
+                    output.Write("\n");
                 }
             }
             catch (Exception error)
@@ -67,7 +68,8 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var root = arguments[0] as ScriptRootData;
                 int.TryParse(arguments[1] as string, NumberStyles.HexNumber, null, out int color);
-                root.Color = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
+                root.Color        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
+                root.ColorChanged = true;
             }
             catch (Exception error)
             {
@@ -84,7 +86,8 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var root = arguments[0] as ScriptRootData;
                 int.TryParse(arguments[1] as string, NumberStyles.HexNumber, null, out int color);
-                root.BackgroundColor = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
+                root.BackgroundColor        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
+                root.BackgroundColorChanged = true;
             }
             catch (Exception error)
             {
@@ -101,7 +104,8 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var root = arguments[0] as ScriptRootData;
                 int.TryParse(arguments[1] as string, out int fontSize);
-                root.FontSize = fontSize;
+                root.FontSize        = fontSize;
+                root.FontSizeChanged = true;
             }
             catch (Exception error)
             {

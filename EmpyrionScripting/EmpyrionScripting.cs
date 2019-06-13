@@ -20,9 +20,9 @@ namespace EmpyrionScripting
     {
         public static event EventHandler StopApplicationEvent;
 
-        private const string TargetsKeyword = "Targets:";
-        private const string ScriptKeyword = "Script:";
-
+        private const string TargetsKeyword  = "Targets:";
+        private const string ScriptKeyword   = "Script:";
+        private const string ScriptExtension = ".hbs";
         ModGameAPI legacyApi;
 
         ConcurrentDictionary<string, Func<object, string>> LcdCompileCache = new ConcurrentDictionary<string, Func<object, string>>();
@@ -32,6 +32,9 @@ namespace EmpyrionScripting
         public ConfigurationManager<Configuration> Configuration { get; private set; }
         public static Localization Localization { get; set; }
         public static IModApi ModApi { get; private set; }
+        public FileSystemWatcher SaveGameScriptsWatcher { get; private set; }
+        public ConcurrentDictionary<string, string> SaveGameScripts { get; private set; }
+        public string MainScriptPath { get; private set; }
 
         public EmpyrionScripting()
         {
@@ -53,6 +56,7 @@ namespace EmpyrionScripting
                 SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);
 
                 LoadConfiguration();
+                GetSaveGamesScripts();
 
                 ModApi.Application.OnPlayfieldLoaded += Application_OnPlayfieldLoaded;
                 ModApi.Application.OnPlayfieldUnloaded += Application_OnPlayfieldUnloaded;
@@ -64,6 +68,45 @@ namespace EmpyrionScripting
 
             ModApi.Log("EmpyrionScripting Mod init finish");
 
+        }
+
+        public void GetSaveGamesScripts()
+        {
+            MainScriptPath = Path.Combine(SaveGameModPath, "Scripts");
+            Directory.CreateDirectory(MainScriptPath);
+
+            SaveGameScriptsWatcher = new FileSystemWatcher(MainScriptPath, "*" + ScriptExtension)
+            {
+                IncludeSubdirectories = true,
+            };
+            SaveGameScriptsWatcher.Changed += (S, E) => {
+                ModApi?.Log($"SaveGameScript: changed script: {E.FullPath.NormalizePath()}");
+                SaveGameScripts.AddOrUpdate(E.FullPath.NormalizePath(), F => File.ReadAllText(F), (F, C) => File.ReadAllText(F));
+            };
+            SaveGameScriptsWatcher.Created += (S, E) =>
+            {
+                ModApi?.Log($"SaveGameScript: created script: {E.FullPath.NormalizePath()}");
+                SaveGameScripts.AddOrUpdate(E.FullPath.NormalizePath(), F => File.ReadAllText(F), (F, C) => File.ReadAllText(F));
+            } ;
+            SaveGameScriptsWatcher.Renamed += (S, E) =>
+            {
+                ModApi?.Log($"SaveGameScript: renamed script: {E.OldFullPath.NormalizePath()} -> {E.FullPath.NormalizePath()}");
+                SaveGameScripts.TryRemove(E.OldFullPath.NormalizePath(), out _);
+                SaveGameScripts.AddOrUpdate(E.FullPath.NormalizePath(), F => File.ReadAllText(F), (F, C) => File.ReadAllText(F));
+            };
+            SaveGameScriptsWatcher.Deleted += (S, E) =>
+            {
+                ModApi?.Log($"SaveGameScript: deleted script: {E.FullPath.NormalizePath()}");
+                SaveGameScripts.TryRemove(E.FullPath.NormalizePath(), out _);
+            } ;
+
+            SaveGameScripts = new ConcurrentDictionary<string, string>(
+                                    Directory.GetFiles(MainScriptPath, "*" + ScriptExtension, SearchOption.AllDirectories)
+                                    .ToDictionary(F => F.NormalizePath(), F => File.ReadAllText(F)));
+
+            SaveGameScriptsWatcher.EnableRaisingEvents = true;
+
+            SaveGameScripts.Keys.ForEach(F => ModApi?.Log($"SaveGameScript: found script: {F}"));
         }
 
         private void LoadConfiguration()
@@ -166,16 +209,16 @@ namespace EmpyrionScripting
             {
                 var entityScriptData = new ScriptSaveGameRootData(ModApi.Playfield, entity)
                 {
-                    MainScriptPath = Path.Combine(SaveGameModPath, "Scripts")
+                    MainScriptPath = MainScriptPath
                 };
 
                 ExecFoundSaveGameScripts(entityScriptData, 
-                    Path.Combine(SaveGameModPath, "Scripts", Enum.GetName(typeof(EntityType), entity.Type)),
-                    Path.Combine(SaveGameModPath, "Scripts", entity.Name),
-                    Path.Combine(SaveGameModPath, "Scripts", ModApi.Playfield.Name),
-                    Path.Combine(SaveGameModPath, "Scripts", ModApi.Playfield.Name, Enum.GetName(typeof(EntityType), entity.Type)),
-                    Path.Combine(SaveGameModPath, "Scripts", ModApi.Playfield.Name, entity.Name),
-                    Path.Combine(SaveGameModPath, "Scripts", entity.Id.ToString())
+                    Path.Combine(MainScriptPath, Enum.GetName(typeof(EntityType), entity.Type)),
+                    Path.Combine(MainScriptPath, entity.Name),
+                    Path.Combine(MainScriptPath, ModApi.Playfield.Name),
+                    Path.Combine(MainScriptPath, ModApi.Playfield.Name, Enum.GetName(typeof(EntityType), entity.Type)),
+                    Path.Combine(MainScriptPath, ModApi.Playfield.Name, entity.Name),
+                    Path.Combine(MainScriptPath, entity.Id.ToString())
                     );
             }
             catch (Exception error)
@@ -184,21 +227,24 @@ namespace EmpyrionScripting
             }
         }
 
-        private void ExecFoundSaveGameScripts(ScriptSaveGameRootData entityScriptData, params string[] scriptLocations)
+        public void ExecFoundSaveGameScripts(ScriptSaveGameRootData entityScriptData, params string[] scriptLocations)
         {
             scriptLocations
                 .AsParallel()
                 .ForAll(S =>
                 {
-                    if (File.Exists(S + ".hbs")) ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
-                        Script     = File.ReadAllText(S + ".hbs"),
-                        ScriptPath = Path.GetDirectoryName(S)
+                    var path = S.NormalizePath();
+
+                    if (SaveGameScripts.TryGetValue(path + ScriptExtension, out var C)) ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
+                        Script     = C,
+                        ScriptPath = Path.GetDirectoryName(path)
                     });
-                    else if (Directory.Exists(S)) Directory.GetFiles(S, "*.hbs")
+                    else SaveGameScripts
+                        .Where(F => Path.GetDirectoryName(F.Key) == path)
                         .AsParallel()
                         .ForEach(F => ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
-                            Script     = File.ReadAllText(F),
-                            ScriptPath = Path.GetDirectoryName(F)
+                            Script     = F.Value,
+                            ScriptPath = Path.GetDirectoryName(F.Key)
                         }));
                 });
         }
@@ -237,39 +283,26 @@ namespace EmpyrionScripting
                     result = result.Skip(1).ToArray();
                 }
 
-                var lcdTargets = data.LcdTargets.Select(T => data.E.S.GetCurrent().GetDevice<ILcd>(T)).Where(T => T != null).ToArray();
-
-                if (lcdTargets.Length > 0)
-                {
-                    data.FontSize = lcdTargets[0].GetFontSize();
-                    data.Color = lcdTargets[0].GetColor();
-                    data.BackgroundColor = lcdTargets[0].GetBackground();
-                }
-
-                var initFontSize = data.FontSize;
-                var initColor = data.Color;
-                var initBackgroundColor = data.BackgroundColor;
-
-                data.LcdTargets.ForEach(T =>
-                {
-                    var targetLCD = data.E.S.GetCurrent().GetDevice<ILcd>(T);
-                    if (targetLCD == null) return;
-
-                    if (data.DisplayType == null) targetLCD.SetText(string.Join("\n", result));
-                    else
+                data.LcdTargets
+                    .Select(T => data.E.S.GetCurrent().GetDevice<ILcd>(T))
+                    .Where(T => T != null)
+                    .ForEach(T =>
                     {
-                        var text    = targetLCD.GetText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (data.DisplayType == null) T.SetText(string.Join("\n", result));
+                        else
+                        {
+                            var text    = T.GetText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        targetLCD.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
-                                ? text  .Concat(result).TakeLast(data.DisplayType.Lines)
-                                : result.Concat(text  ).Take    (data.DisplayType.Lines)
-                            ));
-                    }
+                            T.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
+                                    ? text  .Concat(result).TakeLast(data.DisplayType.Lines)
+                                    : result.Concat(text  ).Take    (data.DisplayType.Lines)
+                                ));
+                        }
 
-                    if (initColor           != data.Color)              targetLCD.SetColor     (data.Color);
-                    if (initBackgroundColor != data.BackgroundColor)    targetLCD.SetBackground(data.BackgroundColor);
-                    if (initFontSize        != data.FontSize)           targetLCD.SetFontSize  (data.FontSize);
-                });
+                        if (data.ColorChanged          ) T.SetColor     (data.Color);
+                        if (data.BackgroundColorChanged) T.SetBackground(data.BackgroundColor);
+                        if (data.FontSizeChanged       ) T.SetFontSize  (data.FontSize);
+                    });
             }
             catch (Exception ctrlError)
             {
@@ -292,6 +325,7 @@ namespace EmpyrionScripting
 
         public void Game_Exit()
         {
+            SaveGameScriptsWatcher.EnableRaisingEvents = false;
             StopApplicationEvent?.Invoke(this, EventArgs.Empty);
 
             ModApi.Log("Mod exited");

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Eleon.Modding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -104,6 +105,15 @@ namespace EmpyrionScripting.UnitTests
                 "Yes:1 #10",
                 lcdMod.ExecuteHandlebarScript(lcdData, "{{#items E.S 'BoxA'}}{{test Id leq 2}}Yes:{{Name}} #{{Count}}{{else}}No:{{Name}}{{/test}}{{/items}}")
             );
+        }
+
+        [TestMethod]
+        public void TestMethodColor()
+        {
+            var lcdData = Mock.Of<ScriptRootData>();
+            var lcdMod = new EmpyrionScripting();
+            lcdMod.ExecuteHandlebarScript(lcdData, "{{color @root 'ff00ff'}}");
+            Assert.AreEqual(new UnityEngine.Color(255,0,255), lcdData.Color);
         }
 
         [TestMethod]
@@ -370,6 +380,16 @@ namespace EmpyrionScripting.UnitTests
             Assert.AreEqual("SVa:1#9 SVa:BoxA->CVb:BoxB", lcdMod.ExecuteHandlebarScript(lcdData, "{{#each E.S.DockedE}}{{Name}}:{{#items S 'BoxA'}}{{move this @root/E.S 'Box*'}}{{Id}}#{{Count}} {{SourceE.Name}}:{{Source}}->{{DestinationE.Name}}:{{Destination}}{{/move}}{{/items}}{{/each}}"));
         }
 
+        [TestMethod]
+        public void TestMethodSaveGamesScripts()
+        {
+            var lcdMod = new EmpyrionScripting
+            {
+                SaveGameModPath = @"C:\steamcmd\empyrion\PlayfieldServer/../Saves/Games/Test\Mods\EmpyrionScripting"
+            };
+            lcdMod.GetSaveGamesScripts();
 
+            lcdMod.ExecFoundSaveGameScripts(new ScriptSaveGameRootData(null, null), Path.Combine(lcdMod.MainScriptPath, "CV"));
+        }
     }
 }

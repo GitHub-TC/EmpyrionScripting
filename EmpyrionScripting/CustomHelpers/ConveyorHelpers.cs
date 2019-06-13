@@ -37,25 +37,29 @@ namespace EmpyrionScripting.CustomHelpers
                 var uniqueNames = structure.GetUniqueNames(namesSearch);
                 item.Source
                     .ForEach(S => {
-                        var count = S.Count;
-                        count -= S.Container.RemoveItems(S.Id, count);
-                        if(count > 0) uniqueNames.Values
-                                        .Where(N => N != S.CustomName)
-                                        .ForEach(N => {
-                                            var startCount = count;
-                                            count = MoveItem(S, N, structure, count, maxLimit);
-                                            if(startCount != count) moveInfos.Add(new ItemMoveInfo() {
-                                                Id              = S.Id,
-                                                Count           = startCount - count,
-                                                SourceE         = S.E,
-                                                Source          = S.CustomName,
-                                                DestinationE    = structure.E,
-                                                Destination     = N,
-                                            });
-                                        });
+                        using(var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.Id, S.Position)) {
+                            if (!locked.Success) return;
 
-                        if (count > 0) count = S.Container.AddItems(S.Id, count);
-                        if (count > 0) output.Write($"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}");
+                            var count = S.Count;
+                            count -= S.Container.RemoveItems(S.Id, count);
+                            if(count > 0) uniqueNames.Values
+                                            .Where(N => N != S.CustomName)
+                                            .ForEach(N => {
+                                                var startCount = count;
+                                                count = MoveItem(S, N, structure, count, maxLimit);
+                                                if(startCount != count) moveInfos.Add(new ItemMoveInfo() {
+                                                    Id              = S.Id,
+                                                    Count           = startCount - count,
+                                                    SourceE         = S.E,
+                                                    Source          = S.CustomName,
+                                                    DestinationE    = structure.E,
+                                                    Destination     = N,
+                                                });
+                                            });
+
+                            if (count > 0) count = S.Container.AddItems(S.Id, count);
+                            if (count > 0) output.Write($"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}");
+                        }
                     });
 
                 if(moveInfos.Count == 0) options.Inverse (output, context as object);
@@ -63,7 +67,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{move}} error " + error.Message);
+                output.Write("{{move}} error " + error.ToString());
             }
         }
 
@@ -72,12 +76,20 @@ namespace EmpyrionScripting.CustomHelpers
             var target = structure.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
             if (target == null) return count;
 
-            if (maxLimit.HasValue) {
-                var stock    = target.GetTotalItems(S.Id);
-                var transfer = Math.Min(count, maxLimit.Value - stock);
-                return target.AddItems(S.Id, transfer) + (count - transfer);
+            if(!structure.ContainerSource.TryGetValue(N, out var targetData)) return count;
+
+            using (var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.Id, targetData.Position))
+            {
+                if (!locked.Success) return count;
+
+                if (maxLimit.HasValue)
+                {
+                    var stock = target.GetTotalItems(S.Id);
+                    var transfer = Math.Min(count, maxLimit.Value - stock);
+                    return target.AddItems(S.Id, transfer) + (count - transfer);
+                }
+                else return target.AddItems(S.Id, count);
             }
-            else return target.AddItems(S.Id, count);
         }
 
     }

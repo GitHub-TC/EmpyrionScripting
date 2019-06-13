@@ -49,5 +49,21 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("use")]
+        public static void UseHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length == 0) throw new HandlebarsException("{{use data}} helper must have one argument: (data)");
+
+            try
+            {
+                if (arguments[0] == null) options.Inverse (output, context as object);
+                else                      options.Template(output, arguments[0]);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{use}} error " + error.Message);
+            }
+        }
+
     }
 }

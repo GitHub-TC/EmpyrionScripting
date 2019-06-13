@@ -68,8 +68,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContainerSource.cs" />
     <Compile Include="CustomHelpers\BlockHelpers.cs" />
     <Compile Include="CustomHelpers\ConveyorHelpers.cs" />
+    <Compile Include="DeviceLock.cs" />
     <Compile Include="CustomHelpers\EffectHelpers.cs" />
     <Compile Include="CustomHelpers\LoopHelpers.cs" />
     <Compile Include="CustomHelpers\ExternalDataHelpers.cs" />
@@ -83,6 +85,7 @@
     <Compile Include="EmpyrionScripting.cs" />
     <Compile Include="EntityData.cs" />
     <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="ExtensionsToolbox.cs" />
     <Compile Include="ItemInfos.cs" />
     <Compile Include="ItemsData.cs" />
     <Compile Include="ScriptRootData.cs" />
@@ -92,6 +95,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptSaveGameRootData.cs" />
     <Compile Include="StructureData.cs" />
+    <Compile Include="StructureTank.cs" />
     <Compile Include="TaskExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

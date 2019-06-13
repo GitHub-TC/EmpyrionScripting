@@ -7,6 +7,7 @@ namespace EmpyrionScripting
     {
         public EntityData E { get; set; }
         public IContainer Container { get; set; }
+        public VectorInt3 Position { get; set; }
         public string CustomName { get; set; }
         public int Id { get; set; }
         public int Count { get; set; }

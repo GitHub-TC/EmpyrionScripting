@@ -475,6 +475,16 @@ DateTime format:
 + {random start end}}
   + Zufallswert zwischen (start) und (end) liefern und in den Block als {{this}} hereinreichen
 
+### CustomHelpers (bar)
++ {{bar data min max length \[char\] \[bgchar\]}}
+  + Erzeugt eine Balkenanzeige für (data) in dem Bereich von (min) bis (max) mit der Länge (length)
+  + Der Balkensymbole für "gefüllt" (char) und den Hintergrund (bgchar) sind optional 
+
+### CustomHelpers (use)
++ {{use data}}
+  + Diesen Datensatz im Inhalt zum direkten Zugriff bereitstellen
+  + der {{else}} fall wird aufgerufen wenn data == null ist
+
 ## SaveGame Scripte
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
 \[SaveGame\]\\Mods\\EmpyrionScripting\\Scripts
@@ -930,7 +940,7 @@ DateTime format:
 + https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8#System_DateTime_ToString_System_String_
 
 ### CustomHelpers (move)
-+ {move item structure names [maxLimit]}}
++ {{move item structure names [maxLimit]}}
   + Item (item) into the structure (structure) in the container with the names (names) move
   + [maxLimit] is an optional parameter which one is limited the amount in the target container
 
@@ -943,15 +953,15 @@ DateTime format:
   + For light, select the color (color rgb hex)
 
 ### CustomHelpers (lightblink)
-+ {lightblink light interval length offset}}
++ {{lightblink light interval length offset}}
   + In the case of light, set the interval (interval), the interval length (length) and the interval offset (offset)
 
 ### CustomHelpers (light intensity)
-+ {light intensity light}
++ {{light intensity light}
   + Set the light intensity for light
 
 ### CustomHelpers (lightrange)
-+ {lightrange light range}}
++ {{lightrange light range}}
   + In the case of light, set the light range
 
 ### CustomHelpers (lightspotangle)
@@ -959,7 +969,7 @@ DateTime format:
   + Set the light spot angle (spotangle) for light
 
 ### CustomHelpers (lighttype)
-+ {lighttype light type}}
++ {{lighttype light type}}
   + For light, set the type of light
   + spot
   + Directional
@@ -969,12 +979,22 @@ DateTime format:
   + disc
 
 ### CustomHelpers (steps)
-+ {steps start end \[step\] \[delay\]}}
++ {{steps start end \[step\] \[delay\]}}
   + From (start) to (end) with optional (step)-width and (delay) extends the 1 second per 1 counter add
 
 ### CustomHelpers (random)
-+ {random start end}}
++ {{random start end}}
    + Deliver a random value between (start) and (end) and submit to the block as {{this}}
+
+### CustomHelpers (bar)
++ {{bar data min max length \[char\] \[bgchar\]}}
+  + Displays a bar for (data) in the rage of (min) to (max) with the total bar length of (length)
+  + The string for filled signs (char) and background signs (bgchar) are optional 
+
+### CustomHelpers (use)
++ {{use data}}
+  + Use this data for direct access
+  + the {{else}} case will call when data == null is
 
 ## SaveGame scripts
 This special form of scripts can be stored in the SaveGame. The basic path for this is the

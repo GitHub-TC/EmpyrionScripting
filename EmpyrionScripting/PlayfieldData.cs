@@ -22,8 +22,8 @@ namespace EmpyrionScripting
         public string PlanetClass => playfield.PlanetClass;
         public bool IsPvP => playfield.IsPvP;
 
-        public IEnumerable<PlayerData> Player => _p == null ? _p = playfield.Players.Values.Select(P => new PlayerData(P)) : _p;
-        IEnumerable<PlayerData> _p;
+        public IEnumerable<LimitedPlayerData> Player => _p == null ? _p = playfield.Players.Values.Select(P => new LimitedPlayerData(P)) : _p;
+        IEnumerable<LimitedPlayerData> _p;
         
     }
 }

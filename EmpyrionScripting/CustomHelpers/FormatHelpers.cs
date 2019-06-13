@@ -1,6 +1,7 @@
 ﻿using HandlebarsDotNet;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -42,6 +43,29 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 output.Write("{{format}} error " + error.Message);
+            }
+        }
+
+        [HandlebarTag("bar")]
+        public static void ProcessBarHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 4) throw new HandlebarsException("{{bar data min max length [char] [bgchar]}} helper must have at least four argument: (data) (min) (max) (length)");
+
+            try
+            {
+                double.TryParse(arguments[0]?.ToString(), out var value);
+                double.TryParse(arguments[1]?.ToString(), out var min);
+                double.TryParse(arguments[2]?.ToString(), out var max);
+                int.TryParse(arguments[3]?.ToString(), out var barLength);
+
+                var len = (int)((barLength / (max - min)) * value);
+
+                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 4 ? arguments[4].ToString() : "\u2588", len)));
+                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 5 ? arguments[5].ToString() : "\u2591", barLength - len)));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{bar}} error " + error.Message);
             }
         }
 
