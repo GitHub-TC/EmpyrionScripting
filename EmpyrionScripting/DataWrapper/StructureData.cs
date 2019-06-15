@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EmpyrionScripting
+namespace EmpyrionScripting.DataWrapper
 {
     public class StructureData
     {

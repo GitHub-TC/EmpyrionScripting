@@ -1,7 +1,7 @@
 ﻿using Eleon.Modding;
 using UnityEngine;
 
-namespace EmpyrionScripting
+namespace EmpyrionScripting.DataWrapper
 {
     public class EntityData
     {

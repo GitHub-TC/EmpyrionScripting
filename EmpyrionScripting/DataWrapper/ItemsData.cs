@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Eleon.Modding;
 
-namespace EmpyrionScripting
+namespace EmpyrionScripting.DataWrapper
 {
     public class ItemsSource
     {

@@ -1,9 +1,11 @@
-﻿using HandlebarsDotNet;
+﻿using EmpyrionScripting.DataWrapper;
+using HandlebarsDotNet;
 using System;
 using System.IO;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    [HandlebarHelpers]
     public class SaveGameScriptHelpers
     {
         [HandlebarTag("readfile")]
@@ -18,7 +20,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var filename = Path.Combine(arguments[1].ToString(), arguments[2].ToString());
 
                 if (File.Exists(filename)) options.Template(output, File.ReadAllLines(filename));
-                else                       options.Inverse(output, context as object);
+                else                       options.Inverse (output, context as object);
             }
             catch (Exception error)
             {

@@ -1,9 +1,11 @@
 ﻿using Eleon.Modding;
 using EmpyrionNetAPITools;
 using EmpyrionScripting.CustomHelpers;
+using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,7 +24,6 @@ namespace EmpyrionScripting
 
         private const string TargetsKeyword  = "Targets:";
         private const string ScriptKeyword   = "Script:";
-        private const string ScriptExtension = ".hbs";
         ModGameAPI legacyApi;
 
         ConcurrentDictionary<string, Func<object, string>> LcdCompileCache = new ConcurrentDictionary<string, Func<object, string>>();
@@ -32,9 +33,7 @@ namespace EmpyrionScripting
         public ConfigurationManager<Configuration> Configuration { get; private set; }
         public static Localization Localization { get; set; }
         public static IModApi ModApi { get; private set; }
-        public FileSystemWatcher SaveGameScriptsWatcher { get; private set; }
-        public ConcurrentDictionary<string, string> SaveGameScripts { get; private set; }
-        public string MainScriptPath { get; private set; }
+        public SaveGamesScripts SaveGamesScripts { get; private set; }
 
         public EmpyrionScripting()
         {
@@ -56,7 +55,8 @@ namespace EmpyrionScripting
                 SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);
 
                 LoadConfiguration();
-                GetSaveGamesScripts();
+                SaveGamesScripts = new SaveGamesScripts(modAPI) { SaveGameModPath = SaveGameModPath };
+                SaveGamesScripts.ReadSaveGamesScripts();
 
                 ModApi.Application.OnPlayfieldLoaded += Application_OnPlayfieldLoaded;
                 ModApi.Application.OnPlayfieldUnloaded += Application_OnPlayfieldUnloaded;
@@ -68,45 +68,6 @@ namespace EmpyrionScripting
 
             ModApi.Log("EmpyrionScripting Mod init finish");
 
-        }
-
-        public void GetSaveGamesScripts()
-        {
-            MainScriptPath = Path.Combine(SaveGameModPath, "Scripts");
-            Directory.CreateDirectory(MainScriptPath);
-
-            SaveGameScriptsWatcher = new FileSystemWatcher(MainScriptPath, "*" + ScriptExtension)
-            {
-                IncludeSubdirectories = true,
-            };
-            SaveGameScriptsWatcher.Changed += (S, E) => {
-                ModApi?.Log($"SaveGameScript: changed script: {E.FullPath.NormalizePath()}");
-                SaveGameScripts.AddOrUpdate(E.FullPath.NormalizePath(), F => File.ReadAllText(F), (F, C) => File.ReadAllText(F));
-            };
-            SaveGameScriptsWatcher.Created += (S, E) =>
-            {
-                ModApi?.Log($"SaveGameScript: created script: {E.FullPath.NormalizePath()}");
-                SaveGameScripts.AddOrUpdate(E.FullPath.NormalizePath(), F => File.ReadAllText(F), (F, C) => File.ReadAllText(F));
-            } ;
-            SaveGameScriptsWatcher.Renamed += (S, E) =>
-            {
-                ModApi?.Log($"SaveGameScript: renamed script: {E.OldFullPath.NormalizePath()} -> {E.FullPath.NormalizePath()}");
-                SaveGameScripts.TryRemove(E.OldFullPath.NormalizePath(), out _);
-                SaveGameScripts.AddOrUpdate(E.FullPath.NormalizePath(), F => File.ReadAllText(F), (F, C) => File.ReadAllText(F));
-            };
-            SaveGameScriptsWatcher.Deleted += (S, E) =>
-            {
-                ModApi?.Log($"SaveGameScript: deleted script: {E.FullPath.NormalizePath()}");
-                SaveGameScripts.TryRemove(E.FullPath.NormalizePath(), out _);
-            } ;
-
-            SaveGameScripts = new ConcurrentDictionary<string, string>(
-                                    Directory.GetFiles(MainScriptPath, "*" + ScriptExtension, SearchOption.AllDirectories)
-                                    .ToDictionary(F => F.NormalizePath(), F => File.ReadAllText(F)));
-
-            SaveGameScriptsWatcher.EnableRaisingEvents = true;
-
-            SaveGameScripts.Keys.ForEach(F => ModApi?.Log($"SaveGameScript: found script: {F}"));
         }
 
         private void LoadConfiguration()
@@ -209,16 +170,16 @@ namespace EmpyrionScripting
             {
                 var entityScriptData = new ScriptSaveGameRootData(ModApi.Playfield, entity)
                 {
-                    MainScriptPath = MainScriptPath
+                    MainScriptPath = SaveGamesScripts.MainScriptPath
                 };
 
                 ExecFoundSaveGameScripts(entityScriptData, 
-                    Path.Combine(MainScriptPath, Enum.GetName(typeof(EntityType), entity.Type)),
-                    Path.Combine(MainScriptPath, entity.Name),
-                    Path.Combine(MainScriptPath, ModApi.Playfield.Name),
-                    Path.Combine(MainScriptPath, ModApi.Playfield.Name, Enum.GetName(typeof(EntityType), entity.Type)),
-                    Path.Combine(MainScriptPath, ModApi.Playfield.Name, entity.Name),
-                    Path.Combine(MainScriptPath, entity.Id.ToString())
+                    Path.Combine(SaveGamesScripts.MainScriptPath, Enum.GetName(typeof(EntityType), entity.Type)),
+                    Path.Combine(SaveGamesScripts.MainScriptPath, entity.Name),
+                    Path.Combine(SaveGamesScripts.MainScriptPath, ModApi.Playfield.Name),
+                    Path.Combine(SaveGamesScripts.MainScriptPath, ModApi.Playfield.Name, Enum.GetName(typeof(EntityType), entity.Type)),
+                    Path.Combine(SaveGamesScripts.MainScriptPath, ModApi.Playfield.Name, entity.Name),
+                    Path.Combine(SaveGamesScripts.MainScriptPath, entity.Id.ToString())
                     );
             }
             catch (Exception error)
@@ -235,11 +196,11 @@ namespace EmpyrionScripting
                 {
                     var path = S.NormalizePath();
 
-                    if (SaveGameScripts.TryGetValue(path + ScriptExtension, out var C)) ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
+                    if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + SaveGamesScripts.ScriptExtension, out var C)) ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
                         Script     = C,
                         ScriptPath = Path.GetDirectoryName(path)
                     });
-                    else SaveGameScripts
+                    else SaveGamesScripts.SaveGameScripts
                         .Where(F => Path.GetDirectoryName(F.Key) == path)
                         .AsParallel()
                         .ForEach(F => ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
@@ -249,7 +210,7 @@ namespace EmpyrionScripting
                 });
         }
 
-        private void AddTargetsAndDisplayType(ScriptRootData data, string targets)
+        private static void AddTargetsAndDisplayType(ScriptRootData data, string targets)
         {
             if (targets.StartsWith("["))
             {
@@ -268,11 +229,8 @@ namespace EmpyrionScripting
             data.LcdTargets.AddRange(data.E.S.GetUniqueNames(targets).Values.Where(N => !N.StartsWith(ScriptKeyword)));
         }
 
-        private void ProcessScript(ScriptRootData data)
+        private void ProcessScript<T>(T data) where T : ScriptRootData
         {
-            data.ScriptDebugLcd?.SetText("");
-            data.ScriptDebugLcd?.SetText(data.ScriptDebugLcd?.GetText() + $"\nTargets:" + data.LcdTargets.Aggregate("", (s, c) => $"{s};{c}"));
-
             try
             {
                 var result = ExecuteHandlebarScript(data, data.Script).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
@@ -284,31 +242,30 @@ namespace EmpyrionScripting
                 }
 
                 data.LcdTargets
-                    .Select(T => data.E.S.GetCurrent().GetDevice<ILcd>(T))
-                    .Where(T => T != null)
-                    .ForEach(T =>
+                    .Select(L => data.E.S.GetCurrent().GetDevice<ILcd>(L))
+                    .Where(L => L != null)
+                    .ForEach(L =>
                     {
-                        if (data.DisplayType == null) T.SetText(string.Join("\n", result));
+                        if (data.DisplayType == null) L.SetText(string.Join("\n", result));
                         else
                         {
-                            var text    = T.GetText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                            var text    = L.GetText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-                            T.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
+                            L.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
                                     ? text  .Concat(result).TakeLast(data.DisplayType.Lines)
                                     : result.Concat(text  ).Take    (data.DisplayType.Lines)
                                 ));
                         }
 
-                        if (data.ColorChanged          ) T.SetColor     (data.Color);
-                        if (data.BackgroundColorChanged) T.SetBackground(data.BackgroundColor);
-                        if (data.FontSizeChanged       ) T.SetFontSize  (data.FontSize);
+                        if (data.ColorChanged          ) L.SetColor     (data.Color);
+                        if (data.BackgroundColorChanged) L.SetBackground(data.BackgroundColor);
+                        if (data.FontSizeChanged       ) L.SetFontSize  (data.FontSize);
                     });
             }
             catch (Exception ctrlError)
             {
                 ModApi.LogError(ctrlError.ToString());
-                data.ScriptDebugLcd?.SetText(data.ScriptDebugLcd?.GetText() + $"\n{ctrlError.Message} {DateTime.Now.ToLongTimeString()}");
-                data.LcdTargets.ForEach(T => data.E.S.GetCurrent().GetDevice<ILcd>(T)?.SetText($"{ctrlError.Message} {DateTime.Now.ToLongTimeString()}"));
+                data.LcdTargets.ForEach(L => data.E.S.GetCurrent().GetDevice<ILcd>(L)?.SetText($"{ctrlError.Message} {DateTime.Now.ToLongTimeString()}"));
             }
         }
 
@@ -325,7 +282,6 @@ namespace EmpyrionScripting
 
         public void Game_Exit()
         {
-            SaveGameScriptsWatcher.EnableRaisingEvents = false;
             StopApplicationEvent?.Invoke(this, EventArgs.Empty);
 
             ModApi.Log("Mod exited");

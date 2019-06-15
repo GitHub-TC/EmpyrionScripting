@@ -1,7 +1,7 @@
 ﻿using Eleon.Modding;
 using System.Collections.Generic;
 
-namespace EmpyrionScripting
+namespace EmpyrionScripting.DataWrapper
 {
     public class LimitedPlayerData
     {

@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
 using System.Globalization;

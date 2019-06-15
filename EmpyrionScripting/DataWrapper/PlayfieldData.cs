@@ -2,7 +2,7 @@
 using System.Linq;
 using Eleon.Modding;
 
-namespace EmpyrionScripting
+namespace EmpyrionScripting.DataWrapper
 {
     public class PlayfieldData
     {

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Eleon.Modding;
+using EmpyrionScripting.DataWrapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -191,6 +192,26 @@ namespace EmpyrionScripting.UnitTests
             Assert.AreEqual(
                 DateTime.Now.ToString(),
                 lcdMod.ExecuteHandlebarScript("", "{{datetime}}")
+            );
+        }
+
+        [TestMethod]
+        public void TestMethodFormatPercentPos()
+        {
+            var lcdMod = new EmpyrionScripting();
+            Assert.AreEqual(
+                "50,0%",
+                lcdMod.ExecuteHandlebarScript(0.5, "{{format . '{0:P1}'}}")
+            );
+        }
+
+        [TestMethod]
+        public void TestMethodFormatPercentNeg()
+        {
+            var lcdMod = new EmpyrionScripting();
+            Assert.AreEqual(
+                "-50,0%",
+                lcdMod.ExecuteHandlebarScript(-0.5, "{{format . '{0:P1}'}}")
             );
         }
 
@@ -387,9 +408,21 @@ namespace EmpyrionScripting.UnitTests
             {
                 SaveGameModPath = @"C:\steamcmd\empyrion\PlayfieldServer/../Saves/Games/Test\Mods\EmpyrionScripting"
             };
-            lcdMod.GetSaveGamesScripts();
+            lcdMod.SaveGamesScripts.ReadSaveGamesScripts();
 
-            lcdMod.ExecFoundSaveGameScripts(new ScriptSaveGameRootData(null, null), Path.Combine(lcdMod.MainScriptPath, "CV"));
+            lcdMod.ExecFoundSaveGameScripts(new ScriptSaveGameRootData(null, null), Path.Combine(lcdMod.SaveGamesScripts.MainScriptPath, "CV"));
+        }
+
+        [TestMethod]
+        public void TestMethodSaveGamesScriptsRoot()
+        {
+            var lcdData = Mock.Of<ScriptSaveGameRootData>();
+            lcdData.MainScriptPath = "abc";
+            var lcdMod = new EmpyrionScripting();
+            Assert.AreEqual(
+                "abc",
+                lcdMod.ExecuteHandlebarScript(lcdData, "{{MainScriptPath}}")
+            );
         }
     }
 }

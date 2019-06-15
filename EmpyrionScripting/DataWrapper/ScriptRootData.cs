@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace EmpyrionScripting
+namespace EmpyrionScripting.DataWrapper
 {
     public class ScriptRootData
     {
@@ -17,19 +17,17 @@ namespace EmpyrionScripting
         {
             this.playfield = playfield;
             this.entity = entity;
-
-            ScriptDebugLcd = entity?.Structure?.GetDevice<ILcd>("ScriptDebugInfo");
         }
 
         public ScriptRootData(ScriptRootData data) : this(data.playfield, data.entity)
         {
             _p = data._p;
             _e = data._e;
-            ScriptDebugLcd = data.ScriptDebugLcd;
             DisplayType    = data.DisplayType;
         }
 
-        public ILcd ScriptDebugLcd { get; }
+        public string OreIds => "2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297";
+        public string IngotIds => "2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298";
 
         public PlayfieldData P { get => _p == null ? _p = new PlayfieldData(playfield) : _p; set => _p = value; }
         private PlayfieldData _p;

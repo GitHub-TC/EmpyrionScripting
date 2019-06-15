@@ -68,7 +68,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ContainerSource.cs" />
+    <Compile Include="CustomHelpers\LcdHelpers.cs" />
+    <Compile Include="DataWrapper\BlockData.cs" />
+    <Compile Include="CustomHelpers\MathHelpers.cs" />
+    <Compile Include="DataWrapper\ContainerSource.cs" />
     <Compile Include="CustomHelpers\BlockHelpers.cs" />
     <Compile Include="CustomHelpers\ConveyorHelpers.cs" />
     <Compile Include="DeviceLock.cs" />
@@ -83,19 +86,20 @@
     <Compile Include="CustomHelpers\SaveGameScriptHelpers.cs" />
     <Compile Include="DisplayOutputConfiguration.cs" />
     <Compile Include="EmpyrionScripting.cs" />
-    <Compile Include="EntityData.cs" />
+    <Compile Include="DataWrapper\EntityData.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="ExtensionsToolbox.cs" />
     <Compile Include="ItemInfos.cs" />
-    <Compile Include="ItemsData.cs" />
-    <Compile Include="ScriptRootData.cs" />
+    <Compile Include="DataWrapper\ItemsData.cs" />
+    <Compile Include="DataWrapper\ScriptRootData.cs" />
     <Compile Include="Localization.cs" />
-    <Compile Include="PlayerData.cs" />
-    <Compile Include="PlayfieldData.cs" />
+    <Compile Include="DataWrapper\PlayerData.cs" />
+    <Compile Include="DataWrapper\PlayfieldData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScriptSaveGameRootData.cs" />
-    <Compile Include="StructureData.cs" />
-    <Compile Include="StructureTank.cs" />
+    <Compile Include="DataWrapper\ScriptSaveGameRootData.cs" />
+    <Compile Include="DataWrapper\StructureData.cs" />
+    <Compile Include="DataWrapper\StructureTank.cs" />
+    <Compile Include="SaveGamesScripts.cs" />
     <Compile Include="TaskExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

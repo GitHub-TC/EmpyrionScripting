@@ -1,5 +1,6 @@
 ﻿using HandlebarsDotNet;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -8,6 +9,18 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class FormatHelpers
     {
+        public static CultureInfo FormatCulture { get; } = CreateFormatCulture();
+
+        private static CultureInfo CreateFormatCulture()
+        {
+            var c = (CultureInfo)CultureInfo.CurrentUICulture.Clone();
+
+            c.NumberFormat.PercentNegativePattern = 1;
+            c.NumberFormat.PercentPositivePattern = 1;
+
+            return c;
+        }
+
         [HandlebarTag("i18n")]
         public static void I18NHelper(TextWriter output, dynamic context, object[] arguments)
         {
@@ -38,7 +51,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                output.Write(string.Format(arguments[1]?.ToString(), arguments[0]).Replace(" ", "\u2007\u2009"));
+                output.Write(string.Format(FormatCulture, arguments[1]?.ToString(), arguments[0]).Replace(" ", "\u2007\u2009"));
             }
             catch (Exception error)
             {

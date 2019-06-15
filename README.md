@@ -311,6 +311,7 @@ Welt
 ```
 ----------------------------------------------------
 ## ERZE und BARREN IDENTIFIKATIONS NUMMER:
+@root/OreIds
 
 + Item Id: 2248, Name: Magnesium Erz
 + Item Id: 2249, Name: Eisen Erz
@@ -326,6 +327,7 @@ Welt
 + Item Id: 2297, Name: Gold Erz
 
 ---
+@root/IngotIds
 
 + Item Id: 2271, Name: Magnesiumpulver
 + Item Id: 2272, Name: Eisen Barren
@@ -341,38 +343,6 @@ Welt
 + Item Id: 2285, Name: Sathium Barren
 + Item Id: 2294, Name: Pentaxid Kristalle
 + Item Id: 2298, Name: Gold Barren
-
----
-
-+ Item Id: 2248, Name: MagnesiumOre
-+ Item Id: 2249, Name: IronOre
-+ Item Id: 2250, Name: CobaltOre
-+ Item Id: 2251, Name: SiliconOre
-+ Item Id: 2252, Name: NeodymiumOre
-+ Item Id: 2253, Name: CopperOre
-+ Item Id: 2254, Name: PromethiumOre
-+ Item Id: 2269, Name: ErestrumOre
-+ Item Id: 2270, Name: ZascosiumOre
-+ Item Id: 2284, Name: SathiumOre
-+ Item Id: 2293, Name: PentaxidOre
-+ Item Id: 2297, Name: GoldOre
-
----
-
-+ Item Id: 2271, Name: MagnesiumPowder
-+ Item Id: 2272, Name: IronIngot
-+ Item Id: 2273, Name: CobaltIngot
-+ Item Id: 2274, Name: SiliconIngot
-+ Item Id: 2275, Name: NeodymiumIngot
-+ Item Id: 2276, Name: CopperIngot
-+ Item Id: 2277, Name: PromethiumPellets
-+ Item Id: 2278, Name: ErestrumIngot
-+ Item Id: 2279, Name: ZascosiumIngot
-+ Item Id: 2280, Name: CrushedStone
-+ Item Id: 2281, Name: RockDust
-+ Item Id: 2285, Name: SathiumIngot
-+ Item Id: 2294, Name: PentaxidCrystal
-+ Item Id: 2298, Name: GoldIngot
 
 ---
 # Technical
@@ -467,9 +437,25 @@ DateTime format:
 	+	Rectangle
 	+	Disc
 
+### CustomHelpers (devices)
++ {{devices structure customnames}}
+  + (structure) (name;name*;*;name)
+
+### CustomHelpers (devicesoftype)
++ {{devicesoftype structure type}}
+  + (structure) (type)
+
+### CustomHelpers (setactive)
++ {{setactive block|device active}}
+
 ### CustomHelpers (steps)
 + {steps start end \[step\] \[delay\]}}
   + Von (start) nach (end) mit optional einer Schrittweite von (step) und einer (delay)-Sekunden geänderten Zeitbasis
+
+### CustomHelpers (split)
++ {split string separator [removeemptyentries]}}
+  + (string) mit dem Trennzeichen (separator) zerteilen.
+  + \[removeemptyentries\] falls leere Einträge entfernt werden sollen 'true'
 
 ### CustomHelpers (random)
 + {random start end}}
@@ -484,6 +470,10 @@ DateTime format:
 + {{use data}}
   + Diesen Datensatz im Inhalt zum direkten Zugriff bereitstellen
   + der {{else}} fall wird aufgerufen wenn data == null ist
+
+### CustomHelpers (math)
++ {{math (lvalue) op (rvalue)}}
+  + op = +, -, *, /, %
 
 ## SaveGame Scripte
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
@@ -831,37 +821,7 @@ Welt
 ----------------------------------------------------
 ## ERZE und BARREN IDENTIFIKATIONS NUMMER:
 
-+ Item Id: 2248, Name: Magnesium Erz
-+ Item Id: 2249, Name: Eisen Erz
-+ Item Id: 2250, Name: Kobalt Erz
-+ Item Id: 2251, Name: Silizium Erz
-+ Item Id: 2252, Name: Neodymium Erz
-+ Item Id: 2253, Name: Kupfer Erz
-+ Item Id: 2254, Name: Promethium
-+ Item Id: 2269, Name: Erestrum Erz
-+ Item Id: 2270, Name: Zascosium Erz
-+ Item Id: 2284, Name: Sathium Erz
-+ Item Id: 2293, Name: Pentaxid Erz
-+ Item Id: 2297, Name: Gold Erz
-
----
-
-+ Item Id: 2271, Name: Magnesiumpulver
-+ Item Id: 2272, Name: Eisen Barren
-+ Item Id: 2273, Name: Kobalt Barren
-+ Item Id: 2274, Name: Silizium Barren
-+ Item Id: 2275, Name: Neodymium Barren
-+ Item Id: 2276, Name: Kupfer Barren
-+ Item Id: 2277, Name: Promethium Pallets
-+ Item Id: 2278, Name: Erestrum Barren
-+ Item Id: 2279, Name: Zascosium Barren
-+ Item Id: 2280, Name: Stein
-+ Item Id: 2281, Name: Steinstaub
-+ Item Id: 2285, Name: Sathium Barren
-+ Item Id: 2294, Name: Pentaxid Kristalle
-+ Item Id: 2298, Name: Gold Barren
-
----
+@root/OreIds
 
 + Item Id: 2248, Name: MagnesiumOre
 + Item Id: 2249, Name: IronOre
@@ -877,6 +837,7 @@ Welt
 + Item Id: 2297, Name: GoldOre
 
 ---
+@root/IngotIds
 
 + Item Id: 2271, Name: MagnesiumPowder
 + Item Id: 2272, Name: IronIngot
@@ -978,6 +939,17 @@ DateTime format:
   + rectangle
   + disc
 
+### CustomHelpers (devices)
++ {{devices structure customnames}}
+  + (structure) (name;name*;*;name)
+
+### CustomHelpers (devicesoftype)
++ {{devicesoftype structure type}}
+  + (structure) (type)
+
+### CustomHelpers (setactive)
++ {{setactive block|device active}}
+
 ### CustomHelpers (steps)
 + {{steps start end \[step\] \[delay\]}}
   + From (start) to (end) with optional (step)-width and (delay) extends the 1 second per 1 counter add
@@ -985,6 +957,11 @@ DateTime format:
 ### CustomHelpers (random)
 + {{random start end}}
    + Deliver a random value between (start) and (end) and submit to the block as {{this}}
+
+### CustomHelpers (split)
++ {split string separator [removeemptyentries]}}
+  + (string) split with the delimiter (separator).
+  + \[removeemptyentries\] if empty entries should be removed 'true'
 
 ### CustomHelpers (bar)
 + {{bar data min max length \[char\] \[bgchar\]}}
@@ -995,6 +972,10 @@ DateTime format:
 + {{use data}}
   + Use this data for direct access
   + the {{else}} case will call when data == null is
+
+### CustomHelpers (math)
++ {{math (lvalue) op (rvalue)}}
+  + op = +, -, *, /, %
 
 ## SaveGame scripts
 This special form of scripts can be stored in the SaveGame. The basic path for this is the

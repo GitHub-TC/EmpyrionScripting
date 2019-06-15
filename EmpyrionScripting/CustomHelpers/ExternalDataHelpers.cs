@@ -65,5 +65,27 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("split")]
+        public static void SplitHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 2) throw new HandlebarsException("{{split string separator [removeemptyentries]}} helper must have at least two argument: (string) (separator) [true|false]");
+
+            var data      = arguments[0].ToString();
+            var separator = arguments[1].ToString();
+
+            try
+            {
+                bool.TryParse(arguments.Length > 2 ? arguments[2]?.ToString() : null, out var removeemptyentries);
+
+                options.Template(output, data.Split(new[] { separator },
+                    removeemptyentries ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{split}} error " + error.Message);
+            }
+        }
+
+
     }
 }
