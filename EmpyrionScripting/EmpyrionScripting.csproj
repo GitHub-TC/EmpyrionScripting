@@ -71,6 +71,7 @@
     <Compile Include="CustomHelpers\LcdHelpers.cs" />
     <Compile Include="DataWrapper\BlockData.cs" />
     <Compile Include="CustomHelpers\MathHelpers.cs" />
+    <Compile Include="DataWrapper\ContainerData.cs" />
     <Compile Include="DataWrapper\ContainerSource.cs" />
     <Compile Include="CustomHelpers\BlockHelpers.cs" />
     <Compile Include="CustomHelpers\ConveyorHelpers.cs" />

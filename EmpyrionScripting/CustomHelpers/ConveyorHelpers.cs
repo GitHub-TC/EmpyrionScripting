@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.DataWrapper;
+﻿using Eleon.Modding;
+using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,30 @@ namespace EmpyrionScripting.CustomHelpers
             public EntityData DestinationE { get; set; }
             public string Destination { get; set; }
             public int Count { get; set; }
+        }
+
+        [HandlebarTag("islocked")]
+        public static void IsLockedHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 4) throw new HandlebarsException("{{islocked structure x y z}} helper must have four argument: (structure) (x) (y) (z)");
+
+            var structure = arguments[0] as StructureData;
+
+            int.TryParse(arguments[1].ToString(), out var x);
+            int.TryParse(arguments[2].ToString(), out var y);
+            int.TryParse(arguments[3].ToString(), out var z);
+
+            try
+            {
+                var isLocked = EmpyrionScripting.ModApi.Playfield.IsStructureDeviceLocked(structure.E.Id, new VectorInt3(x, y, z));
+
+                if (isLocked) options.Inverse(output, context as object);
+                else          options.Inverse(output, context as object);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{islocked}} error " + error.ToString());
+            }
         }
 
         [HandlebarTag("move")]

@@ -44,5 +44,6 @@ namespace EmpyrionScripting.DataWrapper
         public Color BackgroundColor { get; set; }
         public string Script { get; set; }
         public DisplayOutputConfiguration DisplayType { get; set; }
+        public string Error { get; set; }
     }
 }

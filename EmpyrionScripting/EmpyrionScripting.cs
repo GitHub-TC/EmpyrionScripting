@@ -3,9 +3,10 @@ using EmpyrionNetAPITools;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Concurrent;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +17,8 @@ namespace EmpyrionScripting
     {
         public int InGameScriptsIntervallMS { get; set; } = 1000;
         public int SaveGameScriptsIntervallMS { get; set; } = 1000;
+        [JsonConverter(typeof(StringEnumConverter))]
+        public DeviceLock.Locking Locking { get; set; } = DeviceLock.Locking.AlwaysLock;
     }
 
     public class EmpyrionScripting : ModInterface, IMod
@@ -30,10 +33,11 @@ namespace EmpyrionScripting
 
         public static ItemInfos ItemInfos { get; set; }
         public string SaveGameModPath { get; set; }
-        public ConfigurationManager<Configuration> Configuration { get; private set; }
+        public static ConfigurationManager<Configuration> Configuration { get; private set; }
         public static Localization Localization { get; set; }
         public static IModApi ModApi { get; private set; }
         public SaveGamesScripts SaveGamesScripts { get; private set; }
+        public string L { get; private set; }
 
         public EmpyrionScripting()
         {
@@ -145,7 +149,8 @@ namespace EmpyrionScripting
                     {
                         var data = new ScriptRootData(entityScriptData)
                         {
-                            Script = lcd.GetText()
+                            Script = lcd.GetText(),
+                            Error  = L,
                         };
 
                         AddTargetsAndDisplayType(data, N.Substring(ScriptKeyword.Length));

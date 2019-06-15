@@ -8,10 +8,21 @@ namespace EmpyrionScripting
     {
         readonly Action unlockAction;
 
+        public enum Locking
+        {
+            AlwaysLock,
+            AlwaysUnlocked,
+            Check
+        }
+
         public DeviceLock(IPlayfield playfield, int id, VectorInt3 position)
         {
-            Success = true;
-            return;
+            if (EmpyrionScripting.Configuration.Current.Locking == Locking.AlwaysLock) return;
+            if (EmpyrionScripting.Configuration.Current.Locking == Locking.AlwaysUnlocked)
+            {
+                Success = true;
+                return;
+            }
 
             try
             {

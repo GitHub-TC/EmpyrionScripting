@@ -39,7 +39,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 int.TryParse(arguments[0]?.ToString(), out var start);
-                int.TryParse(arguments[0]?.ToString(), out var end);
+                int.TryParse(arguments[1]?.ToString(), out var end);
 
                 options.Template(output, new Random().Next(start, end));
             }

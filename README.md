@@ -457,6 +457,18 @@ DateTime format:
   + (string) mit dem Trennzeichen (separator) zerteilen.
   + \[removeemptyentries\] falls leere Einträge entfernt werden sollen 'true'
 
+### CustomHelpers (islocked)
++ {{islocked structure x y z}}
+  + Prüft ob der Block/Device der (structure) an der Position (x) (y) (z) gesperrt ist.
+
+### CustomHelpers (gettexture)
++ {{gettexture block pos}}
+  + Liefert die TexturId des Blocks von der Seite T=Top, B=Bottom,, N=North, S=South, W=West, E=East
+
+### CustomHelpers (settexture)
++ {{settexture block pos textureid}}
+  + Setzt die TexturId des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden
+
 ### CustomHelpers (random)
 + {random start end}}
   + Zufallswert zwischen (start) und (end) liefern und in den Block als {{this}} hereinreichen
@@ -474,6 +486,10 @@ DateTime format:
 ### CustomHelpers (math)
 + {{math (lvalue) op (rvalue)}}
   + op = +, -, *, /, %
+
+### CustomHelpers (block)
++ {{block structure x y z}}
+  + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
 
 ## SaveGame Scripte
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
@@ -976,6 +992,22 @@ DateTime format:
 ### CustomHelpers (math)
 + {{math (lvalue) op (rvalue)}}
   + op = +, -, *, /, %
+
+### CustomHelpers (block)
++ {{block structure x y z}}
+  + Returns the block/device of the (structure) at the position (x) (y) (z) 
+
+### CustomHelpers (islocked)
++ {{islocked structure x y z}}
+  + Test if the block/device of the (structure) at the position (x) (y) (z) is locked
+
+### CustomHelpers (gettexture)
++ {{gettexture block pos}}
+  + Get the TexturId of the block from the side T=Top, B=Bottom,, N=North, S=South, W=West, E=East
+
+### CustomHelpers (settexture)
++ {{settexture block pos textureid}}
+  + Set the TexturId of the block at the sides T=Top, B=Bottom,, N=North, S=South, W=West, E=East it could be many sides declared, komma separated
 
 ## SaveGame scripts
 This special form of scripts can be stored in the SaveGame. The basic path for this is the
