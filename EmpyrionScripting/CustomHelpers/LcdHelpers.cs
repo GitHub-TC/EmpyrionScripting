@@ -14,7 +14,7 @@ namespace EmpyrionScripting.CustomHelpers
     public static class LcdHelpers
     {
         [HandlebarTag("settext")]
-        public static void DeviceBlockHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SetTextHelper(TextWriter output, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{settext lcddevice text}} helper must have exactly two argument: (structure) (text)");
 
@@ -25,6 +25,25 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 lcd?.SetText(text);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{settext}} error " + error.Message);
+            }
+        }
+
+        [HandlebarTag("gettext")]
+        public static void GetTextHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{gettext lcddevice}} helper must have exactly one argument: (structure)");
+
+            var block = arguments[0] as BlockData;
+            var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+
+            try
+            {
+                if (lcd == null) options.Inverse (output, context as object);
+                else             options.Template(output, lcd.GetText());
             }
             catch (Exception error)
             {

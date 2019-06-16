@@ -40,9 +40,11 @@ namespace EmpyrionScripting.CustomHelpers
                 var filename = Path.Combine(arguments[1].ToString(), arguments[2].ToString());
                 bool.TryParse(arguments.Length > 3 ? arguments[3].ToString() : null, out var append);
 
-                using (var file = append ? File.AppendText(filename) : File.CreateText(filename))
-                {
-                    options.Template(file, context as object);
+                using (var text = new StringWriter()) {
+                    options.Template(text, context as object);
+
+                    if (append) File.AppendAllText(filename, text.ToString());
+                    else        File.WriteAllText (filename, text.ToString());
                 }
             }
             catch (Exception error)

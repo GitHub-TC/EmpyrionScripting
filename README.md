@@ -491,6 +491,14 @@ DateTime format:
 + {{block structure x y z}}
   + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
 
+### CustomHelpers (gettext)
++ {{gettext lcddevice}}
+  + Liefert den Text des LCD (lcddevice)
+
+### CustomHelpers (settext)
++ {{gettext lcddevice text}}
+  + Setzt den Text des LCD (lcddevice) mit dem Text (text)
+
 ## SaveGame Scripte
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
 \[SaveGame\]\\Mods\\EmpyrionScripting\\Scripts
@@ -1008,6 +1016,14 @@ DateTime format:
 ### CustomHelpers (settexture)
 + {{settexture block pos textureid}}
   + Set the TexturId of the block at the sides T=Top, B=Bottom,, N=North, S=South, W=West, E=East it could be many sides declared, komma separated
+
+### CustomHelpers (gettext)
++ {{gettext lcddevice}}
+  + Gets the text from the  LCD (lcddevice)
+
+### CustomHelpers (settext)
++ {{settext lcddevice text}}
+  + Set the text of the LCD (lcddevice) with (text)
 
 ## SaveGame scripts
 This special form of scripts can be stored in the SaveGame. The basic path for this is the
