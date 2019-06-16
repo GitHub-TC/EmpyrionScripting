@@ -499,6 +499,14 @@ DateTime format:
 + {{gettext lcddevice text}}
   + Setzt den Text des LCD (lcddevice) mit dem Text (text)
 
+### CustomHelpers (setcolor)
++ {{setcolor lcddevice (rgb hex)}}
+  + Setzt die Farbe des LCD (lcddevice) auf (rgb hex)
+
+### CustomHelpers (setbgcolor)
++ {{setbrcolor lcddevice (rgb hex)}}
+  + Setzt die Hintergrundfarbe des LCD (lcddevice) auf (rgb hex)
+
 ## SaveGame Scripte
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
 \[SaveGame\]\\Mods\\EmpyrionScripting\\Scripts
@@ -1024,6 +1032,14 @@ DateTime format:
 ### CustomHelpers (settext)
 + {{settext lcddevice text}}
   + Set the text of the LCD (lcddevice) with (text)
+
+### CustomHelpers (setcolor)
++ {{setcolor lcddevice (rgb hex)}}
+  + Set the color of the LCD (lcddevice) with (rgb hex)
+
+### CustomHelpers (setbgcolor)
++ {{setbrcolor lcddevice (rgb hex)}}
+  + Set the bgcolor of the LCD (lcddevice) with (rgb hex)
 
 ## SaveGame scripts
 This special form of scripts can be stored in the SaveGame. The basic path for this is the

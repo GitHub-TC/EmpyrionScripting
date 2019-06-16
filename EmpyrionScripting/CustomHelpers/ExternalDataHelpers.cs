@@ -1,6 +1,10 @@
 ﻿using HandlebarsDotNet;
 using System;
+using System.Collections;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -70,8 +74,8 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length < 2) throw new HandlebarsException("{{split string separator [removeemptyentries]}} helper must have at least two argument: (string) (separator) [true|false]");
 
-            var data      = arguments[0].ToString();
-            var separator = arguments[1].ToString();
+            var data      =                arguments[0].ToString();
+            var separator = Regex.Unescape(arguments[1].ToString());
 
             try
             {
@@ -86,6 +90,28 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("concat")]
+        public static void ConcatHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 2) throw new HandlebarsException("{{concat a1 a2 a3 ...}} helper must have at least two arguments: (a1) (a2)");
+
+            try
+            {
+                var text = new StringBuilder();
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    if      (arguments[i] is string   s) text.Append(s);
+                    else if (arguments[i] is string[] a) text.Append(string.Join(Regex.Unescape(arguments[++i]?.ToString()), a));
+                    else                                 text.Append(arguments[i]?.ToString());
+                }
+
+                output.Write(text.ToString());
+            }
+            catch (Exception error)
+            {
+                output.Write("{{concat}} error " + error.Message);
+            }
+        }
 
     }
 }

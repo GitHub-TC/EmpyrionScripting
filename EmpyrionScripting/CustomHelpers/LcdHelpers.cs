@@ -3,10 +3,12 @@ using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -50,5 +52,63 @@ namespace EmpyrionScripting.CustomHelpers
                 output.Write("{{settext}} error " + error.Message);
             }
         }
+
+        [HandlebarTag("setfontsize")]
+        public static void SetFontSizeHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{setfontsize lcddevice size}} helper must have exactly two argument: (structure) (size)");
+
+            var block = arguments[0] as BlockData;
+            var lcd = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+            int.TryParse(arguments[1]?.ToString(), out var size);
+
+            try
+            {
+                lcd?.SetFontSize(size);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{setfontsize}} error " + error.Message);
+            }
+        }
+
+        [HandlebarTag("setcolor")]
+        public static void SetColorHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{setcolor lcddevice color}} helper must have exactly two argument: (structure) (rgb color)");
+
+            var block = arguments[0] as BlockData;
+            var lcd = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+
+            try
+            {
+                int.TryParse(arguments[1]?.ToString(), NumberStyles.HexNumber, null, out int color);
+                lcd?.SetColor(new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{setcolor}} error " + error.Message);
+            }
+        }
+
+        [HandlebarTag("setbgcolor")]
+        public static void SetBGColorHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{setbgcolor lcddevice color}} helper must have exactly two argument: (structure) (rgb color)");
+
+            var block = arguments[0] as BlockData;
+            var lcd = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+
+            try
+            {
+                int.TryParse(arguments[1]?.ToString(), NumberStyles.HexNumber, null, out int color);
+                lcd?.SetBackground(new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{setbgcolor}} error " + error.Message);
+            }
+        }
+
     }
 }

@@ -43,6 +43,8 @@ namespace EmpyrionScripting.CustomHelpers
                 using (var text = new StringWriter()) {
                     options.Template(text, context as object);
 
+                    Directory.CreateDirectory(Path.GetDirectoryName(filename));
+
                     if (append) File.AppendAllText(filename, text.ToString());
                     else        File.WriteAllText (filename, text.ToString());
                 }

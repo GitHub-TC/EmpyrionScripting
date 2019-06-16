@@ -22,7 +22,6 @@ namespace EmpyrionScripting
         public SaveGamesScripts(IModApi modApi)
         {
             ModApi = modApi;
-            EmpyrionScripting.StopApplicationEvent += (S, E) => SaveGameScriptsWatcher.EnableRaisingEvents = false;
         }
 
         public void ReadSaveGamesScripts()
