@@ -3,8 +3,6 @@ using EmpyrionNetAPITools;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -17,8 +15,6 @@ namespace EmpyrionScripting
     {
         public int InGameScriptsIntervallMS { get; set; } = 1000;
         public int SaveGameScriptsIntervallMS { get; set; } = 1000;
-        [JsonConverter(typeof(StringEnumConverter))]
-        public DeviceLock.Locking Locking { get; set; } = DeviceLock.Locking.AlwaysLock;
     }
 
     public class EmpyrionScripting : ModInterface, IMod

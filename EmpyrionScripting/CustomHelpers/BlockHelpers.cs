@@ -84,7 +84,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("setactive")]
         public static void SetBlockActiveHelper(TextWriter output, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{setactive block|device active}} helper must have exactly two argument: (structure) (name;name*;*;name)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{setactive block|device active}} helper must have exactly two argument: (block|device) (name;name*;*;name)");
 
             var block = arguments[0] as BlockData;
             bool.TryParse(arguments[1]?.ToString(), out bool active);

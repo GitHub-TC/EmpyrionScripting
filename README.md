@@ -459,7 +459,7 @@ DateTime format:
 
 ### CustomHelpers (islocked)
 + {{islocked structure x y z}}
-  + Prüft ob der Block/Device der (structure) an der Position (x) (y) (z) gesperrt ist.
+  + Prüft bei der Struktur (structure) ob das Device (device) oder das Device an der Position (x) (y) (z) gesperrt ist.
 
 ### CustomHelpers (gettexture)
 + {{gettexture block pos}}
@@ -1014,8 +1014,8 @@ DateTime format:
   + Returns the block/device of the (structure) at the position (x) (y) (z) 
 
 ### CustomHelpers (islocked)
-+ {{islocked structure x y z}}
-  + Test if the block/device of the (structure) at the position (x) (y) (z) is locked
++ {{islocked structure device|x y z}}
+  + Checks at the structure whether the device (device) or the device is locked at the position (x) (y) (z).
 
 ### CustomHelpers (gettexture)
 + {{gettexture block pos}}

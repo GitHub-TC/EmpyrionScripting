@@ -16,6 +16,8 @@ namespace EmpyrionScripting.DataWrapper
             this.playfield = playfield;
         }
 
+        public IPlayfield GetCurrent() => playfield;
+
         public string Name => playfield.Name;
         public string PlayfieldType => playfield.PlayfieldType;
         public string PlanetType => playfield.PlanetType;

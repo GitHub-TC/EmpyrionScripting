@@ -24,20 +24,31 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("islocked")]
         public static void IsLockedHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 4) throw new HandlebarsException("{{islocked structure x y z}} helper must have four argument: (structure) (x) (y) (z)");
+            if (arguments.Length != 2 && arguments.Length != 4) throw new HandlebarsException("{{islocked structure device|x y z}} helper must have two or four argument: (structure) (device)|(x) (y) (z)");
 
             var structure = arguments[0] as StructureData;
+            VectorInt3 position = new VectorInt3();
 
-            int.TryParse(arguments[1].ToString(), out var x);
-            int.TryParse(arguments[2].ToString(), out var y);
-            int.TryParse(arguments[3].ToString(), out var z);
+            if (arguments.Length == 2)
+            {
+                var block = arguments[1] as BlockData;
+                position  = block?.Position ?? new VectorInt3();
+            }
+            else
+            {
+                int.TryParse(arguments[1].ToString(), out var x);
+                int.TryParse(arguments[2].ToString(), out var y);
+                int.TryParse(arguments[3].ToString(), out var z);
+
+                position = new VectorInt3(x, y, z);
+            }
 
             try
             {
-                var isLocked = EmpyrionScripting.ModApi.Playfield.IsStructureDeviceLocked(structure.E.Id, new VectorInt3(x, y, z));
+                var isLocked = EmpyrionScripting.ModApi.Playfield.IsStructureDeviceLocked(structure.GetCurrent().Id, position);
 
-                if (isLocked) options.Inverse(output, context as object);
-                else          options.Inverse(output, context as object);
+                if (isLocked) options.Template(output, context as object);
+                else          options.Inverse (output, context as object);
             }
             catch (Exception error)
             {
@@ -63,7 +74,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var uniqueNames = structure.GetUniqueNames(namesSearch);
                 item.Source
                     .ForEach(S => {
-                        using(var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.Id, S.Position)) {
+                        using(var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.S.GetCurrent(), S.Position)) {
                             if (!locked.Success) return;
 
                             var count = S.Count;
@@ -104,7 +115,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             if(!structure.ContainerSource.TryGetValue(N, out var targetData)) return count;
 
-            using (var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.Id, targetData.Position))
+            using (var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.S.GetCurrent(), targetData.Position))
             {
                 if (!locked.Success) return count;
 
