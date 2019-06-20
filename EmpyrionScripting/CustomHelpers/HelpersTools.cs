@@ -1,9 +1,12 @@
 ﻿using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Caching;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -74,5 +77,43 @@ namespace EmpyrionScripting.CustomHelpers
         {
             return source.Skip(Math.Max(0, source.Count() - N));
         }
+
+        public class FileContent {
+            public string[] Lines { get; set; }
+            public string Text { get; set; }
+            public FileSystemWatcher Watcher { get; set; }
+        }
+
+        static ConcurrentDictionary<string, FileContent> FileContentCache = new ConcurrentDictionary<string, FileContent>();
+
+        public static FileContent GetFileContent(string filename)
+        {
+            try
+            {
+                if (FileContentCache.TryGetValue(filename, out var filecontent)) return filecontent;
+                if (!File.Exists(filename)) return null;
+
+                filecontent = new FileContent()
+                {
+                    Lines   = File.ReadAllLines(filename),
+                    Text    = File.ReadAllText(filename),
+                    Watcher = new FileSystemWatcher(Path.GetDirectoryName(filename), Path.GetFileName(filename))
+                };
+                filecontent.Watcher.Renamed += (S, A) => { filecontent.Watcher.EnableRaisingEvents = false; FileContentCache.TryRemove(filename, out var _); };
+                filecontent.Watcher.Changed += (S, A) => { filecontent.Watcher.EnableRaisingEvents = false; FileContentCache.TryRemove(filename, out var _); };
+                filecontent.Watcher.Deleted += (S, A) => { filecontent.Watcher.EnableRaisingEvents = false; FileContentCache.TryRemove(filename, out var _); };
+                filecontent.Watcher.Created += (S, A) => { filecontent.Watcher.EnableRaisingEvents = false; FileContentCache.TryRemove(filename, out var _); };
+                filecontent.Watcher.EnableRaisingEvents = true;
+
+                FileContentCache.AddOrUpdate(filename, filecontent, (S, O) => filecontent);
+                return filecontent;
+            }
+            catch (Exception error)
+            {
+                EmpyrionScripting.ModApi?.Log($"Filename: {filename} => {error}");
+                return null;
+            }
+        }
+
     }
 }

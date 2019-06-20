@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Eleon.Modding;
+using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -423,6 +424,12 @@ namespace EmpyrionScripting.UnitTests
                 "abc",
                 lcdMod.ExecuteHandlebarScript(lcdData, "{{MainScriptPath}}")
             );
+        }
+
+        [TestMethod]
+        public void TestMethodFileCache()
+        {
+            var fg = HelpersTools.GetFileContent(@"C:\steamcmd\empyrion\Saves\Games\Test\Mods\EmpyrionScripting\Codes\x\..\Codes.txt");
         }
     }
 }

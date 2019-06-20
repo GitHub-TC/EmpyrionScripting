@@ -2,12 +2,8 @@
 using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace EmpyrionScripting.CustomHelpers
@@ -31,6 +27,28 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 output.Write("{{settext}} error " + error.Message);
+            }
+        }
+
+        [HandlebarTag("settextblock")]
+        public static void SetTextBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{settextblock lcddevice}} helper must have exactly one argument: (structure)");
+
+            var block = arguments[0] as BlockData;
+            var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+
+            try
+            {
+                using (var text = new StringWriter())
+                {
+                    options.Template(text, context as object);
+                    lcd?.SetText(text.ToString());
+                }
+            }
+            catch (Exception error)
+            {
+                output.Write("{{settextblock}} error " + error.Message);
             }
         }
 

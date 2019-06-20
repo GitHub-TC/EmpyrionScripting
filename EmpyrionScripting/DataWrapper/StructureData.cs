@@ -29,7 +29,11 @@ namespace EmpyrionScripting.DataWrapper
         public ItemsData[] Items { get => _i == null ? _i = CollectAllItems(GetCurrent()) : _i; set => _i = value; }
         private ItemsData[] _i;
 
-        public EntityData[] DockedE { get => _d == null ? _d = GetCurrent().GetDockedStructures().Select(D => new EntityData(EmpyrionScripting.ModApi.Playfield.Entities[D.Id])).ToArray() : _d; set => _d = value; }
+        public EntityData[] DockedE { get => _d == null ? _d = GetCurrent()
+                .GetDockedStructures()
+                .Select(S => EmpyrionScripting.ModApi.Playfield.Entities.FirstOrDefault(E => E.Value.Structure?.Id == S.Id))
+                .Where(E => E.Value != null)
+                .Select(E => new EntityData(E.Value)).ToArray() : _d; set => _d = value; }
         private EntityData[] _d;
 
         public string[] GetDeviceTypeNames => GetCurrent().GetDeviceTypeNames();

@@ -19,8 +19,10 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var filename = Path.Combine(arguments[1].ToString(), arguments[2].ToString());
 
-                if (File.Exists(filename)) options.Template(output, File.ReadAllLines(filename));
-                else                       options.Inverse (output, context as object);
+                var fileContent = HelpersTools.GetFileContent(filename)?.Lines;
+
+                if (fileContent == null) options.Inverse(output, context as object);
+                else                     options.Template(output, fileContent);
             }
             catch (Exception error)
             {
@@ -42,11 +44,14 @@ namespace EmpyrionScripting.CustomHelpers
 
                 using (var text = new StringWriter()) {
                     options.Template(text, context as object);
+                    var content = text.ToString();
+
+                    if (!append && HelpersTools.GetFileContent(filename)?.Text == content) return;
 
                     Directory.CreateDirectory(Path.GetDirectoryName(filename));
 
-                    if (append) File.AppendAllText(filename, text.ToString());
-                    else        File.WriteAllText (filename, text.ToString());
+                    if (append) File.AppendAllText(filename, content);
+                    else        File.WriteAllText (filename, content);
                 }
             }
             catch (Exception error)

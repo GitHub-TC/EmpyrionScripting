@@ -93,8 +93,13 @@ namespace EmpyrionScripting
 
         private void Application_OnPlayfieldLoaded(string playfieldName)
         {
-            TaskTools.Intervall(Configuration.Current.InGameScriptsIntervallMS,   () => UpdateScripts(ProcessAllInGameScripts));
-            TaskTools.Intervall(Configuration.Current.SaveGameScriptsIntervallMS, () => UpdateScripts(ProcessAllSaveGameScripts));
+            StartScriptIntervall(Configuration.Current.InGameScriptsIntervallMS,   () => UpdateScripts(ProcessAllInGameScripts));
+            StartScriptIntervall(Configuration.Current.SaveGameScriptsIntervallMS, () => UpdateScripts(ProcessAllSaveGameScripts));
+        }
+
+        private void StartScriptIntervall(int intervall, Action action)
+        {
+            if (intervall > 0) TaskTools.Intervall(intervall, action);
         }
 
         private void Application_OnPlayfieldUnloaded(string playfieldName)
@@ -119,14 +124,16 @@ namespace EmpyrionScripting
                 .Values
                 .Where(E => E.Type == EntityType.BA ||
                             E.Type == EntityType.CV ||
-                            E.Type == EntityType.SV || 
+                            E.Type == EntityType.SV ||
                             E.Type == EntityType.HV)
+                .ToArray()
                 .AsParallel()
                 .ForAll(process);
         }
 
         private void ProcessAllInGameScripts(IEntity entity)
         {
+            if (entity.Type == EntityType.Proxy) return;
 
             try
             {
@@ -166,6 +173,7 @@ namespace EmpyrionScripting
 
         private void ProcessAllSaveGameScripts(IEntity entity)
         {
+            if (entity.Type == EntityType.Proxy) return;
 
             try
             {

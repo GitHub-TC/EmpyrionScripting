@@ -499,6 +499,10 @@ DateTime format:
 + {{gettext lcddevice text}}
   + Setzt den Text des LCD (lcddevice) mit dem Text (text)
 
+### CustomHelpers (settextblock)
++ {{gettext lcddevice}}
+  + Setzt den Text des LCD (lcddevice) mit dem Text des innenliegenden Blockes
+
 ### CustomHelpers (setcolor)
 + {{setcolor lcddevice (rgb hex)}}
   + Setzt die Farbe des LCD (lcddevice) auf (rgb hex)
@@ -1032,6 +1036,10 @@ DateTime format:
 ### CustomHelpers (settext)
 + {{settext lcddevice text}}
   + Set the text of the LCD (lcddevice) with (text)
+
+### CustomHelpers (settextblock)
++ {{settext lcddevice}}
+  + Set the text of the LCD (lcddevice) from the nested block
 
 ### CustomHelpers (setcolor)
 + {{setcolor lcddevice (rgb hex)}}
