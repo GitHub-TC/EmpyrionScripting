@@ -108,14 +108,14 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        private static int MoveItem(ItemsSource S, string N, StructureData structure, int count, int? maxLimit)
+        private static int MoveItem(ItemsSource S, string N, StructureData targetStructure, int count, int? maxLimit)
         {
-            var target = structure.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
+            var target = targetStructure.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
             if (target == null) return count;
 
-            if(!structure.ContainerSource.TryGetValue(N, out var targetData)) return count;
+            if(!targetStructure.ContainerSource.TryGetValue(N, out var targetData)) return count;
 
-            using (var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.S.GetCurrent(), targetData.Position))
+            using (var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, targetStructure.GetCurrent(), targetData.Position))
             {
                 if (!locked.Success) return count;
 
