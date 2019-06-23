@@ -9,6 +9,34 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class LogicHelpers
     {
+        [HandlebarTag("if")]
+        public static void IfBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{if}} helper must have exactly one argument: (testvalue)");
+
+            try
+            {
+                var test = arguments[0]?.ToString();
+
+                if (string.IsNullOrEmpty(test)) options.Inverse(output, context as object);
+                else if(bool.TryParse(test, out var boolresult))
+                {
+                    if(boolresult) options.Template(output, context as object);
+                    else       options.Inverse(output,  context as object);
+                }
+                else if(int.TryParse(test, out var intresult))
+                {
+                    if(intresult == 0) options.Inverse(output, context as object); 
+                    else               options.Template(output, context as object);
+                }
+
+            }
+            catch (Exception error)
+            {
+                throw new HandlebarsException($"{{if}} {error.Message}");
+            }
+        }
+
         [HandlebarTag("test")]
         public static void TestBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments) {
             if (arguments.Length != 3) throw new HandlebarsException("{{test}} helper must have exactly three argument: (testvalue) 'eq'|'le'|'leq'|'ge'|'geq'|'in' (compareto)");

@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -42,6 +43,7 @@ namespace EmpyrionScripting.DataWrapper
         public Color Color { get; set; }
         public bool BackgroundColorChanged { get; set; }
         public Color BackgroundColor { get; set; }
+        public ConcurrentDictionary<string, object> Data { get; set; } = new ConcurrentDictionary<string, object>();
         public string Script { get; set; }
         public DisplayOutputConfiguration DisplayType { get; set; }
         public string Error { get; set; }

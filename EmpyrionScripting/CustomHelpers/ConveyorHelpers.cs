@@ -52,7 +52,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{islocked}} error " + error.ToString());
+                output.Write("{{islocked}} error " + error.Message);
             }
         }
 
@@ -104,7 +104,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{move}} error " + error.ToString());
+                output.Write("{{move}} error " + error.Message);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using HandlebarsDotNet;
+﻿using EmpyrionScripting.DataWrapper;
+using HandlebarsDotNet;
 using System;
 using System.IO;
 using System.Text;
@@ -64,6 +65,42 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 output.Write("{{use}} error " + error.Message);
+            }
+        }
+
+        [HandlebarTag("set")]
+        public static void SetHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 3) throw new HandlebarsException("{{set @root key data}} helper must have three argument: @root (key) (data)");
+
+            try
+            {
+                var root = arguments[0] as ScriptRootData;
+                root.Data.AddOrUpdate(arguments[1]?.ToString(), arguments[2], (S, O) => arguments[2]);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{set}} error " + error.Message);
+            }
+        }
+
+        [HandlebarTag("setblock")]
+        public static void SetBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{setblock @root key}} helper must have three argument: @root (key)");
+
+            try
+            {
+                var root = arguments[0] as ScriptRootData;
+
+                var data = new StringWriter();
+                options.Template(data, context as object);
+
+                root.Data.AddOrUpdate(arguments[1]?.ToString(), data.ToString(), (S, O) => data.ToString());
+            }
+            catch (Exception error)
+            {
+                output.Write("{{setblock}} error " + error.Message);
             }
         }
 

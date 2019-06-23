@@ -250,6 +250,13 @@ namespace EmpyrionScripting
                     result = result.Skip(1).ToArray();
                 }
 
+                if (data.DisplayType != null) result = result
+                                                .SkipWhile(string.IsNullOrWhiteSpace)
+                                                .Reverse()
+                                                .SkipWhile(string.IsNullOrWhiteSpace)
+                                                .Reverse()
+                                                .ToArray();
+
                 data.LcdTargets
                     .Select(L => data.E.S.GetCurrent().GetDevice<ILcd>(L))
                     .Where(L => L != null)
@@ -258,7 +265,7 @@ namespace EmpyrionScripting
                         if (data.DisplayType == null) L.SetText(string.Join("\n", result));
                         else
                         {
-                            var text    = L.GetText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                            var text = L.GetText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                             L.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
                                     ? text  .Concat(result).TakeLast(data.DisplayType.Lines)

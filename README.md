@@ -365,6 +365,11 @@ Syntaxdocu:
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
 
+### CustomHelpers (if)
+* {{#if data}}
+  * Block ausführen wenn (data) einen Wert (ungleich 'null') hat oder (data) gleich 'true' oder ungleich 0 ist
+  * anderfalls wird der {{else}} Teil ausgeführt
+
 ### CustomHelpers (intervall)
 * {{#intervall sec}}
   * Intervall in (sec) Sekunden
@@ -482,6 +487,14 @@ DateTime format:
 + {{use data}}
   + Diesen Datensatz im Inhalt zum direkten Zugriff bereitstellen
   + der {{else}} fall wird aufgerufen wenn data == null ist
+
+### CustomHelpers (set)
++ {{set @root key data}}
+  + Die Daten (data) hinterlegen so dass sie per @root.Data.(key) jederzeit wieder abgerufen werden können
+
+### CustomHelpers (setblock)
++ {{setblock @root key}}
+  + Die Daten des Blockes hinterlegen so dass sie per @root.Data.(key) jederzeit wieder abgerufen werden können
 
 ### CustomHelpers (math)
 + {{math (lvalue) op (rvalue)}}
@@ -911,6 +924,11 @@ Syntaxdocu:
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
 
+### CustomHelpers (if)
+* {{#if data}}
+   * Execute block if (data) has a value (not equal to 'null') or (data) equals 'true' or not equal to 0
+   * otherwise the {{else}} part will be executed
+
 ### CustomHelpers (intervall)
 * {{#intervall sec}}
   * intervall in seconds
@@ -1008,6 +1026,14 @@ DateTime format:
 + {{use data}}
   + Use this data for direct access
   + the {{else}} case will call when data == null is
+
+### CustomHelpers (set)
++ {{set @root key data}}
+   + The data (data) are stored so that they can be recalled at any time via @ root.Data. (Key)
+
+### CustomHelpers (setblock)
++ {{setblock @root key}}
+   + The data of the block are stored so that they can be recalled at any time via @ root.Data. (Key)
 
 ### CustomHelpers (math)
 + {{math (lvalue) op (rvalue)}}
