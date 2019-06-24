@@ -15,6 +15,7 @@ namespace EmpyrionScripting
     {
         public int InGameScriptsIntervallMS { get; set; } = 1000;
         public int SaveGameScriptsIntervallMS { get; set; } = 1000;
+        public bool ScriptTracking { get; set; }
     }
 
     public class EmpyrionScripting : ModInterface, IMod
@@ -140,14 +141,12 @@ namespace EmpyrionScripting
                 var entityScriptData = new ScriptRootData(ModApi.Playfield, entity);
 
                 var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword)).ToArray();
-                //ModApi.Log($"UpdateLCDs ({entity.Id}/{entity.Name}):LCDs: {deviceNames.Aggregate(string.Empty, (N, S) => N + ";" + S)}");
 
                 Parallel.ForEach(deviceNames, N =>
                 {
                     var lcd = entity.Structure.GetDevice<ILcd>(N);
                     if (lcd == null) return;
 
-                    //ModApi.Log($"UpdateLCDs Test ({entity.Id}/{entity.Name}/{entity.Type}):[{i}]{lcdText}");// + entity.Structure.GetDeviceTypeNames().Aggregate("", (s, l) => s + "\n" + l));
                     try
                     {
                         var data = new ScriptRootData(entityScriptData)
@@ -157,6 +156,13 @@ namespace EmpyrionScripting
                         };
 
                         AddTargetsAndDisplayType(data, N.Substring(ScriptKeyword.Length));
+
+                        if (Configuration.Current.ScriptTracking)
+                        {
+                            var trackfile = GetTrackingFileName(entity, data.Script.GetHashCode().ToString());
+                            if(!File.Exists(trackfile)) File.WriteAllText(trackfile, data.Script);
+                        }
+
                         ProcessScript(data);
                     }
                     catch //(Exception lcdError)
@@ -167,8 +173,15 @@ namespace EmpyrionScripting
             }
             catch (Exception error)
             {
-                ModApi.LogError($"ProcessAllScripts ({entity.Id}/{entity.Name}): {error}");
+                File.WriteAllText(GetTrackingFileName(entity, string.Empty) + ".error", error.ToString());
             }
+        }
+
+        private string GetTrackingFileName(IEntity entity, string scriptid)
+        {
+            var trackfile = Path.Combine(SaveGameModPath, "ScriptTracking", entity == null ? "" : entity.Id.ToString(), $"{entity?.Id}-{entity?.Type}-{scriptid}.hbs");
+            Directory.CreateDirectory(Path.GetDirectoryName(trackfile));
+            return trackfile;
         }
 
         private void ProcessAllSaveGameScripts(IEntity entity)
@@ -193,7 +206,7 @@ namespace EmpyrionScripting
             }
             catch (Exception error)
             {
-                ModApi.Log($"SaveGameScript ({entity.Id}/{entity.Name}):{error}");
+                File.WriteAllText(GetTrackingFileName(entity, "SaveGameScript") + ".error", error.ToString());
             }
         }
 
@@ -280,7 +293,7 @@ namespace EmpyrionScripting
             }
             catch (Exception ctrlError)
             {
-                ModApi.LogError(ctrlError.ToString());
+                File.WriteAllText(GetTrackingFileName(data.E.GetCurrent(), data.Script.GetHashCode().ToString()) + ".error", ctrlError.ToString());
                 data.LcdTargets.ForEach(L => data.E.S.GetCurrent().GetDevice<ILcd>(L)?.SetText($"{ctrlError.Message} {DateTime.Now.ToLongTimeString()}"));
             }
         }
