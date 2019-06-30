@@ -1,5 +1,6 @@
 ﻿using Eleon.Modding;
 using EmpyrionNetAPITools;
+using EmpyrionNetAPITools.Extensions;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
@@ -7,27 +8,22 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EmpyrionScripting
 {
-    public class Configuration
-    {
-        public int InGameScriptsIntervallMS { get; set; } = 1000;
-        public int SaveGameScriptsIntervallMS { get; set; } = 1000;
-        public bool ScriptTracking { get; set; }
-    }
 
     public class EmpyrionScripting : ModInterface, IMod
     {
-        public static event EventHandler StopApplicationEvent;
+        public static event EventHandler StopScriptsEvent;
 
         private const string TargetsKeyword  = "Targets:";
         private const string ScriptKeyword   = "Script:";
         ModGameAPI legacyApi;
 
         ConcurrentDictionary<string, Func<object, string>> LcdCompileCache = new ConcurrentDictionary<string, Func<object, string>>();
-
+        
         public static ItemInfos ItemInfos { get; set; }
         public string SaveGameModPath { get; set; }
         public static ConfigurationManager<Configuration> Configuration { get; private set; }
@@ -35,6 +31,11 @@ namespace EmpyrionScripting
         public static IModApi ModApi { get; private set; }
         public SaveGamesScripts SaveGamesScripts { get; private set; }
         public string L { get; private set; }
+        public static bool DeviceLockAllowed => (CycleCounter % Configuration.Current.DeviceLockOnlyAllowedEveryXCycles) == 0;
+
+        public bool StopScripts { get; private set; }
+
+        private static int CycleCounter;
 
         public EmpyrionScripting()
         {
@@ -59,8 +60,14 @@ namespace EmpyrionScripting
                 SaveGamesScripts = new SaveGamesScripts(modAPI) { SaveGameModPath = SaveGameModPath };
                 SaveGamesScripts.ReadSaveGamesScripts();
 
-                ModApi.Application.OnPlayfieldLoaded += Application_OnPlayfieldLoaded;
+                ModApi.Application.OnPlayfieldLoaded   += Application_OnPlayfieldLoaded;
                 ModApi.Application.OnPlayfieldUnloaded += Application_OnPlayfieldUnloaded;
+
+                StopScriptsEvent += (S, E) =>
+                {
+                    ModApi.Log($"StopScriptsEvent: {(StopScripts ? "always stopped" : "scripts running")}");
+                    StopScripts = true;
+                };
             }
             catch (Exception error)
             {
@@ -84,6 +91,7 @@ namespace EmpyrionScripting
 
         public void Shutdown()
         {
+            StopScriptsEvent.Invoke(this, EventArgs.Empty);
         }
 
         private void SetupHandlebarsComponent()
@@ -94,18 +102,31 @@ namespace EmpyrionScripting
 
         private void Application_OnPlayfieldLoaded(string playfieldName)
         {
-            StartScriptIntervall(Configuration.Current.InGameScriptsIntervallMS,   () => UpdateScripts(ProcessAllInGameScripts));
+            StopScripts = false;
+            ModApi.Log($"StartScripts for {playfieldName}");
+
+            StartScriptIntervall(Configuration.Current.InGameScriptsIntervallMS,   () =>
+            {
+                Interlocked.Increment(ref CycleCounter);
+                UpdateScripts(ProcessAllInGameScripts);
+            });
+
             StartScriptIntervall(Configuration.Current.SaveGameScriptsIntervallMS, () => UpdateScripts(ProcessAllSaveGameScripts));
         }
 
         private void StartScriptIntervall(int intervall, Action action)
         {
-            if (intervall > 0) TaskTools.Intervall(intervall, action);
+            if (intervall > 0)
+            {
+                var exec = TaskTools.Intervall(intervall, action);
+                StopScriptsEvent += (S, A) => exec.Set();
+            }
         }
 
         private void Application_OnPlayfieldUnloaded(string playfieldName)
         {
-            StopApplicationEvent.Invoke(this, EventArgs.Empty);
+            ModApi.Log($"StopScripts for {playfieldName}");
+            StopScriptsEvent.Invoke(this, EventArgs.Empty);
         }
 
         // Called once early when the game starts (but not again if player quits from game to title menu and starts (or resumes) a game again
@@ -134,7 +155,7 @@ namespace EmpyrionScripting
 
         private void ProcessAllInGameScripts(IEntity entity)
         {
-            if (entity.Type == EntityType.Proxy) return;
+            if (entity.Type == EntityType.Proxy || StopScripts) return;
 
             try
             {
@@ -144,6 +165,8 @@ namespace EmpyrionScripting
 
                 Parallel.ForEach(deviceNames, N =>
                 {
+                    if (StopScripts) return;
+
                     var lcd = entity.Structure.GetDevice<ILcd>(N);
                     if (lcd == null) return;
 
@@ -165,9 +188,10 @@ namespace EmpyrionScripting
 
                         ProcessScript(data);
                     }
-                    catch //(Exception lcdError)
+                    catch (Exception lcdError)
                     {
-                        //ModApi.Log($"UpdateLCDs ({entity.Id}/{entity.Name}):LCD: {lcdError}");
+                        if(Configuration.Current.LogLevel >= EmpyrionNetAPIDefinitions.LogLevel.Debug)
+                            ModApi.Log($"UpdateLCDs ({entity.Id}/{entity.Name}):LCD: {lcdError}");
                     }
                 });
             }
@@ -186,7 +210,7 @@ namespace EmpyrionScripting
 
         private void ProcessAllSaveGameScripts(IEntity entity)
         {
-            if (entity.Type == EntityType.Proxy) return;
+            if (entity.Type == EntityType.Proxy || StopScripts) return;
 
             try
             {
@@ -216,6 +240,8 @@ namespace EmpyrionScripting
                 .AsParallel()
                 .ForAll(S =>
                 {
+                    if (StopScripts) return;
+
                     var path = S.NormalizePath();
 
                     if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + SaveGamesScripts.ScriptExtension, out var C)) ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
@@ -255,6 +281,8 @@ namespace EmpyrionScripting
         {
             try
             {
+                if (StopScripts) return;
+
                 var result = ExecuteHandlebarScript(data, data.Script).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (result.Length > 0 && result[0].StartsWith(TargetsKeyword))
@@ -275,6 +303,8 @@ namespace EmpyrionScripting
                     .Where(L => L != null)
                     .ForEach(L =>
                     {
+                        if (StopScripts) return;
+
                         if (data.DisplayType == null) L.SetText(string.Join("\n", result));
                         else
                         {
@@ -294,6 +324,8 @@ namespace EmpyrionScripting
             catch (Exception ctrlError)
             {
                 File.WriteAllText(GetTrackingFileName(data.E.GetCurrent(), data.Script.GetHashCode().ToString()) + ".error", ctrlError.ToString());
+
+                if (StopScripts) return;
                 data.LcdTargets.ForEach(L => data.E.S.GetCurrent().GetDevice<ILcd>(L)?.SetText($"{ctrlError.Message} {DateTime.Now.ToLongTimeString()}"));
             }
         }
@@ -311,7 +343,7 @@ namespace EmpyrionScripting
 
         public void Game_Exit()
         {
-            StopApplicationEvent?.Invoke(this, EventArgs.Empty);
+            StopScriptsEvent?.Invoke(this, EventArgs.Empty);
 
             ModApi.Log("Mod exited");
         }

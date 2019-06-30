@@ -2,6 +2,7 @@
 using HandlebarsDotNet;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -145,6 +146,47 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 output.Write("{{concat}} error " + error.Message);
+            }
+        }
+
+        [HandlebarTag("substring")]
+        public static void SubstringHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 2) throw new HandlebarsException("{{substring text startindex [length]}} helper must have at least two arguments: (text) (startindex)");
+
+            var text = arguments[0]?.ToString();
+            int startIndex = 0, 
+                length     = 0;
+            try
+            {
+                int.TryParse(arguments[1]?.ToString(), out startIndex);
+
+                if(arguments.Length == 2) output.Write(text?.Substring(startIndex));
+                else
+                {
+                    int.TryParse(arguments[2]?.ToString(), out length);
+                    output.Write(text?.Substring(startIndex, Math.Min(length, text.Length - startIndex)));
+                }
+            }
+            catch (Exception error)
+            {
+                if (arguments.Length == 2) output.Write("{{substring}} error (startindex=" + startIndex + ") text='" + text + "' " + error.Message);
+                else                       output.Write("{{substring}} error (startindex=" + startIndex + ", length=" + length + ") text='" + text + "' " + error.Message);
+            }
+        }
+
+        [HandlebarTag("chararray")]
+        public static void CharArrayHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{chararray text}} helper must have only one argument: (text)");
+
+            try
+            {
+                options.Template(output, arguments[0]?.ToString().ToCharArray().Select(C => C.ToString()).ToArray());
+            }
+            catch (Exception error)
+            {
+                output.Write("{{chararray}} error " + error.Message);
             }
         }
 

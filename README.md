@@ -500,6 +500,24 @@ DateTime format:
 + {{math (lvalue) op (rvalue)}}
   + op = +, -, *, /, %
 
+### CustomHelpers (calc)
++ {{calc (lvalue) op (rvalue)}}
+  + op = +, -, *, /, %
+  + Kann mit () inline in anderen Kommandos benutzt werden
+
+### CustomHelpers (concat)
++ {{concat a1 a2 a3 ...}}
+  + Fügt die Werte a1 .. aN zusammen
+  + Wenn ein Wert ein Array von Texten (string[]) ist wird der nächste Parameter als Trennzeichen für diese Einträge gewertet
+
+### CustomHelpers (substring)
++ {{substring text startindex [length]}}
+  + Teiltext von dem Text (text) von Index (startindex) mit einer optionalen maximalen Länge von (length) Zeichen
+
+### CustomHelpers (chararray)
++ {{chararray text}}
+  + Text als Array von Zeichen liefern
+
 ### CustomHelpers (block)
 + {{block structure x y z}}
   + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
@@ -1013,9 +1031,17 @@ DateTime format:
    + Deliver a random value between (start) and (end) and submit to the block as {{this}}
 
 ### CustomHelpers (split)
-+ {split string separator [removeemptyentries]}}
++ {{split string separator [removeemptyentries]}}
   + (string) split with the delimiter (separator).
   + \[removeemptyentries\] if empty entries should be removed 'true'
+
+### CustomHelpers (substring)
++ {{substring text startindex [length]}}
+  + Substring from the Text (text) from Index (startindex) with optional maximum (length) characters
+
+### CustomHelpers (chararray)
++ {{chararray text}}
+  + Split the Text into an array of characters
 
 ### CustomHelpers (bar)
 + {{bar data min max length \[char\] \[bgchar\]}}
@@ -1039,9 +1065,18 @@ DateTime format:
 + {{math (lvalue) op (rvalue)}}
   + op = +, -, *, /, %
 
+### CustomHelpers (calc)
++ {{calc (lvalue) op (rvalue)}}
+  + op = +, -, *, /, %
+  + Can be used with () inline in other commands
+
 ### CustomHelpers (block)
 + {{block structure x y z}}
-  + Returns the block/device of the (structure) at the position (x) (y) (z) 
+
+### CustomHelpers (concat)
++ {{concat a1 a2 a3 ...}}
+  + Concatenate the values of a1 .. aN 
+  + If a value is an array of texts (string []), the next parameter is considered the separator for those entries
 
 ### CustomHelpers (islocked)
 + {{islocked structure device|x y z}}

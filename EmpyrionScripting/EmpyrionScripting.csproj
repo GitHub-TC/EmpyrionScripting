@@ -69,6 +69,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration.cs" />
     <Compile Include="CustomHelpers\LcdHelpers.cs" />
     <Compile Include="DataWrapper\BlockData.cs" />
     <Compile Include="CustomHelpers\MathHelpers.cs" />
@@ -102,7 +103,6 @@
     <Compile Include="DataWrapper\StructureData.cs" />
     <Compile Include="DataWrapper\StructureTank.cs" />
     <Compile Include="SaveGamesScripts.cs" />
-    <Compile Include="TaskExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="EmpyrionScripting_Info.yaml">

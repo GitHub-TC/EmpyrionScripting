@@ -10,6 +10,8 @@ namespace EmpyrionScripting
 
         public DeviceLock(IPlayfield playfield, IStructure structure, VectorInt3 position)
         {
+            if (!EmpyrionScripting.DeviceLockAllowed) return;
+
             try
             {
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;
