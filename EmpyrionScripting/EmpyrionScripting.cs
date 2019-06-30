@@ -216,7 +216,8 @@ namespace EmpyrionScripting
             {
                 var entityScriptData = new ScriptSaveGameRootData(ModApi.Playfield, entity)
                 {
-                    MainScriptPath = SaveGamesScripts.MainScriptPath
+                    MainScriptPath = SaveGamesScripts.MainScriptPath,
+                    ModApi         = ModApi
                 };
 
                 ExecFoundSaveGameScripts(entityScriptData, 

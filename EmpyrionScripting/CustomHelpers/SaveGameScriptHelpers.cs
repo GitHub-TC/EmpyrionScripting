@@ -59,5 +59,36 @@ namespace EmpyrionScripting.CustomHelpers
                 output.Write("{{writefile}} error " + error.Message);
             }
         }
+
+        [HandlebarTag("sendmessagetoplayer")]
+        public static void SendMessageToPlayerHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 2) throw new HandlebarsException("{{sendmessagetoplayer @root playerid}} helper must have at least two argument: @root (playerid)");
+
+            if (!(arguments[0] is ScriptSaveGameRootData root)) throw new HandlebarsException("{{sendmessagetoplayer @root playerid}} only allowed in SaveGame scripts");
+
+            try
+            {
+                int.TryParse(arguments[1].ToString(), out var playerId);
+
+                using (var text = new StringWriter())
+                {
+                    options.Template(text, context as object);
+
+                    root.ModApi.Application.SendChatMessage(new Eleon.MessageData()
+                    {
+                        SenderType          = Eleon.SenderType.ServerInfo,
+                        Channel             = Eleon.MsgChannel.Server,
+                        RecipientEntityId   = playerId,
+                        Text                = text.ToString()
+                    });
+                }
+            }
+            catch (Exception error)
+            {
+                output.Write("{{sendmessagetoplayer}} error " + error.Message);
+            }
+        }
+
     }
 }

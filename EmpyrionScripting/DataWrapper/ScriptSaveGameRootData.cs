@@ -18,6 +18,6 @@ namespace EmpyrionScripting.DataWrapper
 
         public string ScriptPath { get; set; }
         public string MainScriptPath { get; set; }
-
+        public IModApi ModApi { get; set; }
     }
 }

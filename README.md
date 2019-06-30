@@ -54,7 +54,7 @@ Eine Debugausgabe erhält man mit einem LCD das den Namen "ScriptDebugInfo" hat.
 
 Eingabe im LCD 1 (alles ohne "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT Optional"
 {{items E.S '"Name der Kiste"'}}
 {{Count}}{{Name}}
@@ -62,7 +62,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD Alle Erze
+Targets:LCD Alle Erze
 Meine Erze
 {{#items E.S 'Alle Erze'}}
 {{Count}}{{i18 Key 'Deutsch'}}
@@ -73,7 +73,7 @@ Meine Erze
 
 Eingabe im LCD (alles ohne "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#test ID in '2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -82,7 +82,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD Alle Erze
+Targets:LCD Alle Erze
 Meine Erze
 {{#each E.S.Items}}
 {{#test Id in '2248,2249,2250,2251,2252,2253,2269,2270,2284,2297,2280,2254'}}
@@ -95,7 +95,7 @@ Meine Erze
 
 Eingabe im LCD (alles ohne "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
@@ -105,7 +105,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD Barren
+Targets:LCD Barren
 Alle meine Barren in der Basis:
 {{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
@@ -117,7 +117,7 @@ Alle meine Barren in der Basis:
 ## Ausgabe dieser per ID festgelegten Produkte (hier sind es alle Barren die es gibt im Spiel)
 Eingabe im LCD (alles ohne "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -125,7 +125,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD Alle Barren im Spiel
+Targets:LCD Alle Barren im Spiel
 Alle Barren im Spiel:
 {{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -135,7 +135,7 @@ Alle Barren im Spiel:
 ## Anzeige eines bestimmten Produktes in der Basis/Schiff/HV/CV
 ```
 Eingabe im LCD (alles ohne "")
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#itemlist E.S.Items '2249'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -143,7 +143,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD EISEN ERZ
+Targets:LCD EISEN ERZ
 Meine EisenErz und Barren
 {{#itemlist E.S.Items '2249;2272'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -176,7 +176,7 @@ Hier werden alle Erze angezeigt wo nur 1-1000 auf der Basis vorhanden ist.
 
 Eingabe im LCD (alles ohne "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"Eingabe im LCD (alles ohne "")
+Targets:"NAME DES ANZUZEIGENDEN LCD"Eingabe im LCD (alles ohne "")
 "TEXT optional"
 {{#each P.Player}}
  "-" {{Name}}
@@ -184,7 +184,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"Eingabe im LCD (alles ohne "")
 ```
 Bsp.
 ```
-LCDInfo:LCD Info W1
+Targets:LCD Info W1
 Player:
 {{#each P.Player}}
  - {{Name}}
@@ -195,7 +195,7 @@ Player:
 
 Eingabe im LCD (alles ohne "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"Eingabe im LCD (alles ohne "")
+Targets:"NAME DES ANZUZEIGENDEN LCD"Eingabe im LCD (alles ohne "")
 "TEXT optional"
 {{datetime}}
 
@@ -205,7 +205,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"Eingabe im LCD (alles ohne "")
 ```
 Bsp.
 ```
-LCDInfo:LCD UHRZEIT
+Targets:LCD UHRZEIT
 Wie spät ist es?
 {{datetime}}
 
@@ -621,7 +621,7 @@ Below is the ID number for ores and ingots.<br/>
 Some functions require a comma "," others require a simcard ";".<br/>
 Everything in "" are texts and not to be specified.<br/>
 Individuals are to be indicated.<br/>
-One can also display an information on 2 LCD's then at LCDInfo: "Name LCD"; "Name LCD2"<br/>
+One can also display an information on 2 LCD's then at Targets: "Name LCD"; "Name LCD2"<br/>
 You can also display the content of various boxes on an LCD!<br/>
 
 ---
@@ -629,7 +629,7 @@ You can also display the content of various boxes on an LCD!<br/>
 
 Eingabe im LCD 1 (alles ohne "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT Optional"
 {{items E.S '"Name der Kiste"'}}
 {{Count}}{{Name}}
@@ -637,7 +637,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD Alle Erze
+Targets:LCD Alle Erze
 Meine Erze
 {{#items E.S 'Alle Erze'}}
 {{Count}}{{i18 Key 'Deutsch'}}
@@ -648,7 +648,7 @@ Meine Erze
 
 Input on the LCD (everything without "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#test ID in '2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -657,7 +657,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD Alle Erze
+Targets:LCD Alle Erze
 Meine Erze
 {{#each E.S.Items}}
 {{#test Id in '2248,2249,2250,2251,2252,2253,2269,2270,2284,2297,2280,2254'}}
@@ -670,7 +670,7 @@ Meine Erze
 
 Input on the LCD (everything without "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
@@ -680,7 +680,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD Barren
+Targets:LCD Barren
 Alle meine Barren in der Basis:
 {{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
@@ -692,7 +692,7 @@ Alle meine Barren in der Basis:
 ## Output of these ID-defined products (here are all ingots in the game)
 Input on the LCD (everything without "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -700,7 +700,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD Alle Barren im Spiel
+Targets:LCD Alle Barren im Spiel
 Alle Barren im Spiel:
 {{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -711,7 +711,7 @@ Alle Barren im Spiel:
 
 Input on the LCD (everything without "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
+Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#itemlist E.S.Items '2249'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -719,7 +719,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"
 ```
 Bsp:
 ```
-LCDInfo:LCD EISEN ERZ
+Targets:LCD EISEN ERZ
 Meine EisenErz und Barren
 {{#itemlist E.S.Items '2249;2272'}}
 {{Count}} {{i18n Key 'Deutsch'}}
@@ -752,7 +752,7 @@ Here all ores are displayed where only 1-1000 exists on the basis.
 
 Input on the LCD (everything without "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"Input on the LCD (everything without "")
+Targets:"NAME DES ANZUZEIGENDEN LCD"Input on the LCD (everything without "")
 "TEXT optional"
 {{#each P.Player}}
  "-" {{Name}}
@@ -760,7 +760,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"Input on the LCD (everything without "")
 ```
 Bsp.
 ```
-LCDInfo:LCD Info W1
+Targets:LCD Info W1
 Player:
 {{#each P.Player}}
  - {{Name}}
@@ -771,7 +771,7 @@ Player:
 
 Input on the LCD (everything without "")
 ```
-LCDInfo:"NAME DES ANZUZEIGENDEN LCD"Input on the LCD (everything without "")
+Targets:"NAME DES ANZUZEIGENDEN LCD"Input on the LCD (everything without "")
 "TEXT optional"
 {{datetime}}
 
@@ -781,7 +781,7 @@ LCDInfo:"NAME DES ANZUZEIGENDEN LCD"Input on the LCD (everything without "")
 ```
 Bsp.
 ```
-LCDInfo:LCD UHRZEIT
+Targets:LCD UHRZEIT
 Wie spät ist es?
 {{datetime}}
 
