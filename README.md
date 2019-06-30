@@ -357,7 +357,7 @@ Syntaxdocu:
 * {{#test Select Op Value}}
   * Op: eq is =
   * Op: leq is <=
-  * Op: le is <>
+  * Op: le is <
   * Op: geq is >=
   * Op: ge is >
   * Op: in 
@@ -934,7 +934,7 @@ Syntaxdocu:
 * {{#test Select Op Value}}
   * Op: eq is =
   * Op: leq is <=
-  * Op: le is <>
+  * Op: le is <
   * Op: geq is >=
   * Op: ge is >
   * Op: in 
