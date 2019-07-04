@@ -12,6 +12,7 @@ namespace EmpyrionScripting
         {
             if (!EmpyrionScripting.DeviceLockAllowed) return;
 
+            var witherror = false;
             try
             {
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;
@@ -19,15 +20,25 @@ namespace EmpyrionScripting
                 var e = new AutoResetEvent(false);
                 playfield.LockStructureDevice(structure.Id, position, true, (s) =>
                 {
-                    Success = s;
-                    e.Set();
+                    if (witherror) playfield.LockStructureDevice(structure.Id, position, false, null);
+                    else
+                    {
+                        Success = s;
+                        e.Set();
+                    }
                 });
-                e.WaitOne(10000);
+                witherror = !e.WaitOne(10000);
 
-                if(Success) unlockAction = () => playfield.LockStructureDevice(structure.Id, position, false, null);
+                if (Success) unlockAction = () =>
+                 {
+                     e.Reset();
+                     playfield.LockStructureDevice(structure.Id, position, false, (s) => e.Set());
+                     e.WaitOne(10000);
+                 };
             }
             catch (Exception error)
             {
+                witherror = true;
                 throw new Exception($"DeviceLock:failed on Playfield:{playfield?.Name} at Id:{structure.Id} on {position} with: {error}");
             }
         }
