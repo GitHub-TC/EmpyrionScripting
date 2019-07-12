@@ -12,6 +12,7 @@ namespace EmpyrionScripting
         public int DeviceLockOnlyAllowedEveryXCycles { get; set; } = 30;
         public int SaveGameScriptsIntervallMS { get; set; } = 1000;
         public bool ScriptTracking { get; set; }
+        public float EntityAccessMinDistance { get; set; } = 500;
     }
 
 }

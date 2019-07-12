@@ -34,6 +34,7 @@ namespace EmpyrionScripting
         public static bool DeviceLockAllowed => (CycleCounter % Configuration.Current.DeviceLockOnlyAllowedEveryXCycles) == 0;
 
         public bool StopScripts { get; private set; }
+        public IEntity[] CurrentEntities { get; private set; }
 
         private static int CycleCounter;
 
@@ -142,13 +143,15 @@ namespace EmpyrionScripting
             if (ModApi.Playfield          == null) return;
             if (ModApi.Playfield.Entities == null) return;
 
-            ModApi.Playfield.Entities
+            CurrentEntities = ModApi.Playfield.Entities
                 .Values
                 .Where(E => E.Type == EntityType.BA ||
                             E.Type == EntityType.CV ||
                             E.Type == EntityType.SV ||
                             E.Type == EntityType.HV)
-                .ToArray()
+                .ToArray();
+
+            CurrentEntities
                 .AsParallel()
                 .ForAll(process);
         }
@@ -159,7 +162,7 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptRootData(ModApi.Playfield, entity);
+                var entityScriptData = new ScriptRootData(CurrentEntities, ModApi.Playfield, entity);
 
                 var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword)).ToArray();
 
@@ -214,7 +217,7 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptSaveGameRootData(ModApi.Playfield, entity)
+                var entityScriptData = new ScriptSaveGameRootData(CurrentEntities, ModApi.Playfield, entity)
                 {
                     MainScriptPath = SaveGamesScripts.MainScriptPath,
                     ModApi         = ModApi
@@ -275,7 +278,7 @@ namespace EmpyrionScripting
                 }
             }
 
-            data.LcdTargets.AddRange(data.E.S.GetUniqueNames(targets).Values.Where(N => !N.StartsWith(ScriptKeyword)));
+            data.LcdTargets.AddRange(data.E.S.AllCustomDeviceNames.GetUniqueNames(targets).Where(N => !N.StartsWith(ScriptKeyword)));
         }
 
         private void ProcessScript<T>(T data) where T : ScriptRootData

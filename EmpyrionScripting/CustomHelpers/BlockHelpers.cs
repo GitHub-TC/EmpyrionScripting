@@ -20,9 +20,9 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var uniqueNames = structure.GetUniqueNames(namesSearch);
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
 
-                var blocks = uniqueNames.Values
+                var blocks = uniqueNames
                     .SelectMany(N => structure.GetCurrent().GetDevicePositions(N)
                         .Select(V => new BlockData(structure.GetCurrent(), V))).ToArray();
                 if (blocks != null && blocks.Length > 0) options.Template(output, blocks);

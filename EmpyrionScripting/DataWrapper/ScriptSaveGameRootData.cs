@@ -12,7 +12,7 @@ namespace EmpyrionScripting.DataWrapper
             ScriptPath     = data.ScriptPath;
             MainScriptPath = data.MainScriptPath;
         }
-        public ScriptSaveGameRootData(IPlayfield playfield, IEntity entity) : base(playfield, entity)
+        public ScriptSaveGameRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity) : base(currentEntities, playfield, entity)
         {
         }
 

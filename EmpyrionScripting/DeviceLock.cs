@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using Eleon.Modding;
 
@@ -17,10 +18,15 @@ namespace EmpyrionScripting
             {
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;
 
+                var lockkey = $"{structure.Id}#{position.x}#{position.y}#{position.z}";
+
                 var e = new AutoResetEvent(false);
                 playfield.LockStructureDevice(structure.Id, position, true, (s) =>
                 {
-                    if (witherror) playfield.LockStructureDevice(structure.Id, position, false, null);
+                    if (witherror)
+                    {
+                        playfield.LockStructureDevice(structure.Id, position, false, null);
+                    }
                     else
                     {
                         Success = s;

@@ -22,9 +22,9 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var uniqueNames = structure.GetUniqueNames(namesSearch);
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
 
-                var devices = uniqueNames.Values.Select(N => structure.GetCurrent().GetDevice<ILight>(N)).ToArray();
+                var devices = uniqueNames.Select(N => structure.GetCurrent().GetDevice<ILight>(N)).ToArray();
                 if (devices.Length > 0) devices.ForEach(L => options.Template(output, L));
                 else                    options.Inverse(output, context as object);
             }

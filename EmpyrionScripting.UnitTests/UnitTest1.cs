@@ -411,7 +411,7 @@ namespace EmpyrionScripting.UnitTests
             };
             lcdMod.SaveGamesScripts.ReadSaveGamesScripts();
 
-            lcdMod.ExecFoundSaveGameScripts(new ScriptSaveGameRootData(null, null), Path.Combine(lcdMod.SaveGamesScripts.MainScriptPath, "CV"));
+            lcdMod.ExecFoundSaveGameScripts(new ScriptSaveGameRootData(null, null, null), Path.Combine(lcdMod.SaveGamesScripts.MainScriptPath, "CV"));
         }
 
         [TestMethod]

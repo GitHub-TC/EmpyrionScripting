@@ -20,12 +20,12 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var uniqueNames = structure.GetUniqueNames(namesSearch);
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
 
                 var allItems = new ConcurrentDictionary<int, ItemsData>();
                 structure.Items
                     .AsParallel()
-                    .SelectMany(I => I.Source.Where(S => S.CustomName != null && uniqueNames.ContainsKey(S.CustomName)))
+                    .SelectMany(I => I.Source.Where(S => S.CustomName != null && uniqueNames.Contains(S.CustomName)))
                     .ForAll(I =>
                     {
                         ItemInfo details = null;
@@ -59,7 +59,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             var items = arguments[0] as ItemsData[];
             var ids   = (arguments[1] as string)
-                            .Split(';')
+                            .Split(';', ',')
                             .Select(N => int.TryParse(N, out int i) ? i : 0)
                             .Where(i => i != 0)
                             .ToArray();
