@@ -138,6 +138,8 @@ namespace EmpyrionScripting
             legacyApi?.Console_Write("EmpyrionScripting Mod started: Game_Start");
         }
 
+        public static string ErrorFilter(Exception error) => Configuration.Current.LogLevel == EmpyrionNetAPIDefinitions.LogLevel.Debug ? error.ToString() : error.Message;
+
         private void UpdateScripts(Action<IEntity> process)
         {
             if (ModApi.Playfield          == null) return;

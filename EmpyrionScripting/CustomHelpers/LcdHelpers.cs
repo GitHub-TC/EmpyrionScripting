@@ -26,7 +26,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{settext}} error " + error.Message);
+                output.Write("{{settext}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -48,7 +48,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{settextblock}} error " + error.Message);
+                output.Write("{{settextblock}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -67,7 +67,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{settext}} error " + error.Message);
+                output.Write("{{settext}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -86,7 +86,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setfontsize}} error " + error.Message);
+                output.Write("{{setfontsize}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -105,7 +105,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setcolor}} error " + error.Message);
+                output.Write("{{setcolor}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -124,7 +124,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setbgcolor}} error " + error.Message);
+                output.Write("{{setbgcolor}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

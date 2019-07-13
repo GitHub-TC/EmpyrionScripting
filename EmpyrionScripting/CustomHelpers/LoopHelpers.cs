@@ -27,7 +27,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{steps}} error " + error.Message);
+                output.Write("{{steps}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

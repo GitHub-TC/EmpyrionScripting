@@ -54,7 +54,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{islocked}} error " + error.Message);
+                output.Write("{{islocked}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -74,7 +74,8 @@ namespace EmpyrionScripting.CustomHelpers
                 var moveInfos = new List<ItemMoveInfo>();
 
                 var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
-                item.Source
+
+                if(uniqueNames.Any()) item.Source
                     .ForEach(S => {
                         lock (movelock) { 
                             using(var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.S.GetCurrent(), S.Position)) {
@@ -108,13 +109,13 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{move}} error " + error.Message);
+                output.Write("{{move}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
         private static int MoveItem(ItemsSource S, string N, StructureData targetStructure, int count, int? maxLimit)
         {
-            var target = targetStructure.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
+            var target = targetStructure?.GetCurrent()?.GetDevice<Eleon.Modding.IContainer>(N);
             if (target == null) return count;
 
             if(!targetStructure.ContainerSource.TryGetValue(N, out var targetData)) return count;

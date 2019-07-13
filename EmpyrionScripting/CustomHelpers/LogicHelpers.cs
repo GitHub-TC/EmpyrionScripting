@@ -33,7 +33,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                throw new HandlebarsException($"{{if}} {error.Message}");
+                throw new HandlebarsException($"{{if}} {EmpyrionScripting.ErrorFilter(error)}");
             }
         }
 
@@ -66,13 +66,13 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                throw new HandlebarsException($"{{test}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a}")}]:{error.Message}");
+                throw new HandlebarsException($"{{test}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a}")}]:{EmpyrionScripting.ErrorFilter(error)}");
             }
         }
 
         private static bool In(object left, object right)
         {
-            var list = right.ToString().Split(',').Select(T => T.Trim());
+            var list = right.ToString().Split(new []{ ',', ';', '#', '+' }).Select(T => T.Trim());
             var Converter = TypeDescriptor.GetConverter(left.GetType());
 
             return list.Any(I =>

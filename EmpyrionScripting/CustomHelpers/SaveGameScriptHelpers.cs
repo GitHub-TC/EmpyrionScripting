@@ -26,7 +26,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{readfile}} error " + error.Message);
+                output.Write("{{readfile}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -56,7 +56,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{writefile}} error " + error.Message);
+                output.Write("{{writefile}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -86,7 +86,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{sendmessagetoplayer}} error " + error.Message);
+                output.Write("{{sendmessagetoplayer}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

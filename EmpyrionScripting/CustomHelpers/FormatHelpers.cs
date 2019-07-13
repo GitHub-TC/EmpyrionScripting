@@ -40,7 +40,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{i18n}} error " + error.Message);
+                output.Write("{{i18n}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -55,7 +55,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{format}} error " + error.Message);
+                output.Write("{{format}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -78,7 +78,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{bar}} error " + error.Message);
+                output.Write("{{bar}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

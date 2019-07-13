@@ -32,7 +32,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{entitybyname}} error " + error.Message);
+                output.Write("{{entitybyname}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -57,7 +57,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{entitiesbyname}} error " + error.Message);
+                output.Write("{{entitiesbyname}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -82,7 +82,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{entitiesbyid}} error " + error.Message);
+                output.Write("{{entitiesbyid}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -107,7 +107,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{entitybyid}} error " + error.Message);
+                output.Write("{{entitybyid}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

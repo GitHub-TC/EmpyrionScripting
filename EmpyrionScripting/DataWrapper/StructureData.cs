@@ -38,7 +38,14 @@ namespace EmpyrionScripting.DataWrapper
 
         public string[] GetDeviceTypeNames => GetCurrent().GetDeviceTypeNames();
 
-        public ConcurrentDictionary<string, ContainerSource> ContainerSource { get; private set; }
+        public ConcurrentDictionary<string, ContainerSource> ContainerSource {
+            get {
+                if (_ContainerSource == null) Items = CollectAllItems(GetCurrent());
+                return _ContainerSource;
+            }
+            set => _ContainerSource = value;
+        }
+        private ConcurrentDictionary<string, ContainerSource> _ContainerSource;
 
         private ItemsData[] CollectAllItems(IStructure structure)
         {

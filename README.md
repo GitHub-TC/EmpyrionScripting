@@ -360,7 +360,7 @@ Syntaxdocu:
   * Op: le is <
   * Op: geq is >=
   * Op: ge is >
-  * Op: in 
+  * Op: in  (Trennzeichen sind: ,;#+ )
     * Value: '1,2,3,42'
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
@@ -541,6 +541,22 @@ DateTime format:
 ### CustomHelpers (setbgcolor)
 + {{setbrcolor lcddevice (rgb hex)}}
   + Setzt die Hintergrundfarbe des LCD (lcddevice) auf (rgb hex)
+
+### CustomHelpers (entitybyname)
++ {{entitybyname @root name}}
+  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Name (name)
+
+### CustomHelpers (entitiesbyname)
++ {{entitiesbyname @root names}}
+  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Namen in (name;name*;*)
+
+### CustomHelpers (entitybyid)
++ {{entitybyid @root id}}
+  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Id (id)
+
+### CustomHelpers (entitiesbyid)
++ {{entitiesbyid @root ids}}
+  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit IDs in (id1;id2;id3)
 
 ## SaveGame Scripte
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
@@ -937,7 +953,7 @@ Syntaxdocu:
   * Op: le is <
   * Op: geq is >=
   * Op: ge is >
-  * Op: in 
+  * Op: in (Delimitters are: ,;#+ )
     * Value: '1,2,3,42'
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
@@ -1109,6 +1125,23 @@ DateTime format:
 ### CustomHelpers (setbgcolor)
 + {{setbrcolor lcddevice (rgb hex)}}
   + Set the bgcolor of the LCD (lcddevice) with (rgb hex)
+
+### CustomHelpers (entitybyname)
++ {{entitybyname @root name}}
+  + Get nearby Entity (with same faction) with (name)
+
+### CustomHelpers (entitiesbyname)
++ {{entitiesbyname @root names}}
+  + Get nearby Entity (with same faction) with Names in (name;name*;*)
+
+### CustomHelpers (entitybyid)
++ {{entitybyid @root id}}
+  + Get nearby Entity (with same faction) with (id)
+
+### CustomHelpers (entitiesbyid)
++ {{entitiesbyid @root ids}}
+  + Get nearby Entity (with same faction) with IDs in (id1;id2;id3)
+
 
 ## SaveGame scripts
 This special form of scripts can be stored in the SaveGame. The basic path for this is the

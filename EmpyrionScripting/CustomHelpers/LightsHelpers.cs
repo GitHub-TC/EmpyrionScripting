@@ -30,7 +30,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lights}} error " + error.Message);
+                output.Write("{{lights}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -48,7 +48,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightcolor}} error " + error.Message);
+                output.Write("{{lightcolor}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -65,7 +65,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightblink}} error " + error.Message);
+                output.Write("{{lightblink}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -82,7 +82,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightintensity}} error " + error.Message);
+                output.Write("{{lightintensity}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -99,7 +99,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightrange}} error " + error.Message);
+                output.Write("{{lightrange}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -116,7 +116,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightspotangle}} error " + error.Message);
+                output.Write("{{lightspotangle}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -134,7 +134,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lighttype}} error " + error.Message);
+                output.Write("{{lighttype}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

@@ -28,7 +28,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{datetime}} error " + error.Message);
+                output.Write("{{datetime}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -49,7 +49,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{random}} error " + error.Message);
+                output.Write("{{random}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -65,7 +65,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{use}} error " + error.Message);
+                output.Write("{{use}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -81,7 +81,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{set}} error " + error.Message);
+                output.Write("{{set}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -101,7 +101,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setblock}} error " + error.Message);
+                output.Write("{{setblock}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -122,7 +122,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{split}} error " + error.Message);
+                output.Write("{{split}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -145,7 +145,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{concat}} error " + error.Message);
+                output.Write("{{concat}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -170,8 +170,8 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                if (arguments.Length == 2) output.Write("{{substring}} error (startindex=" + startIndex + ") text='" + text + "' " + error.Message);
-                else                       output.Write("{{substring}} error (startindex=" + startIndex + ", length=" + length + ") text='" + text + "' " + error.Message);
+                if (arguments.Length == 2) output.Write("{{substring}} error (startindex=" + startIndex + ") text='" + text + "' " + EmpyrionScripting.ErrorFilter(error));
+                else                       output.Write("{{substring}} error (startindex=" + startIndex + ", length=" + length + ") text='" + text + "' " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -186,7 +186,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{chararray}} error " + error.Message);
+                output.Write("{{chararray}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
