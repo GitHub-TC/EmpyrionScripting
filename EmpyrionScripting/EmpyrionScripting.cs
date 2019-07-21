@@ -7,6 +7,7 @@ using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -136,7 +137,7 @@ namespace EmpyrionScripting
                 if (PauseScripts) return;
 
                 Interlocked.Increment(ref CycleCounter);
-                UpdateScripts(ProcessAllInGameScripts);
+                UpdateScripts(ProcessAllInGameScripts, "InGameScript");
             }, "InGameScript");
 
             StartScriptIntervall(Configuration.Current.SaveGameScriptsIntervallMS, () =>
@@ -145,7 +146,7 @@ namespace EmpyrionScripting
                 LastAlive = DateTime.Now;
                 if (PauseScripts) return;
 
-                UpdateScripts(ProcessAllSaveGameScripts);
+                UpdateScripts(ProcessAllSaveGameScripts, "SaveGameScript");
             }, "SaveGameScript");
         }
 
@@ -167,12 +168,15 @@ namespace EmpyrionScripting
 
         public static string ErrorFilter(Exception error) => Configuration.Current.LogLevel == EmpyrionNetAPIDefinitions.LogLevel.Debug ? error.ToString() : error.Message;
 
-        private void UpdateScripts(Action<IEntity> process)
+        private void UpdateScripts(Action<IEntity> process, string name)
         {
             try
             {
                 if (ModApi.Playfield          == null) { ModApi.Log($"UpdateScripts no Playfield"); return; }
                 if (ModApi.Playfield.Entities == null) { ModApi.Log($"UpdateScripts no Entities");  return; }
+
+                var timer = new Stopwatch();
+                timer.Start();
 
                 CurrentEntities = ModApi.Playfield.Entities
                     .Values
@@ -188,6 +192,11 @@ namespace EmpyrionScripting
                 //CurrentEntities
                 //    .AsParallel()
                 //    .ForAll(process);
+
+                timer.Stop();
+                if(timer.Elapsed.TotalSeconds > 30) Log($"UpdateScripts: {name} RUNS {timer.Elapsed} !!!!", LogLevel.Message);
+                else                                Log($"UpdateScripts: {name} take {timer.Elapsed}",      LogLevel.Debug);
+
             }
             catch (Exception error)
             {
