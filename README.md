@@ -505,6 +505,10 @@ DateTime format:
   + op = +, -, *, /, %
   + Kann mit () inline in anderen Kommandos benutzt werden
 
+### CustomHelpers (distance)
++ {{distance (lVector) (rVector)}}
+  + Abstand zwischen (lVector) und (rVector)
+
 ### CustomHelpers (concat)
 + {{concat a1 a2 a3 ...}}
   + Fügt die Werte a1 .. aN zusammen
@@ -581,6 +585,9 @@ Hinweis: EntityType ist BA,CV,SV or HV
 + {{writefile @root dir filename}} 
   + (dir)\\(filename) Inhalt des Blockes wird in die Datei geschrieben
 
+### CustomHelpers-SaveGameScripts (fileexists)
++ {{fileexists @root dir filename}}
+  + Wenn die Datei existiert dann das Innere ausführen ansonsten den exec Teil auswerten
 
 ### Whats next?
 
@@ -1086,6 +1093,10 @@ DateTime format:
   + op = +, -, *, /, %
   + Can be used with () inline in other commands
 
+### CustomHelpers (distance)
++ {{distance (lVector) (rVector)}}
+  + Distance between (lVector) and (rVector)
+
 ### CustomHelpers (block)
 + {{block structure x y z}}
 
@@ -1165,6 +1176,10 @@ Note: EntityType is BA,CV,SV or HV
 ### CustomHelpers-SaveGameScripts (writefile)
 + {{writefile @root dir filename}}
    + (dir)\\(filename) Content of the block is written to the file
+
+### CustomHelpers-SaveGameScripts (fileexists)
++ {{fileexists @root dir filename}}
+  + If exists then templane oterwirse exec else part
 
 ### Whats next?
 

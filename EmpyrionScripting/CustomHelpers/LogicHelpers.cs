@@ -72,6 +72,8 @@ namespace EmpyrionScripting.CustomHelpers
 
         private static bool In(object left, object right)
         {
+            if (left == null || right == null) return false;
+
             var list = right.ToString().Split(new []{ ',', ';', '#', '+' }).Select(T => T.Trim());
             var Converter = TypeDescriptor.GetConverter(left.GetType());
 
@@ -87,6 +89,10 @@ namespace EmpyrionScripting.CustomHelpers
 
         private static int Compare(object left, object right)
         {
+            if (left == null && right == null) return  0;
+            if (left != null && right == null) return -1;
+            if (left == null && right != null) return  1;
+
             var r = TypeDescriptor.GetConverter(left.GetType()).ConvertFromString(right.ToString());
             return ((IComparable)left).CompareTo((IComparable)r);
         }

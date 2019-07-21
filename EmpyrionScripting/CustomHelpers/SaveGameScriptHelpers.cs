@@ -8,6 +8,24 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public class SaveGameScriptHelpers
     {
+        [HandlebarTag("fileexists")]
+        public static void FileExistsHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 3) throw new HandlebarsException("{{fileexists @root dir filename}} helper must have two argument: @root (dir) (filename)");
+
+            if (!(arguments[0] is ScriptSaveGameRootData root)) throw new HandlebarsException("{{readfile @root dir filename}} only allowed in SaveGame scripts");
+
+            try
+            {
+                if (File.Exists(Path.Combine(arguments[1].ToString(), arguments[2].ToString()))) options.Template(output, context as object);
+                else                                                                             options.Inverse (output, context as object);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{fileexists}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("readfile")]
         public static void ReadFileHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {

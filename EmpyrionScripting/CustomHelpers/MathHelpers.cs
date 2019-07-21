@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -61,6 +62,21 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 throw new HandlebarsException($"{{calc}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a}")}]:{EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
+        [HandlebarTag("distance")]
+        public static void DistanceHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{distance}} helper must have exactly two argument: (lVector) (rVector)");
+
+            try
+            {
+                output.Write(Vector3.Distance((Vector3)arguments[0], (Vector3)arguments[1])); 
+            }
+            catch (Exception error)
+            {
+                throw new HandlebarsException($"{{distance}} error: {EmpyrionScripting.ErrorFilter(error)}");
             }
         }
 

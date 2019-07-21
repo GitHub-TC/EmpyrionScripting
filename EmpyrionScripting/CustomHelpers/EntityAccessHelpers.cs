@@ -17,15 +17,16 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2) throw new HandlebarsException("{{entitybyname @root name}} helper must have exactly two argument: @root (name)");
             if (EmpyrionScripting.Configuration.Current.EntityAccessMinDistance == 0) return;
 
-            var root        = arguments[0] as ScriptRootData;
-            var namesSearch = arguments[1]?.ToString();
+            var isSaveGameScript    = arguments[0] is ScriptSaveGameRootData;
+            var root                = arguments[0] as ScriptRootData;
+            var namesSearch         = arguments[1]?.ToString();
 
             try
             {
                 var found = root.GetCurrentEntites()
-                    .Where(E => E.Faction.Id == root.E.GetCurrent().Faction.Id)
+                    .Where(E => isSaveGameScript || E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => E.Name == namesSearch)
-                    .FirstOrDefault(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
+                    .FirstOrDefault(E => isSaveGameScript || Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null) options.Inverse(output, context as object);
                 else               options.Template(output, new EntityData(found));
@@ -42,15 +43,16 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2) throw new HandlebarsException("{{entitiesbyname @root name}} helper must have exactly two argument: @root (name;name*;*)");
             if (EmpyrionScripting.Configuration.Current.EntityAccessMinDistance == 0) return;
 
-            var root        = arguments[0] as ScriptRootData;
-            var namesSearch = arguments[1]?.ToString();
+            var isSaveGameScript    = arguments[0] is ScriptSaveGameRootData;
+            var root                = arguments[0] as ScriptRootData;
+            var namesSearch         = arguments[1]?.ToString();
 
             try
             {
                 var found = root.GetCurrentEntites()
-                    .Where(E => E.Faction.Id == root.E.GetCurrent().Faction.Id)
+                    .Where(E => isSaveGameScript || E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => new[] { E.Name }.GetUniqueNames(namesSearch).Any())
-                    .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
+                    .Where(E => isSaveGameScript || Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
                 else                               options.Template(output, found.Select(E => new EntityData(E)).ToArray());

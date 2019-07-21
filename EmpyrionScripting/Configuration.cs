@@ -13,6 +13,7 @@ namespace EmpyrionScripting
         public int SaveGameScriptsIntervallMS { get; set; } = 1000;
         public bool ScriptTracking { get; set; }
         public float EntityAccessMinDistance { get; set; } = 500;
+        public int DelayStartForNSecondsOnPlayfieldLoad { get; set; } = 30;
     }
 
 }

@@ -54,10 +54,15 @@ namespace EmpyrionScripting.CustomHelpers
 
         public static IEnumerable<string> GetUniqueNames(this IEnumerable<string> sourceNames, string namesSearch)
         {
+            return sourceNames.GetUniqueNames(namesSearch, new[] { ';', ',' });
+        }
+
+        public static IEnumerable<string> GetUniqueNames(this IEnumerable<string> sourceNames, string namesSearch, char[] delimitter)
+        {
             var names = new List<string>();
 
             namesSearch
-                .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Split(delimitter, StringSplitOptions.RemoveEmptyEntries)
                 .Select(N => N.Trim())
                 .ForEach(N =>
                 {
