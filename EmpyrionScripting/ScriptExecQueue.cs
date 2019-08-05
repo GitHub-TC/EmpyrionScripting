@@ -29,7 +29,7 @@ namespace EmpyrionScripting
         public void Add(ScriptRootData data)
         {
             if (WaitForExec.TryAdd(data.ScriptId, data)) ExecQueue.Enqueue(data);
-            else                                    lock(ExecQueue) WaitForExec.AddOrUpdate(data.ScriptId, data, (i, d) => data);
+            else lock (ExecQueue) WaitForExec.AddOrUpdate(data.ScriptId, data, (i, d) => { data.E.DeviceLockAllowed = data.E.DeviceLockAllowed || data.E.DeviceLockAllowed; return data; });
         }
 
         static public Action<string, LogLevel> Log { get; set; }
