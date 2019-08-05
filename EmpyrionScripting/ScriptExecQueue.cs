@@ -18,8 +18,8 @@ namespace EmpyrionScripting
 
         private Action<ScriptRootData> processScript;
 
-        ConcurrentDictionary<string, ScriptRootData> WaitForExec { get; } = new ConcurrentDictionary<string, ScriptRootData>();
-        ConcurrentQueue<ScriptRootData>              ExecQueue { get; } = new ConcurrentQueue<ScriptRootData>();
+        public ConcurrentDictionary<string, ScriptRootData> WaitForExec { get; } = new ConcurrentDictionary<string, ScriptRootData>();
+        public ConcurrentQueue<ScriptRootData>              ExecQueue { get; private set; } = new ConcurrentQueue<ScriptRootData>();
 
         public ScriptExecQueue(Action<ScriptRootData> processScript)
         {
@@ -68,6 +68,13 @@ namespace EmpyrionScripting
             {
                 Log($"EmpyrionScripting Mod: ExecNext {data.ScriptId} => {error}", LogLevel.Debug);
             }
+        }
+
+        public void Clear()
+        {
+            ScriptRunInfo.Clear();
+            WaitForExec.Clear();
+            ExecQueue = new ConcurrentQueue<ScriptRootData>();
         }
     }
 }

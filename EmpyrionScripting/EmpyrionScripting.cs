@@ -128,6 +128,9 @@ namespace EmpyrionScripting
         {
             ModApi.Log($"PauseScripts for {playfieldName} {(PauseScripts ? "always stopped" : "scripts running")}");
             PauseScripts = true;
+
+            DisplayScriptInfos();
+            ScriptExecQueue.Clear();
         }
 
         public void StartAllScriptsForPlayfieldServer()
@@ -155,16 +158,21 @@ namespace EmpyrionScripting
 
             StartScriptIntervall(60000, () =>
             {
-                Log($"ScriptInfos: {ScriptExecQueue.ScriptRunInfo.Count}", LogLevel.Debug);
+                Log($"ScriptInfos: {ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{ScriptExecQueue.ExecQueue.Count} WaitForExec:{ScriptExecQueue.WaitForExec.Count}", LogLevel.Debug);
                 LastAlive = DateTime.Now;
                 if (PauseScripts || Configuration.Current.LogLevel > LogLevel.Message) return;
 
-                if(Configuration.Current.LogLevel != LogLevel.Debug) Log($"ScriptInfos: {ScriptExecQueue.ScriptRunInfo.Count}", LogLevel.Message);
-                ScriptExecQueue.ScriptRunInfo
-                    .OrderBy(I => I.Key)
-                    .ForEach(I => Log($"Script: {I.Key,-50} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime}", LogLevel.Message));
+                DisplayScriptInfos();
             }, "ScriptInfos");
 
+        }
+
+        private void DisplayScriptInfos()
+        {
+            if (Configuration.Current.LogLevel != LogLevel.Debug) Log($"ScriptInfos: {ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{ScriptExecQueue.ExecQueue.Count} WaitForExec:{ScriptExecQueue.WaitForExec.Count}", LogLevel.Message);
+            ScriptExecQueue.ScriptRunInfo
+                .OrderBy(I => I.Key)
+                .ForEach(I => Log($"Script: {I.Key,-50} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime}", LogLevel.Message));
         }
 
         private void StartScriptIntervall(int intervall, Action action, string name)
