@@ -63,8 +63,7 @@ namespace EmpyrionScripting.DataWrapper
                         ContainerSource.TryAdd(block.CustomName, new ContainerSource() { E = E, Container = container, CustomName = block.CustomName, Position = P });
 
                         container.GetContent()
-                            .AsParallel()
-                            .ForAll(I => {
+                            .ForEach(I => {
                                 EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(I.id, out ItemInfo details);
                                 var source = new ItemsSource() { E = E, Id = I.id, Count = I.count, Container = container, CustomName = block.CustomName, Position = P };
                                 allItems.AddOrUpdate(I.id,

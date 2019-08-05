@@ -104,6 +104,7 @@
     <Compile Include="DataWrapper\StructureData.cs" />
     <Compile Include="DataWrapper\StructureTank.cs" />
     <Compile Include="SaveGamesScripts.cs" />
+    <Compile Include="ScriptExecQueue.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="EmpyrionScripting_Info.yaml">

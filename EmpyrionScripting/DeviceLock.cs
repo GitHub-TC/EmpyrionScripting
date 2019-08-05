@@ -11,8 +11,6 @@ namespace EmpyrionScripting
 
         public DeviceLock(IPlayfield playfield, IStructure structure, VectorInt3 position)
         {
-            if (!EmpyrionScripting.DeviceLockAllowed) return;
-
             var witherror = false;
             try
             {

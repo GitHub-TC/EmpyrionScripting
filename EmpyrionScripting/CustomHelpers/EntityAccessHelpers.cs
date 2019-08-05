@@ -24,12 +24,13 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var found = root.GetCurrentEntites()
+                    .Where(E => E.Type != EntityType.Proxy)
                     .Where(E => isSaveGameScript || E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => E.Name == namesSearch)
                     .FirstOrDefault(E => isSaveGameScript || Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null) options.Inverse(output, context as object);
-                else               options.Template(output, new EntityData(found));
+                else               options.Template(output, new EntityData(found) { DeviceLockAllowed = root.E.DeviceLockAllowed });
             }
             catch (Exception error)
             {
@@ -50,12 +51,13 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var found = root.GetCurrentEntites()
+                    .Where(E => E.Type != EntityType.Proxy)
                     .Where(E => isSaveGameScript || E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => new[] { E.Name }.GetUniqueNames(namesSearch).Any())
                     .Where(E => isSaveGameScript || Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
-                else                               options.Template(output, found.Select(E => new EntityData(E)).ToArray());
+                else                               options.Template(output, found.Select(E => new EntityData(E) { DeviceLockAllowed = root.E.DeviceLockAllowed }).ToArray());
             }
             catch (Exception error)
             {
@@ -75,12 +77,13 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var found = root.GetCurrentEntites()
+                    .Where(E => E.Type != EntityType.Proxy)
                     .Where(E => E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => new[] { E.Id.ToString() }.GetUniqueNames(idsSearch).Any())
                     .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
-                else                               options.Template(output, found.Select(E => new EntityData(E)).ToArray());
+                else                               options.Template(output, found.Select(E => new EntityData(E) { DeviceLockAllowed = root.E.DeviceLockAllowed }).ToArray());
             }
             catch (Exception error)
             {
@@ -100,12 +103,13 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var found = root.GetCurrentEntites()
+                    .Where(E => E.Type != EntityType.Proxy)
                     .Where(E => E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => E.Id == id)
                     .FirstOrDefault(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null) options.Inverse(output, context as object);
-                else               options.Template(output, new EntityData(found));
+                else               options.Template(output, new EntityData(found) { DeviceLockAllowed = root.E.DeviceLockAllowed });
             }
             catch (Exception error)
             {

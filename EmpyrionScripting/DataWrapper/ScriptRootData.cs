@@ -7,6 +7,8 @@ namespace EmpyrionScripting.DataWrapper
 {
     public class ScriptRootData
     {
+        public bool DeviceLockAllowed { get; }
+
         private IEntity[] currentEntites;
         private IPlayfield playfield;
         private IEntity entity;
@@ -15,14 +17,15 @@ namespace EmpyrionScripting.DataWrapper
         {
         }
 
-        public ScriptRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity)
+        public ScriptRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed)
         {
+            DeviceLockAllowed = deviceLockAllowed;
             this.currentEntites = currentEntities;
             this.playfield = playfield;
             this.entity = entity;
         }
 
-        public ScriptRootData(ScriptRootData data) : this(data.currentEntites, data.playfield, data.entity)
+        public ScriptRootData(ScriptRootData data) : this(data.currentEntites, data.playfield, data.entity, data.DeviceLockAllowed)
         {
             _p = data._p;
             _e = data._e;
@@ -37,7 +40,7 @@ namespace EmpyrionScripting.DataWrapper
         public PlayfieldData P { get => _p == null ? _p = new PlayfieldData(playfield) : _p; set => _p = value; }
         private PlayfieldData _p;
 
-        public EntityData E { get => _e == null ? _e = new EntityData(entity) : _e; set => _e = value; }
+        public EntityData E { get => _e == null ? _e = new EntityData(entity) { DeviceLockAllowed = DeviceLockAllowed } : _e; set => _e = value; }
         private EntityData _e;
 
         public List<string> LcdTargets { get; set; } = new List<string>();
@@ -51,5 +54,6 @@ namespace EmpyrionScripting.DataWrapper
         public string Script { get; set; }
         public DisplayOutputConfiguration DisplayType { get; set; }
         public string Error { get; set; }
+        public string ScriptId { get; set; }
     }
 }

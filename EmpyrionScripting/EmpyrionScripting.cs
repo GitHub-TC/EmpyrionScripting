@@ -26,6 +26,8 @@ namespace EmpyrionScripting
 
         ConcurrentDictionary<string, Func<object, string>> LcdCompileCache = new ConcurrentDictionary<string, Func<object, string>>();
 
+        public ScriptExecQueue ScriptExecQueue { get; set; }
+
         public static EmpyrionScripting EmpyrionScriptingInstance { get; set; }
         public static ItemInfos ItemInfos { get; set; }
         public string SaveGameModPath { get; set; }
@@ -34,7 +36,7 @@ namespace EmpyrionScripting
         public static IModApi ModApi { get; private set; }
         public SaveGamesScripts SaveGamesScripts { get; private set; }
         public string L { get; private set; }
-        public static bool DeviceLockAllowed => (CycleCounter % Configuration.Current.DeviceLockOnlyAllowedEveryXCycles) == 0;
+        public bool DeviceLockAllowed => (CycleCounter % Configuration.Current.DeviceLockOnlyAllowedEveryXCycles) == 0;
 
         public bool PauseScripts { get; private set; } = true;
         public IEntity[] CurrentEntities { get; private set; }
@@ -46,6 +48,8 @@ namespace EmpyrionScripting
         {
             EmpyrionScriptingInstance     = this;
             EmpyrionConfiguration.ModName = "EmpyrionScripting";
+            ScriptExecQueue.Log           = Log;
+            ScriptExecQueue               = new ScriptExecQueue(ProcessScript);
             SetupHandlebarsComponent();
         }
 
@@ -148,6 +152,19 @@ namespace EmpyrionScripting
 
                 UpdateScripts(ProcessAllSaveGameScripts, "SaveGameScript");
             }, "SaveGameScript");
+
+            StartScriptIntervall(60000, () =>
+            {
+                Log($"ScriptInfos: {ScriptExecQueue.ScriptRunInfo.Count}", LogLevel.Debug);
+                LastAlive = DateTime.Now;
+                if (PauseScripts || Configuration.Current.LogLevel > LogLevel.Message) return;
+
+                if(Configuration.Current.LogLevel != LogLevel.Debug) Log($"ScriptInfos: {ScriptExecQueue.ScriptRunInfo.Count}", LogLevel.Message);
+                ScriptExecQueue.ScriptRunInfo
+                    .OrderBy(I => I.Key)
+                    .ForEach(I => Log($"Script: {I.Key,-50} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime}", LogLevel.Message));
+            }, "ScriptInfos");
+
         }
 
         private void StartScriptIntervall(int intervall, Action action, string name)
@@ -189,9 +206,6 @@ namespace EmpyrionScripting
                 Log($"CurrentEntities: {CurrentEntities.Length}", LogLevel.Debug);
 
                 CurrentEntities.ForEach(process);
-                //CurrentEntities
-                //    .AsParallel()
-                //    .ForAll(process);
 
                 timer.Stop();
                 if(timer.Elapsed.TotalSeconds > 30) Log($"UpdateScripts: {name} RUNS {timer.Elapsed} !!!!", LogLevel.Message);
@@ -216,7 +230,7 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptRootData(CurrentEntities, ModApi.Playfield, entity);
+                var entityScriptData = new ScriptRootData(CurrentEntities, ModApi.Playfield, entity, DeviceLockAllowed);
 
                 var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword)).ToArray();
                 Log($"ProcessAllInGameScripts: #{deviceNames.Length}", LogLevel.Debug);
@@ -246,7 +260,8 @@ namespace EmpyrionScripting
                             if(!File.Exists(trackfile)) File.WriteAllText(trackfile, data.Script);
                         }
 
-                        ProcessScript(data);
+                        data.ScriptId = entity.Id + "/" + N;
+                        ScriptExecQueue.Add(data);
                     }
                     catch (Exception lcdError)
                     {
@@ -298,8 +313,7 @@ namespace EmpyrionScripting
         public void ExecFoundSaveGameScripts(ScriptSaveGameRootData entityScriptData, params string[] scriptLocations)
         {
             scriptLocations
-                .AsParallel()
-                .ForAll(S =>
+                .ForEach(S =>
                 {
                     if (PauseScripts) return;
 
@@ -311,7 +325,6 @@ namespace EmpyrionScripting
                     });
                     else SaveGamesScripts.SaveGameScripts
                         .Where(F => Path.GetDirectoryName(F.Key) == path)
-                        .AsParallel()
                         .ForEach(F => ProcessScript(new ScriptSaveGameRootData(entityScriptData) {
                             Script     = F.Value,
                             ScriptPath = Path.GetDirectoryName(F.Key)
@@ -412,6 +425,8 @@ namespace EmpyrionScripting
         {
             //Log("EmpyrionScripting Mod: Game_Update", LogLevel.Debug);
             if (!PauseScripts && (DateTime.Now - LastAlive).TotalSeconds > 120) RestartAllScriptsForPlayfieldServer();
+
+            ScriptExecQueue.ExecNext();
         }
 
         public static void RestartAllScriptsForPlayfieldServer()

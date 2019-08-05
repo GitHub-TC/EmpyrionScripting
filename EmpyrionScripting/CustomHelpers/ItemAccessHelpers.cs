@@ -24,9 +24,8 @@ namespace EmpyrionScripting.CustomHelpers
 
                 var allItems = new ConcurrentDictionary<int, ItemsData>();
                 structure.Items
-                    .AsParallel()
                     .SelectMany(I => I.Source.Where(S => S.CustomName != null && uniqueNames.Contains(S.CustomName)))
-                    .ForAll(I =>
+                    .ForEach(I =>
                     {
                         ItemInfo details = null;
                         EmpyrionScripting.ItemInfos?.ItemInfo.TryGetValue(I.Id, out details);

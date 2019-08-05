@@ -71,41 +71,43 @@ namespace EmpyrionScripting.CustomHelpers
 
                 int? maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? limit : (int?)null;
 
+                if (!structure.E.DeviceLockAllowed) return;
+
                 var moveInfos = new List<ItemMoveInfo>();
 
                 var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
 
-                if(uniqueNames.Any()) item.Source
-                    .ForEach(S => {
-                        lock (movelock) { 
-                            using(var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.S.GetCurrent(), S.Position)) {
-                                if (!locked.Success) return;
+                lock (movelock) { 
+                    if(uniqueNames.Any()) item.Source
+                        .ForEach(S => {
+                                using(var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.S.GetCurrent(), S.Position)) {
+                                    if (!locked.Success) return;
 
-                                var count = S.Count;
-                                count -= S.Container.RemoveItems(S.Id, count);
-                                if(count > 0) uniqueNames
-                                                .Where(N => N != S.CustomName)
-                                                .ForEach(N => {
-                                                    var startCount = count;
-                                                    count = MoveItem(S, N, structure, count, maxLimit);
-                                                    if(startCount != count) moveInfos.Add(new ItemMoveInfo() {
-                                                        Id              = S.Id,
-                                                        Count           = startCount - count,
-                                                        SourceE         = S.E,
-                                                        Source          = S.CustomName,
-                                                        DestinationE    = structure.E,
-                                                        Destination     = N,
+                                    var count = S.Count;
+                                    count -= S.Container.RemoveItems(S.Id, count);
+                                    if(count > 0) uniqueNames
+                                                    .Where(N => N != S.CustomName)
+                                                    .ForEach(N => {
+                                                        var startCount = count;
+                                                        count = MoveItem(S, N, structure, count, maxLimit);
+                                                        if(startCount != count) moveInfos.Add(new ItemMoveInfo() {
+                                                            Id              = S.Id,
+                                                            Count           = startCount - count,
+                                                            SourceE         = S.E,
+                                                            Source          = S.CustomName,
+                                                            DestinationE    = structure.E,
+                                                            Destination     = N,
+                                                        });
                                                     });
-                                                });
 
-                                if (count > 0) count = S.Container.AddItems(S.Id, count);
-                                if (count > 0) output.Write($"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}");
-                            }
-                        }
-                    });
+                                    if (count > 0) count = S.Container.AddItems(S.Id, count);
+                                    if (count > 0) output.Write($"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}");
+                                }
+                        });
+                }
 
-                if(moveInfos.Count == 0) options.Inverse (output, context as object);
-                else                     moveInfos.ForEach(I => options.Template(output, I));
+                if (moveInfos.Count == 0) options.Inverse (output, context as object);
+                else                      moveInfos.ForEach(I => options.Template(output, I));
             }
             catch (Exception error)
             {
