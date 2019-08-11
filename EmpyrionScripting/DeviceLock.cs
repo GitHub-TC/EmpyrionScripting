@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using Eleon.Modding;
+using EmpyrionNetAPIDefinitions;
 
 namespace EmpyrionScripting
 {
@@ -23,6 +24,7 @@ namespace EmpyrionScripting
                 {
                     if (witherror)
                     {
+                        Log($"Lock:Callback:Error {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
                         playfield.LockStructureDevice(structure.Id, position, false, null);
                     }
                     else
@@ -32,12 +34,13 @@ namespace EmpyrionScripting
                     }
                 });
                 witherror = !e.WaitOne(10000);
+                if (witherror) Log($"Lock:WaitOne:Error {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
 
                 if (Success) unlockAction = () =>
                  {
                      e.Reset();
                      playfield.LockStructureDevice(structure.Id, position, false, (s) => e.Set());
-                     e.WaitOne(10000);
+                     if(!e.WaitOne(10000)) Log($"Unlock:Timeout {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
                  };
             }
             catch (Exception error)
@@ -47,6 +50,7 @@ namespace EmpyrionScripting
             }
         }
 
+        public static Action<string, LogLevel> Log { get; set; }
         public bool Success { get; private set; }
 
         public void Dispose()

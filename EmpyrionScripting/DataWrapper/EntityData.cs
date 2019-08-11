@@ -28,6 +28,7 @@ namespace EmpyrionScripting.DataWrapper
         public EntityType EntityType => entity.Type;
 
         public Vector3 Pos => entity.Position;
+        public FactionData Faction => entity.Faction;
 
         public virtual IEntity GetCurrent() => entity;
     }

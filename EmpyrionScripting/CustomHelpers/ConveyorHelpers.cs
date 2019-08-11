@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
@@ -12,6 +13,8 @@ namespace EmpyrionScripting.CustomHelpers
     public static class ConveyorHelpers
     {
         private static object movelock = new object();
+
+        public static Action<string, LogLevel> Log { get; set; }
 
         public class ItemMoveInfo
         {
@@ -81,7 +84,11 @@ namespace EmpyrionScripting.CustomHelpers
                     if(uniqueNames.Any()) item.Source
                         .ForEach(S => {
                                 using(var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.S.GetCurrent(), S.Position)) {
-                                    if (!locked.Success) return;
+                                    if (!locked.Success)
+                                    {
+                                        Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
+                                        return;
+                                    }
 
                                     var count = S.Count;
                                     count -= S.Container.RemoveItems(S.Id, count);
@@ -104,6 +111,12 @@ namespace EmpyrionScripting.CustomHelpers
                                     if (count > 0) output.Write($"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}");
                                 }
                         });
+                    else
+                    {
+                        Log($"NoDevicesFound: {namesSearch}", LogLevel.Debug);
+                        return;
+                    }
+
                 }
 
                 if (moveInfos.Count == 0) options.Inverse (output, context as object);
@@ -118,13 +131,25 @@ namespace EmpyrionScripting.CustomHelpers
         private static int MoveItem(ItemsSource S, string N, StructureData targetStructure, int count, int? maxLimit)
         {
             var target = targetStructure?.GetCurrent()?.GetDevice<Eleon.Modding.IContainer>(N);
-            if (target == null) return count;
+            if (target == null)
+            {
+                Log($"TargetNoFound: {S.Id} #{S.Count} => {N}", LogLevel.Debug);
+                return count;
+            }
 
-            if(!targetStructure.ContainerSource.TryGetValue(N, out var targetData)) return count;
+            if (!targetStructure.ContainerSource.TryGetValue(N, out var targetData))
+            {
+                Log($"TargetDataNoFound: {S.Id} #{S.Count} => {N}", LogLevel.Debug);
+                return count;
+            }
 
             using (var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, targetStructure.GetCurrent(), targetData.Position))
             {
-                if (!locked.Success) return count;
+                if (!locked.Success)
+                {
+                    Log($"DeviceIsLocked (Target): {S.Id} #{S.Count} => {targetData.CustomName}", LogLevel.Debug);
+                    return count;
+                }
 
                 if (maxLimit.HasValue)
                 {

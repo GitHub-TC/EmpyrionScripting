@@ -9,7 +9,7 @@ namespace EmpyrionScripting
         [JsonConverter(typeof(StringEnumConverter))]
         public LogLevel LogLevel { get; set; } = LogLevel.Message;
         public int InGameScriptsIntervallMS { get; set; } = 1000;
-        public int DeviceLockOnlyAllowedEveryXCycles { get; set; } = 30;
+        public int DeviceLockOnlyAllowedEveryXCycles { get; set; } = 10;
         public int SaveGameScriptsIntervallMS { get; set; } = 1000;
         public bool ScriptTracking { get; set; }
         public float EntityAccessMinDistance { get; set; } = 500;

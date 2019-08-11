@@ -48,6 +48,8 @@ namespace EmpyrionScripting
         {
             EmpyrionScriptingInstance     = this;
             EmpyrionConfiguration.ModName = "EmpyrionScripting";
+            DeviceLock     .Log           = Log;
+            ConveyorHelpers.Log           = Log;
             ScriptExecQueue.Log           = Log;
             ScriptExecQueue               = new ScriptExecQueue(ProcessScript);
             SetupHandlebarsComponent();
@@ -131,6 +133,7 @@ namespace EmpyrionScripting
 
             DisplayScriptInfos();
             ScriptExecQueue.Clear();
+            LcdCompileCache.Clear();
         }
 
         public void StartAllScriptsForPlayfieldServer()

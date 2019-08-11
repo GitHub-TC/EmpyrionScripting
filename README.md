@@ -24,6 +24,13 @@ https://steamcommunity.com/workshop/filedetails/?id=1751409371
 
 YouTube video;
 * https://youtu.be/8nEpEygHBu8 (danke an Olly :-) )
+* https://youtu.be/8MzjdeYlzPU
+* https://youtu.be/gPp5CGJusr4
+* https://youtu.be/9601vpeLJAI
+* https://youtu.be/V1w2A3LAZCs
+* https://youtu.be/O89NQJjbQuw
+* https://youtu.be/uTgXwrlCfNQ
+
 * https://youtu.be/XzYKNevK0bs
 * https://youtu.be/SOnZ_mzytA4
 * https://youtu.be/oDOSbllwqSw
@@ -626,6 +633,13 @@ https://steamcommunity.com/workshop/filedetails/?id=1751409371
 
 YouTube video;
 * https://youtu.be/Wm_09Q-cvh0 (thanks to Olly :-) )
+* https://youtu.be/8MzjdeYlzPU
+* https://youtu.be/gPp5CGJusr4
+* https://youtu.be/9601vpeLJAI
+* https://youtu.be/V1w2A3LAZCs
+* https://youtu.be/O89NQJjbQuw
+* https://youtu.be/uTgXwrlCfNQ
+
 * https://youtu.be/XzYKNevK0bs
 * https://youtu.be/SOnZ_mzytA4
 * https://youtu.be/oDOSbllwqSw
