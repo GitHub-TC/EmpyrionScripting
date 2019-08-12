@@ -19,8 +19,6 @@ namespace EmpyrionScripting.DataWrapper
         public StructureData S { get => _s == null ? _s = new StructureData(this) : _s; set => _s = value; }
         private StructureData _s;
 
-        public bool DeviceLockAllowed { get; set; }
-
         public string[] DeviceNames => entity.Structure.GetDeviceTypeNames();
 
         public int Id => entity.Id;

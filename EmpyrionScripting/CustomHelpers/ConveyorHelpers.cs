@@ -74,15 +74,20 @@ namespace EmpyrionScripting.CustomHelpers
 
                 int? maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? limit : (int?)null;
 
-                if (!structure.E.DeviceLockAllowed) return;
+                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+                {
+                    Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                    return;
+                }
 
                 var moveInfos = new List<ItemMoveInfo>();
 
                 var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
 
                 lock (movelock) { 
-                    if(uniqueNames.Any()) item.Source
-                        .ForEach(S => {
+                    if(uniqueNames.Any()){
+                        item.Source
+                            .ForEach(S => {
                                 using(var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.S.GetCurrent(), S.Position)) {
                                     if (!locked.Success)
                                     {
@@ -92,7 +97,9 @@ namespace EmpyrionScripting.CustomHelpers
 
                                     var count = S.Count;
                                     count -= S.Container.RemoveItems(S.Id, count);
-                                    if(count > 0) uniqueNames
+                                    Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
+
+                                    if (count > 0) uniqueNames
                                                     .Where(N => N != S.CustomName)
                                                     .ForEach(N => {
                                                         var startCount = count;
@@ -110,7 +117,10 @@ namespace EmpyrionScripting.CustomHelpers
                                     if (count > 0) count = S.Container.AddItems(S.Id, count);
                                     if (count > 0) output.Write($"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}");
                                 }
-                        });
+                            });
+
+                            Log($"Move Total: #{item.Source.Count}", LogLevel.Debug);
+                        }
                     else
                     {
                         Log($"NoDevicesFound: {namesSearch}", LogLevel.Debug);

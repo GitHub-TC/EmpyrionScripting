@@ -20,7 +20,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var i = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds % (Math.Abs(delay) * ((Math.Abs(end - start) / Math.Abs(step)) + 1));
+                var i = ScriptExecQueue.Iteration % (Math.Abs(delay) * ((Math.Abs(end - start) / Math.Abs(step)) + 1));
                 var stepI = (int)(start < end ? i * Math.Abs(step) : start - (i * Math.Abs(step)));
                 options.Template(output, (1 + stepI) / Math.Abs(delay));
 

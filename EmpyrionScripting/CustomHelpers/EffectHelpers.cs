@@ -20,8 +20,8 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                if((TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds % (2 * intervall)) < intervall) options.Template(output, context as object);
-                else                                                                                    options.Inverse (output, context as object);
+                if(ScriptExecQueue.Iteration % (2 * intervall) < intervall) options.Template(output, context as object);
+                else                                                        options.Inverse (output, context as object);
             }
             catch (Exception error)
             {
@@ -49,7 +49,7 @@ namespace EmpyrionScripting.CustomHelpers
                 }
                 else
                 {
-                    var skip = (TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds % (delay * overlapp)) / delay;
+                    var skip = (ScriptExecQueue.Iteration % (delay * overlapp)) / delay;
                     output.Write(string.Join("\n", textlines.Skip((int)skip).Take(lines)));
                     output.Write("\n");
                 }

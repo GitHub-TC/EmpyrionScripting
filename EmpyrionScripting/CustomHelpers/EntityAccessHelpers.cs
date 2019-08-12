@@ -30,7 +30,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .FirstOrDefault(E => isSaveGameScript || Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null) options.Inverse(output, context as object);
-                else               options.Template(output, new EntityData(found) { DeviceLockAllowed = root.E.DeviceLockAllowed });
+                else               options.Template(output, new EntityData(found));
             }
             catch (Exception error)
             {
@@ -57,7 +57,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .Where(E => isSaveGameScript || Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
-                else                               options.Template(output, found.Select(E => new EntityData(E) { DeviceLockAllowed = root.E.DeviceLockAllowed }).ToArray());
+                else                               options.Template(output, found.Select(E => new EntityData(E)).ToArray());
             }
             catch (Exception error)
             {
@@ -83,7 +83,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
-                else                               options.Template(output, found.Select(E => new EntityData(E) { DeviceLockAllowed = root.E.DeviceLockAllowed }).ToArray());
+                else                               options.Template(output, found.Select(E => new EntityData(E)).ToArray());
             }
             catch (Exception error)
             {
@@ -109,7 +109,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .FirstOrDefault(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
                 if (found == null) options.Inverse(output, context as object);
-                else               options.Template(output, new EntityData(found) { DeviceLockAllowed = root.E.DeviceLockAllowed });
+                else               options.Template(output, new EntityData(found));
             }
             catch (Exception error)
             {

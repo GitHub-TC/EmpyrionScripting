@@ -19,6 +19,14 @@ namespace EmpyrionScripting
 
         private Action<ScriptRootData> processScript;
 
+        public static int Iteration => _Iteration;
+        private static int _Iteration;
+
+        public int MainCount => _MainCount;
+        private int _MainCount;
+
+        public DateTime LastIterationUpdate { get; set; }
+
         public ConcurrentDictionary<string, ScriptRootData> WaitForExec { get; } = new ConcurrentDictionary<string, ScriptRootData>();
         public ConcurrentQueue<ScriptRootData>              ExecQueue { get; private set; } = new ConcurrentQueue<ScriptRootData>();
 
@@ -30,10 +38,11 @@ namespace EmpyrionScripting
         public void Add(ScriptRootData data)
         {
             if (WaitForExec.TryAdd(data.ScriptId, data)) ExecQueue.Enqueue(data);
-            else lock (ExecQueue) WaitForExec.AddOrUpdate(data.ScriptId, data, (i, d) => { data.E.DeviceLockAllowed = data.E.DeviceLockAllowed || data.E.DeviceLockAllowed; return data; });
+            else lock (ExecQueue) WaitForExec.AddOrUpdate(data.ScriptId, data, (i, d) => data);
         }
 
         static public Action<string, LogLevel> Log { get; set; }
+        public int ScriptsCount { get; set; }
 
         public void ExecNext()
         {
@@ -51,7 +60,11 @@ namespace EmpyrionScripting
 
             try
             {
-                if (data.E.EntityType == EntityType.Proxy) return;
+                if (data.E.EntityType == EntityType.Proxy)
+                {
+                    WaitForExec.TryRemove(data.ScriptId, out _);
+                    return;
+                }
 
                 if (!ScriptRunInfo.TryGetValue(data.ScriptId, out var info)) info = new ScriptInfo();
 
@@ -64,6 +77,16 @@ namespace EmpyrionScripting
                 info.ExecTime += DateTime.Now - info.LastStart;
 
                 ScriptRunInfo.AddOrUpdate(data.ScriptId, info, (id, i) => info);
+
+                Interlocked.Increment(ref _MainCount);
+                if(MainCount > ScriptsCount)
+                {
+                    if (Interlocked.Exchange(ref _MainCount, 0) > 0 && (DateTime.Now - LastIterationUpdate).TotalSeconds > 0)
+                    {
+                        LastIterationUpdate = DateTime.Now;
+                        Interlocked.Increment(ref _Iteration);
+                    }
+                }
             }
             catch (Exception error)
             {

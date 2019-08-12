@@ -40,7 +40,7 @@ namespace EmpyrionScripting.DataWrapper
         public PlayfieldData P { get => _p == null ? _p = new PlayfieldData(playfield) : _p; set => _p = value; }
         private PlayfieldData _p;
 
-        public EntityData E { get => _e == null ? _e = new EntityData(entity) { DeviceLockAllowed = DeviceLockAllowed } : _e; set => _e = value; }
+        public EntityData E { get => _e == null ? _e = new EntityData(entity) : _e; set => _e = value; }
         private EntityData _e;
 
         public List<string> LcdTargets { get; set; } = new List<string>();

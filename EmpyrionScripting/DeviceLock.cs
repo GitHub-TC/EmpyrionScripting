@@ -15,6 +15,8 @@ namespace EmpyrionScripting
             var witherror = false;
             try
             {
+                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0) return;
+
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;
 
                 var lockkey = $"{structure.Id}#{position.x}#{position.y}#{position.z}";
