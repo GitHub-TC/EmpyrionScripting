@@ -164,7 +164,7 @@ namespace EmpyrionScripting.CustomHelpers
                 if (maxLimit.HasValue)
                 {
                     var stock = target.GetTotalItems(S.Id);
-                    var transfer = Math.Min(count, maxLimit.Value - stock);
+                    var transfer = Math.Max(0, Math.Min(count, maxLimit.Value - stock));
                     return target.AddItems(S.Id, transfer) + (count - transfer);
                 }
                 else return target.AddItems(S.Id, count);
