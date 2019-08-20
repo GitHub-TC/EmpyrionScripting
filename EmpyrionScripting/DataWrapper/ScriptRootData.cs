@@ -1,11 +1,12 @@
 ﻿using Eleon.Modding;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class ScriptRootData
+    public class ScriptRootData : IScriptRootData
     {
         public bool DeviceLockAllowed { get; }
 
@@ -15,9 +16,10 @@ namespace EmpyrionScripting.DataWrapper
 
         public ScriptRootData()
         {
+            _e = new Lazy<IEntityData>(() => new EntityData(entity));
         }
 
-        public ScriptRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed)
+        public ScriptRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed) : this()
         {
             DeviceLockAllowed = deviceLockAllowed;
             this.currentEntites = currentEntities;
@@ -29,7 +31,7 @@ namespace EmpyrionScripting.DataWrapper
         {
             _p = data._p;
             _e = data._e;
-            DisplayType    = data.DisplayType;
+            DisplayType = data.DisplayType;
         }
 
         public IEntity[] GetCurrentEntites() => currentEntites;
@@ -40,8 +42,8 @@ namespace EmpyrionScripting.DataWrapper
         public PlayfieldData P { get => _p == null ? _p = new PlayfieldData(playfield) : _p; set => _p = value; }
         private PlayfieldData _p;
 
-        public EntityData E { get => _e == null ? _e = new EntityData(entity) : _e; set => _e = value; }
-        private EntityData _e;
+        public IEntityData E => _e.Value; 
+        private readonly Lazy<IEntityData> _e;
 
         public List<string> LcdTargets { get; set; } = new List<string>();
         public bool FontSizeChanged { get; set; }

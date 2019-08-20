@@ -17,7 +17,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{lights structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
-            var structure   = arguments[0] as StructureData;
+            var structure   = arguments[0] as IStructureData;
             var namesSearch = arguments[1]?.ToString();
 
             try

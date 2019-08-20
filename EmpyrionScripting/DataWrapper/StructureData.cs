@@ -1,104 +1,107 @@
 ﻿using Eleon.Modding;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class StructureData
+    public class StructureData : IStructureData
     {
+        private readonly Lazy<Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>>> _is;
+
         public StructureData()
         {
+            _n = new Lazy<string[]>(() => GetCurrent().GetAllCustomDeviceNames().OrderBy(N => N).ToArray());
+            _is = new Lazy<Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>>>(() => CollectAllItems(GetCurrent()));
+            _d = new Lazy<IEntityData[]>(() => GetCurrent()
+                .GetDockedStructures()
+                .Select(S => EmpyrionScripting.ModApi.Playfield.Entities.FirstOrDefault(E => E.Value.Structure?.Id == S.Id))
+                .Where(E => E.Value != null)
+                .Select(E => new EntityData(E.Value)).ToArray());
+            _s = new Lazy<IStructure>(() => E.GetCurrent().Structure);
+            _pilot = new Lazy<PlayerData>(() => new PlayerData(GetCurrent().Pilot));
+            _passengers = new Lazy<PlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
+            _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank));
+            _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank));
         }
 
-        public StructureData(EntityData entity)
+        public StructureData(IEntityData entity) : this()
         {
             E = entity;
         }
 
-        public virtual EntityData E { get; protected set; }
+        public virtual IEntityData E { get; protected set; }
 
         public bool IsPowerd => GetCurrent().IsPowered;
         public float DamageLevel => GetCurrent().DamageLevel;
         public bool IsOfflineProtectable => GetCurrent().IsOfflineProtectable;
         public bool IsReady => GetCurrent().IsReady;
 
-        public string[] AllCustomDeviceNames { get => _n == null ? _n = GetCurrent().GetAllCustomDeviceNames().OrderBy(N => N).ToArray() : _n; set => _n = value; }
-        string[] _n;
+        public string[] AllCustomDeviceNames => _n.Value;
+        readonly Lazy<string[]> _n;
 
-        public ItemsData[] Items { get => _i == null ? _i = CollectAllItems(GetCurrent()) : _i; set => _i = value; }
-        private ItemsData[] _i;
+        public ItemsData[] Items => _is.Value.Item1;
 
-        public EntityData[] DockedE { get => _d == null ? _d = GetCurrent()
-                .GetDockedStructures()
-                .Select(S => EmpyrionScripting.ModApi.Playfield.Entities.FirstOrDefault(E => E.Value.Structure?.Id == S.Id))
-                .Where(E => E.Value != null)
-                .Select(E => new EntityData(E.Value)).ToArray() : _d; set => _d = value; }
-        private EntityData[] _d;
+        public IEntityData[] DockedE => _d.Value;
+        private readonly Lazy<IEntityData[]> _d;
 
         public string[] GetDeviceTypeNames => GetCurrent().GetDeviceTypeNames();
 
-        public ConcurrentDictionary<string, ContainerSource> ContainerSource {
-            get {
-                if (_ContainerSource == null) Items = CollectAllItems(GetCurrent());
-                return _ContainerSource;
-            }
-            set => _ContainerSource = value;
-        }
-        private ConcurrentDictionary<string, ContainerSource> _ContainerSource;
+        public ConcurrentDictionary<string, ContainerSource> ContainerSource => _is.Value.Item2;
 
-        private ItemsData[] CollectAllItems(IStructure structure)
+        private Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>> CollectAllItems(IStructure structure)
         {
             var allItems = new ConcurrentDictionary<int, ItemsData>();
-            ContainerSource = new ConcurrentDictionary<string, ContainerSource>();
+            var containerSource = new ConcurrentDictionary<string, ContainerSource>();
 
-            Parallel.ForEach(GetCurrent().GetAllCustomDeviceNames(), N =>
+            Parallel.ForEach(AllCustomDeviceNames, N =>
             {
                 GetCurrent().GetDevicePositions(N)
-                    .ForEach(P => { 
+                    .ForEach(P =>
+                    {
                         var container = structure.GetDevice<IContainer>(P);
-                        var block     = structure.GetBlock(P);
+                        var block = structure.GetBlock(P);
                         if (container == null || block == null) return;
 
-                        ContainerSource.TryAdd(block.CustomName, new ContainerSource() { E = E, Container = container, CustomName = block.CustomName, Position = P });
+                        containerSource.TryAdd(block.CustomName, new ContainerSource() { E = E, Container = container, CustomName = block.CustomName, Position = P });
 
                         container.GetContent()
-                            .ForEach(I => {
+                            .ForEach(I =>
+                            {
                                 EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(I.id, out ItemInfo details);
                                 var source = new ItemsSource() { E = E, Id = I.id, Count = I.count, Container = container, CustomName = block.CustomName, Position = P };
                                 allItems.AddOrUpdate(I.id,
-                                new ItemsData() {
-                                    Source      = new[] { source }.ToList(),
-                                    Id          = I.id,
-                                    Count       = I.count,
-                                    Key         = details == null ? I.id.ToString() : details.Key,
-                                    Name        = details == null ? I.id.ToString() : details.Name,
+                                new ItemsData()
+                                {
+                                    Source = new[] { source }.ToList(),
+                                    Id = I.id,
+                                    Count = I.count,
+                                    Key = details == null ? I.id.ToString() : details.Key,
+                                    Name = details == null ? I.id.ToString() : details.Name,
                                 },
                                 (K, U) => U.AddCount(I.count, source));
                             });
                     });
             });
 
-            return allItems
-                .Values
-                .OrderBy(I => I.Id)
-                .ToArray();
+            return new Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>>(allItems.Values.OrderBy(I => I.Id).ToArray(), containerSource);
         }
 
-        virtual public IStructure GetCurrent() => _s == null ? _s = E.GetCurrent().Structure : _s;
-        private IStructure _s;
+        virtual public IStructure GetCurrent() => _s.Value;
+        private readonly Lazy<IStructure> _s;
 
-        public PlayerData Pilot => _pilot == null ? _pilot = new PlayerData(GetCurrent().Pilot) : _pilot;
-        private PlayerData _pilot;
+        public PlayerData Pilot => _pilot.Value;
+        private readonly Lazy<PlayerData> _pilot;
 
-        public PlayerData[] Passengers => _passengers == null ? _passengers = GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray() : _passengers;
-        private PlayerData[] _passengers;
+        public PlayerData[] Passengers => _passengers.Value;
+        private readonly Lazy<PlayerData[]> _passengers;
 
-        public StructureTank FuelTank => _FuelTank == null ? _FuelTank = new StructureTank(GetCurrent().FuelTank) : _FuelTank;
-        private StructureTank _FuelTank;
+        public StructureTank FuelTank => _FuelTank.Value;
+        private readonly Lazy<StructureTank> _FuelTank;
 
-        public StructureTank OxygenTank => _OxygenTank == null ? _OxygenTank = new StructureTank(GetCurrent().OxygenTank) : _OxygenTank;
-        private StructureTank _OxygenTank;
+        public StructureTank OxygenTank => _OxygenTank.Value;
+        private readonly Lazy<StructureTank> _OxygenTank;
 
     }
 }

@@ -67,7 +67,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var root = arguments[0] as ScriptRootData;
+                var root = arguments[0] as IScriptRootData;
                 int.TryParse(arguments[1] as string, NumberStyles.HexNumber, null, out int color);
                 root.Color        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
                 root.ColorChanged = true;
@@ -85,7 +85,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var root = arguments[0] as ScriptRootData;
+                var root = arguments[0] as IScriptRootData;
                 int.TryParse(arguments[1] as string, NumberStyles.HexNumber, null, out int color);
                 root.BackgroundColor        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
                 root.BackgroundColorChanged = true;
@@ -103,7 +103,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var root = arguments[0] as ScriptRootData;
+                var root = arguments[0] as IScriptRootData;
                 int.TryParse(arguments[1] as string, out int fontSize);
                 root.FontSize        = fontSize;
                 root.FontSizeChanged = true;

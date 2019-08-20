@@ -19,9 +19,9 @@ namespace EmpyrionScripting.CustomHelpers
         public class ItemMoveInfo
         {
             public int Id { get; set; }
-            public EntityData SourceE { get; set; }
+            public IEntityData SourceE { get; set; }
             public string Source { get; set; }
-            public EntityData DestinationE { get; set; }
+            public IEntityData DestinationE { get; set; }
             public string Destination { get; set; }
             public int Count { get; set; }
         }
@@ -31,7 +31,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2 && arguments.Length != 4) throw new HandlebarsException("{{islocked structure device|x y z}} helper must have two or four argument: (structure) (device)|(x) (y) (z)");
 
-            var structure = arguments[0] as StructureData;
+            var structure = arguments[0] as IStructureData;
             VectorInt3 position = new VectorInt3();
 
             if (arguments.Length == 2)
@@ -69,12 +69,12 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var item        = arguments[0] as ItemsData;
-                var structure   = arguments[1] as StructureData;
+                var structure   = arguments[1] as IStructureData;
                 var namesSearch = arguments[2] as string;
 
                 int? maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? limit : (int?)null;
 
-                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+                if (!EmpyrionScripting.WithinUnitTest && ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
                 {
                     Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                     return;
@@ -88,7 +88,7 @@ namespace EmpyrionScripting.CustomHelpers
                     if(uniqueNames.Any()){
                         item.Source
                             .ForEach(S => {
-                                using(var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, S.E.S.GetCurrent(), S.Position)) {
+                                using(var locked = new DeviceLock(EmpyrionScripting.ModApi?.Playfield, S.E?.S.GetCurrent(), S.Position)) {
                                     if (!locked.Success)
                                     {
                                         Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
@@ -138,7 +138,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        private static int MoveItem(ItemsSource S, string N, StructureData targetStructure, int count, int? maxLimit)
+        private static int MoveItem(ItemsSource S, string N, IStructureData targetStructure, int count, int? maxLimit)
         {
             var target = targetStructure?.GetCurrent()?.GetDevice<Eleon.Modding.IContainer>(N);
             if (target == null)

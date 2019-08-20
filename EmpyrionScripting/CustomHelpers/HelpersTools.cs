@@ -35,17 +35,15 @@ namespace EmpyrionScripting.CustomHelpers
                 {
                     try
                     {
-                        Handlebars.RegisterHelper(
-                            ((HandlebarTagAttribute)Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute))).Tag,
-                            (HandlebarsHelper)Delegate.CreateDelegate(typeof(HandlebarsHelper), M));
+                        if (Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute)) is HandlebarTagAttribute A)
+                            Handlebars.RegisterHelper(A.Tag, (HandlebarsHelper)Delegate.CreateDelegate(typeof(HandlebarsHelper), M));
                     }
                     catch { }
 
                     try
                     {
-                        Handlebars.RegisterHelper(
-                            ((HandlebarTagAttribute)Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute))).Tag,
-                            (HandlebarsBlockHelper)Delegate.CreateDelegate(typeof(HandlebarsBlockHelper), M));
+                        if (Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute)) is HandlebarTagAttribute A)
+                            Handlebars.RegisterHelper(A.Tag, (HandlebarsBlockHelper)Delegate.CreateDelegate(typeof(HandlebarsBlockHelper), M));
                     }
                     catch { }
                 })

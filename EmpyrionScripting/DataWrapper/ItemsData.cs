@@ -5,7 +5,7 @@ namespace EmpyrionScripting.DataWrapper
 {
     public class ItemsSource
     {
-        public EntityData E { get; set; }
+        public IEntityData E { get; set; }
         public IContainer Container { get; set; }
         public VectorInt3 Position { get; set; }
         public string CustomName { get; set; }

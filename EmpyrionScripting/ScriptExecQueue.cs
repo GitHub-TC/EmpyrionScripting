@@ -17,7 +17,7 @@ namespace EmpyrionScripting
         }
         public ConcurrentDictionary<string, ScriptInfo> ScriptRunInfo { get; } = new ConcurrentDictionary<string, ScriptInfo>();
 
-        private Action<ScriptRootData> processScript;
+        private Action<IScriptRootData> processScript;
 
         public static int Iteration => _Iteration;
         private static int _Iteration;
@@ -27,15 +27,15 @@ namespace EmpyrionScripting
 
         public DateTime LastIterationUpdate { get; set; }
 
-        public ConcurrentDictionary<string, ScriptRootData> WaitForExec { get; } = new ConcurrentDictionary<string, ScriptRootData>();
-        public ConcurrentQueue<ScriptRootData>              ExecQueue { get; private set; } = new ConcurrentQueue<ScriptRootData>();
+        public ConcurrentDictionary<string, IScriptRootData> WaitForExec { get; } = new ConcurrentDictionary<string, IScriptRootData>();
+        public ConcurrentQueue<IScriptRootData>              ExecQueue { get; private set; } = new ConcurrentQueue<IScriptRootData>();
 
-        public ScriptExecQueue(Action<ScriptRootData> processScript)
+        public ScriptExecQueue(Action<IScriptRootData> processScript)
         {
             this.processScript = processScript;
         }
 
-        public void Add(ScriptRootData data)
+        public void Add(IScriptRootData data)
         {
             if (WaitForExec.TryAdd(data.ScriptId, data)) ExecQueue.Enqueue(data);
             else lock (ExecQueue) WaitForExec.AddOrUpdate(data.ScriptId, data, (i, d) => data);
@@ -44,19 +44,24 @@ namespace EmpyrionScripting
         static public Action<string, LogLevel> Log { get; set; }
         public int ScriptsCount { get; set; }
 
-        public void ExecNext()
+        public bool ExecNext()
         {
-            var             found = false;
-            ScriptRootData  data  = null;
+            var              found = false;
+            IScriptRootData  data  = null;
             lock (ExecQueue) found = ExecQueue.TryDequeue(out data);
-            if (!found) return;
+            if (!found) return false;
 
-            if(!ThreadPool.QueueUserWorkItem(ExecScript, data)) Log($"EmpyrionScripting Mod: ExecNext NorThreadPoolFree {data.ScriptId}", LogLevel.Debug);
+            if (!ThreadPool.QueueUserWorkItem(ExecScript, data))
+            {
+                Log($"EmpyrionScripting Mod: ExecNext NorThreadPoolFree {data.ScriptId}", LogLevel.Debug);
+                return false;
+            }
+            return true;
         }
 
         private void ExecScript(object state)
         {
-            if (!(state is ScriptRootData data)) return;
+            if (!(state is IScriptRootData data)) return;
 
             try
             {
@@ -81,7 +86,7 @@ namespace EmpyrionScripting
                 Interlocked.Increment(ref _MainCount);
                 if(MainCount > ScriptsCount)
                 {
-                    if (Interlocked.Exchange(ref _MainCount, 0) > 0 && (DateTime.Now - LastIterationUpdate).TotalSeconds > 0)
+                    if (Interlocked.Exchange(ref _MainCount, 0) > 0 && (DateTime.Now - LastIterationUpdate).TotalSeconds >= 1)
                     {
                         LastIterationUpdate = DateTime.Now;
                         Interlocked.Increment(ref _Iteration);
@@ -98,7 +103,7 @@ namespace EmpyrionScripting
         {
             ScriptRunInfo.Clear();
             WaitForExec.Clear();
-            ExecQueue = new ConcurrentQueue<ScriptRootData>();
+            ExecQueue = new ConcurrentQueue<IScriptRootData>();
         }
     }
 }

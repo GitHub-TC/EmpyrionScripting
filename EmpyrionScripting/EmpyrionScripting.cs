@@ -34,7 +34,7 @@ namespace EmpyrionScripting
         public static ConfigurationManager<Configuration> Configuration { get; private set; }
         public static Localization Localization { get; set; }
         public static IModApi ModApi { get; private set; }
-        public SaveGamesScripts SaveGamesScripts { get; private set; }
+        public SaveGamesScripts SaveGamesScripts { get; set; }
         public string L { get; private set; }
         public bool DeviceLockAllowed => (CycleCounter % Configuration.Current.DeviceLockOnlyAllowedEveryXCycles) == 0;
 
@@ -43,6 +43,7 @@ namespace EmpyrionScripting
         public DateTime LastAlive { get; private set; }
         public int InGameScriptsCount { get; private set; }
         public int SaveGameScriptsCount { get; private set; }
+        public static bool WithinUnitTest { get; set; }
 
         private static int CycleCounter;
 
@@ -198,7 +199,7 @@ namespace EmpyrionScripting
             legacyApi?.Console_Write("EmpyrionScripting Mod started: Game_Start");
         }
 
-        public static string ErrorFilter(Exception error) => Configuration.Current.LogLevel == EmpyrionNetAPIDefinitions.LogLevel.Debug ? error.ToString() : error.Message;
+        public static string ErrorFilter(Exception error) => Configuration?.Current.LogLevel == EmpyrionNetAPIDefinitions.LogLevel.Debug ? error.ToString() : error.Message;
 
         private int UpdateScripts(Func<IEntity, int> process, string name)
         {
@@ -239,7 +240,7 @@ namespace EmpyrionScripting
 
         private void Log(string text, LogLevel level)
         {
-            if(Configuration.Current.LogLevel <= level) ModApi.Log(text);
+            if(Configuration?.Current.LogLevel <= level) ModApi.Log(text);
         }
 
         private int ProcessAllInGameScripts(IEntity entity)
@@ -377,7 +378,7 @@ namespace EmpyrionScripting
             return count;
         }
 
-        private static void AddTargetsAndDisplayType(ScriptRootData data, string targets)
+        private static void AddTargetsAndDisplayType(IScriptRootData data, string targets)
         {
             if (targets.StartsWith("["))
             {
@@ -396,7 +397,7 @@ namespace EmpyrionScripting
             data.LcdTargets.AddRange(data.E.S.AllCustomDeviceNames.GetUniqueNames(targets).Where(N => !N.StartsWith(ScriptKeyword)));
         }
 
-        private void ProcessScript<T>(T data) where T : ScriptRootData
+        private void ProcessScript<T>(T data) where T : IScriptRootData
         {
             try
             {
@@ -468,10 +469,13 @@ namespace EmpyrionScripting
 
         public void Game_Update()
         {
-            //Log("EmpyrionScripting Mod: Game_Update", LogLevel.Debug);
             if (!PauseScripts && (DateTime.Now - LastAlive).TotalSeconds > 120) RestartAllScriptsForPlayfieldServer();
+            if (!ThreadPool.QueueUserWorkItem(QueueScriptExecuting, null)) Log($"EmpyrionScripting Mod: Game_Update NorThreadPoolFree", LogLevel.Debug);
+        }
 
-            ScriptExecQueue.ExecNext();
+        private void QueueScriptExecuting(object state)
+        {
+            for (int i = Configuration.Current.ScriptsParallelExecution - 1; i >= 0 && ScriptExecQueue.ExecNext(); i--);
         }
 
         public static void RestartAllScriptsForPlayfieldServer()

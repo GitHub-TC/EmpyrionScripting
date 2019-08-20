@@ -15,6 +15,12 @@ namespace EmpyrionScripting
             var witherror = false;
             try
             {
+                if (EmpyrionScripting.WithinUnitTest)
+                {
+                    Success = true;
+                    return;
+                }
+
                 if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0) return;
 
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;

@@ -15,7 +15,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{devices structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
-            var structure   = arguments[0] as StructureData;
+            var structure   = arguments[0] as IStructureData;
             var namesSearch = arguments[1].ToString();
 
             try
@@ -39,7 +39,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{devicesoftype structure type}} helper must have exactly two argument: (structure) (type)");
 
-            var structure  = arguments[0] as StructureData;
+            var structure  = arguments[0] as IStructureData;
             var typeSearch = arguments[1].ToString();
 
             try
@@ -63,7 +63,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 4) throw new HandlebarsException("{{block structure x y z}} helper must have exactly four argument: (structure) (x) (y) (z)");
 
-            var structure = arguments[0] as StructureData;
+            var structure = arguments[0] as IStructureData;
             int.TryParse(arguments[1].ToString(), out var x);
             int.TryParse(arguments[2].ToString(), out var y);
             int.TryParse(arguments[3].ToString(), out var z);

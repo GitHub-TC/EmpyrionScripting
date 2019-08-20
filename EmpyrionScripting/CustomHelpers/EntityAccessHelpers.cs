@@ -18,7 +18,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (EmpyrionScripting.Configuration.Current.EntityAccessMinDistance == 0) return;
 
             var isSaveGameScript    = arguments[0] is ScriptSaveGameRootData;
-            var root                = arguments[0] as ScriptRootData;
+            var root                = arguments[0] as IScriptRootData;
             var namesSearch         = arguments[1]?.ToString();
 
             try
@@ -45,7 +45,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (EmpyrionScripting.Configuration.Current.EntityAccessMinDistance == 0) return;
 
             var isSaveGameScript    = arguments[0] is ScriptSaveGameRootData;
-            var root                = arguments[0] as ScriptRootData;
+            var root                = arguments[0] as IScriptRootData;
             var namesSearch         = arguments[1]?.ToString();
 
             try
@@ -71,7 +71,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2) throw new HandlebarsException("{{entitiesbyid @root ids}} helper must have exactly two argument: @root (id1;id2;id3)");
             if (EmpyrionScripting.Configuration.Current.EntityAccessMinDistance == 0) return;
 
-            var root      = arguments[0] as ScriptRootData;
+            var root      = arguments[0] as IScriptRootData;
             var idsSearch = arguments[1]?.ToString();
 
             try
@@ -97,7 +97,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2) throw new HandlebarsException("{{entitybyid @root id}} helper must have exactly two argument: @root (id)");
             if (EmpyrionScripting.Configuration.Current.EntityAccessMinDistance == 0) return;
 
-            var root = arguments[0] as ScriptRootData;
+            var root = arguments[0] as IScriptRootData;
             if (!int.TryParse(arguments[1]?.ToString(), out int id)) return;
 
             try

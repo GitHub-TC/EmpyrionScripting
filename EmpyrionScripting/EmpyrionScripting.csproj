@@ -78,6 +78,9 @@
     <Compile Include="DataWrapper\ContainerSource.cs" />
     <Compile Include="CustomHelpers\BlockHelpers.cs" />
     <Compile Include="CustomHelpers\ConveyorHelpers.cs" />
+    <Compile Include="DataWrapper\IEntityData.cs" />
+    <Compile Include="DataWrapper\IScriptRootData.cs" />
+    <Compile Include="DataWrapper\IStructureData.cs" />
     <Compile Include="DeviceLock.cs" />
     <Compile Include="CustomHelpers\EffectHelpers.cs" />
     <Compile Include="CustomHelpers\LoopHelpers.cs" />

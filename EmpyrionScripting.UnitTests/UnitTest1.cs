@@ -5,7 +5,7 @@ using Eleon.Modding;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+using NSubstitute;
 
 namespace EmpyrionScripting.UnitTests
 {
@@ -56,14 +56,19 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodTestLEQReal()
         {
-            var lcdData = Mock.Of<ScriptRootData>();
-            lcdData.E   = Mock.Of<EntityData>();
-            lcdData.E.S = Mock.Of<StructureData>();
-            lcdData.E.S.Items = new[] {
+            var S = Substitute.For<IStructureData>();
+            S.Items.Returns(new[] {
                 new ItemsData(){ Id = 1, Count = 10, Name = "a" },
                 new ItemsData(){ Id = 2, Count = 20, Name = "b" },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c" },
-            };
+            });
+
+            var E = Substitute.For<IEntityData>();
+            E.S.Returns(S);
+
+            var lcdData = Substitute.For<IScriptRootData>();
+            lcdData.E.Returns(E);
+
             var lcdMod = new EmpyrionScripting();
             Assert.AreEqual(
                 "Yes:aYes:bNo:c",
@@ -74,15 +79,20 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodItems()
         {
-            var lcdData = Mock.Of<ScriptRootData>();
-            lcdData.E = Mock.Of<EntityData>();
-            lcdData.E.S = Mock.Of<StructureData>();
-            lcdData.E.S.AllCustomDeviceNames = new[] { "BoxA", "BoxB", "BoxC" };
-            lcdData.E.S.Items = new[] {
+            var S = Substitute.For<IStructureData>();
+            S.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC" });
+            S.Items.Returns(new[] {
                 new ItemsData(){ Id = 1, Count = 10, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10 } }.ToList() },
                 new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20 } }.ToList()  },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
-            };
+            });
+
+            var E = Substitute.For<IEntityData>();
+            E.S.Returns(S);
+
+            var lcdData = Substitute.For<IScriptRootData>();
+            lcdData.E.Returns(E);
+
             var lcdMod = new EmpyrionScripting();
             Assert.AreEqual(
                 "Yes:1 #10",
@@ -93,15 +103,20 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodItemsPartial()
         {
-            var lcdData = Mock.Of<ScriptRootData>();
-            lcdData.E = Mock.Of<EntityData>();
-            lcdData.E.S = Mock.Of<StructureData>();
-            lcdData.E.S.AllCustomDeviceNames = new[] { "BoxA", "BoxB", "BoxC", "BoxX" };
-            lcdData.E.S.Items = new[] {
+            var S = Substitute.For<IStructureData>();
+            S.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
+            S.Items.Returns(new[] {
                 new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10 }, new ItemsSource() { CustomName = "BoxX", Id = 1, Count = 1 } }.ToList() },
                 new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20 } }.ToList()  },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
-            };
+            });
+
+            var E = Substitute.For<IEntityData>();
+            E.S.Returns(S);
+
+            var lcdData = Substitute.For<IScriptRootData>();
+            lcdData.E.Returns(E);
+
             var lcdMod = new EmpyrionScripting();
             Assert.AreEqual(
                 "Yes:1 #10",
@@ -112,7 +127,7 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodColor()
         {
-            var lcdData = Mock.Of<ScriptRootData>();
+            var lcdData = Substitute.For<IScriptRootData>();
             var lcdMod = new EmpyrionScripting();
             lcdMod.ExecuteHandlebarScript(lcdData, "{{color @root 'ff00ff'}}");
             Assert.AreEqual(new UnityEngine.Color(255,0,255), lcdData.Color);
@@ -263,28 +278,33 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodItemsMove()
         {
-            var boxA = new Mock<IContainer>();
-            boxA.Setup(i => i.RemoveItems(1, int.MaxValue)).Returns(10);
-            boxA.Setup(i => i.AddItems(1, 1)).Returns(0);
+            EmpyrionScripting.WithinUnitTest = true;
 
-            var boxB = new Mock<IContainer>();
-            boxB.Setup(i => i.AddItems(1, 10)).Returns(1);
+            var boxA = Substitute.For<IContainer>();
+            boxA.RemoveItems(1, int.MaxValue).Returns(10);
+            boxA.AddItems(1, 1).Returns(0);
 
-            var es = new Mock<IStructure>();
-            es.Setup(i => i.GetDevice<IContainer>("BoxB")).Returns(boxB.Object);
+            var boxB = Substitute.For<IContainer>();
+            boxB.AddItems(1, 10).Returns(1);
 
-            var s = new Mock<StructureData>();
-            s.Object.AllCustomDeviceNames = new[] { "BoxA", "BoxB", "BoxC", "BoxX" };
-            s.Object.Items = new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA.Object } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB.Object } }.ToList() },
+            var es = Substitute.For<IStructure>();
+            es.GetDevice<IContainer>("BoxB").Returns(boxB);
+
+            var s = Substitute.For<IStructureData>();
+            s.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
+            s.Items.Returns(new[] {
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB } }.ToList() },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
-            };
-            s.Setup(i => i.GetCurrent()).Returns(es.Object);
+            });
+            s.GetCurrent().Returns(es);
 
-            var lcdData = Mock.Of<ScriptRootData>();
-            lcdData.E = Mock.Of<EntityData>();
-            lcdData.E.S = s.Object;
+            var E = Substitute.For<IEntityData>();
+            E.S.Returns(s);
+
+            var lcdData = Substitute.For<IScriptRootData>();
+            lcdData.E.Returns(E);
+
             var lcdMod = new EmpyrionScripting();
             Assert.AreEqual("", lcdMod.ExecuteHandlebarScript(lcdData, "{{#items E.S 'BoxA'}}{{move this ../E.S 'BoxB'}}{{/move}}{{/items}}"));
         }
@@ -292,35 +312,35 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodItemsMoveWithSameBox()
         {
-            var e = new Mock<EntityData>();
-            e.Setup(i => i.Name).Returns("CVa");
+            var e = Substitute.For<IEntityData>();
+            e.Name.Returns("CVa");
 
-            var boxA = new Mock<IContainer>();
-            boxA.Setup(i => i.RemoveItems(1, int.MaxValue)).Returns(10);
-            boxA.Setup(i => i.AddItems(1, 1)).Returns(0);
-            boxA.Setup(i => i.AddItems(1, 10)).Throws(new Exception("in the same box"));
+            var boxA = Substitute.For<IContainer>();
+            boxA.RemoveItems(1, int.MaxValue).Returns(10);
+            boxA.AddItems(1, 1).Returns(0);
+            boxA.AddItems(1, 10).Returns(C => throw new Exception("in the same box"));
 
-            var boxB = new Mock<IContainer>();
-            boxB.Setup(i => i.AddItems(1, 10)).Returns(1);
+            var boxB = Substitute.For<IContainer>();
+            boxB.AddItems(1, 10).Returns(1);
 
-            var es = new Mock<IStructure>();
-            es.Setup(i => i.GetDevice<IContainer>("BoxA")).Returns(boxA.Object);
-            es.Setup(i => i.GetDevice<IContainer>("BoxB")).Returns(boxB.Object);
+            var es = Substitute.For<IStructure>();
+            es.GetDevice<IContainer>("BoxA").Returns(boxA);
+            es.GetDevice<IContainer>("BoxB").Returns(boxB);
 
-            var s = new Mock<StructureData>();
-            s.Object.AllCustomDeviceNames = new[] { "BoxA", "BoxB", "BoxC", "BoxX" };
-            s.Object.Items = new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA.Object, E = e.Object } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB.Object, E = e.Object } }.ToList() },
+            var s = Substitute.For<IStructureData>();
+            s.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
+            s.Items.Returns(new[] {
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA, E = e } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB, E = e } }.ToList() },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
-            };
-            s.Setup(i => i.GetCurrent()).Returns(es.Object);
-            s.Setup(i => i.E).Returns(e.Object);
+            });
+            s.GetCurrent().Returns(es);
+            s.E.Returns(e);
 
-            var lcdData = Mock.Of<ScriptRootData>();
+            var lcdData = Substitute.For<IScriptRootData>();
 
-            lcdData.E = e.Object;
-            lcdData.E.S = s.Object;
+            lcdData.E.Returns(e);
+            lcdData.E.S.Returns(s);
             var lcdMod = new EmpyrionScripting();
             Assert.AreEqual("1#9 CVa:BoxA->CVa:BoxB", lcdMod.ExecuteHandlebarScript(lcdData, "{{#items E.S 'BoxA'}}{{move this ../E.S 'Box*'}}{{Id}}#{{Count}} {{SourceE.Name}}:{{Source}}->{{DestinationE.Name}}:{{Destination}}{{/move}}{{/items}}"));
         }
@@ -329,75 +349,75 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodItemsMoveToOtherEntity()
         {
             // SV ==================================================================
-            var SVboxA = new Mock<IContainer>();
-            SVboxA.Setup(i => i.RemoveItems(1, int.MaxValue)).Returns(10);
-            SVboxA.Setup(i => i.AddItems(1, 1)).Returns(0);
-            SVboxA.Setup(i => i.AddItems(1, 10)).Throws(new Exception("in the same box"));
+            var SVboxA = Substitute.For<IContainer>();
+            SVboxA.RemoveItems(1, int.MaxValue).Returns(10);
+            SVboxA.AddItems(1, 1).Returns(0);
+            SVboxA.AddItems(1, 10).Returns(C => throw new Exception("in the same box"));
 
-            var SVboxB = new Mock<IContainer>();
-            SVboxB.Setup(i => i.AddItems(1, 10)).Returns(1);
+            var SVboxB = Substitute.For<IContainer>();
+            SVboxB.AddItems(1, 10).Returns(1);
 
-            var esSV = new Mock<IStructure>();
-            esSV.Setup(i => i.GetDevice<IContainer>("BoxA")).Returns(SVboxA.Object);
-            esSV.Setup(i => i.GetDevice<IContainer>("BoxB")).Returns(SVboxB.Object);
+            var esSV = Substitute.For<IStructure>();
+            esSV.GetDevice<IContainer>("BoxA").Returns(SVboxA);
+            esSV.GetDevice<IContainer>("BoxB").Returns(SVboxB);
 
-            var eeSV = new Mock<IEntity>();
-            eeSV.Setup(i => i.Structure).Returns(esSV.Object);
+            var eeSV = Substitute.For<IEntity>();
+            eeSV.Structure.Returns(esSV);
 
-            var eSV = new Mock<EntityData>();
-            eSV.Setup(i => i.Name).Returns("SVa");
-            eSV.Setup(i => i.GetCurrent()).Returns(eeSV.Object);
+            var eSV = Substitute.For<IEntityData>();
+            eSV.Name.Returns("SVa");
+            eSV.GetCurrent().Returns(eeSV);
 
-            var sSV = new Mock<StructureData>();
-            sSV.Object.AllCustomDeviceNames = new[] { "BoxA", "BoxB", "BoxC", "BoxX" };
-            sSV.Object.Items = new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = SVboxA.Object, E = eSV.Object } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = SVboxB.Object, E = eSV.Object } }.ToList() },
+            var sSV = Substitute.For<IStructureData>();
+            sSV.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
+            sSV.Items.Returns(new[] {
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = SVboxA, E = eSV } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = SVboxB, E = eSV } }.ToList() },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
-            };
-            sSV.Setup(i => i.GetCurrent()).Returns(esSV.Object);
-            sSV.Setup(i => i.E).Returns(eSV.Object);
-            eSV.Object.S = sSV.Object;
+            });
+            sSV.GetCurrent().Returns(esSV);
+            sSV.E.Returns(eSV);
+            eSV.S.Returns(sSV);
 
             // CV ==================================================================
-            var CVboxA = new Mock<IContainer>();
-            CVboxA.Setup(i => i.RemoveItems(1, int.MaxValue)).Returns(10);
-            CVboxA.Setup(i => i.AddItems(1, 1)).Returns(0);
-            CVboxA.Setup(i => i.AddItems(1, 10)).Throws(new Exception("in the same box"));
+            var CVboxA = Substitute.For<IContainer>();
+            CVboxA.RemoveItems(1, int.MaxValue).Returns(10);
+            CVboxA.AddItems(1, 1).Returns(0);
+            CVboxA.AddItems(1, 10).Returns(C => throw new Exception("in the same box"));
 
-            var CVboxB = new Mock<IContainer>();
-            CVboxB.Setup(i => i.AddItems(1, 10)).Returns(1);
+            var CVboxB = Substitute.For<IContainer>();
+            CVboxB.AddItems(1, 10).Returns(1);
 
-            var esCV = new Mock<IStructure>();
-            esCV.Setup(i => i.GetDevice<IContainer>("BoxA")).Returns(CVboxA.Object);
-            esCV.Setup(i => i.GetDevice<IContainer>("BoxB")).Returns(CVboxB.Object);
+            var esCV = Substitute.For<IStructure>();
+            esCV.GetDevice<IContainer>("BoxA").Returns(CVboxA);
+            esCV.GetDevice<IContainer>("BoxB").Returns(CVboxB);
 
-            var eeCV = new Mock<IEntity>();
-            eeCV.Setup(i => i.Structure).Returns(esCV.Object);
+            var eeCV = Substitute.For<IEntity>();
+            eeCV.Structure.Returns(esCV);
 
-            var eCV = new Mock<EntityData>();
-            eCV.Setup(i => i.Name).Returns("CVb");
-            eCV.Setup(i => i.GetCurrent()).Returns(eeCV.Object);
+            var eCV = Substitute.For<IEntityData>();
+            eCV.Name.Returns("CVb");
+            eCV.GetCurrent().Returns(eeCV);
 
-            var sCV = new Mock<StructureData>();
-            sCV.Object.AllCustomDeviceNames = new[] { "BoxA", "BoxB", "BoxC", "BoxX" };
-            sCV.Object.Items = new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = CVboxA.Object, E = eCV.Object } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = CVboxB.Object, E = eCV.Object } }.ToList() },
+            var sCV = Substitute.For<IStructureData>();
+            sCV.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
+            sCV.Items.Returns(new[] {
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = CVboxA, E = eCV } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = CVboxB, E = eCV } }.ToList() },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
-            };
-            sCV.Setup(i => i.GetCurrent()).Returns(esCV.Object);
-            sCV.Setup(i => i.E).Returns(eCV.Object);
-            eCV.Object.S = sCV.Object;
+            });
+            sCV.GetCurrent().Returns(esCV);
+            sCV.E.Returns(eCV);
+            eCV.S.Returns(sCV);
 
-            sCV.Object.DockedE = new[] { eSV.Object };
+            sCV.DockedE.Returns(new[] { eSV });
 
             // MOVE ==================================================================
 
-            var lcdData = Mock.Of<ScriptRootData>();
+            var lcdData = Substitute.For<IScriptRootData>();
 
-            lcdData.E   = eCV.Object;
-            lcdData.E.S = sCV.Object;
+            lcdData.E.Returns(eCV);
+            lcdData.E.S.Returns(sCV);
             var lcdMod = new EmpyrionScripting();
             Assert.AreEqual("SVa:1#9 SVa:BoxA->CVb:BoxB", lcdMod.ExecuteHandlebarScript(lcdData, "{{#each E.S.DockedE}}{{Name}}:{{#items S 'BoxA'}}{{move this @root/E.S 'Box*'}}{{Id}}#{{Count}} {{SourceE.Name}}:{{Source}}->{{DestinationE.Name}}:{{Destination}}{{/move}}{{/items}}{{/each}}"));
         }
@@ -409,6 +429,7 @@ namespace EmpyrionScripting.UnitTests
             {
                 SaveGameModPath = @"C:\steamcmd\empyrion\PlayfieldServer/../Saves/Games/Test\Mods\EmpyrionScripting"
             };
+            lcdMod.SaveGamesScripts = new SaveGamesScripts(null) { SaveGameModPath = lcdMod.SaveGameModPath };
             lcdMod.SaveGamesScripts.ReadSaveGamesScripts();
 
             lcdMod.ExecFoundSaveGameScripts(new ScriptSaveGameRootData(null, null, null), Path.Combine(lcdMod.SaveGamesScripts.MainScriptPath, "CV"));
@@ -417,7 +438,7 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodSaveGamesScriptsRoot()
         {
-            var lcdData = Mock.Of<ScriptSaveGameRootData>();
+            var lcdData = Substitute.For<ScriptSaveGameRootData>();
             lcdData.MainScriptPath = "abc";
             var lcdMod = new EmpyrionScripting();
             Assert.AreEqual(

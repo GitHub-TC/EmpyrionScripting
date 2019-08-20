@@ -76,7 +76,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var root = arguments[0] as ScriptRootData;
+                var root = arguments[0] as IScriptRootData;
                 root.Data.AddOrUpdate(arguments[1]?.ToString(), arguments[2], (S, O) => arguments[2]);
             }
             catch (Exception error)
@@ -92,7 +92,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var root = arguments[0] as ScriptRootData;
+                var root = arguments[0] as IScriptRootData;
 
                 var data = new StringWriter();
                 options.Template(data, context as object);

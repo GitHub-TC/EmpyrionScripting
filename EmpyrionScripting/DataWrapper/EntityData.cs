@@ -1,23 +1,25 @@
 ﻿using Eleon.Modding;
+using System;
 using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class EntityData
+    public class EntityData : IEntityData
     {
-        private IEntity entity;
+        private readonly IEntity entity;
 
         public EntityData()
         {
+            _s = new Lazy<IStructureData>(() => new StructureData(this));
         }
 
-        public EntityData(IEntity entity)
+        public EntityData(IEntity entity): this()
         {
             this.entity = entity;
         }
 
-        public StructureData S { get => _s == null ? _s = new StructureData(this) : _s; set => _s = value; }
-        private StructureData _s;
+        public IStructureData S => _s.Value;
+        private readonly Lazy<IStructureData> _s;
 
         public string[] DeviceNames => entity.Structure.GetDeviceTypeNames();
 
