@@ -96,6 +96,7 @@
     <Compile Include="DataWrapper\EntityData.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="ExtensionsToolbox.cs" />
+    <Compile Include="IDeviceLock.cs" />
     <Compile Include="ItemInfos.cs" />
     <Compile Include="DataWrapper\ItemsData.cs" />
     <Compile Include="DataWrapper\ScriptRootData.cs" />

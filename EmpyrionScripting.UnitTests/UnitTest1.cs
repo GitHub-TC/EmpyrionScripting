@@ -278,7 +278,7 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodItemsMove()
         {
-            EmpyrionScripting.WithinUnitTest = true;
+            ConveyorHelpers.CreateDeviceLock = (P, S, V) => new MockDeviceLock();
 
             var boxA = Substitute.For<IContainer>();
             boxA.RemoveItems(1, int.MaxValue).Returns(10);
@@ -297,6 +297,11 @@ namespace EmpyrionScripting.UnitTests
                 new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB } }.ToList() },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
             });
+            s.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, ContainerSource>() {
+                ["BoxA"] = new ContainerSource() { Container = boxA, CustomName = "BoxA"},
+                ["BoxB"] = new ContainerSource() { Container = boxB, CustomName = "BoxB"},
+            });
+
             s.GetCurrent().Returns(es);
 
             var E = Substitute.For<IEntityData>();
@@ -306,12 +311,23 @@ namespace EmpyrionScripting.UnitTests
             lcdData.E.Returns(E);
 
             var lcdMod = new EmpyrionScripting();
-            Assert.AreEqual("", lcdMod.ExecuteHandlebarScript(lcdData, "{{#items E.S 'BoxA'}}{{move this ../E.S 'BoxB'}}{{/move}}{{/items}}"));
+            Assert.AreEqual("9-1", lcdMod.ExecuteHandlebarScript(lcdData, "{{#items E.S 'BoxA'}}{{move this ../E.S 'BoxB'}}{{Count}}-{{Id}}{{/move}}{{/items}}"));
+        }
+
+        class MockDeviceLock : IDeviceLock
+        {
+            public bool Success => true;
+
+            public void Dispose()
+            {
+            }
         }
 
         [TestMethod]
         public void TestMethodItemsMoveWithSameBox()
         {
+            ConveyorHelpers.CreateDeviceLock = (P, S, V) => new MockDeviceLock();
+
             var e = Substitute.For<IEntityData>();
             e.Name.Returns("CVa");
 
@@ -334,6 +350,11 @@ namespace EmpyrionScripting.UnitTests
                 new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB, E = e } }.ToList() },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
             });
+            s.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, ContainerSource>()
+            {
+                ["BoxA"] = new ContainerSource() { Container = boxA, CustomName = "BoxA" },
+                ["BoxB"] = new ContainerSource() { Container = boxB, CustomName = "BoxB" },
+            });
             s.GetCurrent().Returns(es);
             s.E.Returns(e);
 
@@ -348,6 +369,8 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodItemsMoveToOtherEntity()
         {
+            ConveyorHelpers.CreateDeviceLock = (P, S, V) => new MockDeviceLock();
+            
             // SV ==================================================================
             var SVboxA = Substitute.For<IContainer>();
             SVboxA.RemoveItems(1, int.MaxValue).Returns(10);
@@ -374,6 +397,11 @@ namespace EmpyrionScripting.UnitTests
                 new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = SVboxA, E = eSV } }.ToList() },
                 new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = SVboxB, E = eSV } }.ToList() },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
+            });
+            sSV.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, ContainerSource>()
+            {
+                ["BoxA"] = new ContainerSource() { Container = SVboxA, CustomName = "BoxA" },
+                ["BoxB"] = new ContainerSource() { Container = SVboxB, CustomName = "BoxB" },
             });
             sSV.GetCurrent().Returns(esSV);
             sSV.E.Returns(eSV);
@@ -405,6 +433,11 @@ namespace EmpyrionScripting.UnitTests
                 new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = CVboxA, E = eCV } }.ToList() },
                 new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = CVboxB, E = eCV } }.ToList() },
                 new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
+            });
+            sCV.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, ContainerSource>()
+            {
+                ["BoxA"] = new ContainerSource() { Container = CVboxA, CustomName = "BoxA" },
+                ["BoxB"] = new ContainerSource() { Container = CVboxB, CustomName = "BoxB" },
             });
             sCV.GetCurrent().Returns(esCV);
             sCV.E.Returns(eCV);

@@ -31,7 +31,7 @@ namespace EmpyrionScripting
         public static EmpyrionScripting EmpyrionScriptingInstance { get; set; }
         public static ItemInfos ItemInfos { get; set; }
         public string SaveGameModPath { get; set; }
-        public static ConfigurationManager<Configuration> Configuration { get; private set; }
+        public static ConfigurationManager<Configuration> Configuration { get; set; } = new ConfigurationManager<Configuration>() { Current = new Configuration() };
         public static Localization Localization { get; set; }
         public static IModApi ModApi { get; private set; }
         public SaveGamesScripts SaveGamesScripts { get; set; }
@@ -43,7 +43,6 @@ namespace EmpyrionScripting
         public DateTime LastAlive { get; private set; }
         public int InGameScriptsCount { get; private set; }
         public int SaveGameScriptsCount { get; private set; }
-        public static bool WithinUnitTest { get; set; }
 
         private static int CycleCounter;
 

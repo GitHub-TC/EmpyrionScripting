@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
 
 namespace EmpyrionScripting
 {
-    public class DeviceLock : IDisposable
+    public class DeviceLock : IDeviceLock
     {
         readonly Action unlockAction;
 
@@ -15,12 +14,6 @@ namespace EmpyrionScripting
             var witherror = false;
             try
             {
-                if (EmpyrionScripting.WithinUnitTest)
-                {
-                    Success = true;
-                    return;
-                }
-
                 if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0) return;
 
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;
@@ -48,7 +41,7 @@ namespace EmpyrionScripting
                  {
                      e.Reset();
                      playfield.LockStructureDevice(structure.Id, position, false, (s) => e.Set());
-                     if(!e.WaitOne(10000)) Log($"Unlock:Timeout {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
+                     if (!e.WaitOne(10000)) Log($"Unlock:Timeout {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
                  };
             }
             catch (Exception error)

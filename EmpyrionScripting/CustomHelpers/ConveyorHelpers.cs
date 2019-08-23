@@ -15,6 +15,7 @@ namespace EmpyrionScripting.CustomHelpers
         private static object movelock = new object();
 
         public static Action<string, LogLevel> Log { get; set; }
+        public static Func<IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateDeviceLock { get; set; } = (P, S, V) => new DeviceLock(P,S,V);
 
         public class ItemMoveInfo
         {
@@ -74,7 +75,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 int? maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? limit : (int?)null;
 
-                if (!EmpyrionScripting.WithinUnitTest && ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
                 {
                     Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                     return;
@@ -88,7 +89,7 @@ namespace EmpyrionScripting.CustomHelpers
                     if(uniqueNames.Any()){
                         item.Source
                             .ForEach(S => {
-                                using(var locked = new DeviceLock(EmpyrionScripting.ModApi?.Playfield, S.E?.S.GetCurrent(), S.Position)) {
+                                using(var locked = CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, S.E?.S.GetCurrent(), S.Position)) {
                                     if (!locked.Success)
                                     {
                                         Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
@@ -153,7 +154,7 @@ namespace EmpyrionScripting.CustomHelpers
                 return count;
             }
 
-            using (var locked = new DeviceLock(EmpyrionScripting.ModApi.Playfield, targetStructure.GetCurrent(), targetData.Position))
+            using (var locked = CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, targetStructure.GetCurrent(), targetData.Position))
             {
                 if (!locked.Success)
                 {
