@@ -179,7 +179,7 @@ namespace EmpyrionScripting
             if (Configuration.Current.LogLevel != LogLevel.Debug) Log($"ScriptInfos: {ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{ScriptExecQueue.ExecQueue.Count} WaitForExec:{ScriptExecQueue.WaitForExec.Count}", LogLevel.Message);
             ScriptExecQueue.ScriptRunInfo
                 .OrderBy(I => I.Key)
-                .ForEach(I => Log($"Script: {I.Key,-50} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime}", LogLevel.Message));
+                .ForEach(I => Log($"Script: {I.Key,-50} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime} {(I.Value.RunningInstances > 0 ? $" !!!running!!! {I.Value.RunningInstances} times" : "")}", LogLevel.Message));
         }
 
         private void StartScriptIntervall(int intervall, Action action, string name)

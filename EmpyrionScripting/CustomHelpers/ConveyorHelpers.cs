@@ -12,6 +12,7 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class ConveyorHelpers
     {
+        private const int PlayerCoreType = 558;
         private static object movelock = new object();
 
         public static Action<string, LogLevel> Log { get; set; }
@@ -171,6 +172,110 @@ namespace EmpyrionScripting.CustomHelpers
                 else return target.AddItems(S.Id, count);
             }
         }
+
+        [HandlebarTag("deconstruct")]
+        public static void DeconstructHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 3) throw new HandlebarsException("{{deconstruct @root entity container}} helper must have three argument: @root entity container");
+
+            var root = arguments[0] as IScriptRootData;
+            var E    = arguments[1] as IEntityData;
+            var N    = arguments[2]?.ToString();
+            IDeviceLock locked = null;
+
+            try
+            {
+                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+                {
+                    Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                    return;
+                }
+
+                var minPos      = E.S.GetCurrent().MinPos;
+                var maxPos      = E.S.GetCurrent().MaxPos;
+                var S           = E.S.GetCurrent();
+                var coreName    = $"Core-Destruct-{E.Id}";
+                var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
+
+                var maxMilliSeconds = EmpyrionScripting.Configuration.Current.InGameScriptsIntervallMS * EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles;
+
+                var target      = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
+                if (target == null)
+                {
+                    output.Write($"No target container '{N}' found");
+                    return;
+                }
+                var targetPos = root.E.S.GetCurrent().GetDevicePositions(N).First();
+
+                var removed     = 0;
+                var count       = 0;
+                var poscount    = 0;
+
+                if(corePosList.Count == 0)
+                {
+                    output.Write($"No core '{coreName}' found on {E.Id}");
+                    return;
+                }
+
+                var corePos = corePosList.First();
+                var core = E.S.GetCurrent().GetBlock(corePos);
+                core.Get(out var coreBlockType, out _ , out _, out _);
+
+                if (coreBlockType != PlayerCoreType)
+                {
+                    output.Write($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
+                    return;
+                }
+
+                var startTime = DateTime.Now;
+                output.WriteLine($"Deconstruct:{E.Name} Id:{E.Id}\nminPos:{minPos} maxPos:{maxPos}");
+
+                for (int y = maxPos.y; y >= minPos.y; y--)
+                {
+
+                    for (int x = minPos.x; x <= maxPos.x; x++)
+                    {
+                        for (int z = minPos.z; z <= maxPos.z; z++)
+                        {
+                            var block = S.GetBlock(x, 128 + y, z);
+                            if (block != null)
+                            {
+                                poscount++;
+                                block.Get(out var blockType, out _, out _, out _);
+                                if (blockType > 0 && blockType != PlayerCoreType)
+                                {
+                                    locked = locked ?? CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, root.E.S.GetCurrent(), targetPos);
+                                    if (!locked.Success) return;
+
+                                    count++;
+                                    if (target.AddItems(blockType, 1) > 0)
+                                    {
+                                        output.WriteLine($"Container '{N}' is full");
+                                        return;
+                                    }
+                                    block.Set(0);
+                                    removed++;
+
+                                    if (removed > 100 && removed % 100 == 0 && (DateTime.Now - startTime).TotalMilliseconds > maxMilliSeconds) return;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                output.WriteLine($"Removed:{removed} Count:{poscount}/{count}");
+            }
+            catch (Exception error)
+            {
+                output.Write("{{deconstruct}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+            finally
+            {
+                locked?.Dispose();
+            }
+        }
+
+
 
     }
 }

@@ -108,5 +108,45 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("setdamage")]
+        public static void BlockSetDamageHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 3) throw new HandlebarsException("{{setdamage @root block damage}} helper must have three argument: @root block damage");
+            if (!(arguments[0] is ScriptSaveGameRootData root)) throw new HandlebarsException("{{setdamage @root block damage}} only allowed in SaveGame scripts");
+
+            var block = arguments[1] as BlockData;
+            int.TryParse(arguments[2].ToString(), out var damage);
+
+            try
+            {
+                block.GetBlock().SetDamage(damage);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{setdamage}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("settype")]
+        public static void BlockSetHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 3) throw new HandlebarsException("{{settype @root block typeid}} helper must have three argument: @root block typeid");
+            if (!(arguments[0] is ScriptSaveGameRootData root)) throw new HandlebarsException("{{settype @root block typeid}} only allowed in SaveGame scripts");
+
+            var block = arguments[1] as BlockData;
+            int.TryParse(arguments[2].ToString(), out var type);
+
+            try
+            {
+                block.GetBlock().Set(type);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{settype}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+
+
     }
 }

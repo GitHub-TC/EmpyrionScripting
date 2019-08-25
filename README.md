@@ -30,6 +30,7 @@ YouTube video;
 * https://youtu.be/V1w2A3LAZCs
 * https://youtu.be/O89NQJjbQuw
 * https://youtu.be/uTgXwrlCfNQ
+* https://youtu.be/qhYmJWHk8ec
 
 * https://youtu.be/XzYKNevK0bs
 * https://youtu.be/SOnZ_mzytA4
@@ -569,6 +570,11 @@ DateTime format:
 + {{entitiesbyid @root ids}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit IDs in (id1;id2;id3)
 
+### CustomHelpers (deconstruct)
++ {{deconstruct @root entity container}}
+  + Baut die Struktur 'entity' ab und befördert die Teile in den Container mit dem Namen welcher mit 'container' angegben wird
+  + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
+
 ## SaveGame Scripte
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
 \[SaveGame\]\\Mods\\EmpyrionScripting\\Scripts
@@ -595,6 +601,9 @@ Hinweis: EntityType ist BA,CV,SV or HV
 ### CustomHelpers-SaveGameScripts (fileexists)
 + {{fileexists @root dir filename}}
   + Wenn die Datei existiert dann das Innere ausführen ansonsten den exec Teil auswerten
+
+{{settype @root block typeid}}
+{{setdamage @root block damage}}
 
 ### Whats next?
 
@@ -639,6 +648,7 @@ YouTube video;
 * https://youtu.be/V1w2A3LAZCs
 * https://youtu.be/O89NQJjbQuw
 * https://youtu.be/uTgXwrlCfNQ
+* https://youtu.be/qhYmJWHk8ec
 
 * https://youtu.be/XzYKNevK0bs
 * https://youtu.be/SOnZ_mzytA4
@@ -1167,6 +1177,10 @@ DateTime format:
 + {{entitiesbyid @root ids}}
   + Get nearby Entity (with same faction) with IDs in (id1;id2;id3)
 
+### CustomHelpers (deconstruct)
++ {{deconstruct @root entity container}}
+   + Deconstruct the entity 'entity' and moves parts to container named as 'container''
+   + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
 
 ## SaveGame scripts
 This special form of scripts can be stored in the SaveGame. The basic path for this is the

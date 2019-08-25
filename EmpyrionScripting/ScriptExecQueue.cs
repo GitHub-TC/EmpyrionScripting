@@ -14,8 +14,9 @@ namespace EmpyrionScripting
             public int Count { get; set; }
             public DateTime LastStart { get; set; }
             public TimeSpan ExecTime { get; set; }
+            public int RunningInstances;
         }
-        public ConcurrentDictionary<string, ScriptInfo> ScriptRunInfo { get; } = new ConcurrentDictionary<string, ScriptInfo>();
+        public ConcurrentDictionary<string, ScriptInfo> ScriptRunInfo { get; set; } = new ConcurrentDictionary<string, ScriptInfo>();
 
         private Action<IScriptRootData> processScript;
 
@@ -76,7 +77,10 @@ namespace EmpyrionScripting
                 info.LastStart = DateTime.Now;
                 info.Count++;
 
+                Interlocked.Increment(ref info.RunningInstances);
                 processScript(data);
+                Interlocked.Decrement(ref info.RunningInstances);
+
                 lock (ExecQueue) WaitForExec.TryRemove(data.ScriptId, out _);
 
                 info.ExecTime += DateTime.Now - info.LastStart;
@@ -101,7 +105,9 @@ namespace EmpyrionScripting
 
         public void Clear()
         {
-            ScriptRunInfo.Clear();
+            try                     { ScriptRunInfo = new ConcurrentDictionary<string, ScriptInfo>(ScriptRunInfo.Where(S => S.Value.RunningInstances > 0).ToArray()); }
+            catch (Exception error) { ScriptRunInfo.Clear(); Log($"EmpyrionScripting Mod: Clear => {error}", LogLevel.Error); }
+
             WaitForExec.Clear();
             ExecQueue = new ConcurrentQueue<IScriptRootData>();
         }
