@@ -10,6 +10,7 @@ namespace EmpyrionScripting.DataWrapper
     {
         public bool DeviceLockAllowed { get; }
 
+        private ConcurrentDictionary<string, object> _PersistendData;
         private IEntity[] currentEntites;
         private IPlayfield playfield;
         private IEntity entity;
@@ -19,21 +20,23 @@ namespace EmpyrionScripting.DataWrapper
             _e = new Lazy<IEntityData>(() => new EntityData(entity));
         }
 
-        public ScriptRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed) : this()
+        public ScriptRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed, ConcurrentDictionary<string, object> persistendData) : this()
         {
             DeviceLockAllowed = deviceLockAllowed;
+            _PersistendData = persistendData;
             this.currentEntites = currentEntities;
             this.playfield = playfield;
             this.entity = entity;
         }
 
-        public ScriptRootData(ScriptRootData data) : this(data.currentEntites, data.playfield, data.entity, data.DeviceLockAllowed)
+        public ScriptRootData(ScriptRootData data) : this(data.currentEntites, data.playfield, data.entity, data.DeviceLockAllowed, data._PersistendData)
         {
             _p = data._p;
             _e = data._e;
             DisplayType = data.DisplayType;
         }
 
+        public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;
         public IEntity[] GetCurrentEntites() => currentEntites;
 
         public string OreIds => "2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297";

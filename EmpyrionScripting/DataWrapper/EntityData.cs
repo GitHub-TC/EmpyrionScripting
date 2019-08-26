@@ -6,7 +6,7 @@ namespace EmpyrionScripting.DataWrapper
 {
     public class EntityData : IEntityData
     {
-        private readonly IEntity entity;
+        private readonly WeakReference<IEntity> entity;
 
         public EntityData()
         {
@@ -15,21 +15,21 @@ namespace EmpyrionScripting.DataWrapper
 
         public EntityData(IEntity entity): this()
         {
-            this.entity = entity;
+            this.entity = new WeakReference<IEntity>(entity);
         }
 
         public IStructureData S => _s.Value;
         private readonly Lazy<IStructureData> _s;
 
-        public string[] DeviceNames => entity.Structure.GetDeviceTypeNames();
+        public string[] DeviceNames => GetCurrent().Structure.GetDeviceTypeNames();
 
-        public int Id => entity.Id;
-        public virtual string Name => entity.Name;
-        public EntityType EntityType => entity.Type;
+        public int Id => GetCurrent().Id;
+        public virtual string Name => GetCurrent().Name;
+        public EntityType EntityType => GetCurrent().Type;
 
-        public Vector3 Pos => entity.Position;
-        public FactionData Faction => entity.Faction;
+        public Vector3 Pos => GetCurrent().Position;
+        public FactionData Faction => GetCurrent().Faction;
 
-        public virtual IEntity GetCurrent() => entity;
+        public virtual IEntity GetCurrent() => entity.TryGetTarget(out var e) ? e : null;
     }
 }

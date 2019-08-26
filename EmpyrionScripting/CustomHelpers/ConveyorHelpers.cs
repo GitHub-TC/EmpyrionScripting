@@ -173,47 +173,51 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        public class DeconstructData
+        {
+            public int Id { get; set; }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public int Z { get; set; }
+            public int TotalBlocks { get; set; }
+            public int CheckedBlocks { get; set; }
+            public int RemovedBlocks { get; set; }
+            public VectorInt3 MinPos { get; set; }
+            public VectorInt3 MaxPos { get; set; }
+        }
+
         [HandlebarTag("deconstruct")]
-        public static void DeconstructHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void DeconstructHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length < 3) throw new HandlebarsException("{{deconstruct @root entity container}} helper must have three argument: @root entity container");
 
             var root = arguments[0] as IScriptRootData;
             var E    = arguments[1] as IEntityData;
             var N    = arguments[2]?.ToString();
-            IDeviceLock locked = null;
 
             try
             {
-                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
-                {
-                    Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
-                    return;
-                }
-
                 var minPos      = E.S.GetCurrent().MinPos;
                 var maxPos      = E.S.GetCurrent().MaxPos;
                 var S           = E.S.GetCurrent();
                 var coreName    = $"Core-Destruct-{E.Id}";
                 var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
 
-                var maxMilliSeconds = EmpyrionScripting.Configuration.Current.InGameScriptsIntervallMS * EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles;
-
                 var target      = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
                 if (target == null)
                 {
+                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
                     output.Write($"No target container '{N}' found");
+                    options.Inverse(output, context as object);
                     return;
                 }
                 var targetPos = root.E.S.GetCurrent().GetDevicePositions(N).First();
 
-                var removed     = 0;
-                var count       = 0;
-                var poscount    = 0;
-
                 if(corePosList.Count == 0)
                 {
+                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
                     output.Write($"No core '{coreName}' found on {E.Id}");
+                    options.Inverse(output, context as object);
                     return;
                 }
 
@@ -223,59 +227,89 @@ namespace EmpyrionScripting.CustomHelpers
 
                 if (coreBlockType != PlayerCoreType)
                 {
+                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
                     output.Write($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
+                    options.Inverse(output, context as object);
                     return;
                 }
 
-                var startTime = DateTime.Now;
-                output.WriteLine($"Deconstruct:{E.Name} Id:{E.Id}\nminPos:{minPos} maxPos:{maxPos}");
+                var deconstructData = root.GetPersistendData().GetOrAdd(root.ScriptId, K => new DeconstructData() {
+                    Id          = E.Id,
+                    MinPos      = minPos,
+                    MaxPos      = maxPos,
+                    X           = minPos.x,
+                    Y           = maxPos.y,
+                    Z           = minPos.z,
+                    TotalBlocks =   (Math.Abs(minPos.x) + Math.Abs(maxPos.x) + 1) *
+                                    (Math.Abs(minPos.y) + Math.Abs(maxPos.y) + 1) *
+                                    (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
+                }) as DeconstructData;
 
-                for (int y = maxPos.y; y >= minPos.y; y--)
-                {
+                if(deconstructData.Id != E.Id)                                       root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                else if(deconstructData.CheckedBlocks < deconstructData.TotalBlocks) lock(deconstructData) DeconstructPart(output, root, S, deconstructData, target, targetPos, N);
 
-                    for (int x = minPos.x; x <= maxPos.x; x++)
-                    {
-                        for (int z = minPos.z; z <= maxPos.z; z++)
-                        {
-                            var block = S.GetBlock(x, 128 + y, z);
-                            if (block != null)
-                            {
-                                poscount++;
-                                block.Get(out var blockType, out _, out _, out _);
-                                if (blockType > 0 && blockType != PlayerCoreType)
-                                {
-                                    locked = locked ?? CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, root.E.S.GetCurrent(), targetPos);
-                                    if (!locked.Success) return;
-
-                                    count++;
-                                    if (target.AddItems(blockType, 1) > 0)
-                                    {
-                                        output.WriteLine($"Container '{N}' is full");
-                                        return;
-                                    }
-                                    block.Set(0);
-                                    removed++;
-
-                                    if (removed > 100 && removed % 100 == 0 && (DateTime.Now - startTime).TotalMilliseconds > maxMilliSeconds) return;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                output.WriteLine($"Removed:{removed} Count:{poscount}/{count}");
+                options.Template(output, deconstructData);
             }
             catch (Exception error)
             {
                 output.Write("{{deconstruct}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        static void DeconstructPart(TextWriter output, IScriptRootData root, IStructure S, DeconstructData deconstructData, IContainer target, VectorInt3 targetPos, string N)
+        {
+            IDeviceLock locked = null;
+
+            var startTime = DateTime.Now;
+            var maxMilliSeconds = EmpyrionScripting.Configuration.Current.InGameScriptsIntervallMS;
+
+            try
+            {
+                for (; deconstructData.Y >= deconstructData.MinPos.y; deconstructData.Y--)
+                {
+                    for (; deconstructData.X <= deconstructData.MaxPos.x; deconstructData.X++)
+                    {
+                        for (; deconstructData.Z <= deconstructData.MaxPos.z; deconstructData.Z++)
+                        {
+                            deconstructData.CheckedBlocks++;
+
+                            var block = S.GetBlock(deconstructData.X, 128 + deconstructData.Y, deconstructData.Z);
+                            if (block != null)
+                            {
+                                block.Get(out var blockType, out _, out _, out _);
+                                if (blockType > 0 && blockType != PlayerCoreType)
+                                {
+                                    locked = locked ?? CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, root.E.S.GetCurrent(), targetPos);
+                                    if (!locked.Success)
+                                    {
+                                        deconstructData.CheckedBlocks--;
+                                        output.WriteLine($"Container '{N}' is locked");
+                                        return;
+                                    }
+
+                                    if (target.AddItems(blockType, 1) > 0)
+                                    {
+                                        deconstructData.CheckedBlocks--;
+                                        output.WriteLine($"Container '{N}' is full");
+                                        return;
+                                    }
+                                    block.Set(0);
+                                    deconstructData.RemovedBlocks++;
+
+                                    if (deconstructData.RemovedBlocks > 100 && deconstructData.RemovedBlocks % 100 == 0 && (DateTime.Now - startTime).TotalMilliseconds > maxMilliSeconds) return;
+                                }
+                            }
+                        }
+                        deconstructData.Z = deconstructData.MinPos.z;
+                    }
+                    deconstructData.X = deconstructData.MinPos.x;
+                }
             }
             finally
             {
                 locked?.Dispose();
             }
         }
-
-
 
     }
 }

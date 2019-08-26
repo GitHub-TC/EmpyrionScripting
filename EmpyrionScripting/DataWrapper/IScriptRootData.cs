@@ -26,5 +26,6 @@ namespace EmpyrionScripting.DataWrapper
         string ScriptId { get; set; }
 
         IEntity[] GetCurrentEntites();
+        ConcurrentDictionary<string, object> GetPersistendData();
     }
 }

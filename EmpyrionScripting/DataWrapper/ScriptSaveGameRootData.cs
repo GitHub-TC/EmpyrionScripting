@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using System.Collections.Concurrent;
 
 namespace EmpyrionScripting.DataWrapper
 {
@@ -12,7 +13,7 @@ namespace EmpyrionScripting.DataWrapper
             ScriptPath     = data.ScriptPath;
             MainScriptPath = data.MainScriptPath;
         }
-        public ScriptSaveGameRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity) : base(currentEntities, playfield, entity, true)
+        public ScriptSaveGameRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity, ConcurrentDictionary<string, object> persistendData) : base(currentEntities, playfield, entity, true, persistendData)
         {
         }
 

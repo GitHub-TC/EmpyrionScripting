@@ -25,6 +25,7 @@ namespace EmpyrionScripting
         ModGameAPI legacyApi;
 
         ConcurrentDictionary<string, Func<object, string>> LcdCompileCache = new ConcurrentDictionary<string, Func<object, string>>();
+        ConcurrentDictionary<string, object> PersistendData { get; set; } = new ConcurrentDictionary<string, object>();
 
         public ScriptExecQueue ScriptExecQueue { get; set; }
 
@@ -136,6 +137,7 @@ namespace EmpyrionScripting
             DisplayScriptInfos();
             ScriptExecQueue.Clear();
             LcdCompileCache.Clear();
+            PersistendData.Clear();
         }
 
         public void StartAllScriptsForPlayfieldServer()
@@ -249,7 +251,7 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptRootData(CurrentEntities, ModApi.Playfield, entity, DeviceLockAllowed);
+                var entityScriptData = new ScriptRootData(CurrentEntities, ModApi.Playfield, entity, DeviceLockAllowed, PersistendData);
 
                 var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword)).ToArray();
                 Log($"ProcessAllInGameScripts: #{deviceNames.Length}", LogLevel.Debug);
@@ -315,7 +317,7 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptSaveGameRootData(CurrentEntities, ModApi.Playfield, entity)
+                var entityScriptData = new ScriptSaveGameRootData(CurrentEntities, ModApi.Playfield, entity, PersistendData)
                 {
                     MainScriptPath = SaveGamesScripts.MainScriptPath,
                     ModApi         = ModApi

@@ -19,7 +19,7 @@ namespace EmpyrionScripting.DataWrapper
                 .Select(S => EmpyrionScripting.ModApi.Playfield.Entities.FirstOrDefault(E => E.Value.Structure?.Id == S.Id))
                 .Where(E => E.Value != null)
                 .Select(E => new EntityData(E.Value)).ToArray());
-            _s = new Lazy<IStructure>(() => E.GetCurrent().Structure);
+            _s = new Lazy<WeakReference<IStructure>>(() => new WeakReference<IStructure>(E.GetCurrent().Structure));
             _pilot = new Lazy<PlayerData>(() => new PlayerData(GetCurrent().Pilot));
             _passengers = new Lazy<PlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
             _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank));
@@ -88,8 +88,8 @@ namespace EmpyrionScripting.DataWrapper
             return new Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>>(allItems.Values.OrderBy(I => I.Id).ToArray(), containerSource);
         }
 
-        virtual public IStructure GetCurrent() => _s.Value;
-        private readonly Lazy<IStructure> _s;
+        virtual public IStructure GetCurrent() => _s.Value.TryGetTarget(out var s) ? s : null;
+        private readonly Lazy<WeakReference<IStructure>> _s;
 
         public PlayerData Pilot => _pilot.Value;
         private readonly Lazy<PlayerData> _pilot;
