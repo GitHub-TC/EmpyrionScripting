@@ -207,7 +207,7 @@ namespace EmpyrionScripting.CustomHelpers
                 if (target == null)
                 {
                     root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                    output.Write($"No target container '{N}' found");
+                    output.WriteLine($"No target container '{N}' found");
                     options.Inverse(output, context as object);
                     return;
                 }
@@ -216,7 +216,7 @@ namespace EmpyrionScripting.CustomHelpers
                 if(corePosList.Count == 0)
                 {
                     root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                    output.Write($"No core '{coreName}' found on {E.Id}");
+                    output.WriteLine($"No core '{coreName}' found on {E.Id}");
                     options.Inverse(output, context as object);
                     return;
                 }
@@ -228,7 +228,7 @@ namespace EmpyrionScripting.CustomHelpers
                 if (coreBlockType != PlayerCoreType)
                 {
                     root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                    output.Write($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
+                    output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
                     options.Inverse(output, context as object);
                     return;
                 }
