@@ -1,7 +1,6 @@
 ﻿using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -18,7 +17,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (EmpyrionScripting.Configuration.Current.EntityAccessMinDistance == 0) return;
 
             var root                = arguments[0] as IScriptRootData;
-            var isElevatedScript    = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Id == (int)FactionGroup.Admin;
+            var isElevatedScript    = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
             var namesSearch         = arguments[1]?.ToString();
 
             try
@@ -45,7 +44,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (EmpyrionScripting.Configuration.Current.EntityAccessMinDistance == 0) return;
 
             var root                = arguments[0] as IScriptRootData;
-            var isElevatedScript    = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Id == (int)FactionGroup.Admin;
+            var isElevatedScript    = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
             var namesSearch         = arguments[1]?.ToString();
 
             try

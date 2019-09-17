@@ -44,8 +44,12 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
+                if(!Enum.TryParse<DeviceTypeName>(typeSearch, true, out var deviceType)) {
+                    output.Write("{{devicesoftype}} error unknown device " + typeSearch);
+                }
+
                 var blocks = structure?.GetCurrent()
-                                .GetDevices(typeSearch)?
+                                .GetDevices(deviceType)?
                                 .Values()
                                 .Select(V => new BlockData(structure.GetCurrent(), V))
                                 .ToArray();

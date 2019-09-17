@@ -21,7 +21,7 @@ namespace EmpyrionScripting.DataWrapper
         public IStructureData S => _s.Value;
         private readonly Lazy<IStructureData> _s;
 
-        public string[] DeviceNames => GetCurrent().Structure.GetDeviceTypeNames();
+        public string[] DeviceNames => Enum.GetNames(typeof(DeviceTypeName));
 
         public int Id => GetCurrent().Id;
         public virtual string Name => GetCurrent().Name;

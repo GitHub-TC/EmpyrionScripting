@@ -575,6 +575,16 @@ DateTime format:
   + Baut die Struktur 'entity' ab und befördert die Teile in den Container mit dem Namen welcher mit 'container' angegben wird
   + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
 
+## Elevated Scripte (Savegame oder Adm-Strukturen)
++ {{lockdevice @root structure device|x y z}}
+  + Sperrt ein Device
+
++ {{additems @root container itemid count}}
+  + Fügt (itemid) (count) mal dem container hinzu (dieser sollte gelocked sein)
+
++ {{removeitems @root container itemid maxcount}}
+  + Entfernt (itemid) (count) aus dem container hinzu (dieser sollte gelocked sein)
+
 ## SaveGame Scripte
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
 \[SaveGame\]\\Mods\\EmpyrionScripting\\Scripts
@@ -1150,7 +1160,7 @@ DateTime format:
   + Set the text of the LCD (lcddevice) with (text)
 
 ### CustomHelpers (settextblock)
-+ {{settext lcddevice}}
++ {{settextblock lcddevice}}
   + Set the text of the LCD (lcddevice) from the nested block
 
 ### CustomHelpers (setcolor)
@@ -1181,6 +1191,16 @@ DateTime format:
 + {{deconstruct @root entity container}}
    + Deconstruct the entity 'entity' and moves parts to container named as 'container''
    + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
+
+## Elevated scripts (Savegame or Adm structures)
++ {{lockdevice @root structure device | x y z}}
+  + Locks a device
+
++ {{additems @root container item id count}}
+  + Add (itemid) (count) times to the container (this should be locked)
+
++ {{removeitems @root container itemid maxcount}}
+  + Removes (itemid) (count) from the container (it should be locked)
 
 ## SaveGame scripts
 This special form of scripts can be stored in the SaveGame. The basic path for this is the

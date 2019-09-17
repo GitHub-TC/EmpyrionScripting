@@ -21,8 +21,10 @@ namespace EmpyrionScripting
                 var lockkey = $"{structure.Id}#{position.x}#{position.y}#{position.z}";
 
                 var e = new AutoResetEvent(false);
-                playfield.LockStructureDevice(structure.Id, position, true, (s) =>
+                playfield.LockStructureDevice(structure.Id, position, true, (id, pos, success) =>
                 {
+                    if (id != structure.Id || pos != position) return;
+
                     if (witherror)
                     {
                         Log($"Lock:Callback:Error {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
@@ -30,7 +32,7 @@ namespace EmpyrionScripting
                     }
                     else
                     {
-                        Success = s;
+                        Success = success;
                         e.Set();
                     }
                 });
@@ -40,7 +42,10 @@ namespace EmpyrionScripting
                 if (Success) unlockAction = () =>
                  {
                      e.Reset();
-                     playfield.LockStructureDevice(structure.Id, position, false, (s) => e.Set());
+                     playfield.LockStructureDevice(structure.Id, position, false, (id, pos, s) => {
+                         if (id != structure.Id || pos != position) return;
+                         e.Set();
+                     });
                      if (!e.WaitOne(10000)) Log($"Unlock:Timeout {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
                  };
             }

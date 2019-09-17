@@ -34,7 +34,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2 && arguments.Length != 4) throw new HandlebarsException("{{islocked structure device|x y z}} helper must have two or four argument: (structure) (device)|(x) (y) (z)");
 
             var structure = arguments[0] as IStructureData;
-            VectorInt3 position = new VectorInt3();
+            VectorInt3 position;
 
             if (arguments.Length == 2)
             {
@@ -60,6 +60,94 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 output.Write("{{islocked}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("lockdevice")]
+        public static void LockDeviceHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 3 && arguments.Length != 5) throw new HandlebarsException("{{lockdevice @root structure device|x y z}} helper must have three or five argument: @root (structure) (device)|(x) (y) (z)");
+
+            var root                = arguments[0] as IScriptRootData;
+            var isElevatedScript    = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var S                   = arguments[1] as IStructureData;
+            VectorInt3 position;
+
+            if(!isElevatedScript) throw new HandlebarsException("{{lockdevice}} only allowed in elevated scripts");
+
+            if (arguments.Length == 3)
+            {
+                var block = arguments[2] as BlockData;
+                position  = block?.Position ?? new VectorInt3();
+            }
+            else
+            {
+                int.TryParse(arguments[2].ToString(), out var x);
+                int.TryParse(arguments[3].ToString(), out var y);
+                int.TryParse(arguments[4].ToString(), out var z);
+
+                position = new VectorInt3(x, y, z);
+            }
+
+            try
+            {
+                using (var locked = CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, S.E?.S.GetCurrent(), position))
+                {
+                    if (locked.Success) options.Template(output, context as object);
+                    else                options.Inverse (output, context as object);
+                }
+            }
+            catch (Exception error)
+            {
+                output.Write("{{lockdevice}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("additems")]
+        public static void AddItemsHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 4) throw new HandlebarsException("{{additems @root container itemid count}} helper must have four arguments: @root (container) (item) (count)");
+
+            var root                = arguments[0] as IScriptRootData;
+            var isElevatedScript    = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var block               = arguments[1] as BlockData;
+            int.TryParse(arguments[2].ToString(), out var itemid);
+            int.TryParse(arguments[3].ToString(), out var count);
+
+            if (!isElevatedScript) throw new HandlebarsException("{{additems}} only allowed in elevated scripts");
+
+            try
+            {
+                var container = block.Device as ContainerData;
+                container.GetContainer().AddItems(itemid, count);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{additems}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("removeitems")]
+        public static void RemoveItemsHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 4) throw new HandlebarsException("{{removeitems @root container itemid maxcount}} helper must have four arguments: @root (container) (item) (maxcount)");
+
+            var root = arguments[0] as IScriptRootData;
+            var isElevatedScript = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var block = arguments[1] as BlockData;
+            int.TryParse(arguments[2].ToString(), out var itemid);
+            int.TryParse(arguments[3].ToString(), out var maxcount);
+
+            if (!isElevatedScript) throw new HandlebarsException("{{removeitems}} only allowed in elevated scripts");
+
+            try
+            {
+                var container = block.Device as ContainerData;
+                container.GetContainer().RemoveItems(itemid, maxcount);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{removeitems}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

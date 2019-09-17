@@ -11,6 +11,8 @@ namespace EmpyrionScripting.DataWrapper
             _container = container;
         }
 
+        public IContainer GetContainer() => _container;
+
         public float VolumeCapacity => _container.VolumeCapacity;
         public float DecayFactor => _container.DecayFactor;
     }

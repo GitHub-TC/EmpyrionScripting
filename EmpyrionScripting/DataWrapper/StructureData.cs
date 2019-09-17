@@ -15,7 +15,7 @@ namespace EmpyrionScripting.DataWrapper
             _n = new Lazy<string[]>(() => GetCurrent().GetAllCustomDeviceNames().OrderBy(N => N).ToArray());
             _is = new Lazy<Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>>>(() => CollectAllItems(GetCurrent()));
             _d = new Lazy<IEntityData[]>(() => GetCurrent()
-                .GetDockedStructures()
+                .GetDockedVessels()
                 .Select(S => EmpyrionScripting.ModApi.Playfield.Entities.FirstOrDefault(E => E.Value.Structure?.Id == S.Id))
                 .Where(E => E.Value != null)
                 .Select(E => new EntityData(E.Value)).ToArray());
@@ -24,6 +24,7 @@ namespace EmpyrionScripting.DataWrapper
             _passengers = new Lazy<PlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
             _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank));
             _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank));
+            _PentaxidTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().PentaxidTank));
         }
 
         public StructureData(IEntityData entity) : this()
@@ -46,7 +47,7 @@ namespace EmpyrionScripting.DataWrapper
         public IEntityData[] DockedE => _d.Value;
         private readonly Lazy<IEntityData[]> _d;
 
-        public string[] GetDeviceTypeNames => GetCurrent().GetDeviceTypeNames();
+        public string[] GetDeviceTypeNames => Enum.GetNames(typeof(DeviceTypeName));
 
         public ConcurrentDictionary<string, ContainerSource> ContainerSource => _is.Value.Item2;
 
@@ -99,9 +100,9 @@ namespace EmpyrionScripting.DataWrapper
 
         public StructureTank FuelTank => _FuelTank.Value;
         private readonly Lazy<StructureTank> _FuelTank;
-
         public StructureTank OxygenTank => _OxygenTank.Value;
         private readonly Lazy<StructureTank> _OxygenTank;
-
+        public StructureTank PentaxidTank => _PentaxidTank.Value;
+        private readonly Lazy<StructureTank> _PentaxidTank;
     }
 }
