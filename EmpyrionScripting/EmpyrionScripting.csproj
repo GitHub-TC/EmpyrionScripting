@@ -72,6 +72,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="CustomHelpers\EntityAccessHelpers.cs" />
     <Compile Include="CustomHelpers\LcdHelpers.cs" />
+    <Compile Include="CustomHelpers\SignalHelpers.cs" />
     <Compile Include="DataWrapper\BlockData.cs" />
     <Compile Include="CustomHelpers\MathHelpers.cs" />
     <Compile Include="DataWrapper\ContainerData.cs" />
@@ -81,6 +82,12 @@
     <Compile Include="DataWrapper\IEntityData.cs" />
     <Compile Include="DataWrapper\IScriptRootData.cs" />
     <Compile Include="DataWrapper\IStructureData.cs" />
+    <Compile Include="DataWrapper\IStructureTankWrapper.cs" />
+    <Compile Include="DataWrapper\PentaxidTank.cs" />
+    <Compile Include="DataWrapper\SignalData.cs" />
+    <Compile Include="DataWrapper\SignalEvent.cs" />
+    <Compile Include="DataWrapper\SignalEventBase.cs" />
+    <Compile Include="DataWrapper\SignalEventElevated.cs" />
     <Compile Include="DeviceLock.cs" />
     <Compile Include="CustomHelpers\EffectHelpers.cs" />
     <Compile Include="CustomHelpers\LoopHelpers.cs" />
@@ -95,6 +102,7 @@
     <Compile Include="EmpyrionScripting.cs" />
     <Compile Include="DataWrapper\EntityData.cs" />
     <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="DataWrapper\EventStore.cs" />
     <Compile Include="ExtensionsToolbox.cs" />
     <Compile Include="IDeviceLock.cs" />
     <Compile Include="ItemInfos.cs" />
@@ -123,7 +131,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetDir)*.dll" "C:\steamcmd\empyrion\Content\Mods\EmpyrionScripting" /Y
-xcopy "$(TargetDir)*.json" "C:\steamcmd\empyrion\Content\Mods\EmpyrionScripting" /Y
 xcopy "$(TargetDir)*.yaml" "C:\steamcmd\empyrion\Content\Mods\EmpyrionScripting" /Y</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

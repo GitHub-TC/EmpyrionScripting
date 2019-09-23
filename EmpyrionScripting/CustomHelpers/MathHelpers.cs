@@ -16,24 +16,47 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                double.TryParse(arguments[0]?.ToString(), out var left);
                 var op = HandlebarsUtils.IsUndefinedBindingResult(arguments[1])
                                 ? arguments[1].GetType().GetField("Value").GetValue(arguments[1])
                                 : arguments[1]?.ToString();
-                double.TryParse(arguments[2]?.ToString(), out var right);
 
-                switch (op)
-                {
-                    case "+": options.Template(output, left + right); break;
-                    case "-": options.Template(output, left - right); break;
-                    case "*": options.Template(output, left * right); break;
-                    case "/": options.Template(output, left / right); break;
-                    case "%": options.Template(output, left % right); break;
-                }
+                if (arguments[0] is DateTime ||
+                    arguments[0] is TimeSpan) CalcWithTime  (op, output, options, arguments);
+                else                          CalcWithDouble(op, output, options, arguments);
             }
             catch (Exception error)
             {
                 throw new HandlebarsException($"{{math}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a}")}]:{EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
+        private static void CalcWithTime(object op, TextWriter output, HelperOptions options, object[] arguments)
+        {
+            switch (op)
+            {
+                case "+": if (arguments[0] is TimeSpan) options.Template(output, (TimeSpan)arguments[0] + (TimeSpan)arguments[2]);
+                          else                          options.Template(output, (DateTime)arguments[0] + (TimeSpan)arguments[2]);
+                          break;
+
+                case "-": if     (arguments[2] is DateTime) options.Template(output, (DateTime)arguments[0] - (DateTime)arguments[2]);
+                          else if(arguments[0] is TimeSpan) options.Template(output, (TimeSpan)arguments[0] - (TimeSpan)arguments[2]);
+                          else                              options.Template(output, (DateTime)arguments[0] - (TimeSpan)arguments[2]);
+                          break;
+            }
+        }
+
+        private static void CalcWithDouble(object op, TextWriter output, HelperOptions options, object[] arguments)
+        {
+            double.TryParse(arguments[0]?.ToString(), out var left);
+            double.TryParse(arguments[2]?.ToString(), out var right);
+
+            switch (op)
+            {
+                case "+": options.Template(output, left + right); break;
+                case "-": options.Template(output, left - right); break;
+                case "*": options.Template(output, left * right); break;
+                case "/": options.Template(output, left / right); break;
+                case "%": options.Template(output, left % right); break;
             }
         }
 

@@ -8,17 +8,18 @@ namespace EmpyrionScripting.DataWrapper
     {
         private readonly WeakReference<IEntity> entity;
 
-        public EntityData()
+        public EntityData(bool isPublic)
         {
-            _s = new Lazy<IStructureData>(() => new StructureData(this));
+            _s = isPublic ? null : new Lazy<IStructureData>(() => new StructureData(this));
         }
+        public EntityData(IEntity entity) : this(entity, false) { }
 
-        public EntityData(IEntity entity): this()
+        public EntityData(IEntity entity, bool isPublic): this(isPublic)
         {
             this.entity = new WeakReference<IEntity>(entity);
         }
 
-        public IStructureData S => _s.Value;
+        public IStructureData S => _s?.Value;
         private readonly Lazy<IStructureData> _s;
 
         public string[] DeviceNames => Enum.GetNames(typeof(DeviceTypeName));

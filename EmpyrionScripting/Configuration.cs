@@ -15,6 +15,8 @@ namespace EmpyrionScripting
         public float EntityAccessMinDistance { get; set; } = 500;
         public int DelayStartForNSecondsOnPlayfieldLoad { get; set; } = 30;
         public int ScriptsParallelExecution { get; set; } = 2;
+        public bool ScriptTrackingError { get; set; }
+        public int MaxStoredEventsPerSignal { get; set; } = 10;
     }
 
 }

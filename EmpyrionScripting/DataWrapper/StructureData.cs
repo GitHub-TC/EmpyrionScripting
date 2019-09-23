@@ -24,7 +24,9 @@ namespace EmpyrionScripting.DataWrapper
             _passengers = new Lazy<PlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
             _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank));
             _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank));
-            _PentaxidTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().PentaxidTank));
+            _PentaxidTank = new Lazy<PentaxidTank>(() => new PentaxidTank(GetCurrent().GetDevice<IContainer>("Pentaxid Tank")));
+            _ControlPanelSignals = new Lazy<SignalData[]>(() => GetCurrent().GetControlPanelSignals().Select(S => new SignalData(this, S)).ToArray());
+            _BlockSignals = new Lazy<SignalData[]>(() => GetCurrent().GetBlockSignals().Select(S => new SignalData(this, S)).ToArray());
         }
 
         public StructureData(IEntityData entity) : this()
@@ -98,11 +100,16 @@ namespace EmpyrionScripting.DataWrapper
         public PlayerData[] Passengers => _passengers.Value;
         private readonly Lazy<PlayerData[]> _passengers;
 
-        public StructureTank FuelTank => _FuelTank.Value;
+        public IStructureTankWrapper FuelTank => _FuelTank.Value;
         private readonly Lazy<StructureTank> _FuelTank;
-        public StructureTank OxygenTank => _OxygenTank.Value;
+        public IStructureTankWrapper OxygenTank => _OxygenTank.Value;
         private readonly Lazy<StructureTank> _OxygenTank;
-        public StructureTank PentaxidTank => _PentaxidTank.Value;
-        private readonly Lazy<StructureTank> _PentaxidTank;
+        public IStructureTankWrapper PentaxidTank => _PentaxidTank.Value;
+        private readonly Lazy<PentaxidTank> _PentaxidTank;
+
+        public SignalData[] ControlPanelSignals => _ControlPanelSignals.Value;
+        private readonly Lazy<SignalData[]> _ControlPanelSignals;
+        public SignalData[] BlockSignals => _BlockSignals.Value;
+        private readonly Lazy<SignalData[]> _BlockSignals;
     }
 }

@@ -2,13 +2,13 @@
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class StructureTank
+    public class StructureTank : IStructureTankWrapper
     {
         private IStructureTank tank;
 
-        public StructureTank(IStructureTank fuelTank)
+        public StructureTank(IStructureTank tank)
         {
-            tank = fuelTank;
+            this.tank = tank;
         }
 
         public float Capacity => tank.Capacity;

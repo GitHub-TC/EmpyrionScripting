@@ -7,6 +7,7 @@ namespace EmpyrionScripting.DataWrapper
 {
     public interface IScriptRootData
     {
+        EventStore SignalEventStore { get; }
         Color BackgroundColor { get; set; }
         bool BackgroundColorChanged { get; set; }
         Color Color { get; set; }

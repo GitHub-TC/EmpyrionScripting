@@ -1,12 +1,10 @@
-﻿using EmpyrionScripting.DataWrapper;
-using HandlebarsDotNet;
+﻿using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Caching;
 
 namespace EmpyrionScripting.CustomHelpers
 {

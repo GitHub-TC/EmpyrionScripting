@@ -15,21 +15,24 @@ namespace EmpyrionScripting.DataWrapper
         private IPlayfield playfield;
         private IEntity entity;
 
+        public EventStore SignalEventStore { get; }
+
         public ScriptRootData()
         {
             _e = new Lazy<IEntityData>(() => new EntityData(entity));
         }
 
-        public ScriptRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed, ConcurrentDictionary<string, object> persistendData) : this()
+        public ScriptRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed, ConcurrentDictionary<string, object> persistendData, EventStore eventStore) : this()
         {
             DeviceLockAllowed = deviceLockAllowed;
             _PersistendData = persistendData;
             this.currentEntites = currentEntities;
             this.playfield = playfield;
             this.entity = entity;
+            SignalEventStore = eventStore;
         }
 
-        public ScriptRootData(ScriptRootData data) : this(data.currentEntites, data.playfield, data.entity, data.DeviceLockAllowed, data._PersistendData)
+        public ScriptRootData(ScriptRootData data) : this(data.currentEntites, data.playfield, data.entity, data.DeviceLockAllowed, data._PersistendData, data.SignalEventStore)
         {
             _p = data._p;
             _e = data._e;
