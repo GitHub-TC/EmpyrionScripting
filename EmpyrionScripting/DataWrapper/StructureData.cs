@@ -22,8 +22,8 @@ namespace EmpyrionScripting.DataWrapper
             _s = new Lazy<WeakReference<IStructure>>(() => new WeakReference<IStructure>(E.GetCurrent().Structure));
             _pilot = new Lazy<PlayerData>(() => new PlayerData(GetCurrent().Pilot));
             _passengers = new Lazy<PlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
-            _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank));
-            _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank));
+            _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank, StructureTankType.Fuel));
+            _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank, StructureTankType.Oxygen));
             _PentaxidTank = new Lazy<PentaxidTank>(() => new PentaxidTank(GetCurrent().GetDevice<IContainer>("Pentaxid Tank")));
             _ControlPanelSignals = new Lazy<SignalData[]>(() => GetCurrent().GetControlPanelSignals().Select(S => new SignalData(this, S)).ToArray());
             _BlockSignals = new Lazy<SignalData[]>(() => GetCurrent().GetBlockSignals().Select(S => new SignalData(this, S)).ToArray());

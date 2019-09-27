@@ -79,18 +79,119 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("setswitch")]
+        public static void SetSwitchHelper(TextWriter output, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 3) throw new HandlebarsException("{{setswitch structure name state}} helper must have exactly three argument: (structure) (name) (state)");
+
+            var structure   = arguments[0] as IStructureData;
+            var namesSearch = arguments[1].ToString();
+
+            try
+            {
+                bool.TryParse(arguments[2]?.ToString(), out var state);
+
+                var uniqueSignalNames = structure.BlockSignals.Select(S => S.Name).GetUniqueNames(namesSearch).ToDictionary(N => N);
+
+                var signals = structure.BlockSignals
+                    .Where(S => uniqueSignalNames.ContainsKey(S.Name) && S.BlockPos.HasValue)
+                    .Select(S => new BlockData(structure.GetCurrent(), S.BlockPos.Value))
+                    .ToList();
+
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
+                signals.AddRange(uniqueNames
+                    .SelectMany(N => structure.GetCurrent().GetDevicePositions(N))
+                    .Select(P => new BlockData(structure.GetCurrent(), P))
+                    );
+
+                signals.ForEach(S => S.SwitchState = state);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{setswitch}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("getswitch")]
+        public static void GetSwitchHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{getswitch structure name}} helper must have exactly two argument: (structure) (name)");
+
+            var structure   = arguments[0] as IStructureData;
+            var namesSearch = arguments[1].ToString();
+
+            try
+            {
+                var uniqueSignalNames = structure.BlockSignals.Select(S => S.Name).GetUniqueNames(namesSearch).ToDictionary(N => N);
+
+                var signals = structure.BlockSignals
+                    .Where(S => uniqueSignalNames.ContainsKey(S.Name) && S.BlockPos.HasValue)
+                    .Select(S => new BlockData(structure.GetCurrent(), S.BlockPos.Value))
+                    .ToList();
+
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
+                signals.AddRange(uniqueNames
+                    .SelectMany(N => structure.GetCurrent().GetDevicePositions(N))
+                    .Select(P => new BlockData(structure.GetCurrent(), P))
+                    );
+
+                if (signals.Any()) options.Template(output, signals.First());
+                else               options.Inverse(output, context as object);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{getswitch}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("getswitches")]
+        public static void GetSwitchesHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{getswitches structure name}} helper must have exactly two argument: (structure) (name1;name2;...)");
+
+            var structure = arguments[0] as IStructureData;
+            var namesSearch = arguments[1].ToString();
+
+            try
+            {
+                var uniqueSignalNames = structure.BlockSignals.Select(S => S.Name).GetUniqueNames(namesSearch).ToDictionary(N => N);
+
+                var signals = structure.BlockSignals
+                    .Where(S => uniqueSignalNames.ContainsKey(S.Name) && S.BlockPos.HasValue)
+                    .Select(S => new BlockData(structure.GetCurrent(), S.BlockPos.Value))
+                    .ToList();
+
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
+                signals.AddRange(uniqueNames
+                    .SelectMany(N => structure.GetCurrent().GetDevicePositions(N))
+                    .Select(P => new BlockData(structure.GetCurrent(), P))
+                    );
+
+                if (signals.Any()) options.Template(output, signals);
+                else               options.Inverse(output, context as object);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{getswitches}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         public class StopWatchData
         {
             public SignalEventBase Start { get; set; }
             public SignalEventBase Stop { get; set; }
+            public TimeSpan TimeTaken { get; set; }
+            public TimeSpan? BestTimeTaken { get; set; }
         }
 
         public class StopWatchRankingData
         {
             public int Pos { get; set; }
+            public string Name { get; set; }
             public SignalEventBase Start { get; set; }
             public SignalEventBase Stop { get; set; }
             public TimeSpan TimeTaken { get; set; }
+            public TimeSpan? BestTimeTaken { get; set; }
         }
 
         [HandlebarTag("stopwatch")]
@@ -108,36 +209,66 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var stopWatchData = root.GetPersistendData().GetOrAdd($"ST{root.ScriptId}", _ => new ConcurrentDictionary<int, StopWatchData>()) as ConcurrentDictionary<int, StopWatchData>;
 
-                if (root.SignalEventStore.GetEvents().TryGetValue(startSignal, out var start) && start.Count > 0)
-                {
-                    start
-                        .Where(S => S.State)
-                        .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
-                        _ => new StopWatchData() {   Start = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S) }, 
-                        (_, s) =>                { s.Start = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S); s.Stop = null; return s; }));
-                    start.Clear();
-                }
+                root.SignalEventStore.GetEvents().Keys
+                    .GetUniqueNames(startSignal)
+                    .ForEach(N => {
+                        if (root.SignalEventStore.GetEvents().TryGetValue(N, out var start) && start.Count > 0)
+                        {
+                            start
+                                .Where(S => S.State)
+                                .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
+                                _ => new StopWatchData() {   Start = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S) }, 
+                                (_, s) =>                { s.Start = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S); s.Stop = null; return s; }));
+                            start.Clear();
+                        }
+                    });
 
-                if (root.SignalEventStore.GetEvents().TryGetValue(stopSignal, out var stop) && stop.Count > 0)
-                {
-                    stop
-                        .Where(S => S.State)
-                        .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
-                        _ => new StopWatchData() {   Stop = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S) }, 
-                        (_, s) =>                { s.Stop = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S); return s; }));
-                    stop.Clear();
-                }
+                root.SignalEventStore.GetEvents().Keys
+                    .GetUniqueNames(stopSignal)
+                    .ForEach(N =>
+                    {
+                        if (root.SignalEventStore.GetEvents().TryGetValue(N, out var stop) && stop.Count > 0)
+                        {
+                            stop
+                                .Where(S => S.State)
+                                .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
+                                _ => new StopWatchData() {   Stop = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S) }, 
+                                (_, s) => {
+                                    s.Stop          = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S);
+                                    if(s.Start != null) { 
+                                        s.TimeTaken     = s.Stop.TimeStamp - s.Start.TimeStamp;
+                                        s.BestTimeTaken = !s.BestTimeTaken.HasValue || s.BestTimeTaken > s.TimeTaken ? s.TimeTaken : s.BestTimeTaken;
+                                    }
+                                    return s;
+                                }));
+                            stop.Clear();
+                        }
+                    });
 
-                if (resetSignal != null && root.SignalEventStore.GetEvents().TryGetValue(resetSignal, out var reset) && reset.Count > 0)
+                if (resetSignal != null)
                 {
-                    if(reset.Any(S => S.State)) stopWatchData.Clear();
-                    reset.Clear();
+                    root.SignalEventStore.GetEvents().Keys
+                        .GetUniqueNames(resetSignal)
+                        .ForEach(N =>
+                        {
+                            if (root.SignalEventStore.GetEvents().TryGetValue(N, out var reset) && reset.Count > 0)
+                            {
+                                if (reset.Any(S => S.State)) stopWatchData.Clear();
+                                reset.Clear();
+                            }
+                        });
                 }
 
                 var pos = 1;
                 var ranking = stopWatchData.Values
                     .Where(S => S.Start != null)
-                    .Select(S => new StopWatchRankingData() { Start = S.Start, Stop = S.Stop, TimeTaken = (S.Stop == null ? DateTime.Now : S.Stop.TimeStamp) - S.Start.TimeStamp })
+                    .Select(S => new StopWatchRankingData() {
+                        Name            = S.Start == null || !EmpyrionScripting.ModApi.Playfield.Entities.TryGetValue(S.Start.TriggeredByEntityId, out var entity) ? null : entity.Name,
+                        Start           = S.Start,
+                        Stop            = S.Stop,
+                        TimeTaken       = (S.Stop == null ? DateTime.Now : S.Stop.TimeStamp) - S.Start.TimeStamp,
+                        BestTimeTaken   = S.BestTimeTaken,
+                    })
                     .Where(S => S.TimeTaken.TotalMilliseconds > 0)
                     .OrderBy(S => S.TimeTaken)
                     .Select(S => { S.Pos = pos++; return S; })

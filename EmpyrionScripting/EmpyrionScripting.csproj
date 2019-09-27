@@ -73,6 +73,7 @@
     <Compile Include="CustomHelpers\EntityAccessHelpers.cs" />
     <Compile Include="CustomHelpers\LcdHelpers.cs" />
     <Compile Include="CustomHelpers\SignalHelpers.cs" />
+    <Compile Include="CustomHelpers\SpecialItemTransfer.cs" />
     <Compile Include="DataWrapper\BlockData.cs" />
     <Compile Include="CustomHelpers\MathHelpers.cs" />
     <Compile Include="DataWrapper\ContainerData.cs" />

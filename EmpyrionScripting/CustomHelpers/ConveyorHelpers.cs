@@ -261,6 +261,98 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("fill")]
+        public static void FillHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 3) throw new HandlebarsException("{{fill item structure tank [max]}} helper must have at least two argument: (item) (structure) (tank) [max count/percentage targets]");
+
+            try
+            {
+                var structure   = arguments[1] as IStructureData;
+                var item        = arguments[0] as ItemsData;
+
+                if (!Enum.TryParse<StructureTankType>(arguments[2]?.ToString(), true, out var type))
+                {
+                    output.WriteLine($"unknown type {arguments[2]}");
+                    return;
+                }
+
+                int maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? Math.Min(100, Math.Max(0, limit)) : 100;
+
+                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+                {
+                    Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                    return;
+                }
+
+                IStructureTankWrapper specialTransfer = null;
+                switch (type)
+                {
+                    case StructureTankType.Oxygen    : specialTransfer = structure.OxygenTank    ; break;
+                    case StructureTankType.Fuel      : specialTransfer = structure.FuelTank      ; break;
+                    case StructureTankType.Pentaxid  : specialTransfer = structure.PentaxidTank  ; break;
+                }
+
+                if (!specialTransfer.AllowedItem(item.Id))
+                {
+                    options.Inverse(output, context as object);
+                    return;
+                }
+
+                var moveInfos = new List<ItemMoveInfo>();
+
+                lock (movelock)
+                {
+                    item.Source
+                        .ForEach(S => {
+                            using (var locked = CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, S.E?.S.GetCurrent(), S.Position))
+                            {
+                                if (!locked.Success)
+                                {
+                                    Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
+                                    return;
+                                }
+
+                                var count = specialTransfer.ItemsNeededForFill(S.Id, maxLimit);
+                                if (count > 0)
+                                {
+                                    count -= S.Container.RemoveItems(S.Id, count);
+                                    Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
+                                }
+
+                                if (count > 0)
+                                {
+                                    var startCount = count;
+                                    count = specialTransfer.AddItems(S.Id, count);
+                                    if (startCount != count) moveInfos.Add(new ItemMoveInfo()
+                                    {
+                                        Id              = S.Id,
+                                        Count           = startCount - count,
+                                        SourceE         = S.E,
+                                        Source          = S.CustomName,
+                                        DestinationE    = structure.E,
+                                        Destination     = type.ToString(),
+                                    });
+                                };
+
+                                if (count > 0) count = S.Container.AddItems(S.Id, count);
+                                if (count > 0) output.Write($"{{fill}} error lost #{count} of item {S.Id} in container {S.CustomName}");
+                            }
+                        });
+
+                    Log($"Fill Total: #{item.Source.Count}", LogLevel.Debug);
+                }
+
+                if (moveInfos.Count == 0) options.Inverse(output, context as object);
+                else                      moveInfos.ForEach(I => options.Template(output, I));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{fill}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+
         public class DeconstructData
         {
             public int Id { get; set; }
