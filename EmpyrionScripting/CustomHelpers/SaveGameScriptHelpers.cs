@@ -26,6 +26,24 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("filelist")]
+        public static void FileListHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 3 && arguments.Length != 4) throw new HandlebarsException("{{filelist @root dir filename [recursive]}} helper must have at least three arguments: @root (dir) (filename) [recursive]");
+
+            if (!(arguments[0] is ScriptSaveGameRootData root)) throw new HandlebarsException("{{filelist}} only allowed in SaveGame scripts");
+
+            try
+            {
+                bool.TryParse(arguments.Length == 4 ? arguments[3].ToString() : "false", out var recursive);
+                options.Template(output, Directory.EnumerateFiles(arguments[1].ToString(), arguments[2].ToString(), recursive ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{filelist}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("readfile")]
         public static void ReadFileHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
         {

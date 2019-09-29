@@ -31,6 +31,7 @@ YouTube video;
 * https://youtu.be/O89NQJjbQuw
 * https://youtu.be/uTgXwrlCfNQ
 * https://youtu.be/qhYmJWHk8ec
+* https://youtu.be/IbVuzFf_ywI
 
 * https://youtu.be/XzYKNevK0bs
 * https://youtu.be/SOnZ_mzytA4
@@ -361,7 +362,7 @@ Syntaxdocu:
 + https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
 
-### CustomHelpers (test)
+## CustomHelpers Bedingungen
 * {{#test Select Op Value}}
   * Op: eq is =
   * Op: leq is <=
@@ -373,74 +374,48 @@ Syntaxdocu:
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
 
-### CustomHelpers (if)
 * {{#if data}}
   * Block ausführen wenn (data) einen Wert (ungleich 'null') hat oder (data) gleich 'true' oder ungleich 0 ist
   * anderfalls wird der {{else}} Teil ausgeführt
 
-### CustomHelpers (intervall)
-* {{#intervall sec}}
-  * Intervall in (sec) Sekunden
+## CustomHelpers Inhalte
++ {{#items structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln
 
-### CustomHelpers (scroll)
-* {{#scroll lines delay}}
-  * Text scrollen mit (lines) Zeilen und einer Verzögerung von (delay) Sekunden
-
-### CustomHelpers (itemlist)
 * {{#itemlist list 'id1;id2;id3,...'}}
   * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
     Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
 
-### CustomHelpers (i18n)
-* {{#i18n Select 'Language'}}
-  * Language: English,Deutsch,Français,Italiano,Spanish,...
-    das Sprachkürzel kann hier, aus der ersten Zeile, entnommen werden \[ESG\]\\Content\\Extras\\Localization.csv
-
-### CustomHelpers (datetime)
-+ {{datetime}} = Datum und Uhrzeit anzeigen
-+ {{datetime 'format'}} = gemäß dem 'format' ausgeben
-+ {{datetime 'format' '+5'}} = N Stunden addieren
-
-DateTime format:
-+ https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8#System_DateTime_ToString_System_String_
-
-### CustomHelpers (items)
-+ {{#items structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln
-
-### CustomHelpers (format)
-+ {{format data format}} = Daten (data) gemäß dem Format (format) ausgeben
-  + https://docs.microsoft.com/de-de/dotnet/api/system.string.format?view=netframework-4.8#remarks-top
-
-### CustomHelpers (move)
-+ {{move item structure names [maxLimit]}}
+## CustomHelpers Verschieben/Auffüllen/Verarbeiten
++ {{move item structure names \[maxLimit\]}}
   + Item (item) in die Struktur (structure) in die Container mit den Namen (names) verschieben
-  + [maxLimit] ist ein optionaler Parameter der die Anzahl im Zielcontainer begrenzt
+  + \[maxLimit\] ist ein optionaler Parameter der die Anzahl im Zielcontainer begrenzt
 
-### CustomHelpers (lights)
++ {{fill item structure tank \[max\]}}
+  + Füllt in der Struktur (structure) den Tank (tank) = Fuel/Pxygen/Pentaxid mit dem Item (item) auf. Der prozentuale Füllstand kann mit (max) optional limitiert werden. Standard ist 100.
+
++ {{deconstruct @root entity container}}
+  + Baut die Struktur 'entity' ab und befördert die Teile in den Container mit dem Namen welcher mit 'container' angegben wird
+  + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
+
+## CustomHelpers Lichter
 + {{lights structure names}}
   + Lichter der Struktur (structure) mit den Namen (names) auswählen
 
-### CustomHelpers (lightcolor)
 + {{lightcolor light color}}
   + Bei Licht (light) die Farbe (color rgb hex) auswählen
 
-### CustomHelpers (lightblink)
 + {{lightblink light interval length offset}}
   + Bei Licht (light) das Intervall (intervall) die Intervalllänge (length) und den Intervalloffset (offset) einstellen
 
-### CustomHelpers (lightintensity)
 + {{lightintensity light intensity}}
   + Bei Licht (light) die Lichtintensität (intensity) einstellen
 
-### CustomHelpers (lightrange)
 + {{lightrange light range}}
   + Bei Licht (light) die Lichtreichweite (range) einstellen
 
-### CustomHelpers (lightspotangle)
 + {{lightspotangle light spotangle}}
   + Bei Licht (light) die Lichtspotwinkel (spotangle) einstellen
 
-### CustomHelpers (lighttype)
 + {{lighttype light type}}
   + Bei Licht (light) die Lichttyp (type) einstellen
 	+	Spot
@@ -450,130 +425,144 @@ DateTime format:
 	+	Rectangle
 	+	Disc
 
-### CustomHelpers (devices)
+## CustomHelpers Geräte
 + {{devices structure customnames}}
   + (structure) (name;name*;*;name)
 
-### CustomHelpers (devicesoftype)
 + {{devicesoftype structure type}}
   + (structure) (type)
 
-### CustomHelpers (setactive)
 + {{setactive block|device active}}
 
-### CustomHelpers (steps)
-+ {steps start end \[step\] \[delay\]}}
-  + Von (start) nach (end) mit optional einer Schrittweite von (step) und einer (delay)-Sekunden geänderten Zeitbasis
-
-### CustomHelpers (split)
-+ {split string separator [removeemptyentries]}}
-  + (string) mit dem Trennzeichen (separator) zerteilen.
-  + \[removeemptyentries\] falls leere Einträge entfernt werden sollen 'true'
-
-### CustomHelpers (islocked)
 + {{islocked structure x y z}}
   + Prüft bei der Struktur (structure) ob das Device (device) oder das Device an der Position (x) (y) (z) gesperrt ist.
 
-### CustomHelpers (gettexture)
-+ {{gettexture block pos}}
-  + Liefert die TexturId des Blocks von der Seite T=Top, B=Bottom,, N=North, S=South, W=West, E=East
+## CustomHelpers Datenaufbereitung
+* {{#intervall sec}}
+  * Intervall in (sec) Sekunden
 
-### CustomHelpers (settexture)
-+ {{settexture block pos textureid}}
-  + Setzt die TexturId des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden
+* {{#scroll lines delay}}
+  * Text scrollen mit (lines) Zeilen und einer Verzögerung von (delay) Sekunden
 
-### CustomHelpers (random)
+* {{#i18n Select 'Language'}}
+  * Language: English,Deutsch,Français,Italiano,Spanish,...
+    das Sprachkürzel kann hier, aus der ersten Zeile, entnommen werden \[ESG\]\\Content\\Extras\\Localization.csv
+
++ {{datetime}} = Datum und Uhrzeit anzeigen
++ {{datetime 'format'}} = gemäß dem 'format' ausgeben
++ {{datetime 'format' '+5'}} = N Stunden addieren
+   + DateTime format:<br/>
+    https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8#System_DateTime_ToString_System_String_
+
++ {{format data format}} = Daten (data) gemäß dem Format (format) ausgeben
+  + https://docs.microsoft.com/de-de/dotnet/api/system.string.format?view=netframework-4.8#remarks-top
+
++ {steps start end \[step\] \[delay\]}}
+  + Von (start) nach (end) mit optional einer Schrittweite von (step) und einer (delay)-Sekunden geänderten Zeitbasis
+
++ {split string separator \[removeemptyentries\]}}
+  + (string) mit dem Trennzeichen (separator) zerteilen.
+  + \[removeemptyentries\] falls leere Einträge entfernt werden sollen 'true'
+
 + {random start end}}
   + Zufallswert zwischen (start) und (end) liefern und in den Block als {{this}} hereinreichen
 
-### CustomHelpers (bar)
 + {{bar data min max length \[char\] \[bgchar\]}}
   + Erzeugt eine Balkenanzeige für (data) in dem Bereich von (min) bis (max) mit der Länge (length)
   + Der Balkensymbole für "gefüllt" (char) und den Hintergrund (bgchar) sind optional 
 
-### CustomHelpers (use)
 + {{use data}}
   + Diesen Datensatz im Inhalt zum direkten Zugriff bereitstellen
   + der {{else}} fall wird aufgerufen wenn data == null ist
 
-### CustomHelpers (set)
 + {{set @root key data}}
   + Die Daten (data) hinterlegen so dass sie per @root.Data.(key) jederzeit wieder abgerufen werden können
 
-### CustomHelpers (setblock)
 + {{setblock @root key}}
   + Die Daten des Blockes hinterlegen so dass sie per @root.Data.(key) jederzeit wieder abgerufen werden können
 
-### CustomHelpers (math)
++ {{concat a1 a2 a3 ...}}
+  + Fügt die Werte a1 .. aN zusammen
+  + Wenn ein Wert ein Array von Texten (string\[\]) ist wird der nächste Parameter als Trennzeichen für diese Einträge gewertet
+
++ {{substring text startindex \[length\]}}
+  + Teiltext von dem Text (text) von Index (startindex) mit einer optionalen maximalen Länge von (length) Zeichen
+
++ {{chararray text}}
+  + Text als Array von Zeichen liefern
+
+## CustomHelpers Block
++ {{block structure x y z}}
+  + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
+
++ {{gettexture block pos}}
+  + Liefert die TexturId des Blocks von der Seite T=Top, B=Bottom,, N=North, S=South, W=West, E=East
+
++ {{settexture block pos textureid}}
+  + Setzt die TexturId des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden
+
+## CustomHelpers Rechnen
 + {{math (lvalue) op (rvalue)}}
   + op = +, -, *, /, %
 
-### CustomHelpers (calc)
 + {{calc (lvalue) op (rvalue)}}
   + op = +, -, *, /, %
   + Kann mit () inline in anderen Kommandos benutzt werden
 
-### CustomHelpers (distance)
 + {{distance (lVector) (rVector)}}
   + Abstand zwischen (lVector) und (rVector)
 
-### CustomHelpers (concat)
-+ {{concat a1 a2 a3 ...}}
-  + Fügt die Werte a1 .. aN zusammen
-  + Wenn ein Wert ein Array von Texten (string[]) ist wird der nächste Parameter als Trennzeichen für diese Einträge gewertet
 
-### CustomHelpers (substring)
-+ {{substring text startindex [length]}}
-  + Teiltext von dem Text (text) von Index (startindex) mit einer optionalen maximalen Länge von (length) Zeichen
-
-### CustomHelpers (chararray)
-+ {{chararray text}}
-  + Text als Array von Zeichen liefern
-
-### CustomHelpers (block)
-+ {{block structure x y z}}
-  + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
-
-### CustomHelpers (gettext)
+## CustomHelpers LCD
 + {{gettext lcddevice}}
   + Liefert den Text des LCD (lcddevice)
 
-### CustomHelpers (settext)
 + {{gettext lcddevice text}}
   + Setzt den Text des LCD (lcddevice) mit dem Text (text)
 
-### CustomHelpers (settextblock)
 + {{gettext lcddevice}}
   + Setzt den Text des LCD (lcddevice) mit dem Text des innenliegenden Blockes
 
-### CustomHelpers (setcolor)
 + {{setcolor lcddevice (rgb hex)}}
   + Setzt die Farbe des LCD (lcddevice) auf (rgb hex)
 
-### CustomHelpers (setbgcolor)
 + {{setbrcolor lcddevice (rgb hex)}}
   + Setzt die Hintergrundfarbe des LCD (lcddevice) auf (rgb hex)
 
-### CustomHelpers (entitybyname)
+## CustomHelpers Strukturen
 + {{entitybyname @root name}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Name (name)
 
-### CustomHelpers (entitiesbyname)
 + {{entitiesbyname @root names}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Namen in (name;name*;*)
 
-### CustomHelpers (entitybyid)
 + {{entitybyid @root id}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Id (id)
 
-### CustomHelpers (entitiesbyid)
 + {{entitiesbyid @root ids}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit IDs in (id1;id2;id3)
 
-### CustomHelpers (deconstruct)
-+ {{deconstruct @root entity container}}
-  + Baut die Struktur 'entity' ab und befördert die Teile in den Container mit dem Namen welcher mit 'container' angegben wird
-  + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
+## Signale
++ {{signalevents @root names}} 
+  + die letzten Signalevents mit den namen (name1;name2...)
+
++ {{signals structure names}}
+  + Liefert die Signale (names) der Struktur
+
++ {{getsignal structure name}}
+  + Liefert den Status true/false des Signal (name)
+
++ {{setswitch structure name state}}
+  + Setzt den Schalter (name) auf (state) = true/false. Der Name darf der Name des Schalter im ControlPanel oder der Name seines Signales sein
+
++ {{getswitch structure name}}
+  + Liefert den Status true/false des Schalters (name). Der Name darf der Name des Schalter im ControlPanel oder der Name seines Signales sein
+
++ {{getswitches structure name}}
+  + Liefert alle Schalte die im ControlPanel auf dem Namen (name) passen
+
++ {{stopwatch @root startsignal stopsignal \[resetsignal\]}}
+  + Eine einfache Stopuhr (für Rennstrecken) mit einem Startsignal, einem Stopsignal und für das Zurücksetzten der Ergebnisse optionalem Resetsignal
 
 ## Elevated Scripte (Savegame oder Adm-Strukturen)
 + {{lockdevice @root structure device|x y z}}
@@ -599,21 +588,25 @@ in diesem Verzeichnis werden nach folgendem Muster Scriptdateien mit der Endung 
 
 Hinweis: EntityType ist BA,CV,SV or HV
 
-### CustomHelpers-SaveGameScripts (readfile)
+### CustomHelpers-SaveGameScripts
 + {{readfile @root dir filename}} 
   + (dir)\\(filename) Dateiinhalt wird als ZeilenArray geliefert
   + Falls die Datei nicht existiert wird der {{else}} Teil ausgeführt
 
-### CustomHelpers-SaveGameScripts (writefile)
 + {{writefile @root dir filename}} 
   + (dir)\\(filename) Inhalt des Blockes wird in die Datei geschrieben
 
-### CustomHelpers-SaveGameScripts (fileexists)
 + {{fileexists @root dir filename}}
   + Wenn die Datei existiert dann das Innere ausführen ansonsten den exec Teil auswerten
 
-{{settype @root block typeid}}
-{{setdamage @root block damage}}
++ {{filelist @root dir filename \[recursive\]}}
+  + Liste der Dateien (optional rekursiv amit allen Unterverzeichnissen) in dem Verzeichnis (dir) auf, welche dem Pattern (filename) entsprechen
+
++ {{settype @root block typeid}}
+  + Den Block (austauschen) zu (typeid)
+
++ {{setdamage @root block damage}}
+  + Schaden des Blockes setzen
 
 ### Whats next?
 

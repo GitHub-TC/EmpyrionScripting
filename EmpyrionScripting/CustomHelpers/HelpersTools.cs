@@ -87,7 +87,7 @@ namespace EmpyrionScripting.CustomHelpers
             public FileSystemWatcher Watcher { get; set; }
         }
 
-        static ConcurrentDictionary<string, FileContent> FileContentCache = new ConcurrentDictionary<string, FileContent>();
+        static readonly ConcurrentDictionary<string, FileContent> FileContentCache = new ConcurrentDictionary<string, FileContent>();
 
         public static FileContent GetFileContent(string filename)
         {

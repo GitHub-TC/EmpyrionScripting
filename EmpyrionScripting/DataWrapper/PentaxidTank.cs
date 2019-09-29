@@ -14,9 +14,11 @@ namespace EmpyrionScripting.DataWrapper
             this.tank = tank;
         }
 
-        public float Capacity => tank == null ? 0 : tank.VolumeCapacity;
+        public float Capacity => tank == null ? 0 : tank.VolumeCapacity / Amount;
 
-        public float Content => tank == null ? 0 : tank.GetTotalItems(PentaxidItemId) * EmpyrionScripting.Configuration.Current.StructureTank[StructureTankType.Pentaxid].First(I => I.ItemId == PentaxidItemId).Amount;
+        public float Content => tank == null ? 0 : tank.GetTotalItems(PentaxidItemId);
+
+        private static int Amount => EmpyrionScripting.Configuration.Current.StructureTank[StructureTankType.Pentaxid].First(I => I.ItemId == PentaxidItemId).Amount;
 
         public int ItemsNeededForFill(int itemId, int maxLimit)
         {
