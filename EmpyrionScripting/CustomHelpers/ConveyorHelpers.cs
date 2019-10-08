@@ -75,6 +75,12 @@ namespace EmpyrionScripting.CustomHelpers
 
             if(!isElevatedScript) throw new HandlebarsException("{{lockdevice}} only allowed in elevated scripts");
 
+            if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+            {
+                Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                return;
+            }
+
             if (arguments.Length == 3)
             {
                 var block = arguments[2] as BlockData;
@@ -459,20 +465,27 @@ namespace EmpyrionScripting.CustomHelpers
                                 block.Get(out var blockType, out _, out _, out _);
                                 if (blockType > 0 && blockType != PlayerCoreType)
                                 {
-                                    locked = locked ?? CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, root.E.S.GetCurrent(), targetPos);
-                                    if (!locked.Success)
+                                    if (EmpyrionScripting.Configuration.Current?.DeconstructBlockSubstitution != null &&
+                                        EmpyrionScripting.Configuration.Current.DeconstructBlockSubstitution.TryGetValue(blockType, out var substituteTo)) blockType = substituteTo;
+
+                                    if (blockType > 0)
                                     {
-                                        deconstructData.CheckedBlocks--;
-                                        output.WriteLine($"Container '{N}' is locked");
-                                        return;
+                                        locked = locked ?? CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, root.E.S.GetCurrent(), targetPos);
+                                        if (!locked.Success)
+                                        {
+                                            deconstructData.CheckedBlocks--;
+                                            output.WriteLine($"Container '{N}' is locked");
+                                            return;
+                                        }
+
+                                        if (target.AddItems(blockType, 1) > 0)
+                                        {
+                                            deconstructData.CheckedBlocks--;
+                                            output.WriteLine($"Container '{N}' is full");
+                                            return;
+                                        }
                                     }
 
-                                    if (target.AddItems(blockType, 1) > 0)
-                                    {
-                                        deconstructData.CheckedBlocks--;
-                                        output.WriteLine($"Container '{N}' is full");
-                                        return;
-                                    }
                                     block.Set(0);
                                     deconstructData.RemovedBlocks++;
 

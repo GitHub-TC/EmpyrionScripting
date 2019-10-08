@@ -31,6 +31,7 @@ namespace EmpyrionScripting
         public int ScriptsParallelExecution { get; set; } = 2;
         public bool ScriptTrackingError { get; set; }
         public int MaxStoredEventsPerSignal { get; set; } = 10;
+        public Dictionary<int, int> DeconstructBlockSubstitution { get; set; } = new Dictionary<int, int>() { [331] = 0, [541] = 0, [542] = 0, [543] = 0, [544] = 0 };       
         public Dictionary<StructureTankType, AllowedItem[]> StructureTank { get; set; } = new Dictionary<StructureTankType, AllowedItem[]>()
         {
             [StructureTankType.Oxygen  ] = new[] { new AllowedItem(2128, 250) },

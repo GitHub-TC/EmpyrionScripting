@@ -396,6 +396,7 @@ Syntaxdocu:
 + {{deconstruct @root entity container}}
   + Baut die Struktur 'entity' ab und befördert die Teile in den Container mit dem Namen welcher mit 'container' angegben wird
   + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
+  + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
 
 ## CustomHelpers Lichter
 + {{lights structure names}}
@@ -1184,6 +1185,7 @@ DateTime format:
 + {{deconstruct @root entity container}}
    + Deconstruct the entity 'entity' and moves parts to container named as 'container''
    + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
+   + With the configuration setting DeconstructBlockSubstitution a replacement (by another block type) / deletion (by 0) of block types can be defined
 
 ## Elevated scripts (Savegame or Adm structures)
 + {{lockdevice @root structure device | x y z}}
