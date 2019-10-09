@@ -1,6 +1,8 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.CustomHelpers;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,7 +26,7 @@ namespace EmpyrionScripting.DataWrapper
             _passengers = new Lazy<PlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
             _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank, StructureTankType.Fuel));
             _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank, StructureTankType.Oxygen));
-            _PentaxidTank = new Lazy<PentaxidTank>(() => new PentaxidTank(GetCurrent().GetDevice<IContainer>("Pentaxid Tank")));
+            _PentaxidTank = new Lazy<PentaxidTank>(() => new PentaxidTank(GetCurrent().GetDevice<IContainer>(AllCustomDeviceNames.GetUniqueNames("Pentaxid Tank*").FirstOrDefault() ?? "Pentaxid Tank")));
             _ControlPanelSignals = new Lazy<SignalData[]>(() => GetCurrent().GetControlPanelSignals().Select(S => new SignalData(this, S)).ToArray());
             _BlockSignals = new Lazy<SignalData[]>(() => GetCurrent().GetBlockSignals().Select(S => new SignalData(this, S)).ToArray());
         }
@@ -48,6 +50,12 @@ namespace EmpyrionScripting.DataWrapper
 
         public IEntityData[] DockedE => _d.Value;
         private readonly Lazy<IEntityData[]> _d;
+
+        public IEnumerable<LimitedPlayerData> Players => _p == null ? _p =
+            EmpyrionScripting.ModApi.Playfield.Players.Values
+            .Where(P => P.CurrentStructure?.Id == GetCurrent()?.Id)
+            .Select(P => E != null && E.Faction.Group == FactionGroup.Admin ? new PlayerData(P) : new LimitedPlayerData(P)) : _p;
+        IEnumerable<LimitedPlayerData> _p;
 
         public string[] GetDeviceTypeNames => Enum.GetNames(typeof(DeviceTypeName));
 
