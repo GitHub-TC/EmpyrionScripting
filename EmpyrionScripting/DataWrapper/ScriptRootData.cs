@@ -1,13 +1,18 @@
 ﻿using Eleon.Modding;
+using EmpyrionNetAPIAccess;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
 {
     public class ScriptRootData : IScriptRootData
     {
+        private static readonly Assembly CurrentAssembly = Assembly.GetAssembly(typeof(ScriptRootData));
+        public static string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
+
         public bool DeviceLockAllowed { get; }
 
         private ConcurrentDictionary<string, object> _PersistendData;
