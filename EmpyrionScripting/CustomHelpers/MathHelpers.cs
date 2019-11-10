@@ -10,7 +10,7 @@ namespace EmpyrionScripting.CustomHelpers
     public static class MathHelpers
     {
         [HandlebarTag("math")]
-        public static void MathBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void MathBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{math}} helper must have exactly three argument: (lvalue) op (rvalue)");
 
@@ -61,7 +61,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("calc")]
-        public static void CalcHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void CalcHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{calc}} helper must have exactly three argument: (lvalue) op (rvalue)");
 
@@ -89,7 +89,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("distance")]
-        public static void DistanceHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void DistanceHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{distance}} helper must have exactly two argument: (lVector) (rVector)");
 

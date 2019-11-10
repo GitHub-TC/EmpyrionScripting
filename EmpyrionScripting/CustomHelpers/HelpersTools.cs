@@ -113,7 +113,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                EmpyrionScripting.ModApi?.Log($"Filename: {filename} => {error}");
+                EmpyrionScripting.Log($"Filename: {filename} => {error}", EmpyrionNetAPIDefinitions.LogLevel.Message);
                 return null;
             }
         }

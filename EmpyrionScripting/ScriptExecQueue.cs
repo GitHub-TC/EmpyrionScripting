@@ -18,10 +18,8 @@ namespace EmpyrionScripting
         }
         public ConcurrentDictionary<string, ScriptInfo> ScriptRunInfo { get; set; } = new ConcurrentDictionary<string, ScriptInfo>();
 
+        private PlayfieldScriptData playfieldScriptData;
         private Action<IScriptRootData> processScript;
-
-        public static int Iteration => _Iteration;
-        private static int _Iteration;
 
         public int MainCount => _MainCount;
         private int _MainCount;
@@ -31,9 +29,10 @@ namespace EmpyrionScripting
         public ConcurrentDictionary<string, IScriptRootData> WaitForExec { get; } = new ConcurrentDictionary<string, IScriptRootData>();
         public ConcurrentQueue<IScriptRootData>              ExecQueue { get; private set; } = new ConcurrentQueue<IScriptRootData>();
 
-        public ScriptExecQueue(Action<IScriptRootData> processScript)
+        public ScriptExecQueue(PlayfieldScriptData playfieldScriptData, Action<IScriptRootData> processScript)
         {
-            this.processScript = processScript;
+            this.playfieldScriptData = playfieldScriptData;
+            this.processScript       = processScript;
         }
 
         public void Add(IScriptRootData data)
@@ -93,7 +92,7 @@ namespace EmpyrionScripting
                     if (Interlocked.Exchange(ref _MainCount, 0) > 0 && (DateTime.Now - LastIterationUpdate).TotalSeconds >= 1)
                     {
                         LastIterationUpdate = DateTime.Now;
-                        Interlocked.Increment(ref _Iteration);
+                        data.GetPlayfieldScriptData().IncrementIteration();
                     }
                 }
             }

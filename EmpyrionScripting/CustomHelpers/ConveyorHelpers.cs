@@ -16,7 +16,7 @@ namespace EmpyrionScripting.CustomHelpers
         private static object movelock = new object();
 
         public static Action<string, LogLevel> Log { get; set; }
-        public static Func<IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateDeviceLock { get; set; } = (P, S, V) => new DeviceLock(P,S,V);
+        public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateDeviceLock { get; set; } = (R, P, S, V) => new DeviceLock(R, P,S,V);
 
         public class ItemMoveInfo
         {
@@ -29,11 +29,12 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("islocked")]
-        public static void IsLockedHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void IsLockedHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2 && arguments.Length != 4) throw new HandlebarsException("{{islocked structure device|x y z}} helper must have two or four argument: (structure) (device)|(x) (y) (z)");
 
-            var structure = arguments[0] as IStructureData;
+            var root        = rootObject as IScriptRootData;
+            var structure   = arguments[0] as IStructureData;
             VectorInt3 position;
 
             if (arguments.Length == 2)
@@ -52,7 +53,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var isLocked = EmpyrionScripting.ModApi.Playfield.IsStructureDeviceLocked(structure.GetCurrent().Id, position);
+                var isLocked = root.GetCurrentPlayfield().IsStructureDeviceLocked(structure.GetCurrent().Id, position);
 
                 if (isLocked) options.Template(output, context as object);
                 else          options.Inverse (output, context as object);
@@ -64,40 +65,40 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("lockdevice")]
-        public static void LockDeviceHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void LockDeviceHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 3 && arguments.Length != 5) throw new HandlebarsException("{{lockdevice @root structure device|x y z}} helper must have three or five argument: @root (structure) (device)|(x) (y) (z)");
+            if (arguments.Length != 2 && arguments.Length != 4) throw new HandlebarsException("{{lockdevice structure device|x y z}} helper must have two or four argument: @root (structure) (device)|(x) (y) (z)");
 
-            var root                = arguments[0] as IScriptRootData;
-            var isElevatedScript    = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
-            var S                   = arguments[1] as IStructureData;
+            var root                = rootObject as IScriptRootData;
+            var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var S                   = arguments[0] as IStructureData;
             VectorInt3 position;
 
             if(!isElevatedScript) throw new HandlebarsException("{{lockdevice}} only allowed in elevated scripts");
 
-            if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+            if (root.GetPlayfieldScriptData().Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
             {
-                Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                Log($"NoLockAllowed: {root.GetPlayfieldScriptData().Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                 return;
             }
 
-            if (arguments.Length == 3)
+            if (arguments.Length == 2)
             {
-                var block = arguments[2] as BlockData;
+                var block = arguments[1] as BlockData;
                 position  = block?.Position ?? new VectorInt3();
             }
             else
             {
-                int.TryParse(arguments[2].ToString(), out var x);
-                int.TryParse(arguments[3].ToString(), out var y);
-                int.TryParse(arguments[4].ToString(), out var z);
+                int.TryParse(arguments[1].ToString(), out var x);
+                int.TryParse(arguments[2].ToString(), out var y);
+                int.TryParse(arguments[3].ToString(), out var z);
 
                 position = new VectorInt3(x, y, z);
             }
 
             try
             {
-                using (var locked = CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, S.E?.S.GetCurrent(), position))
+                using (var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), position))
                 {
                     if (locked.Success) options.Template(output, context as object);
                     else                options.Inverse (output, context as object);
@@ -110,15 +111,15 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("additems")]
-        public static void AddItemsHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void AddItemsHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 4) throw new HandlebarsException("{{additems @root container itemid count}} helper must have four arguments: @root (container) (item) (count)");
+            if (arguments.Length != 3) throw new HandlebarsException("{{additems container itemid count}} helper must have three arguments: (container) (item) (count)");
 
-            var root                = arguments[0] as IScriptRootData;
-            var isElevatedScript    = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
-            var block               = arguments[1] as BlockData;
-            int.TryParse(arguments[2].ToString(), out var itemid);
-            int.TryParse(arguments[3].ToString(), out var count);
+            var root                = rootObject as IScriptRootData;
+            var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var block               = arguments[0] as BlockData;
+            int.TryParse(arguments[1].ToString(), out var itemid);
+            int.TryParse(arguments[2].ToString(), out var count);
 
             if (!isElevatedScript) throw new HandlebarsException("{{additems}} only allowed in elevated scripts");
 
@@ -134,15 +135,15 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("removeitems")]
-        public static void RemoveItemsHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void RemoveItemsHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 4) throw new HandlebarsException("{{removeitems @root container itemid maxcount}} helper must have four arguments: @root (container) (item) (maxcount)");
+            if (arguments.Length != 3) throw new HandlebarsException("{{removeitems container itemid maxcount}} helper must have three arguments: (container) (item) (maxcount)");
 
-            var root = arguments[0] as IScriptRootData;
-            var isElevatedScript = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
-            var block = arguments[1] as BlockData;
-            int.TryParse(arguments[2].ToString(), out var itemid);
-            int.TryParse(arguments[3].ToString(), out var maxcount);
+            var root                = rootObject as IScriptRootData;
+            var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var block               = arguments[0] as BlockData;
+            int.TryParse(arguments[1].ToString(), out var itemid);
+            int.TryParse(arguments[2].ToString(), out var maxcount);
 
             if (!isElevatedScript) throw new HandlebarsException("{{removeitems}} only allowed in elevated scripts");
 
@@ -158,21 +159,22 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("move")]
-        public static void ItemMoveHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void ItemMoveHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length < 3) throw new HandlebarsException("{{move item structure names [max]}} helper must have at least three argument: (item) (structure) (name;name*;*;name) [max count targets]");
+            if (arguments.Length < 3 || arguments.Length > 4) throw new HandlebarsException("{{move item structure names [max]}} helper must have at least three argument: (item) (structure) (name;name*;*;name) [max count targets]");
 
             try
             {
+                var root        = rootObject as IScriptRootData;
                 var item        = arguments[0] as ItemsData;
                 var structure   = arguments[1] as IStructureData;
                 var namesSearch = arguments[2] as string;
 
                 int? maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? limit : (int?)null;
 
-                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+                if (root.GetPlayfieldScriptData().Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
                 {
-                    Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                    Log($"NoLockAllowed: {root.GetPlayfieldScriptData().Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                     return;
                 }
 
@@ -184,7 +186,7 @@ namespace EmpyrionScripting.CustomHelpers
                     if(uniqueNames.Any()){
                         item.Source
                             .ForEach(S => {
-                                using(var locked = CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, S.E?.S.GetCurrent(), S.Position)) {
+                                using(var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position)) {
                                     if (!locked.Success)
                                     {
                                         Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
@@ -199,7 +201,7 @@ namespace EmpyrionScripting.CustomHelpers
                                                     .Where(N => N != S.CustomName)
                                                     .ForEach(N => {
                                                         var startCount = count;
-                                                        count = MoveItem(S, N, structure, count, maxLimit);
+                                                        count = MoveItem(root, S, N, structure, count, maxLimit);
                                                         if(startCount != count) moveInfos.Add(new ItemMoveInfo() {
                                                             Id              = S.Id,
                                                             Count           = startCount - count,
@@ -234,7 +236,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        private static int MoveItem(ItemsSource S, string N, IStructureData targetStructure, int count, int? maxLimit)
+        private static int MoveItem(IScriptRootData root, ItemsSource S, string N, IStructureData targetStructure, int count, int? maxLimit)
         {
             var target = targetStructure?.GetCurrent()?.GetDevice<Eleon.Modding.IContainer>(N);
             if (target == null)
@@ -249,7 +251,7 @@ namespace EmpyrionScripting.CustomHelpers
                 return count;
             }
 
-            using (var locked = CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, targetStructure.GetCurrent(), targetData.Position))
+            using (var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), targetStructure.GetCurrent(), targetData.Position))
             {
                 if (!locked.Success)
                 {
@@ -268,12 +270,13 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("fill")]
-        public static void FillHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void FillHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length < 3) throw new HandlebarsException("{{fill item structure tank [max]}} helper must have at least two argument: (item) (structure) (tank) [max count/percentage targets]");
+            if (arguments.Length < 3 || arguments.Length > 4) throw new HandlebarsException("{{fill item structure tank [max]}} helper must have at least three argument: (item) (structure) (tank) [max count/percentage targets]");
 
             try
             {
+                var root        = rootObject as IScriptRootData;
                 var structure   = arguments[1] as IStructureData;
                 var item        = arguments[0] as ItemsData;
 
@@ -285,9 +288,9 @@ namespace EmpyrionScripting.CustomHelpers
 
                 int maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? Math.Min(100, Math.Max(0, limit)) : 100;
 
-                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+                if (root.GetPlayfieldScriptData().Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
                 {
-                    Log($"NoLockAllowed: {ScriptExecQueue.Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                    Log($"NoLockAllowed: {root.GetPlayfieldScriptData().Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                     return;
                 }
 
@@ -311,7 +314,7 @@ namespace EmpyrionScripting.CustomHelpers
                 {
                     item.Source
                         .ForEach(S => {
-                            using (var locked = CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, S.E?.S.GetCurrent(), S.Position))
+                            using (var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position))
                             {
                                 if (!locked.Success)
                                 {
@@ -373,13 +376,13 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("deconstruct")]
-        public static void DeconstructHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void DeconstructHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length < 3) throw new HandlebarsException("{{deconstruct @root entity container}} helper must have three argument: @root entity container");
+            if (arguments.Length != 2) throw new HandlebarsException("{{deconstruct entity container}} helper must have two argument: entity container");
 
-            var root = arguments[0] as IScriptRootData;
-            var E    = arguments[1] as IEntityData;
-            var N    = arguments[2]?.ToString();
+            var root = rootObject as IScriptRootData;
+            var E    = arguments[0] as IEntityData;
+            var N    = arguments[1]?.ToString();
 
             try
             {
@@ -470,7 +473,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                                     if (blockType > 0)
                                     {
-                                        locked = locked ?? CreateDeviceLock(EmpyrionScripting.ModApi?.Playfield, root.E.S.GetCurrent(), targetPos);
+                                        locked = locked ?? CreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
                                         if (!locked.Success)
                                         {
                                             deconstructData.CheckedBlocks--;

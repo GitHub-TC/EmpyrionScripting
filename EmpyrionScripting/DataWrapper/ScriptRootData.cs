@@ -13,6 +13,8 @@ namespace EmpyrionScripting.DataWrapper
         private static readonly Assembly CurrentAssembly = Assembly.GetAssembly(typeof(ScriptRootData));
         public static string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
 
+        private readonly PlayfieldScriptData _PlayfieldScriptData;
+
         public bool DeviceLockAllowed { get; }
 
         private ConcurrentDictionary<string, object> _PersistendData;
@@ -24,11 +26,12 @@ namespace EmpyrionScripting.DataWrapper
 
         public ScriptRootData()
         {
-            _e = new Lazy<IEntityData>(() => new EntityData(entity));
+            _e = new Lazy<IEntityData>(() => new EntityData(playfield, entity));
         }
 
-        public ScriptRootData(IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed, ConcurrentDictionary<string, object> persistendData, EventStore eventStore) : this()
+        public ScriptRootData(PlayfieldScriptData playfieldScriptData, IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed, ConcurrentDictionary<string, object> persistendData, EventStore eventStore) : this()
         {
+            _PlayfieldScriptData = playfieldScriptData;
             DeviceLockAllowed = deviceLockAllowed;
             _PersistendData = persistendData;
             this.currentEntites = currentEntities;
@@ -37,15 +40,18 @@ namespace EmpyrionScripting.DataWrapper
             SignalEventStore = eventStore;
         }
 
-        public ScriptRootData(ScriptRootData data) : this(data.currentEntites, data.playfield, data.entity, data.DeviceLockAllowed, data._PersistendData, data.SignalEventStore)
+        public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.currentEntites, data.playfield, data.entity, data.DeviceLockAllowed, data._PersistendData, data.SignalEventStore)
         {
             _p = data._p;
             _e = data._e;
             DisplayType = data.DisplayType;
         }
 
+        public PlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
         public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;
         public IEntity[] GetCurrentEntites() => currentEntites;
+
+        public IPlayfield GetCurrentPlayfield() => playfield;
 
         public string OreIds => "2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297";
         public string IngotIds => "2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298";

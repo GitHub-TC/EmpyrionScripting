@@ -2,6 +2,7 @@
 using System.Threading;
 using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
+using EmpyrionScripting.DataWrapper;
 
 namespace EmpyrionScripting
 {
@@ -9,12 +10,12 @@ namespace EmpyrionScripting
     {
         readonly Action unlockAction;
 
-        public DeviceLock(IPlayfield playfield, IStructure structure, VectorInt3 position)
+        public DeviceLock(IScriptRootData root, IPlayfield playfield, IStructure structure, VectorInt3 position)
         {
             var witherror = false;
             try
             {
-                if (ScriptExecQueue.Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0) return;
+                if (root.GetPlayfieldScriptData().Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0) return;
 
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;
 

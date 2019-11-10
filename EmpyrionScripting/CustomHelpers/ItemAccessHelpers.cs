@@ -11,7 +11,7 @@ namespace EmpyrionScripting.CustomHelpers
     public class ItemAccessHelpers
     {
         [HandlebarTag("items")]
-        public static void ItemsBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void ItemsBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{items structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
@@ -52,7 +52,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("itemlist")]
-        public static void ItemListBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void ItemListBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{itemlist list ids}} helper must have exactly two argument: (list) (id1;id2;id3)");
 

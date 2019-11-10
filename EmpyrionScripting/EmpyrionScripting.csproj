@@ -37,8 +37,8 @@
     <Reference Include="EmpyrionNetApi, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EmpyrionNetAPI.5.0.0\lib\net461\EmpyrionNetApi.dll</HintPath>
     </Reference>
-    <Reference Include="Handlebars, Version=1.10.1.0, Culture=neutral, PublicKeyToken=22225d0bf33cd661, processorArchitecture=MSIL">
-      <HintPath>..\packages\Handlebars.Net.1.10.1\lib\net452\Handlebars.dll</HintPath>
+    <Reference Include="Handlebars">
+      <HintPath>..\dependencies\Handlebars.dll</HintPath>
     </Reference>
     <Reference Include="Mif">
       <HintPath>..\dependencies\Mif.dll</HintPath>
@@ -83,7 +83,6 @@
     <Compile Include="DataWrapper\IScriptRootData.cs" />
     <Compile Include="DataWrapper\IStructureData.cs" />
     <Compile Include="DataWrapper\IStructureTankWrapper.cs" />
-    <Compile Include="DataWrapper\PentaxidTank.cs" />
     <Compile Include="DataWrapper\SignalData.cs" />
     <Compile Include="DataWrapper\SignalEvent.cs" />
     <Compile Include="DataWrapper\SignalEventBase.cs" />
@@ -111,6 +110,7 @@
     <Compile Include="Localization.cs" />
     <Compile Include="DataWrapper\PlayerData.cs" />
     <Compile Include="DataWrapper\PlayfieldData.cs" />
+    <Compile Include="PlayfieldScriptData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataWrapper\ScriptSaveGameRootData.cs" />
     <Compile Include="DataWrapper\StructureData.cs" />

@@ -13,7 +13,7 @@ namespace EmpyrionScripting.CustomHelpers
     public static class LightsHelpers
     {
         [HandlebarTag("lights")]
-        public static void LightsBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void LightsBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{lights structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
@@ -35,7 +35,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("lightcolor")]
-        public static void LightsColorHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void LightsColorHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{lightcolor light color}} helper must have exactly two argument: (light) (rgb hex)");
 
@@ -53,9 +53,9 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("lightblink")]
-        public static void LightsBlickHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void LightsBlickHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 4) throw new HandlebarsException("{{lightblink light interval length offset}} helper must have exactly three argument: (light) (interval) (length) (offset)");
+            if (arguments.Length != 4) throw new HandlebarsException("{{lightblink light interval length offset}} helper must have exactly four argument: (light) (interval) (length) (offset)");
 
             var light = arguments[0] as ILight;
 
@@ -70,9 +70,9 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("lightintensity")]
-        public static void LightsIntensityHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void LightsIntensityHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{lightintensity light intensity}} helper must have exactly three argument: (light) (intensity)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{lightintensity light intensity}} helper must have exactly two argument: (light) (intensity)");
 
             var light = arguments[0] as ILight;
 
@@ -87,9 +87,9 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("lightrange")]
-        public static void LightsRangeHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void LightsRangeHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{lightrange light range}} helper must have exactly three argument: (light) (range)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{lightrange light range}} helper must have exactly two argument: (light) (range)");
 
             var light = arguments[0] as ILight;
 
@@ -104,9 +104,9 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("lightspotangle")]
-        public static void LightsSpotAngleHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void LightsSpotAngleHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{lightspotangle light spotangle}} helper must have exactly three argument: (light) (spotangle)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{lightspotangle light spotangle}} helper must have exactly two argument: (light) (spotangle)");
 
             var light = arguments[0] as ILight;
 
@@ -121,9 +121,9 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("lighttype")]
-        public static void LightsTypeHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void LightsTypeHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{lighttype light type}} helper must have exactly three argument: (light) (type)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{lighttype light type}} helper must have exactly two argument: (light) (type)");
 
             var light = arguments[0] as ILight;
 

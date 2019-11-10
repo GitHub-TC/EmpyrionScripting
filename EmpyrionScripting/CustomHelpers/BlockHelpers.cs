@@ -11,7 +11,7 @@ namespace EmpyrionScripting.CustomHelpers
     {
 
         [HandlebarTag("devices")]
-        public static void DevicesBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void DevicesBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{devices structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
@@ -35,7 +35,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("devicesoftype")]
-        public static void DevicesOfTypeBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void DevicesOfTypeBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{devicesoftype structure type}} helper must have exactly two argument: (structure) (type)");
 
@@ -63,7 +63,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("block")]
-        public static void ObjectBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void ObjectBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 4) throw new HandlebarsException("{{block structure x y z}} helper must have exactly four argument: (structure) (x) (y) (z)");
 
@@ -86,7 +86,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("setactive")]
-        public static void SetBlockActiveHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SetBlockActiveHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{setactive block|device active}} helper must have exactly two argument: (block|device) (name;name*;*;name)");
 
@@ -104,9 +104,9 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("gettexture")]
-        public static void GetTextureBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void GetTextureBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{gettexture block pos}} helper must have exactly three argument: (block) '(T|B|N|S|W|E)'");
+            if (arguments.Length != 2) throw new HandlebarsException("{{gettexture block pos}} helper must have exactly two argument: (block) '(T|B|N|S|W|E)'");
 
             var block = arguments[0] as BlockData;
             var pos   = arguments[1].ToString();
@@ -134,7 +134,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("settexture")]
-        public static void SetTextureBlockHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SetTextureBlockHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{settexture block pos textureid}} helper must have exactly three argument: (block) (T,B,N,S,W,E) (texture)");
 

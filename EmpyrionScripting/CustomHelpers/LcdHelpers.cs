@@ -12,7 +12,7 @@ namespace EmpyrionScripting.CustomHelpers
     public static class LcdHelpers
     {
         [HandlebarTag("settext")]
-        public static void SetTextHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SetTextHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{settext lcddevice text}} helper must have exactly two argument: (structure) (text)");
 
@@ -31,7 +31,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("settextblock")]
-        public static void SetTextBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void SetTextBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{settextblock lcddevice}} helper must have exactly one argument: (structure)");
 
@@ -53,7 +53,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("gettext")]
-        public static void GetTextHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void GetTextHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{gettext lcddevice}} helper must have exactly one argument: (structure)");
 
@@ -72,7 +72,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("setfontsize")]
-        public static void SetFontSizeHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SetFontSizeHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{setfontsize lcddevice size}} helper must have exactly two argument: (structure) (size)");
 
@@ -91,7 +91,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("setcolor")]
-        public static void SetColorHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SetColorHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{setcolor lcddevice color}} helper must have exactly two argument: (structure) (rgb color)");
 
@@ -110,7 +110,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("setbgcolor")]
-        public static void SetBGColorHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SetBGColorHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{setbgcolor lcddevice color}} helper must have exactly two argument: (structure) (rgb color)");
 

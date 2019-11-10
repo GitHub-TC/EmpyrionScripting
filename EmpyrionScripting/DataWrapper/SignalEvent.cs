@@ -1,12 +1,16 @@
-﻿using System;
+﻿using Eleon.Modding;
+using System;
 
 namespace EmpyrionScripting.DataWrapper
 {
     public class SignalEvent : SignalEventBase
     {
-        public SignalEvent(SignalEventBase signalBase) : base(signalBase) {}
+        private readonly IPlayfield _CurrentPlayfield;
+        public SignalEvent(IPlayfield playfield, SignalEventBase signalBase) : base(signalBase) {
+            _CurrentPlayfield = playfield;
+        }
 
-        public IEntityData TriggeredByShip => EmpyrionScripting.ModApi.Playfield.Entities.TryGetValue(TriggeredByEntityId, out var entity) ? new EntityData(entity, true) : null;
-        public LimitedPlayerData TriggeredByPlayer => EmpyrionScripting.ModApi.Playfield.Players.TryGetValue(TriggeredByEntityId, out var player) ? new LimitedPlayerData(player) : null;
+        public IEntityData TriggeredByShip => _CurrentPlayfield.Entities.TryGetValue(TriggeredByEntityId, out var entity) ? new EntityData(_CurrentPlayfield, entity, true) : null;
+        public LimitedPlayerData TriggeredByPlayer => _CurrentPlayfield.Players.TryGetValue(TriggeredByEntityId, out var player) ? new LimitedPlayerData(player) : null;
     }
 }

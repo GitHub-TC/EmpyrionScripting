@@ -12,16 +12,17 @@ namespace EmpyrionScripting.CustomHelpers
     public static class EffectHelpers
     {
         [HandlebarTag("intervall")]
-        public static void IntervallBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void IntervallBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{intervall seconds}} helper must have exactly one argument: (value)");
 
+            var root = rootObject as IScriptRootData;
             double.TryParse(arguments[0]?.ToString(), out double intervall);
 
             try
             {
-                if(ScriptExecQueue.Iteration % (2 * intervall) < intervall) options.Template(output, context as object);
-                else                                                        options.Inverse (output, context as object);
+                if(root.GetPlayfieldScriptData().Iteration % (2 * intervall) < intervall) options.Template(output, context as object);
+                else                                                                      options.Inverse (output, context as object);
             }
             catch (Exception error)
             {
@@ -30,10 +31,11 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("scroll")]
-        public static void ScrollBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void ScrollBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{scroll lines delay}} helper must have exactly two argument: (lines) (delay)");
 
+            var root = rootObject as IScriptRootData;
             int.TryParse(arguments[0] as string, out int lines);
             int.TryParse(arguments[1] as string, out int delay);
 
@@ -49,7 +51,7 @@ namespace EmpyrionScripting.CustomHelpers
                 }
                 else
                 {
-                    var skip = (ScriptExecQueue.Iteration % (delay * overlapp)) / delay;
+                    var skip = (root.GetPlayfieldScriptData().Iteration % (delay * overlapp)) / delay;
                     output.Write(string.Join("\n", textlines.Skip((int)skip).Take(lines)));
                     output.Write("\n");
                 }
@@ -61,14 +63,14 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("color")]
-        public static void ColorHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void ColorHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{color}} helper must have exactly two argument: '@root (rgb hex)'");
+            if (arguments.Length != 1) throw new HandlebarsException("{{color}} helper must have exactly one argument: '(rgb hex)'");
 
             try
             {
-                var root = arguments[0] as IScriptRootData;
-                int.TryParse(arguments[1] as string, NumberStyles.HexNumber, null, out int color);
+                var root = rootObject as IScriptRootData;
+                int.TryParse(arguments[0] as string, NumberStyles.HexNumber, null, out int color);
                 root.Color        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
                 root.ColorChanged = true;
             }
@@ -79,14 +81,14 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("bgcolor")]
-        public static void BGColorHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void BGColorHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{bgcolor}} helper must have exactly two argument: '@root (rgb hex)'");
+            if (arguments.Length != 1) throw new HandlebarsException("{{bgcolor}} helper must have exactly one argument: '(rgb hex)'");
 
             try
             {
-                var root = arguments[0] as IScriptRootData;
-                int.TryParse(arguments[1] as string, NumberStyles.HexNumber, null, out int color);
+                var root = rootObject as IScriptRootData;
+                int.TryParse(arguments[0] as string, NumberStyles.HexNumber, null, out int color);
                 root.BackgroundColor        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
                 root.BackgroundColorChanged = true;
             }
@@ -97,14 +99,14 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("fontsize")]
-        public static void FontSizeHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void FontSizeHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{fontsize}} helper must have exactly two argument: @root (number)");
+            if (arguments.Length != 1) throw new HandlebarsException("{{fontsize}} helper must have exactly one argument: (number)");
 
             try
             {
-                var root = arguments[0] as IScriptRootData;
-                int.TryParse(arguments[1] as string, out int fontSize);
+                var root = rootObject as IScriptRootData;
+                int.TryParse(arguments[0] as string, out int fontSize);
                 root.FontSize        = fontSize;
                 root.FontSizeChanged = true;
             }

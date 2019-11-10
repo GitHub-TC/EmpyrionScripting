@@ -9,16 +9,18 @@ namespace EmpyrionScripting.DataWrapper
     public class EntityData : IEntityData
     {
         private readonly WeakReference<IEntity> entity;
+        private readonly WeakReference<IPlayfield> playfield;
 
         public EntityData(bool isPublic)
         {
             _s = isPublic ? null : new Lazy<IStructureData>(() => new StructureData(this));
         }
-        public EntityData(IEntity entity) : this(entity, false) { }
+        public EntityData(IPlayfield playfield, IEntity entity) : this(playfield, entity, false) { }
 
-        public EntityData(IEntity entity, bool isPublic): this(isPublic)
+        public EntityData(IPlayfield playfield, IEntity entity, bool isPublic): this(isPublic)
         {
-            this.entity = new WeakReference<IEntity>(entity);
+            this.playfield = new WeakReference<IPlayfield>(playfield);
+            this.entity    = new WeakReference<IEntity>(entity);
         }
 
         public IStructureData S => _s?.Value;
@@ -34,5 +36,6 @@ namespace EmpyrionScripting.DataWrapper
         public FactionData Faction => GetCurrent().Faction;
 
         public virtual IEntity GetCurrent() => entity.TryGetTarget(out var e) ? e : null;
+        public virtual IPlayfield GetCurrentPlayfield() => playfield.TryGetTarget(out var p) ? p : null;
     }
 }
