@@ -301,21 +301,21 @@ Welt
 {{/intervall}}
 
 {{#intervall 5}}
-{{fontsize @root 8}}
+{{fontsize 8}}
 {{else}}
-{{fontsize @root 15}}
+{{fontsize 15}}
 {{/intervall}}
 
 {{#intervall 1}}
-{{color @root 'ff0000'}}
+{{color 'ff0000'}}
 {{else}}
-{{color @root '00ff00'}}
+{{color '00ff00'}}
 {{/intervall}}
 
 {{#intervall 1}}
-{{bgcolor @root 'ffff00'}}
+{{bgcolor 'ffff00'}}
 {{else}}
-{{bgcolor @root '000000'}}
+{{bgcolor '000000'}}
 {{/intervall}}
 ```
 ----------------------------------------------------
@@ -393,7 +393,7 @@ Syntaxdocu:
 + {{fill item structure tank \[max\]}}
   + Füllt in der Struktur (structure) den Tank (tank) = Fuel/Pxygen/Pentaxid mit dem Item (item) auf. Der prozentuale Füllstand kann mit (max) optional limitiert werden. Standard ist 100.
 
-+ {{deconstruct @root entity container}}
++ {{deconstruct entity container}}
   + Baut die Struktur 'entity' ab und befördert die Teile in den Container mit dem Namen welcher mit 'container' angegben wird
   + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
   + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
@@ -476,10 +476,10 @@ Syntaxdocu:
   + Diesen Datensatz im Inhalt zum direkten Zugriff bereitstellen
   + der {{else}} fall wird aufgerufen wenn data == null ist
 
-+ {{set @root key data}}
++ {{set key data}}
   + Die Daten (data) hinterlegen so dass sie per @root.Data.(key) jederzeit wieder abgerufen werden können
 
-+ {{setblock @root key}}
++ {{setblock key}}
   + Die Daten des Blockes hinterlegen so dass sie per @root.Data.(key) jederzeit wieder abgerufen werden können
 
 + {{concat a1 a2 a3 ...}}
@@ -531,20 +531,20 @@ Syntaxdocu:
   + Setzt die Hintergrundfarbe des LCD (lcddevice) auf (rgb hex)
 
 ## CustomHelpers Strukturen
-+ {{entitybyname @root name}}
++ {{entitybyname name}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Name (name)
 
-+ {{entitiesbyname @root names}}
++ {{entitiesbyname names}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Namen in (name;name*;*)
 
-+ {{entitybyid @root id}}
++ {{entitybyid id}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Id (id)
 
-+ {{entitiesbyid @root ids}}
++ {{entitiesbyid ids}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit IDs in (id1;id2;id3)
 
 ## Signale
-+ {{signalevents @root names}} 
++ {{signalevents names}} 
   + die letzten Signalevents mit den namen (name1;name2...)
 
 + {{signals structure names}}
@@ -562,17 +562,17 @@ Syntaxdocu:
 + {{getswitches structure name}}
   + Liefert alle Schalte die im ControlPanel auf dem Namen (name) passen
 
-+ {{stopwatch @root startsignal stopsignal \[resetsignal\]}}
++ {{stopwatch startsignal stopsignal \[resetsignal\]}}
   + Eine einfache Stopuhr (für Rennstrecken) mit einem Startsignal, einem Stopsignal und für das Zurücksetzten der Ergebnisse optionalem Resetsignal
 
 ## Elevated Scripte (Savegame oder Adm-Strukturen)
-+ {{lockdevice @root structure device|x y z}}
++ {{lockdevice structure device|x y z}}
   + Sperrt ein Device
 
-+ {{additems @root container itemid count}}
++ {{additems container itemid count}}
   + Fügt (itemid) (count) mal dem container hinzu (dieser sollte gelocked sein)
 
-+ {{removeitems @root container itemid maxcount}}
++ {{removeitems container itemid maxcount}}
   + Entfernt (itemid) (count) aus dem container hinzu (dieser sollte gelocked sein)
 
 ## SaveGame Scripte
@@ -590,23 +590,23 @@ in diesem Verzeichnis werden nach folgendem Muster Scriptdateien mit der Endung 
 Hinweis: EntityType ist BA,CV,SV or HV
 
 ### CustomHelpers-SaveGameScripts
-+ {{readfile @root dir filename}} 
++ {{readfile dir filename}} 
   + (dir)\\(filename) Dateiinhalt wird als ZeilenArray geliefert
   + Falls die Datei nicht existiert wird der {{else}} Teil ausgeführt
 
-+ {{writefile @root dir filename}} 
++ {{writefile dir filename}} 
   + (dir)\\(filename) Inhalt des Blockes wird in die Datei geschrieben
 
-+ {{fileexists @root dir filename}}
++ {{fileexists dir filename}}
   + Wenn die Datei existiert dann das Innere ausführen ansonsten den exec Teil auswerten
 
-+ {{filelist @root dir filename \[recursive\]}}
++ {{filelist dir filename \[recursive\]}}
   + Liste der Dateien (optional rekursiv amit allen Unterverzeichnissen) in dem Verzeichnis (dir) auf, welche dem Pattern (filename) entsprechen
 
-+ {{settype @root block typeid}}
++ {{settype block typeid}}
   + Den Block (austauschen) zu (typeid)
 
-+ {{setdamage @root block damage}}
++ {{setdamage block damage}}
   + Schaden des Blockes setzen
 
 ### Whats next?
@@ -919,21 +919,21 @@ Welt
 {{/intervall}}
 
 {{#intervall 5}}
-{{fontsize @root 8}}
+{{fontsize 8}}
 {{else}}
-{{fontsize @root 15}}
+{{fontsize 15}}
 {{/intervall}}
 
 {{#intervall 1}}
-{{color @root 'ff0000'}}
+{{color 'ff0000'}}
 {{else}}
-{{color @root '00ff00'}}
+{{color '00ff00'}}
 {{/intervall}}
 
 {{#intervall 1}}
-{{bgcolor @root 'ffff00'}}
+{{bgcolor 'ffff00'}}
 {{else}}
-{{bgcolor @root '000000'}}
+{{bgcolor '000000'}}
 {{/intervall}}
 ```
 ----------------------------------------------------
@@ -1105,11 +1105,11 @@ DateTime format:
   + the {{else}} case will call when data == null is
 
 ### CustomHelpers (set)
-+ {{set @root key data}}
++ {{set key data}}
    + The data (data) are stored so that they can be recalled at any time via @ root.Data. (Key)
 
 ### CustomHelpers (setblock)
-+ {{setblock @root key}}
++ {{setblock key}}
    + The data of the block are stored so that they can be recalled at any time via @ root.Data. (Key)
 
 ### CustomHelpers (math)
@@ -1166,35 +1166,35 @@ DateTime format:
   + Set the bgcolor of the LCD (lcddevice) with (rgb hex)
 
 ### CustomHelpers (entitybyname)
-+ {{entitybyname @root name}}
++ {{entitybyname name}}
   + Get nearby Entity (with same faction) with (name)
 
 ### CustomHelpers (entitiesbyname)
-+ {{entitiesbyname @root names}}
++ {{entitiesbyname names}}
   + Get nearby Entity (with same faction) with Names in (name;name*;*)
 
 ### CustomHelpers (entitybyid)
-+ {{entitybyid @root id}}
++ {{entitybyid id}}
   + Get nearby Entity (with same faction) with (id)
 
 ### CustomHelpers (entitiesbyid)
-+ {{entitiesbyid @root ids}}
++ {{entitiesbyid ids}}
   + Get nearby Entity (with same faction) with IDs in (id1;id2;id3)
 
 ### CustomHelpers (deconstruct)
-+ {{deconstruct @root entity container}}
++ {{deconstruct entity container}}
    + Deconstruct the entity 'entity' and moves parts to container named as 'container''
    + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
    + With the configuration setting DeconstructBlockSubstitution a replacement (by another block type) / deletion (by 0) of block types can be defined
 
 ## Elevated scripts (Savegame or Adm structures)
-+ {{lockdevice @root structure device | x y z}}
++ {{lockdevice structure device | x y z}}
   + Locks a device
 
-+ {{additems @root container item id count}}
++ {{additems container item id count}}
   + Add (itemid) (count) times to the container (this should be locked)
 
-+ {{removeitems @root container itemid maxcount}}
++ {{removeitems container itemid maxcount}}
   + Removes (itemid) (count) from the container (it should be locked)
 
 ## SaveGame scripts
@@ -1212,16 +1212,16 @@ in this directory script files with the extension *.hbs are searched for accordi
 Note: EntityType is BA,CV,SV or HV
 
 ### CustomHelpers-SaveGameScripts (readfile)
-+ {{readfile @root dir filename}}
++ {{readfile dir filename}}
    + (dir)\\(filename) file content is supplied as a LineArray
    + If the file does not exist, the {{else}} part will be executed
 
 ### CustomHelpers-SaveGameScripts (writefile)
-+ {{writefile @root dir filename}}
++ {{writefile dir filename}}
    + (dir)\\(filename) Content of the block is written to the file
 
 ### CustomHelpers-SaveGameScripts (fileexists)
-+ {{fileexists @root dir filename}}
++ {{fileexists dir filename}}
   + If exists then templane oterwirse exec else part
 
 ### Whats next?

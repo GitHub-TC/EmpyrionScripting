@@ -83,7 +83,6 @@
     <Compile Include="DataWrapper\IScriptRootData.cs" />
     <Compile Include="DataWrapper\IStructureData.cs" />
     <Compile Include="DataWrapper\IStructureTankWrapper.cs" />
-    <Compile Include="DataWrapper\PentaxidTank.cs" />
     <Compile Include="DataWrapper\SignalData.cs" />
     <Compile Include="DataWrapper\SignalEvent.cs" />
     <Compile Include="DataWrapper\SignalEventBase.cs" />

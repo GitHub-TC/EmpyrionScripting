@@ -26,7 +26,7 @@ namespace EmpyrionScripting.DataWrapper
             _passengers = new Lazy<PlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
             _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank, StructureTankType.Fuel));
             _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank, StructureTankType.Oxygen));
-            _PentaxidTank = new Lazy<PentaxidTank>(() => new PentaxidTank(GetCurrent().GetDevice<IContainer>(AllCustomDeviceNames.GetUniqueNames("Pentaxid Tank*").FirstOrDefault() ?? "Pentaxid Tank")));
+            _PentaxidTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().PentaxidTank, StructureTankType.Pentaxid));
             _ControlPanelSignals = new Lazy<SignalData[]>(() => GetCurrent().GetControlPanelSignals().Select(S => new SignalData(this, S)).ToArray());
             _BlockSignals = new Lazy<SignalData[]>(() => GetCurrent().GetBlockSignals().Select(S => new SignalData(this, S)).ToArray());
         }
@@ -113,7 +113,7 @@ namespace EmpyrionScripting.DataWrapper
         public IStructureTankWrapper OxygenTank => _OxygenTank.Value;
         private readonly Lazy<StructureTank> _OxygenTank;
         public IStructureTankWrapper PentaxidTank => _PentaxidTank.Value;
-        private readonly Lazy<PentaxidTank> _PentaxidTank;
+        private readonly Lazy<StructureTank> _PentaxidTank;
 
         public SignalData[] ControlPanelSignals => _ControlPanelSignals.Value;
         private readonly Lazy<SignalData[]> _ControlPanelSignals;
