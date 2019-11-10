@@ -146,20 +146,22 @@ namespace EmpyrionScripting
 
         private void Application_OnPlayfieldUnloaded(string playfieldName)
         {
-            ModApi.Playfield.OnEntityLoaded   -= Playfield_OnEntityLoaded;
-            ModApi.Playfield.OnEntityUnloaded -= Playfield_OnEntityUnloaded;
+            if(ModApi.Playfield != null){
+                ModApi.Playfield.OnEntityLoaded   -= Playfield_OnEntityLoaded;
+                ModApi.Playfield.OnEntityUnloaded -= Playfield_OnEntityUnloaded;
+            }
 
             ModApi.Log($"PauseScripts for {playfieldName} {(PauseScripts ? "always stopped" : "scripts running")}");
             PauseScripts = true;
 
             DisplayScriptInfos();
-            ScriptExecQueue.Clear();
-            LcdCompileCache.Clear();
-            PersistendData.Clear();
+            ScriptExecQueue?.Clear();
+            LcdCompileCache?.Clear();
+            PersistendData?.Clear();
 
-            var stores = EventStore.Values.ToArray();
-            EventStore.Clear();
-            stores.ForEach(S => S.Dispose());
+            var stores = EventStore?.Values.ToArray();
+            EventStore?.Clear();
+            stores?.ForEach(S => S.Dispose());
         }
 
         public void StartAllScriptsForPlayfieldServer()
