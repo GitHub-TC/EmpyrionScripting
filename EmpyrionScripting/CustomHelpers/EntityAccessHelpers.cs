@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.DataWrapper;
+﻿using Eleon.Modding;
+using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
 using System.IO;
@@ -21,20 +22,26 @@ namespace EmpyrionScripting.CustomHelpers
             var namesSearch         = arguments[0]?.ToString();
 
             try
-            {
-                var found = root.GetCurrentEntites()
-                    .Where(E => E.Type != EntityType.Proxy)
-                    .Where(E => isElevatedScript || E.Faction.Id == root.E.GetCurrent().Faction.Id)
-                    .Where(E => E.Name == namesSearch)
-                    .FirstOrDefault(E => isElevatedScript || Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
+        {
+        var found = root.GetCurrentEntites()
+            .Where(SafeIsNoProxyCheck)
+            .Where(E => isElevatedScript || E.Faction.Id == root.E.GetCurrent().Faction.Id)
+            .Where(E => E.Name == namesSearch)
+            .FirstOrDefault(E => isElevatedScript || Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
 
-                if (found == null) options.Inverse(output, context as object);
-                else               options.Template(output, new EntityData(root.GetCurrentPlayfield(), found));
-            }
-            catch (Exception error)
+        if (found == null) options.Inverse(output, context as object);
+        else options.Template(output, new EntityData(root.GetCurrentPlayfield(), found));
+        }
+        catch (Exception error)
             {
                 output.Write("{{entitybyname}} error " + EmpyrionScripting.ErrorFilter(error));
             }
+        }
+
+        private static bool SafeIsNoProxyCheck(IEntity entity)
+        {
+            try   { return entity != null && entity.Type != EntityType.Proxy; }
+            catch { return false; }
         }
 
         [HandlebarTag("entitiesbyname")]
@@ -45,12 +52,12 @@ namespace EmpyrionScripting.CustomHelpers
 
             var root                = rootObject as IScriptRootData;
             var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
-            var namesSearch         = arguments[1]?.ToString();
+            var namesSearch         = arguments[0]?.ToString();
 
             try
             {
                 var found = root.GetCurrentEntites()
-                    .Where(E => E.Type != EntityType.Proxy)
+                    .Where(SafeIsNoProxyCheck)
                     .Where(E => isElevatedScript || E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => new[] { E.Name }.GetUniqueNames(namesSearch).Any())
                     .Where(E => isElevatedScript || Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
@@ -76,7 +83,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var found = root.GetCurrentEntites()
-                    .Where(E => E.Type != EntityType.Proxy)
+                    .Where(SafeIsNoProxyCheck)
                     .Where(E => E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => new[] { E.Id.ToString() }.GetUniqueNames(idsSearch).Any())
                     .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);
@@ -102,7 +109,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var found = root.GetCurrentEntites()
-                    .Where(E => E.Type != EntityType.Proxy)
+                    .Where(SafeIsNoProxyCheck)
                     .Where(E => E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => E.Id == id)
                     .FirstOrDefault(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMinDistance);

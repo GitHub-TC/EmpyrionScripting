@@ -23,7 +23,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestEQ()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "Yes:aNo:bNo:c",
                 lcdMod.ExecuteHandlebarScript(pf, new { I = new[] {
@@ -39,7 +39,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestLEQ()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "Yes:aYes:bNo:c",
                 lcdMod.ExecuteHandlebarScript(pf, new
@@ -72,7 +72,7 @@ namespace EmpyrionScripting.UnitTests
             lcdData.E.Returns(E);
 
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "Yes:aYes:bNo:c",
                 lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#each E.S.Items}}{{test Id leq 2}}Yes:{{Name}}{{else}}No:{{Name}}{{/test}}{{/each}}")
@@ -97,7 +97,7 @@ namespace EmpyrionScripting.UnitTests
             lcdData.E.Returns(E);
 
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "Yes:1 #10",
                 lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#items E.S 'BoxA'}}{{test Id leq 2}}Yes:{{Name}} #{{Count}}{{else}}No:{{Name}}{{/test}}{{/items}}")
@@ -122,7 +122,7 @@ namespace EmpyrionScripting.UnitTests
             lcdData.E.Returns(E);
 
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "Yes:1 #10",
                 lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#items E.S 'BoxA'}}{{test Id leq 2}}Yes:{{Name}} #{{Count}}{{else}}No:{{Name}}{{/test}}{{/items}}")
@@ -134,7 +134,7 @@ namespace EmpyrionScripting.UnitTests
         {
             var lcdData = Substitute.For<IScriptRootData>();
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{color 'ff00ff'}}");
             Assert.AreEqual(new UnityEngine.Color(255,0,255), lcdData.Color);
         }
@@ -143,7 +143,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestINList()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "Yes:aYes:bNo:c",
                 lcdMod.ExecuteHandlebarScript(pf, new
@@ -161,7 +161,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestINRange()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "Yes:aYes:bNo:c",
                 lcdMod.ExecuteHandlebarScript(pf, new
@@ -179,7 +179,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestINRangeNeg1()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "Yes:aYes:bNo:c",
                 lcdMod.ExecuteHandlebarScript(pf, new
@@ -197,7 +197,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestINRangeNeg2()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "No:aNo:bNo:c",
                 lcdMod.ExecuteHandlebarScript(pf, new
@@ -215,7 +215,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestDateTime()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 DateTime.Now.ToString(),
                 lcdMod.ExecuteHandlebarScript(pf, "", "{{datetime}}")
@@ -226,7 +226,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodFormatPercentPos()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "50,0%",
                 lcdMod.ExecuteHandlebarScript(pf, 0.5, "{{format . '{0:P1}'}}")
@@ -237,7 +237,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodFormatPercentNeg()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "-50,0%",
                 lcdMod.ExecuteHandlebarScript(pf, -0.5, "{{format . '{0:P1}'}}")
@@ -248,7 +248,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestDateTimeMESZ()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 DateTime.Now.ToString(),
                 lcdMod.ExecuteHandlebarScript(pf, "", "{{datetime MESZ}}")
@@ -259,7 +259,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestDateTimeMESZFormat()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 DateTime.Now.ToString("dd MMM HH:mm:ss"),
                 lcdMod.ExecuteHandlebarScript(pf, "", "{{datetime 'dd MMM HH:mm:ss'}}")
@@ -270,7 +270,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodUnicodeEscape()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "äöü äöü",
                 lcdMod.ExecuteHandlebarScript(pf, "äöü", "äöü {{this}}")
@@ -288,14 +288,14 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodTestScroll()
         {
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             var outtext = lcdMod.ExecuteHandlebarScript(pf, "", "{{#scroll 5 1}}\nLine 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10\nLine 11\nLine 12\nLine 13\n{{/scroll}}");
         }
 
         [TestMethod]
         public void TestMethodItemsMove()
         {
-            ConveyorHelpers.CreateDeviceLock = (P, S, V) => new MockDeviceLock();
+            ConveyorHelpers.CreateDeviceLock = (R, P, S, V) => new MockDeviceLock();
 
             var boxA = Substitute.For<IContainer>();
             boxA.RemoveItems(1, int.MaxValue).Returns(10);
@@ -328,7 +328,7 @@ namespace EmpyrionScripting.UnitTests
             lcdData.E.Returns(E);
 
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual("9-1", lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#items E.S 'BoxA'}}{{move this ../E.S 'BoxB'}}{{Count}}-{{Id}}{{/move}}{{/items}}"));
         }
 
@@ -344,7 +344,7 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodItemsMoveWithSameBox()
         {
-            ConveyorHelpers.CreateDeviceLock = (P, S, V) => new MockDeviceLock();
+            ConveyorHelpers.CreateDeviceLock = (R, P, S, V) => new MockDeviceLock();
 
             var e = Substitute.For<IEntityData>();
             e.Name.Returns("CVa");
@@ -381,14 +381,14 @@ namespace EmpyrionScripting.UnitTests
             lcdData.E.Returns(e);
             lcdData.E.S.Returns(s);
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual("1#9 CVa:BoxA->CVa:BoxB", lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#items E.S 'BoxA'}}{{move this ../E.S 'Box*'}}{{Id}}#{{Count}} {{SourceE.Name}}:{{Source}}->{{DestinationE.Name}}:{{Destination}}{{/move}}{{/items}}"));
         }
 
         [TestMethod]
         public void TestMethodItemsMoveToOtherEntity()
         {
-            ConveyorHelpers.CreateDeviceLock = (P, S, V) => new MockDeviceLock();
+            ConveyorHelpers.CreateDeviceLock = (R, P, S, V) => new MockDeviceLock();
             
             // SV ==================================================================
             var SVboxA = Substitute.For<IContainer>();
@@ -471,7 +471,7 @@ namespace EmpyrionScripting.UnitTests
             lcdData.E.Returns(eCV);
             lcdData.E.S.Returns(sCV);
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual("SVa:1#9 SVa:BoxA->CVb:BoxB", lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#each E.S.DockedE}}{{Name}}:{{#items S 'BoxA'}}{{move this @root/E.S 'Box*'}}{{Id}}#{{Count}} {{SourceE.Name}}:{{Source}}->{{DestinationE.Name}}:{{Destination}}{{/move}}{{/items}}{{/each}}"));
         }
 
@@ -485,8 +485,8 @@ namespace EmpyrionScripting.UnitTests
             lcdMod.SaveGamesScripts = new SaveGamesScripts(null) { SaveGameModPath = lcdMod.SaveGameModPath };
             lcdMod.SaveGamesScripts.ReadSaveGamesScripts();
 
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
-            lcdMod.ExecFoundSaveGameScripts(pf, new ScriptSaveGameRootData(null, null, null, null, null), Path.Combine(lcdMod.SaveGamesScripts.MainScriptPath, "CV"));
+            var pf = new PlayfieldScriptData(lcdMod);
+            lcdMod.ExecFoundSaveGameScripts(pf, new ScriptSaveGameRootData(pf, null, null, null, null, null), Path.Combine(lcdMod.SaveGamesScripts.MainScriptPath, "CV"));
         }
 
         [TestMethod]
@@ -495,7 +495,7 @@ namespace EmpyrionScripting.UnitTests
             var lcdData = Substitute.For<ScriptSaveGameRootData>();
             lcdData.MainScriptPath = "abc";
             var lcdMod = new EmpyrionScripting();
-            var pf = new EmpyrionScripting.PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
                 "abc",
                 lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{MainScriptPath}}")

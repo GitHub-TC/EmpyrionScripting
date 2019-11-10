@@ -26,6 +26,7 @@ namespace EmpyrionScripting.DataWrapper
         string Script { get; set; }
         string ScriptId { get; set; }
 
+        PlayfieldScriptData GetPlayfieldScriptData();
         IEntity[] GetCurrentEntites();
         IPlayfield GetCurrentPlayfield();
         ConcurrentDictionary<string, object> GetPersistendData();

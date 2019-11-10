@@ -110,6 +110,7 @@
     <Compile Include="Localization.cs" />
     <Compile Include="DataWrapper\PlayerData.cs" />
     <Compile Include="DataWrapper\PlayfieldData.cs" />
+    <Compile Include="PlayfieldScriptData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataWrapper\ScriptSaveGameRootData.cs" />
     <Compile Include="DataWrapper\StructureData.cs" />
