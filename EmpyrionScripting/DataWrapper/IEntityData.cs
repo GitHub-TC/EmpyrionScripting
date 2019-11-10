@@ -14,5 +14,6 @@ namespace EmpyrionScripting.DataWrapper
         IStructureData S { get; }
 
         IEntity GetCurrent();
+        IPlayfield GetCurrentPlayfield();
     }
 }

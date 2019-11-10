@@ -10,7 +10,7 @@ namespace EmpyrionScripting.CustomHelpers
     public static class LogicHelpers
     {
         [HandlebarTag("if")]
-        public static void IfBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void IfBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{if}} helper must have exactly one argument: (testvalue)");
 
@@ -38,7 +38,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("test")]
-        public static void TestBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments) {
+        public static void TestBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments) {
             if (arguments.Length != 3) throw new HandlebarsException("{{test}} helper must have exactly three argument: (testvalue) 'eq'|'le'|'leq'|'ge'|'geq'|'in' (compareto)");
 
             try

@@ -12,20 +12,20 @@ namespace EmpyrionScripting.CustomHelpers
     public class SignalHelpers
     {
         [HandlebarTag("signalevents")]
-        public static void SignalEventsHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void SignalEventsHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{signalevents @root names}} helper must have exactly two argument: @root (name1;name2...)");
+            if (arguments.Length != 1) throw new HandlebarsException("{{signalevents names}} helper must have exactly one argument: (name1;name2...)");
 
-            var root             = arguments[0] as IScriptRootData;
-            var isElevatedScript = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
-            var namesSearch      = arguments[1].ToString();
+            var root             = rootObject as IScriptRootData;
+            var isElevatedScript = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var namesSearch      = arguments[0].ToString();
 
             try
             {
                 var uniqueNames = root.SignalEventStore.GetEvents().Keys.GetUniqueNames(namesSearch).ToDictionary(N => N);
 
                 var signals = root.SignalEventStore.GetEvents().Where(S => uniqueNames.ContainsKey(S.Key)).Select(S => S.Value).ToArray();
-                if (signals != null && signals.Length > 0) signals.ForEach(S => options.Template(output, S.Select(subS => isElevatedScript ? new SignalEventElevated(subS) : (object)new SignalEvent(subS)).Reverse().ToArray()));
+                if (signals != null && signals.Length > 0) signals.ForEach(S => options.Template(output, S.Select(subS => isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), subS) : (object)new SignalEvent(root.GetCurrentPlayfield(), subS)).Reverse().ToArray()));
                 else                                       options.Inverse(output, context as object);
             }
             catch (Exception error)
@@ -35,7 +35,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("signals")]
-        public static void SignalsHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void SignalsHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{signals structure names}} helper must have exactly two argument: (structure) (name1;name2...)");
 
@@ -61,7 +61,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("getsignal")]
-        public static void GetSignalHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void GetSignalHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{getsignal structure name}} helper must have exactly two argument: (structure) name)");
 
@@ -80,7 +80,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("setswitch")]
-        public static void SetSwitchHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SetSwitchHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{setswitch structure name state}} helper must have exactly three argument: (structure) (name) (state)");
 
@@ -113,7 +113,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("getswitch")]
-        public static void GetSwitchHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void GetSwitchHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{getswitch structure name}} helper must have exactly two argument: (structure) (name)");
 
@@ -145,7 +145,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("getswitches")]
-        public static void GetSwitchesHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void GetSwitchesHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{getswitches structure name}} helper must have exactly two argument: (structure) (name1;name2;...)");
 
@@ -195,15 +195,15 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("stopwatch")]
-        public static void StopWatchHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void StopWatchHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 3 && arguments.Length != 4) throw new HandlebarsException("{{stopwatch @root startsignal stopsignal [resetsignal]}} helper must have at least three argument: @root startsignal stopsignal [resetsignal]");
+            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{stopwatch startsignal stopsignal [resetsignal]}} helper must have at least three argument: startsignal stopsignal [resetsignal]");
 
-            var root                = arguments[0] as IScriptRootData;
-            var isElevatedScript    = arguments[0] is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
-            var startSignal         = arguments[1].ToString();
-            var stopSignal          = arguments[2].ToString();
-            var resetSignal         = arguments.Length == 4 ? arguments[3].ToString() : null;
+            var root                = rootObject as IScriptRootData;
+            var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var startSignal         = arguments[0].ToString();
+            var stopSignal          = arguments[1].ToString();
+            var resetSignal         = arguments.Length == 3 ? arguments[2].ToString() : null;
 
             try
             {
@@ -217,8 +217,8 @@ namespace EmpyrionScripting.CustomHelpers
                             start
                                 .Where(S => S.State)
                                 .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
-                                _ => new StopWatchData() {   Start = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S) }, 
-                                (_, s) =>                { s.Start = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S); s.Stop = null; return s; }));
+                                _ => new StopWatchData() {   Start = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S) }, 
+                                (_, s) =>                { s.Start = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S); s.Stop = null; return s; }));
                             start.Clear();
                         }
                     });
@@ -232,9 +232,9 @@ namespace EmpyrionScripting.CustomHelpers
                             stop
                                 .Where(S => S.State)
                                 .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
-                                _ => new StopWatchData() {   Stop = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S) }, 
+                                _ => new StopWatchData() {   Stop = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S) }, 
                                 (_, s) => {
-                                    s.Stop          = isElevatedScript ? new SignalEventElevated(S) : (SignalEventBase)new SignalEvent(S);
+                                    s.Stop          = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S);
                                     if(s.Start != null) { 
                                         s.TimeTaken     = s.Stop.TimeStamp - s.Start.TimeStamp;
                                         s.BestTimeTaken = !s.BestTimeTaken.HasValue || s.BestTimeTaken > s.TimeTaken ? s.TimeTaken : s.BestTimeTaken;
@@ -263,7 +263,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var ranking = stopWatchData.Values
                     .Where(S => S.Start != null)
                     .Select(S => new StopWatchRankingData() {
-                        Name            = S.Start == null || !EmpyrionScripting.ModApi.Playfield.Entities.TryGetValue(S.Start.TriggeredByEntityId, out var entity) ? null : entity.Name,
+                        Name            = S.Start == null || !root.GetCurrentPlayfield().Entities.TryGetValue(S.Start.TriggeredByEntityId, out var entity) ? null : entity.Name,
                         Start           = S.Start,
                         Stop            = S.Stop,
                         TimeTaken       = (S.Stop == null ? DateTime.Now : S.Stop.TimeStamp) - S.Start.TimeStamp,

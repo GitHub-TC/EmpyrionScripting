@@ -8,7 +8,7 @@ namespace EmpyrionScripting.CustomHelpers
     public static class LoopHelpers
     {
         [HandlebarTag("steps")]
-        public static void StepsHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void StepsHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length < 2) throw new HandlebarsException("{{steps start end [step] [delay]}} helper must have at least two argument: (start) (end)");
 

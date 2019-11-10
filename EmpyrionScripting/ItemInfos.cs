@@ -30,7 +30,7 @@ namespace EmpyrionScripting
             }
             catch (Exception error)
             {
-                EmpyrionScripting.ModApi.LogError($"ReadAllItemData:{error}");
+                EmpyrionScripting.Log($"ReadAllItemData:{error}", EmpyrionNetAPIDefinitions.LogLevel.Error);
             }
         }
 

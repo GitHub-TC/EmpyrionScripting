@@ -12,7 +12,7 @@ namespace EmpyrionScripting.CustomHelpers
     public static class ExternalDataHelpers
     {
         [HandlebarTag("datetime")]
-        public static void DateTimeHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void DateTimeHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             var format = arguments.Length > 0 ? arguments[0]?.ToString() : null;
             var add    = arguments.Length > 1 ? arguments[1]?.ToString() : null;
@@ -33,7 +33,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("random")]
-        public static void RandomHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void RandomHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{random start end}} helper must have two argument: (start) (end)");
 
@@ -54,7 +54,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("use")]
-        public static void UseHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void UseHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length == 0) throw new HandlebarsException("{{use data}} helper must have one argument: (data)");
 
@@ -70,14 +70,14 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("set")]
-        public static void SetHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SetHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 3) throw new HandlebarsException("{{set @root key data}} helper must have three argument: @root (key) (data)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{set key data}} helper must have three argument: (key) (data)");
 
             try
             {
-                var root = arguments[0] as IScriptRootData;
-                root.Data.AddOrUpdate(arguments[1]?.ToString(), arguments[2], (S, O) => arguments[2]);
+                var root = rootObject as IScriptRootData;
+                root.Data.AddOrUpdate(arguments[0]?.ToString(), arguments[1], (S, O) => arguments[1]);
             }
             catch (Exception error)
             {
@@ -86,18 +86,18 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("setblock")]
-        public static void SetBlockHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void SetBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{setblock @root key}} helper must have three argument: @root (key)");
+            if (arguments.Length != 1) throw new HandlebarsException("{{setblock key}} helper must have three argument: (key)");
 
             try
             {
-                var root = arguments[0] as IScriptRootData;
+                var root = rootObject as IScriptRootData;
 
                 var data = new StringWriter();
                 options.Template(data, context as object);
 
-                root.Data.AddOrUpdate(arguments[1]?.ToString(), data.ToString(), (S, O) => data.ToString());
+                root.Data.AddOrUpdate(arguments[0]?.ToString(), data.ToString(), (S, O) => data.ToString());
             }
             catch (Exception error)
             {
@@ -106,7 +106,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("split")]
-        public static void SplitHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void SplitHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length < 2) throw new HandlebarsException("{{split string separator [removeemptyentries]}} helper must have at least two argument: (string) (separator) [true|false]");
 
@@ -127,7 +127,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("concat")]
-        public static void ConcatHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void ConcatHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length < 2) throw new HandlebarsException("{{concat a1 a2 a3 ...}} helper must have at least two arguments: (a1) (a2)");
 
@@ -150,7 +150,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("substring")]
-        public static void SubstringHelper(TextWriter output, dynamic context, object[] arguments)
+        public static void SubstringHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
             if (arguments.Length < 2) throw new HandlebarsException("{{substring text startindex [length]}} helper must have at least two arguments: (text) (startindex)");
 
@@ -176,7 +176,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("chararray")]
-        public static void CharArrayHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        public static void CharArrayHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{chararray text}} helper must have only one argument: (text)");
 

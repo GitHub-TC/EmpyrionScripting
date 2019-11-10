@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Eleon.Modding;
+using System;
 
 namespace EmpyrionScripting.DataWrapper
 {
     public class SignalEventBase
     {
-        public SignalEventBase()
-        {
-        }
+
+        public SignalEventBase(){}
 
         public SignalEventBase(SignalEventBase signalBase)
         {

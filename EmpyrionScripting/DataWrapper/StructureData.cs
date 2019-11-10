@@ -18,9 +18,9 @@ namespace EmpyrionScripting.DataWrapper
             _is = new Lazy<Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>>>(() => CollectAllItems(GetCurrent()));
             _d = new Lazy<IEntityData[]>(() => GetCurrent()
                 .GetDockedVessels()
-                .Select(S => EmpyrionScripting.ModApi.Playfield.Entities.FirstOrDefault(E => E.Value.Structure?.Id == S.Id))
+                .Select(S => E.GetCurrentPlayfield().Entities.FirstOrDefault(E => E.Value.Structure?.Id == S.Id))
                 .Where(E => E.Value != null)
-                .Select(E => new EntityData(E.Value)).ToArray());
+                .Select(DockedE => new EntityData(E.GetCurrentPlayfield(), DockedE.Value)).ToArray());
             _s = new Lazy<WeakReference<IStructure>>(() => new WeakReference<IStructure>(E.GetCurrent().Structure));
             _pilot = new Lazy<PlayerData>(() => new PlayerData(GetCurrent().Pilot));
             _passengers = new Lazy<PlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
@@ -52,7 +52,7 @@ namespace EmpyrionScripting.DataWrapper
         private readonly Lazy<IEntityData[]> _d;
 
         public IEnumerable<LimitedPlayerData> Players => _p == null ? _p =
-            EmpyrionScripting.ModApi.Playfield.Players.Values
+            E.GetCurrentPlayfield().Players.Values
             .Where(P => P.CurrentStructure?.Id == GetCurrent()?.Id)
             .Select(P => E != null && E.Faction.Group == FactionGroup.Admin ? new PlayerData(P) : new LimitedPlayerData(P)) : _p;
         IEnumerable<LimitedPlayerData> _p;
