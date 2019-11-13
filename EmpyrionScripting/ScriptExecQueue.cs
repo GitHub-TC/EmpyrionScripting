@@ -43,6 +43,7 @@ namespace EmpyrionScripting
 
         static public Action<string, LogLevel> Log { get; set; }
         public int ScriptsCount { get; set; }
+        public int QueueCount => ExecQueue.Count;
 
         public bool ExecNext()
         {

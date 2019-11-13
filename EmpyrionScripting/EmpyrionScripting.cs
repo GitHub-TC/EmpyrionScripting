@@ -68,8 +68,8 @@ namespace EmpyrionScripting
 
                 TaskTools.Log = ModApi.LogError;
 
-                ModApi.Application.OnPlayfieldLoaded   += Application_OnPlayfieldLoaded;
-                ModApi.Application.OnPlayfieldUnloaded += Application_OnPlayfieldUnloaded;
+                ModApi.Application.OnPlayfieldLoaded    += Application_OnPlayfieldLoaded;
+                ModApi.Application.OnPlayfieldUnloading += Application_OnPlayfieldUnloading;
 
                 StopScriptsEvent += (S, E) =>
                 {
@@ -113,18 +113,18 @@ namespace EmpyrionScripting
             HelpersTools.ScanHandlebarHelpers();
         }
 
-        private void Application_OnPlayfieldLoaded(string playfieldName)
+        private void Application_OnPlayfieldLoaded(IPlayfield playfield)
         {
             PlayfieldScriptData data = null;
 
-            PlayfieldData.TryAdd(playfieldName, data = new PlayfieldScriptData(this){
-                PlayfieldName = playfieldName,
-                Playfield     = ModApi.Playfield, 
+            PlayfieldData.TryAdd(playfield.Name, data = new PlayfieldScriptData(this){
+                PlayfieldName = playfield.Name,
+                Playfield     = playfield, 
             });
 
-            ModApi.Log($"StartScripts for {playfieldName} pending");
+            ModApi.Log($"StartScripts for {playfield.Name} pending");
             TaskTools.Delay(Configuration.Current.DelayStartForNSecondsOnPlayfieldLoad, () => {
-                ModApi.Log($"StartScripts for {playfieldName}");
+                ModApi.Log($"StartScripts for {playfield.Name}");
                 data.PauseScripts = false;
             });
 
@@ -132,14 +132,14 @@ namespace EmpyrionScripting
             data.Playfield.OnEntityUnloaded += data.Playfield_OnEntityUnloaded;
         }
 
-        private void Application_OnPlayfieldUnloaded(string playfieldName)
+        private void Application_OnPlayfieldUnloading(IPlayfield playfield)
         {
-            if(!PlayfieldData.TryRemove(playfieldName, out var data)) return;
+            if(!PlayfieldData.TryRemove(playfield.Name, out var data)) return;
 
             data.Playfield.OnEntityLoaded   -= data.Playfield_OnEntityLoaded;
             data.Playfield.OnEntityUnloaded -= data.Playfield_OnEntityUnloaded;
 
-            ModApi.Log($"PauseScripts for {playfieldName} {(data.PauseScripts ? "always stopped" : "scripts running")}");
+            ModApi.Log($"PauseScripts for {playfield.Name} {(data.PauseScripts ? "always stopped" : "scripts running")}");
             data.PauseScripts = true;
 
             DisplayScriptInfos();
@@ -185,7 +185,7 @@ namespace EmpyrionScripting
             StartScriptIntervall(60000, () =>
             {
                 PlayfieldData.Values.ForEach(PF => {                 
-                    Log($"ScriptInfos: {PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count}", LogLevel.Debug);
+                    Log($"ScriptInfos: Pause:{PF.PauseScripts} {PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count}", LogLevel.Debug);
                     LastAlive = DateTime.Now;
                     if (PF.PauseScripts || Configuration.Current.LogLevel > LogLevel.Message) return;
 
@@ -280,7 +280,7 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptRootData(playfieldData, playfieldData.CurrentEntities, ModApi.Playfield, entity, playfieldData.DeviceLockAllowed, playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
+                var entityScriptData = new ScriptRootData(playfieldData, playfieldData.CurrentEntities, playfieldData.Playfield, entity, playfieldData.DeviceLockAllowed, playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
 
                 var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword)).ToArray();
                 Log($"ProcessAllInGameScripts: #{deviceNames.Length}", LogLevel.Debug);
@@ -319,8 +319,7 @@ namespace EmpyrionScripting
                     }
                     catch (Exception lcdError)
                     {
-                        if(Configuration.Current.LogLevel >= EmpyrionNetAPIDefinitions.LogLevel.Debug)
-                            ModApi.Log($"UpdateLCDs ({entity.Id}/{entity.Name}):LCD: {lcdError}");
+                        Log($"UpdateLCDs ({entity.Id}/{entity.Name}):LCD: {lcdError}", LogLevel.Debug);
                     }
                 });
 
@@ -346,7 +345,7 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptSaveGameRootData(playfieldData, playfieldData.CurrentEntities, ModApi.Playfield, entity, playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)))
+                var entityScriptData = new ScriptSaveGameRootData(playfieldData, playfieldData.CurrentEntities, playfieldData.Playfield, entity, playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)))
                 {
                     MainScriptPath = SaveGamesScripts.MainScriptPath,
                     ModApi = ModApi
@@ -355,9 +354,9 @@ namespace EmpyrionScripting
                 return ExecFoundSaveGameScripts(playfieldData, entityScriptData,
                     GetPathTo(Enum.GetName(typeof(EntityType), entity.Type)),
                     GetPathTo(entity.Name),
-                    GetPathTo(ModApi.Playfield.Name),
-                    GetPathTo(ModApi.Playfield.Name, Enum.GetName(typeof(EntityType), entity.Type)),
-                    GetPathTo(ModApi.Playfield.Name, entity.Name),
+                    GetPathTo(playfieldData.Playfield.Name),
+                    GetPathTo(playfieldData.Playfield.Name, Enum.GetName(typeof(EntityType), entity.Type)),
+                    GetPathTo(playfieldData.Playfield.Name, entity.Name),
                     GetPathTo(entity.Id.ToString())
                     );
             }
@@ -508,13 +507,14 @@ namespace EmpyrionScripting
 
         public void Game_Update()
         {
-            if (!PlayfieldData.Values.Any(PF => PF.PauseScripts) && (DateTime.Now - LastAlive).TotalSeconds > 120) RestartAllScriptsForPlayfieldServer();
+            if (PlayfieldData.Count > 0 && !PlayfieldData.Values.Any(PF => PF.PauseScripts) && (DateTime.Now - LastAlive).TotalSeconds > 120) RestartAllScriptsForPlayfieldServer();
             if (!ThreadPool.QueueUserWorkItem(QueueScriptExecuting, null)) Log($"EmpyrionScripting Mod: Game_Update NorThreadPoolFree", LogLevel.Debug);
         }
 
         private void QueueScriptExecuting(object state)
         {
             PlayfieldData.Values.ForEach(PF => { 
+                Log($"QueueScriptExecuting: QueueCount:{PF.ScriptExecQueue.QueueCount} ScriptsCount:{PF.ScriptExecQueue.ScriptsCount}", LogLevel.Debug);
                 for (int i = Configuration.Current.ScriptsParallelExecution - 1; i >= 0 && PF.ScriptExecQueue.ExecNext(); i--);
             });
         }
