@@ -156,6 +156,14 @@ namespace EmpyrionScripting
         {
             ModApi.Log($"StartAllScriptsForPlayfieldServer: InGame:{Configuration.Current.InGameScriptsIntervallMS}ms SaveGame:{Configuration.Current.SaveGameScriptsIntervallMS}ms ");
 
+            if(ModApi.Application.Mode == ApplicationMode.Client || ModApi.Application.Mode == ApplicationMode.SinglePlayer)
+            {
+                StartScriptIntervall(Configuration.Current.InGameScriptsIntervallMS, () =>
+                {
+                    if(PlayfieldData.Count == 0 && ModApi.ClientPlayfield != null) Application_OnPlayfieldLoaded(ModApi.ClientPlayfield); 
+                }, "CheckClientPlayfield");
+            }
+
             StartScriptIntervall(Configuration.Current.InGameScriptsIntervallMS, () =>
             {
                 PlayfieldData.Values.ForEach(PF => { 
