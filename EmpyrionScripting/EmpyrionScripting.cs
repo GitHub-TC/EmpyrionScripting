@@ -167,12 +167,10 @@ namespace EmpyrionScripting
             StartScriptIntervall(Configuration.Current.InGameScriptsIntervallMS, () =>
             {
                 PlayfieldData.Values.ForEach(PF => { 
-                    Log($"InGameScript: {PF.PauseScripts} #{PF.CycleCounter}", LogLevel.Debug);
+                    Log($"InGameScript: {PF.PauseScripts}", LogLevel.Debug);
                     LastAlive = DateTime.Now;
                     if (PF.PauseScripts) return;
 
-                    PF.IncrementCycleCounter();
-                    
                     InGameScriptsCount = UpdateScripts(PF, ProcessAllInGameScripts, "InGameScript");
                     PF.ScriptExecQueue.ScriptsCount = InGameScriptsCount + SaveGameScriptsCount;
                 });
@@ -288,7 +286,8 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptRootData(playfieldData, playfieldData.CurrentEntities, playfieldData.Playfield, entity, playfieldData.DeviceLockAllowed, playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
+                var entityScriptData = new ScriptRootData(playfieldData, playfieldData.CurrentEntities, playfieldData.Playfield, entity,
+                    playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
 
                 var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword)).ToArray();
                 Log($"ProcessAllInGameScripts: #{deviceNames.Length}", LogLevel.Debug);

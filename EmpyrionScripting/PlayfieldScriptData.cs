@@ -18,14 +18,10 @@ namespace EmpyrionScripting
         public ConcurrentDictionary<string, object> PersistendData { get; set; } = new ConcurrentDictionary<string, object>();
         public ScriptExecQueue ScriptExecQueue { get; set; }
 
-        public int CycleCounter => _CycleCounter;
-        int _CycleCounter;
-        public void IncrementCycleCounter(){ Interlocked.Increment(ref _CycleCounter); }
-        public bool DeviceLockAllowed => (CycleCounter % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles) == 0;
-
-        public int Iteration => _Iteration;
-        private int _Iteration;
-        public void IncrementIteration(){ Interlocked.Increment(ref _Iteration); }
+        private ConcurrentDictionary<string, int> CycleCounterStore { get; set; } = new ConcurrentDictionary<string, int>();
+        public int CycleCounter(string scriptId) => CycleCounterStore.GetOrAdd(scriptId, I => 0);
+        public void IncrementCycleCounter(string scriptId){ CycleCounterStore.AddOrUpdate(scriptId, 0, (I, C) => C + 1); }
+        public bool DeviceLockAllowed(string scriptId) => (CycleCounter(scriptId) % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles) == 0;
 
         public EntityDelegate Playfield_OnEntityLoaded { get; } 
         public EntityDelegate Playfield_OnEntityUnloaded { get; }

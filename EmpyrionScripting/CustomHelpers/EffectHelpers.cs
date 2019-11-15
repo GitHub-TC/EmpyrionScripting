@@ -21,8 +21,8 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                if(root.GetPlayfieldScriptData().Iteration % (2 * intervall) < intervall) options.Template(output, context as object);
-                else                                                                      options.Inverse (output, context as object);
+                if(root.CycleCounter % (2 * intervall) < intervall) options.Template(output, context as object);
+                else                                                options.Inverse (output, context as object);
             }
             catch (Exception error)
             {
@@ -36,8 +36,8 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2) throw new HandlebarsException("{{scroll lines delay}} helper must have exactly two argument: (lines) (delay)");
 
             var root = rootObject as IScriptRootData;
-            int.TryParse(arguments[0] as string, out int lines);
-            int.TryParse(arguments[1] as string, out int delay);
+            int.TryParse(arguments[0]?.ToString(), out int lines);
+            int.TryParse(arguments[1]?.ToString(), out int delay);
 
             try
             {
@@ -51,8 +51,8 @@ namespace EmpyrionScripting.CustomHelpers
                 }
                 else
                 {
-                    var skip = (root.GetPlayfieldScriptData().Iteration % (delay * overlapp)) / delay;
-                    output.Write(string.Join("\n", textlines.Skip((int)skip).Take(lines)));
+                    var skip = (root.CycleCounter % (delay * overlapp)) / delay;
+                    output.Write(string.Join("\n", textlines.Skip(skip).Take(lines)));
                     output.Write("\n");
                 }
             }
@@ -70,7 +70,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var root = rootObject as IScriptRootData;
-                int.TryParse(arguments[0] as string, NumberStyles.HexNumber, null, out int color);
+                int.TryParse(arguments[0]?.ToString(), NumberStyles.HexNumber, null, out int color);
                 root.Color        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
                 root.ColorChanged = true;
             }
@@ -88,7 +88,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var root = rootObject as IScriptRootData;
-                int.TryParse(arguments[0] as string, NumberStyles.HexNumber, null, out int color);
+                int.TryParse(arguments[0]?.ToString(), NumberStyles.HexNumber, null, out int color);
                 root.BackgroundColor        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
                 root.BackgroundColorChanged = true;
             }
@@ -106,7 +106,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var root = rootObject as IScriptRootData;
-                int.TryParse(arguments[0] as string, out int fontSize);
+                int.TryParse(arguments[0]?.ToString(), out int fontSize);
                 root.FontSize        = fontSize;
                 root.FontSizeChanged = true;
             }

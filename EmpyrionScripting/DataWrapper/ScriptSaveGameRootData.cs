@@ -13,12 +13,15 @@ namespace EmpyrionScripting.DataWrapper
             ScriptPath     = data.ScriptPath;
             MainScriptPath = data.MainScriptPath;
         }
-        public ScriptSaveGameRootData(PlayfieldScriptData playfieldScriptData, IEntity[] currentEntities, IPlayfield playfield, IEntity entity, ConcurrentDictionary<string, object> persistendData, EventStore eventStore) : base(playfieldScriptData, currentEntities, playfield, entity, true, persistendData, eventStore)
+        public ScriptSaveGameRootData(PlayfieldScriptData playfieldScriptData, IEntity[] currentEntities, IPlayfield playfield, IEntity entity, ConcurrentDictionary<string, object> persistendData, EventStore eventStore) : base(playfieldScriptData, currentEntities, playfield, entity, persistendData, eventStore)
         {
         }
 
         public string ScriptPath { get; set; }
         public string MainScriptPath { get; set; }
         public IModApi ModApi { get; set; }
+
+        public override bool DeviceLockAllowed => true;
+
     }
 }

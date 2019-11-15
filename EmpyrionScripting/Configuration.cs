@@ -36,7 +36,7 @@ namespace EmpyrionScripting
         {
             [StructureTankType.Oxygen  ] = new[] { new AllowedItem(2128, 250) },
             [StructureTankType.Fuel    ] = new[] { new AllowedItem(2373, 300), new AllowedItem(2287, 150), new AllowedItem(2266, 30) },
-            [StructureTankType.Pentaxid] = new[] { new AllowedItem(2294, 5) }
+            [StructureTankType.Pentaxid] = new[] { new AllowedItem(2294, 1) }
         };
     }
 

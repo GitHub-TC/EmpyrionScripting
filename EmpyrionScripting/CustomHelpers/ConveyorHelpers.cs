@@ -76,9 +76,9 @@ namespace EmpyrionScripting.CustomHelpers
 
             if(!isElevatedScript) throw new HandlebarsException("{{lockdevice}} only allowed in elevated scripts");
 
-            if (root.GetPlayfieldScriptData().Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+            if (!root.DeviceLockAllowed)
             {
-                Log($"NoLockAllowed: {root.GetPlayfieldScriptData().Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                Log($"NoLockAllowed: {root.CycleCounter} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                 return;
             }
 
@@ -172,9 +172,9 @@ namespace EmpyrionScripting.CustomHelpers
 
                 int? maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? limit : (int?)null;
 
-                if (root.GetPlayfieldScriptData().Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+                if (!root.DeviceLockAllowed)
                 {
-                    Log($"NoLockAllowed: {root.GetPlayfieldScriptData().Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                    Log($"NoLockAllowed: {root.CycleCounter} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                     return;
                 }
 
@@ -288,9 +288,9 @@ namespace EmpyrionScripting.CustomHelpers
 
                 int maxLimit = arguments.Length > 3 && int.TryParse(arguments[3]?.ToString(), out int limit) ? Math.Min(100, Math.Max(0, limit)) : 100;
 
-                if (root.GetPlayfieldScriptData().Iteration % EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles != 0)
+                if (!root.DeviceLockAllowed)
                 {
-                    Log($"NoLockAllowed: {root.GetPlayfieldScriptData().Iteration} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                    Log($"NoLockAllowed: {root.CycleCounter} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                     return;
                 }
 

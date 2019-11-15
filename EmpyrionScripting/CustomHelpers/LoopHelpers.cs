@@ -22,7 +22,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var i = root.GetPlayfieldScriptData().Iteration % (Math.Abs(delay) * ((Math.Abs(end - start) / Math.Abs(step)) + 1));
+                var i = root.CycleCounter % (Math.Abs(delay) * ((Math.Abs(end - start) / Math.Abs(step)) + 1));
                 var stepI = (int)(start < end ? i * Math.Abs(step) : start - (i * Math.Abs(step)));
                 options.Template(output, (1 + stepI) / Math.Abs(delay));
 

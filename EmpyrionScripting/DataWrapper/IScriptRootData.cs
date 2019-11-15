@@ -25,6 +25,7 @@ namespace EmpyrionScripting.DataWrapper
         PlayfieldData P { get; set; }
         string Script { get; set; }
         string ScriptId { get; set; }
+        int CycleCounter { get; }
 
         PlayfieldScriptData GetPlayfieldScriptData();
         IEntity[] GetCurrentEntites();

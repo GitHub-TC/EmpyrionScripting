@@ -15,8 +15,6 @@ namespace EmpyrionScripting.DataWrapper
 
         private readonly PlayfieldScriptData _PlayfieldScriptData;
 
-        public bool DeviceLockAllowed { get; }
-
         private ConcurrentDictionary<string, object> _PersistendData;
         private IEntity[] currentEntites;
         private IPlayfield playfield;
@@ -29,10 +27,9 @@ namespace EmpyrionScripting.DataWrapper
             _e = new Lazy<IEntityData>(() => new EntityData(playfield, entity));
         }
 
-        public ScriptRootData(PlayfieldScriptData playfieldScriptData, IEntity[] currentEntities, IPlayfield playfield, IEntity entity, bool deviceLockAllowed, ConcurrentDictionary<string, object> persistendData, EventStore eventStore) : this()
+        public ScriptRootData(PlayfieldScriptData playfieldScriptData, IEntity[] currentEntities, IPlayfield playfield, IEntity entity, ConcurrentDictionary<string, object> persistendData, EventStore eventStore) : this()
         {
             _PlayfieldScriptData = playfieldScriptData;
-            DeviceLockAllowed = deviceLockAllowed;
             _PersistendData = persistendData;
             this.currentEntites = currentEntities;
             this.playfield = playfield;
@@ -40,7 +37,7 @@ namespace EmpyrionScripting.DataWrapper
             SignalEventStore = eventStore;
         }
 
-        public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.currentEntites, data.playfield, data.entity, data.DeviceLockAllowed, data._PersistendData, data.SignalEventStore)
+        public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.currentEntites, data.playfield, data.entity, data._PersistendData, data.SignalEventStore)
         {
             _p = data._p;
             _e = data._e;
@@ -74,5 +71,8 @@ namespace EmpyrionScripting.DataWrapper
         public DisplayOutputConfiguration DisplayType { get; set; }
         public string Error { get; set; }
         public string ScriptId { get; set; }
+
+        public int CycleCounter => GetPlayfieldScriptData().CycleCounter(ScriptId);
+        public virtual bool DeviceLockAllowed => GetPlayfieldScriptData().DeviceLockAllowed(ScriptId);
     }
 }

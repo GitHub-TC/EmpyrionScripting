@@ -52,6 +52,8 @@ namespace EmpyrionScripting
             lock (ExecQueue) found = ExecQueue.TryDequeue(out data);
             if (!found) return false;
 
+            data.GetPlayfieldScriptData().IncrementCycleCounter(data.ScriptId);
+
             if (!ThreadPool.QueueUserWorkItem(ExecScript, data))
             {
                 Log($"EmpyrionScripting Mod: ExecNext NorThreadPoolFree {data.ScriptId}", LogLevel.Debug);
@@ -93,7 +95,6 @@ namespace EmpyrionScripting
                     if (Interlocked.Exchange(ref _MainCount, 0) > 0 && (DateTime.Now - LastIterationUpdate).TotalSeconds >= 1)
                     {
                         LastIterationUpdate = DateTime.Now;
-                        data.GetPlayfieldScriptData().IncrementIteration();
                     }
                 }
             }
