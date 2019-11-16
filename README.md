@@ -38,6 +38,8 @@ YouTube video;
 * https://youtu.be/oDOSbllwqSw
 * https://youtu.be/qhOnj2D3ejo
 
+* Änderungen mit der A11: https://youtu.be/hxvKs5U1I6I
+
 ## Beispiele
 Allgemein: 
 Benötigt werden mindestens 2 LCD und mindestens 1 Container
@@ -658,6 +660,8 @@ YouTube video;
 * https://youtu.be/SOnZ_mzytA4
 * https://youtu.be/oDOSbllwqSw
 * https://youtu.be/qhOnj2D3ejo
+
+* Changes with the A11: https://youtu.be/hxvKs5U1I6I
 
 ## Examples
 General:

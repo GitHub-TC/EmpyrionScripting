@@ -11,8 +11,6 @@ namespace EmpyrionScripting.DataWrapper
     public class ScriptRootData : IScriptRootData
     {
         private static readonly Assembly CurrentAssembly = Assembly.GetAssembly(typeof(ScriptRootData));
-        public static string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
-
         private readonly PlayfieldScriptData _PlayfieldScriptData;
 
         private ConcurrentDictionary<string, object> _PersistendData;
@@ -43,6 +41,8 @@ namespace EmpyrionScripting.DataWrapper
             _e = data._e;
             DisplayType = data.DisplayType;
         }
+
+        public string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
 
         public PlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
         public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;
