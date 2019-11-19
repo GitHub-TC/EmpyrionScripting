@@ -56,7 +56,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("use")]
         public static void UseHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length == 0) throw new HandlebarsException("{{use data}} helper must have one argument: (data)");
+            if (arguments.Length != 1) throw new HandlebarsException("{{use data}} helper must have one argument: (data)");
 
             try
             {
@@ -72,7 +72,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("set")]
         public static void SetHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{set key data}} helper must have three argument: (key) (data)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{set key data}} helper must have two argument: (key) (data)");
 
             try
             {
@@ -88,7 +88,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("setblock")]
         public static void SetBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 1) throw new HandlebarsException("{{setblock key}} helper must have three argument: (key)");
+            if (arguments.Length != 1) throw new HandlebarsException("{{setblock key}} helper must have one argument: (key)");
 
             try
             {

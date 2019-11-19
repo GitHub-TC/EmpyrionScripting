@@ -362,7 +362,7 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
 
-        public class DeconstructData
+        public class ProcessBlockData
         {
             public int Id { get; set; }
             public int X { get; set; }
@@ -378,7 +378,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("deconstruct")]
         public static void DeconstructHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{deconstruct entity container}} helper must have two argument: entity container");
+            if (arguments.Length < 2 || arguments.Length > 4) throw new HandlebarsException("{{deconstruct entity container [CorePrefix] [RemoveItemsIds1,Id2,...]}} helper must have two to four argument: entity container [CorePrefix] [RemoveItemsIds]");
 
             var root = rootObject as IScriptRootData;
             var E    = arguments[0] as IEntityData;
@@ -389,8 +389,18 @@ namespace EmpyrionScripting.CustomHelpers
                 var minPos      = E.S.GetCurrent().MinPos;
                 var maxPos      = E.S.GetCurrent().MaxPos;
                 var S           = E.S.GetCurrent();
-                var coreName    = $"Core-Destruct-{E.Id}";
+                var coreName    = (arguments[2]?.ToString() ?? "Core-Destruct") + $"-{E.Id}";
                 var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
+                var list        = arguments[3]?.ToString()
+                                    .Split(new []{ ',', ';' })
+                                    .Select(T => T.Trim())
+                                    .Select(T => { 
+                                        var delimiter = T.IndexOf('-', 1); 
+                                        return delimiter > 0 
+                                            ? new Tuple<int,int>(int.TryParse(T.Substring(0, delimiter), out var l1) ? l1 : 0, int.TryParse(T.Substring(delimiter + 1), out var r1) ? r1 : 0)
+                                            : new Tuple<int,int>(int.TryParse(T, out var l2) ? l2 : 0, int.TryParse(T, out var r2) ? r2 : 0); 
+                                    })
+                                    .ToArray();
 
                 var target      = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
                 if (target == null)
@@ -422,7 +432,7 @@ namespace EmpyrionScripting.CustomHelpers
                     return;
                 }
 
-                var deconstructData = root.GetPersistendData().GetOrAdd(root.ScriptId, K => new DeconstructData() {
+                var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId, K => new ProcessBlockData() {
                     Id          = E.Id,
                     MinPos      = minPos,
                     MaxPos      = maxPos,
@@ -432,12 +442,12 @@ namespace EmpyrionScripting.CustomHelpers
                     TotalBlocks =   (Math.Abs(minPos.x) + Math.Abs(maxPos.x) + 1) *
                                     (Math.Abs(minPos.y) + Math.Abs(maxPos.y) + 1) *
                                     (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
-                }) as DeconstructData;
+                }) as ProcessBlockData;
 
-                if(deconstructData.Id != E.Id)                                       root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                else if(deconstructData.CheckedBlocks < deconstructData.TotalBlocks) lock(deconstructData) DeconstructPart(output, root, S, deconstructData, target, targetPos, N);
+                if(processBlockData.Id != E.Id)                                       root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                else if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks) lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, list);
 
-                options.Template(output, deconstructData);
+                options.Template(output, processBlockData);
             }
             catch (Exception error)
             {
@@ -445,7 +455,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        static void DeconstructPart(TextWriter output, IScriptRootData root, IStructure S, DeconstructData deconstructData, IContainer target, VectorInt3 targetPos, string N)
+        static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData, IContainer target, VectorInt3 targetPos, string N, Tuple<int,int>[] list)
         {
             IDeviceLock locked = null;
 
@@ -454,15 +464,15 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                for (; deconstructData.Y >= deconstructData.MinPos.y; deconstructData.Y--)
+                for (; processBlockData.Y >= processBlockData.MinPos.y; processBlockData.Y--)
                 {
-                    for (; deconstructData.X <= deconstructData.MaxPos.x; deconstructData.X++)
+                    for (; processBlockData.X <= processBlockData.MaxPos.x; processBlockData.X++)
                     {
-                        for (; deconstructData.Z <= deconstructData.MaxPos.z; deconstructData.Z++)
+                        for (; processBlockData.Z <= processBlockData.MaxPos.z; processBlockData.Z++)
                         {
-                            deconstructData.CheckedBlocks++;
+                            processBlockData.CheckedBlocks++;
 
-                            var block = S.GetBlock(deconstructData.X, 128 + deconstructData.Y, deconstructData.Z);
+                            var block = S.GetBlock(processBlockData.X, 128 + processBlockData.Y, processBlockData.Z);
                             if (block != null)
                             {
                                 block.Get(out var blockType, out _, out _, out _);
@@ -476,29 +486,35 @@ namespace EmpyrionScripting.CustomHelpers
                                         locked = locked ?? CreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
                                         if (!locked.Success)
                                         {
-                                            deconstructData.CheckedBlocks--;
+                                            processBlockData.CheckedBlocks--;
                                             output.WriteLine($"Container '{N}' is locked");
+                                            return;
+                                        }
+
+                                        if(list != null && list.Any(L => L.Item1 >= blockType && blockType <= L.Item2))
+                                        {
+                                            processBlockData.CheckedBlocks--;
                                             return;
                                         }
 
                                         if (target.AddItems(blockType, 1) > 0)
                                         {
-                                            deconstructData.CheckedBlocks--;
+                                            processBlockData.CheckedBlocks--;
                                             output.WriteLine($"Container '{N}' is full");
                                             return;
                                         }
                                     }
 
                                     block.Set(0);
-                                    deconstructData.RemovedBlocks++;
+                                    processBlockData.RemovedBlocks++;
 
-                                    if (deconstructData.RemovedBlocks > 100 && deconstructData.RemovedBlocks % 100 == 0 && (DateTime.Now - startTime).TotalMilliseconds > maxMilliSeconds) return;
+                                    if (processBlockData.RemovedBlocks > 100 && processBlockData.RemovedBlocks % 100 == 0 && (DateTime.Now - startTime).TotalMilliseconds > maxMilliSeconds) return;
                                 }
                             }
                         }
-                        deconstructData.Z = deconstructData.MinPos.z;
+                        processBlockData.Z = processBlockData.MinPos.z;
                     }
-                    deconstructData.X = deconstructData.MinPos.x;
+                    processBlockData.X = processBlockData.MinPos.x;
                 }
             }
             finally

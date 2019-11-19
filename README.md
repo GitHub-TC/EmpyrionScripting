@@ -395,7 +395,7 @@ Syntaxdocu:
 + {{fill item structure tank \[max\]}}
   + Füllt in der Struktur (structure) den Tank (tank) = Fuel/Pxygen/Pentaxid mit dem Item (item) auf. Der prozentuale Füllstand kann mit (max) optional limitiert werden. Standard ist 100.
 
-+ {{deconstruct entity container}}
++ {{deconstruct entity container \[CorePrefix\] \[RemoveItemsIds1,Id2,...\]}}
   + Baut die Struktur 'entity' ab und befördert die Teile in den Container mit dem Namen welcher mit 'container' angegben wird
   + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
   + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
@@ -1186,7 +1186,7 @@ DateTime format:
   + Get nearby Entity (with same faction) with IDs in (id1;id2;id3)
 
 ### CustomHelpers (deconstruct)
-+ {{deconstruct entity container}}
++ {{deconstruct entity container \[CorePrefix\] \[RemoveItemsIds1,Id2,...\]}}
    + Deconstruct the entity 'entity' and moves parts to container named as 'container''
    + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
    + With the configuration setting DeconstructBlockSubstitution a replacement (by another block type) / deletion (by 0) of block types can be defined
