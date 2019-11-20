@@ -389,9 +389,9 @@ namespace EmpyrionScripting.CustomHelpers
                 var minPos      = E.S.GetCurrent().MinPos;
                 var maxPos      = E.S.GetCurrent().MaxPos;
                 var S           = E.S.GetCurrent();
-                var coreName    = (arguments[2]?.ToString() ?? "Core-Destruct") + $"-{E.Id}";
+                var coreName    = (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}";
                 var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
-                var list        = arguments[3]?.ToString()
+                var list        = arguments.Get(3)?.ToString()
                                     .Split(new []{ ',', ';' })
                                     .Select(T => T.Trim())
                                     .Select(T => { 
@@ -476,6 +476,9 @@ namespace EmpyrionScripting.CustomHelpers
                             if (block != null)
                             {
                                 block.Get(out var blockType, out _, out _, out _);
+
+                                if(list != null && !list.Any(L => L.Item1 <= blockType && L.Item2 >= blockType)) blockType = 0;
+
                                 if (blockType > 0 && blockType != PlayerCoreType)
                                 {
                                     if (EmpyrionScripting.Configuration.Current?.DeconstructBlockSubstitution != null &&
@@ -488,12 +491,6 @@ namespace EmpyrionScripting.CustomHelpers
                                         {
                                             processBlockData.CheckedBlocks--;
                                             output.WriteLine($"Container '{N}' is locked");
-                                            return;
-                                        }
-
-                                        if(list != null && list.Any(L => L.Item1 >= blockType && blockType <= L.Item2))
-                                        {
-                                            processBlockData.CheckedBlocks--;
                                             return;
                                         }
 

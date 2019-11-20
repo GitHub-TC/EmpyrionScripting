@@ -18,5 +18,10 @@ namespace EmpyrionScripting
         {
             for (int i = 0; i < list.Count; i++) yield return list.GetAt(i);
         }
+
+        public static object Get(this object[] args, int index)
+        {
+            return args.Length > index ? args[index] : null;
+        }
     }
 }
