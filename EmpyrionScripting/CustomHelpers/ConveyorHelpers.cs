@@ -280,6 +280,8 @@ namespace EmpyrionScripting.CustomHelpers
                 var structure   = arguments[1] as IStructureData;
                 var item        = arguments[0] as ItemsData;
 
+                if(structure == null) return;
+
                 if (!Enum.TryParse<StructureTankType>(arguments[2]?.ToString(), true, out var type))
                 {
                     output.WriteLine($"unknown type {arguments[2]}");
@@ -364,6 +366,7 @@ namespace EmpyrionScripting.CustomHelpers
 
         public class ProcessBlockData
         {
+            public string Name { get; set; }
             public int Id { get; set; }
             public int X { get; set; }
             public int Y { get; set; }
@@ -433,6 +436,7 @@ namespace EmpyrionScripting.CustomHelpers
                 }
 
                 var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId, K => new ProcessBlockData() {
+                    Name        = E.Name,
                     Id          = E.Id,
                     MinPos      = minPos,
                     MaxPos      = maxPos,
@@ -445,7 +449,7 @@ namespace EmpyrionScripting.CustomHelpers
                 }) as ProcessBlockData;
 
                 if(processBlockData.Id != E.Id)                                       root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                else if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks) lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, list);
+                else if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks) lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list);
 
                 options.Template(output, processBlockData);
             }
@@ -455,7 +459,61 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData, IContainer target, VectorInt3 targetPos, string N, Tuple<int,int>[] list)
+        [HandlebarTag("replaceblocks")]
+        public static void ReplaceBlocksHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 3) throw new HandlebarsException("{{replaceblocks entity RemoveItemsIds1,Id2,... ReplaceId}} helper must have tree argument: entity RemoveItemsIds ReplaceId");
+
+            var root = rootObject as IScriptRootData;
+            var E    = arguments[0] as IEntityData;
+            var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+
+            try
+            {
+                if(!isElevatedScript) throw new HandlebarsException("only allowed in elevated scripts");
+                if(E.Faction.Group != FactionGroup.Player && E.Faction.Group != FactionGroup.Faction) return;
+
+                var minPos      = E.S.GetCurrent().MinPos;
+                var maxPos      = E.S.GetCurrent().MaxPos;
+                var S           = E.S.GetCurrent();
+                var list        = arguments.Get(1)?.ToString()
+                                    .Split(new []{ ',', ';' })
+                                    .Select(T => T.Trim())
+                                    .Select(T => { 
+                                        var delimiter = T.IndexOf('-', 1); 
+                                        return delimiter > 0 
+                                            ? new Tuple<int,int>(int.TryParse(T.Substring(0, delimiter), out var l1) ? l1 : 0, int.TryParse(T.Substring(delimiter + 1), out var r1) ? r1 : 0)
+                                            : new Tuple<int,int>(int.TryParse(T, out var l2) ? l2 : 0, int.TryParse(T, out var r2) ? r2 : 0); 
+                                    })
+                                    .ToArray();
+                int.TryParse(arguments.Get(2)?.ToString(), out var replaceId);
+
+                var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId, K => new ProcessBlockData() {
+                    Name        = E.Name,
+                    Id          = E.Id,
+                    MinPos      = minPos,
+                    MaxPos      = maxPos,
+                    X           = minPos.x,
+                    Y           = maxPos.y,
+                    Z           = minPos.z,
+                    TotalBlocks =   (Math.Abs(minPos.x) + Math.Abs(maxPos.x) + 1) *
+                                    (Math.Abs(minPos.y) + Math.Abs(maxPos.y) + 1) *
+                                    (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
+                }) as ProcessBlockData;
+
+                if(processBlockData.Id != E.Id)                                       root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                else if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks) lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list);
+
+                options.Template(output, processBlockData);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{replaceblocks}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+
+        static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData, IContainer target, VectorInt3 targetPos, string N, int replaceId, Tuple<int,int>[] list)
         {
             IDeviceLock locked = null;
 
@@ -484,7 +542,7 @@ namespace EmpyrionScripting.CustomHelpers
                                     if (EmpyrionScripting.Configuration.Current?.DeconstructBlockSubstitution != null &&
                                         EmpyrionScripting.Configuration.Current.DeconstructBlockSubstitution.TryGetValue(blockType, out var substituteTo)) blockType = substituteTo;
 
-                                    if (blockType > 0)
+                                    if (blockType > 0 && N != null)
                                     {
                                         locked = locked ?? CreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
                                         if (!locked.Success)
@@ -502,7 +560,7 @@ namespace EmpyrionScripting.CustomHelpers
                                         }
                                     }
 
-                                    block.Set(0);
+                                    block.Set(replaceId);
                                     processBlockData.RemovedBlocks++;
 
                                     if (processBlockData.RemovedBlocks > 100 && processBlockData.RemovedBlocks % 100 == 0 && (DateTime.Now - startTime).TotalMilliseconds > maxMilliSeconds) return;

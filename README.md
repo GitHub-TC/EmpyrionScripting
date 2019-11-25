@@ -577,6 +577,10 @@ Syntaxdocu:
 + {{removeitems container itemid maxcount}}
   + Entfernt (itemid) (count) aus dem container hinzu (dieser sollte gelocked sein)
 
++ {{replaceblocks entity RemoveItemsIds1,Id2,... ReplaceId}}
+  + Tauscht die Blöcke mit 'RemoveItemsIds1,Id2,...' gegen den Block 'ReplaceId'
+  + Replace = 0 entfernt den Block einfach
+
 ## SaveGame Scripte
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
 \[SaveGame\]\\Mods\\EmpyrionScripting\\Scripts
@@ -1200,6 +1204,10 @@ DateTime format:
 
 + {{removeitems container itemid maxcount}}
   + Removes (itemid) (count) from the container (it should be locked)
+
++ {{replaceblocks entity RemoveItemsIds1,Id2,... ReplaceId}}
+  + Replace the block with the id 'RemoveItemsIds1,Id2,...' to 'ReplaceId'
+  + Replace = 0 remove the block
 
 ## SaveGame scripts
 This special form of scripts can be stored in the SaveGame. The basic path for this is the

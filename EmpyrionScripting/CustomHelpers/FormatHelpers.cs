@@ -73,8 +73,8 @@ namespace EmpyrionScripting.CustomHelpers
 
                 var len = (int)((barLength / (max - min)) * value);
 
-                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 4 ? arguments[4].ToString() : "\u2588", len)));
-                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 5 ? arguments[5].ToString() : "\u2591", barLength - len)));
+                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 4 ? arguments[4].ToString() : "\u2588", Math.Max(0, Math.Min(barLength, len)))));
+                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 5 ? arguments[5].ToString() : "\u2591", Math.Max(0, Math.Min(barLength, barLength - len)))));
             }
             catch (Exception error)
             {
