@@ -366,6 +366,8 @@ namespace EmpyrionScripting.CustomHelpers
 
         public class ProcessBlockData
         {
+            public DateTime Started { get; set; }
+            public DateTime Finished { get; set; }
             public string Name { get; set; }
             public int Id { get; set; }
             public int X { get; set; }
@@ -435,7 +437,8 @@ namespace EmpyrionScripting.CustomHelpers
                     return;
                 }
 
-                var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId, K => new ProcessBlockData() {
+                var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
+                    Started     = DateTime.Now,
                     Name        = E.Name,
                     Id          = E.Id,
                     MinPos      = minPos,
@@ -448,8 +451,11 @@ namespace EmpyrionScripting.CustomHelpers
                                     (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
                 }) as ProcessBlockData;
 
-                if(processBlockData.Id != E.Id)                                       root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                else if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks) lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list);
+                if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list);
+                    if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
+                }
+                else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
 
                 options.Template(output, processBlockData);
             }
@@ -488,7 +494,8 @@ namespace EmpyrionScripting.CustomHelpers
                                     .ToArray();
                 int.TryParse(arguments.Get(2)?.ToString(), out var replaceId);
 
-                var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId, K => new ProcessBlockData() {
+                var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
+                    Started     = DateTime.Now,
                     Name        = E.Name,
                     Id          = E.Id,
                     MinPos      = minPos,
@@ -501,8 +508,11 @@ namespace EmpyrionScripting.CustomHelpers
                                     (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
                 }) as ProcessBlockData;
 
-                if(processBlockData.Id != E.Id)                                       root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                else if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks) lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list);
+                if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list);
+                    if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
+                }
+                else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
 
                 options.Template(output, processBlockData);
             }

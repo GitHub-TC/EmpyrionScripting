@@ -367,6 +367,7 @@ Syntaxdocu:
 ## CustomHelpers Bedingungen
 * {{#test Select Op Value}}
   * Op: eq is =
+  * Op: neq is <> or !=
   * Op: leq is <=
   * Op: le is <
   * Op: geq is >=
@@ -992,6 +993,7 @@ Syntaxdocu:
 ### CustomHelpers (test)
 * {{#test Select Op Value}}
   * Op: eq is =
+  * Op: neq is <> or !=
   * Op: leq is <=
   * Op: le is <
   * Op: geq is >=

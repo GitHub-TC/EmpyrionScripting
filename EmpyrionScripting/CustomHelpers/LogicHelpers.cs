@@ -54,6 +54,7 @@ namespace EmpyrionScripting.CustomHelpers
                 switch (op)
                 {
                     case "eq" : renderTemplate = Compare(left, right) == 0; break;
+                    case "neq": renderTemplate = Compare(left, right) != 0; break;
                     case "le" : renderTemplate = Compare(left, right) <  0; break;
                     case "leq": renderTemplate = Compare(left, right) <= 0; break;
                     case "ge" : renderTemplate = Compare(left, right) >  0; break;
