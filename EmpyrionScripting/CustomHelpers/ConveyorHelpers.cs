@@ -545,7 +545,9 @@ namespace EmpyrionScripting.CustomHelpers
                             {
                                 block.Get(out var blockType, out _, out _, out _);
 
-                                if(list != null && !list.Any(L => L.Item1 <= blockType && L.Item2 >= blockType)) blockType = 0;
+                                if(list != null     && 
+                                   list.Length > 0  && 
+                                  !list.Any(L => L.Item1 <= blockType && L.Item2 >= blockType)) blockType = 0;
 
                                 if (blockType > 0 && blockType != PlayerCoreType)
                                 {
