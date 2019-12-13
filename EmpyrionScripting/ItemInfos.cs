@@ -44,6 +44,7 @@ namespace EmpyrionScripting
                 var IdPos = L.IndexOf(IdDef);
                 var IdDelimiter = L.IndexOf(",", IdPos);
                 var NamePos = L.IndexOf(NameDef);
+                if (NamePos == -1) return null;
                 var NameDelimiter = L.IndexOf(",", NamePos);
                 if (NameDelimiter == -1) NameDelimiter = L.Length;
 
@@ -65,5 +66,6 @@ namespace EmpyrionScripting
             .ToArray();
 
         }
+
     }
 }
