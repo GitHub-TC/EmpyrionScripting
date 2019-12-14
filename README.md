@@ -384,6 +384,8 @@ Syntaxdocu:
 ## CustomHelpers Inhalte
 + {{#items structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln
 
++ {{#getitems structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln und als Liste liefern z.B. für itemlist
+
 * {{#itemlist list 'id1;id2;id3,...'}}
   * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
     Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
@@ -1016,7 +1018,8 @@ Syntaxdocu:
 * {{#scroll lines delay}}
   * Text scroll block with (lines) od text, scrolls with (delay) seconds
 
-### CustomHelpers (itemlist)
++ {{#getitems structure 'box1; box2; fridge *; ...'}} = Determine all items from the containers (names) = 'box1; box2; fridge *; ...' and deliver them as a list e.g. for itemlist
+
 * {{#itemlist list 'id1;id2;id3'}}
   * Itemlist the the selected items (ids) even if they don't in the list (list)
 

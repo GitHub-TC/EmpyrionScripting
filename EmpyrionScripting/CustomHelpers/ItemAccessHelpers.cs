@@ -51,6 +51,47 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("getitems")]
+        public static void GetItemsBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{getitems structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
+
+            var structure = arguments[0] as IStructureData;
+            var namesSearch = arguments[1]?.ToString();
+
+            try
+            {
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
+
+                var allItems = new ConcurrentDictionary<int, ItemsData>();
+                structure.Items
+                    .SelectMany(I => I.Source.Where(S => S.CustomName != null && uniqueNames.Contains(S.CustomName)))
+                    .ForEach(I =>
+                    {
+                        ItemInfo details = null;
+                        EmpyrionScripting.ItemInfos?.ItemInfo.TryGetValue(I.Id, out details);
+                        allItems.AddOrUpdate(I.Id,
+                        new ItemsData()
+                        {
+                            Source  = new[] { I }.ToList(),
+                            Id      = I.Id,
+                            Count   = I.Count,
+                            Key     = details == null ? I.Id.ToString() : details.Key,
+                            Name    = details == null ? I.Id.ToString() : details.Name,
+                        },
+                        (K, U) => U.AddCount(I.Count, I));
+                    });
+
+
+                if (allItems.Count > 0) options.Template(output, allItems.Values.OrderBy(I => I.Id).ToArray());
+                else                    options.Inverse(output, context as object);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{getitems}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("itemlist")]
         public static void ItemListBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
