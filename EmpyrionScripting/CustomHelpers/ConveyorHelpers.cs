@@ -280,7 +280,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var structure   = arguments[1] as IStructureData;
                 var item        = arguments[0] as ItemsData;
 
-                if(structure == null) return;
+                if(structure == null || item == null) return;
 
                 if (!Enum.TryParse<StructureTankType>(arguments[2]?.ToString(), true, out var type))
                 {
@@ -304,7 +304,7 @@ namespace EmpyrionScripting.CustomHelpers
                     case StructureTankType.Pentaxid  : specialTransfer = structure.PentaxidTank  ; break;
                 }
 
-                if (!specialTransfer.AllowedItem(item.Id))
+                if (specialTransfer == null || !specialTransfer.AllowedItem(item.Id))
                 {
                     options.Inverse(output, context as object);
                     return;
