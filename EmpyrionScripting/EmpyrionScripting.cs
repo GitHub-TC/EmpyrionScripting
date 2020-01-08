@@ -396,11 +396,14 @@ namespace EmpyrionScripting
 
                     if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + SaveGamesScripts.ScriptExtension, out var C))
                     {
-                        ProcessScript(playfieldData, new ScriptSaveGameRootData(entityScriptData)
+                        var data = new ScriptSaveGameRootData(entityScriptData)
                         {
                             Script = C,
+                            ScriptId = entityScriptData.E.Id + "/" + S,
                             ScriptPath = Path.GetDirectoryName(path)
-                        });
+                        };
+                        ProcessScript(playfieldData, data);
+                        data.GetPlayfieldScriptData().IncrementCycleCounter(data.ScriptId);
 
                         Interlocked.Increment(ref count);
                     }
@@ -409,11 +412,15 @@ namespace EmpyrionScripting
                         SaveGamesScripts.SaveGameScripts
                             .Where(F => Path.GetDirectoryName(F.Key) == path)
                             .ForEach(F => {
-                                ProcessScript(playfieldData, new ScriptSaveGameRootData(entityScriptData)
+                                var data = new ScriptSaveGameRootData(entityScriptData)
                                 {
                                     Script = F.Value,
+                                    ScriptId = entityScriptData.E.Id + "/" + S,
                                     ScriptPath = Path.GetDirectoryName(F.Key)
-                                });
+                                };
+
+                                ProcessScript(playfieldData, data);
+                                data.GetPlayfieldScriptData().IncrementCycleCounter(data.ScriptId);
 
                                 Interlocked.Increment(ref count);
                             });
