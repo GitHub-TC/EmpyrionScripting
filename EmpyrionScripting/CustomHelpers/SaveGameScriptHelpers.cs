@@ -9,16 +9,16 @@ namespace EmpyrionScripting.CustomHelpers
     public class SaveGameScriptHelpers
     {
         [HandlebarTag("fileexists")]
-        public static void FileExistsHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        public static void FileExistsHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{fileexists dir filename}} helper must have two argument: (dir) (filename)");
 
-            if (!(root is ScriptSaveGameRootData)) throw new HandlebarsException("{{readfile dir filename}} only allowed in SaveGame scripts");
+            if (!(rootObject is ScriptSaveGameRootData root)) throw new HandlebarsException("{{readfile dir filename}} only allowed in SaveGame scripts");
 
             try
             {
-                if (File.Exists(Path.Combine(arguments[0].ToString(), arguments[1].ToString()))) options.Template(output, context as object);
-                else                                                                             options.Inverse (output, context as object);
+                if (File.Exists(Path.Combine(root.MainScriptPath, arguments[0].ToString(), arguments[1].ToString()))) options.Template(output, context as object);
+                else                                                                                                  options.Inverse (output, context as object);
             }
             catch (Exception error)
             {
@@ -27,16 +27,19 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("filelist")]
-        public static void FileListHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        public static void FileListHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{filelist dir filename [recursive]}} helper must have at least three arguments: @root (dir) (filename) [recursive]");
 
-            if (!(root is ScriptSaveGameRootData)) throw new HandlebarsException("{{filelist}} only allowed in SaveGame scripts");
+            if (!(rootObject is ScriptSaveGameRootData root)) throw new HandlebarsException("{{filelist}} only allowed in SaveGame scripts");
 
             try
             {
                 bool.TryParse(arguments.Length == 3 ? arguments[2].ToString() : "false", out var recursive);
-                options.Template(output, Directory.EnumerateFiles(arguments[0].ToString(), arguments[1].ToString(), recursive ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories));
+                options.Template(output, 
+                    Directory.EnumerateFiles(
+                        Path.Combine(root.MainScriptPath, arguments[0].ToString()), arguments[1].ToString(), 
+                        recursive ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories));
             }
             catch (Exception error)
             {
@@ -45,15 +48,15 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("readfile")]
-        public static void ReadFileHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        public static void ReadFileHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{readfiledir filename}} helper must have two argument: (dir) (filename)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{readfiledir dir filename}} helper must have two argument: (dir) (filename)");
 
-            if (!(root is ScriptSaveGameRootData)) throw new HandlebarsException("{{readfile dir filename}} only allowed in SaveGame scripts");
+            if (!(rootObject is ScriptSaveGameRootData root)) throw new HandlebarsException("{{readfile dir filename}} only allowed in SaveGame scripts");
 
             try
             {
-                var filename = Path.Combine(arguments[0].ToString(), arguments[1].ToString());
+                var filename = Path.Combine(root.MainScriptPath, arguments[0].ToString(), arguments[1].ToString());
 
                 var fileContent = HelpersTools.GetFileContent(filename)?.Lines;
 
@@ -67,15 +70,15 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("writefile")]
-        public static void WriteFileHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        public static void WriteFileHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length < 2) throw new HandlebarsException("{{writefile dir filename [append]}} helper must have at least two argument: (dir) (filename)");
 
-            if (!(root is ScriptSaveGameRootData)) throw new HandlebarsException("{{writefile dir filename}} only allowed in SaveGame scripts");
+            if (!(rootObject is ScriptSaveGameRootData root)) throw new HandlebarsException("{{writefile dir filename}} only allowed in SaveGame scripts");
 
             try
             {
-                var filename = Path.Combine(arguments[0].ToString(), arguments[1].ToString());
+                var filename = Path.Combine(root.MainScriptPath, arguments[0].ToString(), arguments[1].ToString());
                 bool.TryParse(arguments.Length > 2 ? arguments[2].ToString() : null, out var append);
 
                 using (var text = new StringWriter()) {

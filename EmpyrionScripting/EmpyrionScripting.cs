@@ -348,6 +348,7 @@ namespace EmpyrionScripting
 
         private int ProcessAllSaveGameScripts(PlayfieldScriptData playfieldData, IEntity entity)
         {
+            Log($"ProcessAllSaveGameScripts: {entity.Name}:{entity.Type} Pause:{playfieldData.PauseScripts}", LogLevel.Debug);
             if (entity.Type == EntityType.Proxy || playfieldData.PauseScripts) return 0;
 
             try
@@ -358,14 +359,19 @@ namespace EmpyrionScripting
                     ModApi = ModApi
                 };
 
-                return ExecFoundSaveGameScripts(playfieldData, entityScriptData,
+                var count = ExecFoundSaveGameScripts(playfieldData, entityScriptData,
                     GetPathTo(Enum.GetName(typeof(EntityType), entity.Type)),
                     GetPathTo(entity.Name),
                     GetPathTo(playfieldData.Playfield.Name),
                     GetPathTo(playfieldData.Playfield.Name, Enum.GetName(typeof(EntityType), entity.Type)),
                     GetPathTo(playfieldData.Playfield.Name, entity.Name),
-                    GetPathTo(entity.Id.ToString())
+                    GetPathTo(entity.Id.ToString()),
+                    SaveGamesScripts.MainScriptPath
                     );
+
+                Log($"ProcessAllSaveGameScripts: #{count}", LogLevel.Debug);
+
+                return count;
             }
             catch (Exception error)
             {
@@ -398,12 +404,11 @@ namespace EmpyrionScripting
                     {
                         var data = new ScriptSaveGameRootData(entityScriptData)
                         {
-                            Script = C,
-                            ScriptId = entityScriptData.E.Id + "/" + S,
-                            ScriptPath = Path.GetDirectoryName(path)
+                            Script      = C,
+                            ScriptId    = entityScriptData.E.Id + "/" + S,
+                            ScriptPath  = Path.GetDirectoryName(path)
                         };
-                        ProcessScript(playfieldData, data);
-                        data.GetPlayfieldScriptData().IncrementCycleCounter(data.ScriptId);
+                        playfieldData.ScriptExecQueue.Add(data);
 
                         Interlocked.Increment(ref count);
                     }
@@ -414,13 +419,11 @@ namespace EmpyrionScripting
                             .ForEach(F => {
                                 var data = new ScriptSaveGameRootData(entityScriptData)
                                 {
-                                    Script = F.Value,
-                                    ScriptId = entityScriptData.E.Id + "/" + S,
-                                    ScriptPath = Path.GetDirectoryName(F.Key)
+                                    Script      = F.Value,
+                                    ScriptId    = entityScriptData.E.Id + "/" + F.Key,
+                                    ScriptPath  = Path.GetDirectoryName(F.Key)
                                 };
-
-                                ProcessScript(playfieldData, data);
-                                data.GetPlayfieldScriptData().IncrementCycleCounter(data.ScriptId);
+                                playfieldData.ScriptExecQueue.Add(data);
 
                                 Interlocked.Increment(ref count);
                             });

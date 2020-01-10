@@ -588,6 +588,8 @@ Syntaxdocu:
 Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
 \[SaveGame\]\\Mods\\EmpyrionScripting\\Scripts
 
+Dieser Pfad ist auch über @root.MainScriptPath zu erreichen.
+
 in diesem Verzeichnis werden nach folgendem Muster Scriptdateien mit der Endung *.hbs gesucht
 * EntityType
 * EntityName
@@ -595,6 +597,7 @@ in diesem Verzeichnis werden nach folgendem Muster Scriptdateien mit der Endung 
 * PlayfieldName\\EntityType
 * PlayfieldName\\EntityName
 * EntityId
+* im Verzeichnis selber
 
 Hinweis: EntityType ist BA,CV,SV or HV
 
@@ -1218,6 +1221,8 @@ DateTime format:
 This special form of scripts can be stored in the SaveGame. The basic path for this is the
 \[Savegame\]\\Mods\\EmpyrionScripting\\Scripts
 
+This path is avaiable with @root.MainScriptPath
+
 in this directory script files with the extension *.hbs are searched for according to the following pattern
 * EntityType
 * EntityName
@@ -1225,6 +1230,7 @@ in this directory script files with the extension *.hbs are searched for accordi
 * PlayfieldName\\EntityType
 * PlayfieldName\\EntityName
 * EntityId
+* in the directory itself
 
 Note: EntityType is BA,CV,SV or HV
 

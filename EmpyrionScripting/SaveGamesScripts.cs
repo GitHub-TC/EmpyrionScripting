@@ -30,8 +30,17 @@ namespace EmpyrionScripting
                 IncludeSubdirectories = true,
             };
             SaveGameScriptsWatcher.Changed += (S, E) => {
-                ModApi?.Log($"SaveGameScript: changed script: {E.FullPath.NormalizePath()}");
-                SaveGameScripts.AddOrUpdate(E.FullPath.NormalizePath(), F => File.ReadAllText(F), (F, C) => File.ReadAllText(F));
+                var filepath = E.FullPath.NormalizePath();
+
+                if (File.Exists(filepath)) {
+                    ModApi?.Log($"SaveGameScript: changed script: {filepath}");
+                    SaveGameScripts.AddOrUpdate(filepath, F => File.ReadAllText(F), (F, C) => File.ReadAllText(F));
+                }
+                else
+                {
+                    ModApi?.Log($"SaveGameScript: deleted script: {filepath}");
+                    SaveGameScripts.TryRemove(filepath, out _);
+                }
             };
             SaveGameScriptsWatcher.Created += (S, E) =>
             {

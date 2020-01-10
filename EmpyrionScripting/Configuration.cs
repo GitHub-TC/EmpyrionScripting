@@ -24,7 +24,7 @@ namespace EmpyrionScripting
         public LogLevel LogLevel { get; set; } = LogLevel.Message;
         public int InGameScriptsIntervallMS { get; set; } = 1000;
         public int DeviceLockOnlyAllowedEveryXCycles { get; set; } = 10;
-        public int SaveGameScriptsIntervallMS { get; set; } = 1000;
+        public int SaveGameScriptsIntervallMS { get; set; } = 10000;
         public bool ScriptTracking { get; set; }
         public float EntityAccessMinDistance { get; set; } = 500;
         public int DelayStartForNSecondsOnPlayfieldLoad { get; set; } = 30;
