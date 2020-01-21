@@ -119,12 +119,83 @@
     <Compile Include="ScriptExecQueue.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\1Penguin100Cases.exe" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\activation_info.xml" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\bass.dll" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\bfgstate.xml" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\Anim\FishFight.png" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\Anim\Foot.png" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\Anim\PinguSleep.png" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\fonts\comicsFont_0.png" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\fonts\menuFont_0.png" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\djvbdbx.exe" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\pics\60x40.jpg" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\pics\80x80.jpg" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\pics\feature.jpg" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\pyro.dll" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\render.dll" />
+    <Content Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\Uninstall.exe" />
+    <Content Include="CustomHelpers\Transfer\Anrufbeantworter\rec.0.010.wav" />
+    <Content Include="CustomHelpers\Transfer\Anrufbeantworter\rec.0.012.wav" />
+    <Content Include="CustomHelpers\Transfer\AutoShutdown\MirrorData.txt" />
+    <Content Include="CustomHelpers\Transfer\Backup\Backup.exe" />
+    <Content Include="CustomHelpers\Transfer\Backup\BackupTask.xml" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._01 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._02 von Tom.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._03 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._04 von Tom.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._05 von Tom.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._06 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._07 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._08 von Tom.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._09 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._10 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._11 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._12 von Tom.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._13 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._Plakat.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\01 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\02 von Tom.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\03 von I Großekathöfer.jpg" />
+    <Content Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\04 von Tom.jpg" />
     <Content Include="EmpyrionScripting_Info.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ILMergeOrder.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CustomHelpers\Transfer\.picasa.ini" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data.pak" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\Anim\PinguSleep.anm" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\Anim\Thumbs.db" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\fonts\comicsFont.bmf" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\fonts\menuFont.bmf" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\fonts\Thumbs.db" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\anagrama.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\bubbles.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\goOffObj1.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\goOffObj2.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\Pyro1.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\showTip.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\tipEffect.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\tipEffect1.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\tipEffect2.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\data\particle\tipEffect3.pyro" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\gui.dat" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\LaunchGame.bfg" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\pics\Thumbs.db" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\settings.dat" />
+    <None Include="CustomHelpers\Transfer\1 Pinguin 100 Faelle\UnlockGame.bfg" />
+    <None Include="CustomHelpers\Transfer\Backup\Backup.cmd" />
+    <None Include="CustomHelpers\Transfer\Backup\BackupJob.RCJ" />
+    <None Include="CustomHelpers\Transfer\Backup\Mirror.RCJ" />
+    <None Include="CustomHelpers\Transfer\Backup\MirrorData.cmd" />
+    <None Include="CustomHelpers\Transfer\Backup\MirrorVideo.cmd" />
+    <None Include="CustomHelpers\Transfer\BettyAbnahme.xlsx" />
+    <None Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\.DS_Store" />
+    <None Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._.DS_Store" />
+    <None Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._Textstellen der Bibel fertig.pdf" />
+    <None Include="CustomHelpers\Transfer\BettyHDD\Bibelsprichworte\fertig-Bibelredewendungen\._Vita-Tom und Irmgard.pdf" />
     <None Include="ILMerge.props" />
     <None Include="packages.config" />
   </ItemGroup>

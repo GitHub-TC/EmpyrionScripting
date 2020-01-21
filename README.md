@@ -536,11 +536,11 @@ Syntaxdocu:
   + Setzt die Hintergrundfarbe des LCD (lcddevice) auf (rgb hex)
 
 ## CustomHelpers Strukturen
-+ {{entitybyname name}}
-  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Name (name)
++ {{entitybyname name \[maxdistance\]}}
+  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Name (name) und der, optionalen, maximalen Entfernung \[maxdistance\]
 
-+ {{entitiesbyname names}}
-  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Namen in (name;name*;*)
++ {{entitiesbyname names \[maxdistance\]}}
+  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Namen in (name;name*;*) und der, optionalen, maximalen Entfernung \[maxdistance\]
 
 + {{entitybyid id}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Id (id)
@@ -1182,12 +1182,11 @@ DateTime format:
   + Set the bgcolor of the LCD (lcddevice) with (rgb hex)
 
 ### CustomHelpers (entitybyname)
-+ {{entitybyname name}}
-  + Get nearby Entity (with same faction) with (name)
++ {{entitybyname name \[maxdistance\]}}
+  + Returns the entities nearby and with the same fraction, with name (name) and the, optional, maximum distance \[maxdistance\]
 
-### CustomHelpers (entitiesbyname)
-+ {{entitiesbyname names}}
-  + Get nearby Entity (with same faction) with Names in (name;name*;*)
++ {{entitiesbyname names \[maxdistance\]}}
+  + Returns the entities nearby and with the same fraction, with names in (name; name *; *) and the, optional, maximum distance \[maxdistance\]
 
 ### CustomHelpers (entitybyid)
 + {{entitybyid id}}

@@ -67,7 +67,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                throw new HandlebarsException($"{{test}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a}")}]:{EmpyrionScripting.ErrorFilter(error)}");
+                throw new HandlebarsException($"{{test}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a} ")}]:{EmpyrionScripting.ErrorFilter(error)}");
             }
         }
 
@@ -80,11 +80,18 @@ namespace EmpyrionScripting.CustomHelpers
 
             return list.Any(I =>
             {
-                var rangeDelimiter = I.IndexOf('-', 1);
-                return rangeDelimiter == -1
-                    ? ((IComparable)left).CompareTo((IComparable)Converter.ConvertFromString(I)) == 0
-                    : ((IComparable)left).CompareTo((IComparable)Converter.ConvertFromString(I.Substring(0, rangeDelimiter))) >= 0 &&
-                      ((IComparable)left).CompareTo((IComparable)Converter.ConvertFromString(I.Substring(rangeDelimiter + 1))) <= 0;
+                try
+                {
+                    var rangeDelimiter = I.IndexOf('-', 1);
+                    return rangeDelimiter == -1
+                        ? ((IComparable)left).CompareTo((IComparable)Converter.ConvertFromString(I)) == 0
+                        : ((IComparable)left).CompareTo((IComparable)Converter.ConvertFromString(I.Substring(0, rangeDelimiter))) >= 0 &&
+                          ((IComparable)left).CompareTo((IComparable)Converter.ConvertFromString(I.Substring(rangeDelimiter + 1))) <= 0;
+                }
+                catch
+                {
+                    return false;
+                }
             });
         }
 

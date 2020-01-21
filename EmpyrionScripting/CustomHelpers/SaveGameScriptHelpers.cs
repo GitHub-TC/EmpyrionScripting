@@ -39,7 +39,7 @@ namespace EmpyrionScripting.CustomHelpers
                 options.Template(output, 
                     Directory.EnumerateFiles(
                         Path.Combine(root.MainScriptPath, arguments[0].ToString()), arguments[1].ToString(), 
-                        recursive ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories));
+                        recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly));
             }
             catch (Exception error)
             {

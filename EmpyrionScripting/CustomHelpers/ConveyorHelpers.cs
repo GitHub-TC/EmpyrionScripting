@@ -477,7 +477,6 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 if(!isElevatedScript) throw new HandlebarsException("only allowed in elevated scripts");
-                if(E.Faction.Group != FactionGroup.Player && E.Faction.Group != FactionGroup.Faction) return;
 
                 var minPos      = E.S.GetCurrent().MinPos;
                 var maxPos      = E.S.GetCurrent().MaxPos;
