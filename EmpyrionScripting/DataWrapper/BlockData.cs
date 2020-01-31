@@ -35,6 +35,7 @@ namespace EmpyrionScripting.DataWrapper
 
         public IStructure GetStructure() => _structure;
         public IBlock GetBlock() => _block;
+        public IDevice GetDevice() => _device;
 
         public object Device { get; }
 
@@ -58,7 +59,7 @@ namespace EmpyrionScripting.DataWrapper
         public bool Active { get => GetData().blockActive.Value; set => _block?.Set(null, null, null, value); }
         public int Shape { get => GetData().blockShape;         set => _block?.Set(null, value, null, null); }
         public int Rotation { get => GetData().blockRotation;   set => _block?.Set(null, null, value, null); }
-        public int Top { get => GetTexture().textureNorth;      set => _block?.SetTextures(value, null, null, null, null, null); }
+        public int Top { get => GetTexture().textureTop;        set => _block?.SetTextures(value, null, null, null, null, null); }
         public int Bottom { get => GetTexture().textureBottom;  set => _block?.SetTextures(null, value, null, null, null, null); }
         public int North { get => GetTexture().textureNorth;    set => _block?.SetTextures(null, null, value, null, null, null); }
         public int South { get => GetTexture().textureSouth;    set => _block?.SetTextures(null, null, null, value, null, null); }

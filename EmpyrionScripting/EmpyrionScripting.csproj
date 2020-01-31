@@ -73,6 +73,7 @@
     <Compile Include="CustomHelpers\EntityAccessHelpers.cs" />
     <Compile Include="CustomHelpers\LcdHelpers.cs" />
     <Compile Include="CustomHelpers\SignalHelpers.cs" />
+    <Compile Include="CustomHelpers\TeleporterHelpers.cs" />
     <Compile Include="DataWrapper\BlockData.cs" />
     <Compile Include="CustomHelpers\MathHelpers.cs" />
     <Compile Include="DataWrapper\ContainerData.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="DataWrapper\SignalEvent.cs" />
     <Compile Include="DataWrapper\SignalEventBase.cs" />
     <Compile Include="DataWrapper\SignalEventElevated.cs" />
+    <Compile Include="DataWrapper\TeleporterData.cs" />
     <Compile Include="DeviceLock.cs" />
     <Compile Include="CustomHelpers\EffectHelpers.cs" />
     <Compile Include="CustomHelpers\LoopHelpers.cs" />

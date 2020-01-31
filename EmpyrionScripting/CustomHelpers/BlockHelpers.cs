@@ -7,7 +7,7 @@ using System.Linq;
 namespace EmpyrionScripting.CustomHelpers
 {
     [HandlebarHelpers]
-    public partial class BlockHelpers
+    public class BlockHelpers
     {
 
         [HandlebarTag("devices")]
