@@ -37,8 +37,11 @@ namespace EmpyrionScripting
 
         public void Add(IScriptRootData data)
         {
-            if (WaitForExec.TryAdd(data.ScriptId, data)) ExecQueue.Enqueue(data);
-            else lock (ExecQueue) WaitForExec.AddOrUpdate(data.ScriptId, data, (i, d) => data);
+            lock (ExecQueue)
+            {
+                if (WaitForExec.TryAdd(data.ScriptId, data)) ExecQueue.Enqueue(data);
+                else WaitForExec.AddOrUpdate(data.ScriptId, data, (i, d) => data);
+            }
         }
 
         static public Action<string, LogLevel> Log { get; set; }
