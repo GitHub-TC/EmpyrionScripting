@@ -12,6 +12,7 @@ namespace EmpyrionScripting.DataWrapper
             this.p = p;
         }
 
+        public int Id => p == null ? 0 : p.Id;
         public string Name => p?.Name;
     }
 

@@ -30,7 +30,7 @@ namespace EmpyrionScripting
         public string SaveGameModPath { get; set; }
         public static ConfigurationManager<Configuration> Configuration { get; set; } = new ConfigurationManager<Configuration>() { Current = new Configuration() };
         public static Localization Localization { get; set; }
-        private static IModApi ModApi { get; set; }
+        public static IModApi ModApi { get; set; }
         public SaveGamesScripts SaveGamesScripts { get; set; }
         public string L { get; private set; }
         public DateTime LastAlive { get; private set; }
