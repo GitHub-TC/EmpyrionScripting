@@ -73,7 +73,7 @@ namespace EmpyrionScripting
             {
                 if (data.E.EntityType == EntityType.Proxy)
                 {
-                    WaitForExec.TryRemove(data.ScriptId, out _);
+                    lock (ExecQueue) WaitForExec.TryRemove(data.ScriptId, out _);
                     return;
                 }
 
