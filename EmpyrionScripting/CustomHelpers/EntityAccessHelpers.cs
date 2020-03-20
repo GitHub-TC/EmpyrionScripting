@@ -11,6 +11,38 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public class EntityAccessHelpers
     {
+        [HandlebarTag("entities")]
+        public static void EntitiesBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1 && arguments.Length != 2) throw new HandlebarsException("{{entities (name;name*;*) [maxdistance]}} helper must have one or two argument: (name;name*;*) [maxdistance]");
+            if (EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance == 0) return;
+
+            var root = rootObject as IScriptRootData;
+            var isElevatedScript = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var namesSearch = arguments[0]?.ToString();
+
+            if (!isElevatedScript) throw new HandlebarsException("{{entities}} only allowed in elevated scripts");
+
+            if (int.TryParse(arguments.Get(1)?.ToString(), out var distance)) distance = Math.Min((int)EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance, distance);
+            else                                                              distance = int.MaxValue;
+
+            try
+            {
+                var found = root.GetCurrentPlayfield()
+                    .Entities
+                    .Select(E => E.Value)
+                    .Where(E => new[] { E.Name }.GetUniqueNames(namesSearch).Any())
+                    .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= distance);
+
+                if (found == null || !found.Any())  options.Inverse(output, context as object);
+                else                                options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E)).ToArray());
+            }
+            catch (Exception error)
+            {
+                output.Write("{{entities}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("entitybyname")]
         public static void EntityByNameBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
