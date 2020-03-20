@@ -1,5 +1,4 @@
 ﻿using Eleon.Modding;
-using EmpyrionScripting.CustomHelpers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

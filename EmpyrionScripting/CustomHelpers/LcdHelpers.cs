@@ -101,7 +101,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 int.TryParse(arguments[1]?.ToString(), NumberStyles.HexNumber, null, out int color);
-                lcd?.SetColor(new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff));
+                lcd?.SetTextColor(new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff));
             }
             catch (Exception error)
             {
@@ -120,7 +120,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 int.TryParse(arguments[1]?.ToString(), NumberStyles.HexNumber, null, out int color);
-                lcd?.SetBackground(new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff));
+                lcd?.SetBackgroundColor(new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff));
             }
             catch (Exception error)
             {

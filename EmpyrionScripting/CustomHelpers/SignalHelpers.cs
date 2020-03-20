@@ -34,6 +34,57 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("triggerifsignalgoes")]
+        public static void TriggerIfSignalGoesHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{triggerifsignalgoes names state}} helper must have exactly two arguments: (name1,name2,...) (boolstate)");
+
+            var root                = rootObject as IScriptRootData;
+            var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
+            var namesSearch         = arguments[0].ToString();
+
+            try
+            {
+                bool.TryParse(arguments[1]?.ToString(), out var searchState);
+                var uniqueNames = root.SignalEventStore.GetEvents().Keys.GetUniqueNames(namesSearch).ToDictionary(N => N);
+
+                var signals = root.SignalEventStore.GetEvents()
+                    .Where(S => uniqueNames.ContainsKey(S.Key))
+                    .Select(S => S.Value)
+                    .ToArray();
+
+                if (signals != null && signals.Length > 1)
+                {
+                    SignalEventBase found = signals
+                        .Where(S => {
+                            var currentSignal = S[S.Count - 1];
+
+                            if (currentSignal.State == searchState && 
+                               (!root.GetPersistendData().TryGetValue(root.ScriptId + currentSignal.Name, out object lastState) ||
+                                (bool)lastState != currentSignal.State)){
+                                    root.GetPersistendData().AddOrUpdate(root.ScriptId + currentSignal.Name, searchState, (k, v) => searchState);
+                                    return true;
+                            }
+                            return false;
+                            })
+                        .Select(S => S[S.Count - 1])
+                        .FirstOrDefault();
+
+
+                    if (found != null) options.Template(output, 
+                        isElevatedScript 
+                        ? new SignalEventElevated(root.GetCurrentPlayfield(), found) 
+                        : (object)new SignalEvent(root.GetCurrentPlayfield(), found)
+                        );
+                }
+                else options.Inverse(output, context as object);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{triggerifsignalgoes}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("signals")]
         public static void SignalsHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {

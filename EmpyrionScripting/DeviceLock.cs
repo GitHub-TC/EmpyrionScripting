@@ -6,7 +6,7 @@ using EmpyrionScripting.DataWrapper;
 
 namespace EmpyrionScripting
 {
-    public class DeviceLock : IDeviceLock
+    public sealed class DeviceLock : IDeviceLock
     {
         readonly Action unlockAction;
 

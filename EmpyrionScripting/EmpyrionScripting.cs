@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace EmpyrionScripting
 {
 
-    public partial class EmpyrionScripting : ModInterface, IMod, IDisposable
+    public sealed partial class EmpyrionScripting : ModInterface, IMod, IDisposable
     {
         public static event EventHandler StopScriptsEvent;
 
@@ -491,9 +491,9 @@ namespace EmpyrionScripting
                                 ));
                         }
 
-                        if (data.ColorChanged          ) L.SetColor     (data.Color);
-                        if (data.BackgroundColorChanged) L.SetBackground(data.BackgroundColor);
-                        if (data.FontSizeChanged       ) L.SetFontSize  (data.FontSize);
+                        if (data.ColorChanged          ) L.SetTextColor      (data.Color);
+                        if (data.BackgroundColorChanged) L.SetBackgroundColor(data.BackgroundColor);
+                        if (data.FontSizeChanged       ) L.SetFontSize       (data.FontSize);
                     });
             }
             catch (Exception ctrlError)

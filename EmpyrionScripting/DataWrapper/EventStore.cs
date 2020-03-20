@@ -5,7 +5,7 @@ using Eleon.Modding;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class EventStore : IDisposable
+    public sealed class EventStore : IDisposable
     {
         readonly IEntity _Entity;
         readonly ConcurrentDictionary<string, List<SignalEventBase>> _Events = new ConcurrentDictionary<string, List<SignalEventBase>>();

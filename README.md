@@ -552,6 +552,9 @@ Syntaxdocu:
 + {{signalevents names}} 
   + die letzten Signalevents mit den namen (name1;name2...)
 
++ {{triggerifsignalgoes names boolstate}}
+  + triggert wenn eines der Signale 'names' auf den Status 'boolstate' wechselt
+  
 + {{signals structure names}}
   + Liefert die Signale (names) der Struktur
 

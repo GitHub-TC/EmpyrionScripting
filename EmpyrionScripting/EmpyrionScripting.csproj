@@ -106,6 +106,7 @@
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="DataWrapper\EventStore.cs" />
     <Compile Include="ExtensionsToolbox.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IDeviceLock.cs" />
     <Compile Include="ItemInfos.cs" />
     <Compile Include="DataWrapper\ItemsData.cs" />

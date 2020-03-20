@@ -2,7 +2,6 @@
 using EmpyrionScripting.DataWrapper;
 using System;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace EmpyrionScripting
 {

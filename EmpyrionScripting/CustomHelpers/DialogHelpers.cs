@@ -2,11 +2,7 @@
 using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -35,27 +31,24 @@ namespace EmpyrionScripting.CustomHelpers
                 running = true;
                 var success = 
                     EmpyrionScripting.ModApi.Application.ShowDialogBox(player.Id,
-                    //EmpyrionScripting.ModApi.GUI.ShowDialog(
                     new Eleon.Modding.DialogConfig()
                     {
-                        TitleText = "TEST TITLE",
-                        BodyText = "This is some test text",
-                        ButtonTexts = new string[1] { "OK" }
-                        //TitleText = "Title",
-                        //BodyText = "Body",
-                        //ButtonIdxForEnter = 1,
-                        //ButtonIdxForEsc = 2,
-                        //ButtonTexts = new[] { "A", "B" },
-                        //CloseOnLinkClick = true,
-                        //InitialContent = "Init",
-                        //MaxChars = 200,
-                        //Placeholder = "Placeholder"
+                        TitleText = "Title",
+                        BodyText = "Body",
+                        ButtonIdxForEnter = 1,
+                        ButtonIdxForEsc = 2,
+                        ButtonTexts = new[] { "A", "B" },
+                        CloseOnLinkClick = true,
+                        InitialContent = "Init",
+                        MaxChars = 200,
+                        Placeholder = "Placeholder"
                     },
-                    (buttonIdx, linkId, content) =>
+                    (buttonIdx, linkId, content, customValue) =>
                     {
                         running = false;
                         EmpyrionScripting.Log($"DialogCallback: Button={buttonIdx} Link={linkId} Content={content}", EmpyrionNetAPIDefinitions.LogLevel.Message);
-                    });
+                    },
+                    0);
 
                 if (!success) running = false;
 
