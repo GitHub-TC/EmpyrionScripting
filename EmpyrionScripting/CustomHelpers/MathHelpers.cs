@@ -91,11 +91,16 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("distance")]
         public static void DistanceHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{distance}} helper must have exactly two argument: (lVector) (rVector)");
+            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{distance}} helper must have at least two argument: (lVector) (rVector) [format]");
 
             try
             {
-                output.Write(Vector3.Distance((Vector3)arguments[0], (Vector3)arguments[1])); 
+                var format = arguments.Get(2)?.ToString();
+
+                output.Write(string.IsNullOrEmpty(format) 
+                    ? Vector3.Distance((Vector3)arguments[0], (Vector3)arguments[1]).ToString()
+                    : string.Format(format, Vector3.Distance((Vector3)arguments[0], (Vector3)arguments[1]))
+                    ); 
             }
             catch (Exception error)
             {
