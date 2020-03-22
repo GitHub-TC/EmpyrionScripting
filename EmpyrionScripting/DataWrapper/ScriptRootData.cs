@@ -14,7 +14,8 @@ namespace EmpyrionScripting.DataWrapper
         private readonly PlayfieldScriptData _PlayfieldScriptData;
 
         private ConcurrentDictionary<string, object> _PersistendData;
-        private IEntity[] currentEntites;
+        private IEntity[] currentEntities;
+        private IEntity[] allEntities;
         private IPlayfield playfield;
         private IEntity entity;
 
@@ -25,17 +26,25 @@ namespace EmpyrionScripting.DataWrapper
             _e = new Lazy<IEntityData>(() => new EntityData(playfield, entity));
         }
 
-        public ScriptRootData(PlayfieldScriptData playfieldScriptData, IEntity[] currentEntities, IPlayfield playfield, IEntity entity, ConcurrentDictionary<string, object> persistendData, EventStore eventStore) : this()
+        public ScriptRootData(
+            PlayfieldScriptData playfieldScriptData,
+            IEntity[] allEntities,
+            IEntity[] currentEntities, 
+            IPlayfield playfield, 
+            IEntity entity, 
+            ConcurrentDictionary<string, object> persistendData, 
+            EventStore eventStore) : this()
         {
             _PlayfieldScriptData = playfieldScriptData;
             _PersistendData = persistendData;
-            this.currentEntites = currentEntities;
+            this.currentEntities = currentEntities;
+            this.allEntities = allEntities;
             this.playfield = playfield;
             this.entity = entity;
             SignalEventStore = eventStore;
         }
 
-        public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.currentEntites, data.playfield, data.entity, data._PersistendData, data.SignalEventStore)
+        public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.allEntities, data.currentEntities, data.playfield, data.entity, data._PersistendData, data.SignalEventStore)
         {
             _p = data._p;
             _e = data._e;
@@ -46,7 +55,8 @@ namespace EmpyrionScripting.DataWrapper
 
         public PlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
         public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;
-        public IEntity[] GetCurrentEntites() => currentEntites;
+        public IEntity[] GetAllEntites() => allEntities;
+        public IEntity[] GetCurrentEntites() => currentEntities;
 
         public IPlayfield GetCurrentPlayfield() => playfield;
 

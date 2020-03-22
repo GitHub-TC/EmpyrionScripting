@@ -11,38 +11,6 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public class EntityAccessHelpers
     {
-        [HandlebarTag("entities")]
-        public static void EntitiesBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
-        {
-            if (arguments.Length != 1 && arguments.Length != 2) throw new HandlebarsException("{{entities (name;name*;*) [maxdistance]}} helper must have one or two argument: (name;name*;*) [maxdistance]");
-            if (EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance == 0) return;
-
-            var root = rootObject as IScriptRootData;
-            var isElevatedScript = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
-            var namesSearch = arguments[0]?.ToString();
-
-            if (!isElevatedScript) throw new HandlebarsException("{{entities}} only allowed in elevated scripts");
-
-            if (int.TryParse(arguments.Get(1)?.ToString(), out var distance)) distance = Math.Min((int)EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance, distance);
-            else                                                              distance = int.MaxValue;
-
-            try
-            {
-                var found = root.GetCurrentPlayfield()
-                    .Entities
-                    .Select(E => E.Value)
-                    .Where(E => new[] { E.Name }.GetUniqueNames(namesSearch).Any())
-                    .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= distance);
-
-                if (found == null || !found.Any())  options.Inverse(output, context as object);
-                else                                options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E)).ToArray());
-            }
-            catch (Exception error)
-            {
-                output.Write("{{entities}} error " + EmpyrionScripting.ErrorFilter(error));
-            }
-        }
-
         [HandlebarTag("entitybyname")]
         public static void EntityByNameBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
@@ -64,8 +32,8 @@ namespace EmpyrionScripting.CustomHelpers
                     .Where(E => E.Name == namesSearch)
                     .FirstOrDefault(E => Vector3.Distance(E.Position, root.E.Pos) <= distance);
 
-                if (found == null) options.Inverse(output, context as object);
-                else options.Template(output, new EntityData(root.GetCurrentPlayfield(), found));
+                if (found == null)  options.Inverse(output, context as object);
+                else                options.Template(output, new EntityData(root.GetCurrentPlayfield(), found) { Distance = Vector3.Distance(found.Position, root.E.Pos) });
             }
             catch (Exception error)
             {
@@ -82,26 +50,37 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("entitiesbyname")]
         public static void EntitiesByNameBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 1 && arguments.Length != 2) throw new HandlebarsException("{{entitiesbyname (name;name*;*) [maxdistance]}} helper must have one or two argument: (name;name*;*) [maxdistance]");
+            if (arguments.Length < 1 && arguments.Length > 3) throw new HandlebarsException("{{entitiesbyname (name;name*;*) [maxdistance] [types]}} helper must have one or two argument: (name;name*;*) [maxdistance] [types]");
             if (EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance == 0) return;
 
             var root                = rootObject as IScriptRootData;
             var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
             var namesSearch         = arguments[0]?.ToString();
 
-            if (int.TryParse(arguments.Get(1)?.ToString(), out var distance)) distance = Math.Min((int)EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance, distance);
+            var selectedTypes = arguments.Get(2)?.ToString();
+            if (!string.IsNullOrEmpty(selectedTypes) && !isElevatedScript) throw new HandlebarsException("'selectedTypes' only allowed in elevated scripts");
+
+            if (int.TryParse(arguments.Get(1)?.ToString(), out var distance)) distance = isElevatedScript ? distance     : Math.Min((int)EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance, distance);
             else                                                              distance = isElevatedScript ? int.MaxValue : (int)EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance;
 
             try
             {
-                var found = root.GetCurrentEntites()
-                    .Where(SafeIsNoProxyCheck)
+                var entities = string.IsNullOrEmpty(selectedTypes)
+                    ? root.GetCurrentEntites().Where(SafeIsNoProxyCheck)
+                    : root.GetAllEntites()
+                        .Where(E =>
+                        {
+                            try  { return new[] { E.Type.ToString() }.GetUniqueNames(selectedTypes).Any(); }
+                            catch{ return false; }
+                        });
+
+                var found = entities
                     .Where(E => isElevatedScript || E.Faction.Id == root.E.GetCurrent().Faction.Id)
                     .Where(E => new[] { E.Name }.GetUniqueNames(namesSearch).Any())
                     .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= distance);
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
-                else                               options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E)).ToArray());
+                else                               options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E) { Distance = Vector3.Distance(E.Position, root.E.Pos) }).ToArray());
             }
             catch (Exception error)
             {
@@ -127,7 +106,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance);
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
-                else                               options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E)).ToArray());
+                else                               options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E) { Distance = Vector3.Distance(E.Position, root.E.Pos) }).ToArray());
             }
             catch (Exception error)
             {
@@ -153,7 +132,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .FirstOrDefault(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance);
 
                 if (found == null) options.Inverse(output, context as object);
-                else               options.Template(output, new EntityData(root.GetCurrentPlayfield(), found));
+                else               options.Template(output, new EntityData(root.GetCurrentPlayfield(), found) { Distance = Vector3.Distance(found.Position, root.E.Pos) });
             }
             catch (Exception error)
             {

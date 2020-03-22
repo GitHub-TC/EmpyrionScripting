@@ -13,7 +13,14 @@ namespace EmpyrionScripting.DataWrapper
             ScriptPath     = data.ScriptPath;
             MainScriptPath = data.MainScriptPath;
         }
-        public ScriptSaveGameRootData(PlayfieldScriptData playfieldScriptData, IEntity[] currentEntities, IPlayfield playfield, IEntity entity, ConcurrentDictionary<string, object> persistendData, EventStore eventStore) : base(playfieldScriptData, currentEntities, playfield, entity, persistendData, eventStore)
+        public ScriptSaveGameRootData(
+            PlayfieldScriptData playfieldScriptData,
+            IEntity[] allEntities,
+            IEntity[] currentEntities, 
+            IPlayfield playfield, 
+            IEntity entity, 
+            ConcurrentDictionary<string, object> persistendData, 
+            EventStore eventStore) : base(playfieldScriptData, allEntities, currentEntities, playfield, entity, persistendData, eventStore)
         {
         }
 

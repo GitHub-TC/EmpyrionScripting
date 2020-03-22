@@ -364,7 +364,7 @@ Syntaxdocu:
 + https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
 
-## CustomHelpers Bedingungen
+## Bedingungen
 * {{#test Select Op Value}}
   * Op: eq is =
   * Op: neq is <> or !=
@@ -381,7 +381,7 @@ Syntaxdocu:
   * Block ausführen wenn (data) einen Wert (ungleich 'null') hat oder (data) gleich 'true' oder ungleich 0 ist
   * anderfalls wird der {{else}} Teil ausgeführt
 
-## CustomHelpers Inhalte
+## Inhalte
 + {{#items structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln
 
 + {{#getitems structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln und als Liste liefern z.B. für itemlist
@@ -390,7 +390,7 @@ Syntaxdocu:
   * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
     Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
 
-## CustomHelpers Verschieben/Auffüllen/Verarbeiten
+## Verschieben/Auffüllen/Verarbeiten
 + {{move item structure names \[maxLimit\]}}
   + Item (item) in die Struktur (structure) in die Container mit den Namen (names) verschieben
   + \[maxLimit\] ist ein optionaler Parameter der die Anzahl im Zielcontainer begrenzt
@@ -403,7 +403,7 @@ Syntaxdocu:
   + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
   + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
 
-## CustomHelpers Lichter
+## Lichter
 + {{lights structure names}}
   + Lichter der Struktur (structure) mit den Namen (names) auswählen
 
@@ -431,7 +431,7 @@ Syntaxdocu:
 	+	Rectangle
 	+	Disc
 
-## CustomHelpers Geräte
+## Geräte
 + {{devices structure customnames}}
   + (structure) (name;name*;*;name)
 
@@ -443,7 +443,7 @@ Syntaxdocu:
 + {{islocked structure x y z}}
   + Prüft bei der Struktur (structure) ob das Device (device) oder das Device an der Position (x) (y) (z) gesperrt ist.
 
-## CustomHelpers Datenaufbereitung
+## Datenaufbereitung
 * {{#intervall sec}}
   * Intervall in (sec) Sekunden
 
@@ -463,14 +463,18 @@ Syntaxdocu:
 + {{format data format}} = Daten (data) gemäß dem Format (format) ausgeben
   + https://docs.microsoft.com/de-de/dotnet/api/system.string.format?view=netframework-4.8#remarks-top
 
-+ {steps start end \[step\] \[delay\]}}
++ {{steps start end \[step\] \[delay\]}}
   + Von (start) nach (end) mit optional einer Schrittweite von (step) und einer (delay)-Sekunden geänderten Zeitbasis
 
-+ {split string separator \[removeemptyentries\]}}
++ {{sortedeach array sortedBy \[reverse\]}}
+  + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
+  + (reverse) = true um die Sortierung umzukehren
+  
++ {{split string separator \[removeemptyentries\]}}
   + (string) mit dem Trennzeichen (separator) zerteilen.
   + \[removeemptyentries\] falls leere Einträge entfernt werden sollen 'true'
 
-+ {random start end}}
++ {{random start end}}
   + Zufallswert zwischen (start) und (end) liefern und in den Block als {{this}} hereinreichen
 
 + {{bar data min max length \[char\] \[bgchar\]}}
@@ -497,7 +501,7 @@ Syntaxdocu:
 + {{chararray text}}
   + Text als Array von Zeichen liefern
 
-## CustomHelpers Block
+## Block
 + {{block structure x y z}}
   + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
 
@@ -507,7 +511,7 @@ Syntaxdocu:
 + {{settexture block pos textureid}}
   + Setzt die TexturId des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden
 
-## CustomHelpers Rechnen
+## Rechnen
 + {{math (lvalue) op (rvalue)}}
   + op = +, -, *, /, %
 
@@ -515,11 +519,12 @@ Syntaxdocu:
   + op = +, -, *, /, %
   + Kann mit () inline in anderen Kommandos benutzt werden
 
-+ {{distance (lVector) (rVector)}}
++ {{distance (lVector) (rVector) [format]}}
   + Abstand zwischen (lVector) und (rVector)
+  + Optional ein format
 
 
-## CustomHelpers LCD
+## LCD
 + {{gettext lcddevice}}
   + Liefert den Text des LCD (lcddevice)
 
@@ -535,12 +540,13 @@ Syntaxdocu:
 + {{setbrcolor lcddevice (rgb hex)}}
   + Setzt die Hintergrundfarbe des LCD (lcddevice) auf (rgb hex)
 
-## CustomHelpers Strukturen
+## Strukturen
 + {{entitybyname name \[maxdistance\]}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Name (name) und der, optionalen, maximalen Entfernung \[maxdistance\]
 
-+ {{entitiesbyname names \[maxdistance\]}}
++ {{entitiesbyname names \[maxdistance\] \[types\]}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Namen in (name;name*;*) und der, optionalen, maximalen Entfernung \[maxdistance\]
+  + \[types\] ist nur in 'Elevated Scripten' erlaubt und liefert alle Objkete mit den Typen aus (Z.B. auch Proxy und Asteroid)
 
 + {{entitybyid id}}
   + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Id (id)
@@ -998,7 +1004,7 @@ Syntaxdocu:
 + https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
 
-### CustomHelpers (test)
+### (test)
 * {{#test Select Op Value}}
   * Op: eq is =
   * Op: neq is <> or !=
@@ -1011,16 +1017,16 @@ Syntaxdocu:
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
 
-### CustomHelpers (if)
+### (if)
 * {{#if data}}
    * Execute block if (data) has a value (not equal to 'null') or (data) equals 'true' or not equal to 0
    * otherwise the {{else}} part will be executed
 
-### CustomHelpers (intervall)
+### (intervall)
 * {{#intervall sec}}
   * intervall in seconds
 
-### CustomHelpers (scroll)
+### (scroll)
 * {{#scroll lines delay}}
   * Text scroll block with (lines) od text, scrolls with (delay) seconds
 
@@ -1029,12 +1035,12 @@ Syntaxdocu:
 * {{#itemlist list 'id1;id2;id3'}}
   * Itemlist the the selected items (ids) even if they don't in the list (list)
 
-### CustomHelpers (i18n)
+### (i18n)
 * {{#i18n Select 'Language'}}
   * Language: English,Deutsch,Français,Italiano,Spanish,...
     look at \[ESG\]\\Content\\Extras\\Localization.csv at the first line
 
-### CustomHelpers (datetime)
+### (datetime)
 + {{datetime}} = Display the Datetime
 + {{datetime 'format'}} = uses the formatstring
 + {{datetime 'format' '+5'}} = adds N hours
@@ -1042,36 +1048,36 @@ Syntaxdocu:
 DateTime format:
 + https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8#System_DateTime_ToString_System_String_
 
-### CustomHelpers (move)
+### (move)
 + {{move item structure names [maxLimit]}}
   + Item (item) into the structure (structure) in the container with the names (names) move
   + [maxLimit] is an optional parameter which one is limited the amount in the target container
 
-### CustomHelpers (lights)
+### (lights)
 + {lightsign names}}
   + Select lights of the structure with names
 
-### CustomHelpers (lightcolor)
+### (lightcolor)
 + {{light color light color}}
   + For light, select the color (color rgb hex)
 
-### CustomHelpers (lightblink)
+### (lightblink)
 + {{lightblink light interval length offset}}
   + In the case of light, set the interval (interval), the interval length (length) and the interval offset (offset)
 
-### CustomHelpers (light intensity)
+### (light intensity)
 + {{light intensity light}
   + Set the light intensity for light
 
-### CustomHelpers (lightrange)
+### (lightrange)
 + {{lightrange light range}}
   + In the case of light, set the light range
 
-### CustomHelpers (lightspotangle)
+### (lightspotangle)
 + {{lightspotangle light spotangle}}
   + Set the light spot angle (spotangle) for light
 
-### CustomHelpers (lighttype)
+### (lighttype)
 + {{lighttype light type}}
   + For light, set the type of light
   + spot
@@ -1081,125 +1087,132 @@ DateTime format:
   + rectangle
   + disc
 
-### CustomHelpers (devices)
+### (devices)
 + {{devices structure customnames}}
   + (structure) (name;name*;*;name)
 
-### CustomHelpers (devicesoftype)
+### (devicesoftype)
 + {{devicesoftype structure type}}
   + (structure) (type)
 
-### CustomHelpers (setactive)
+### (setactive)
 + {{setactive block|device active}}
 
-### CustomHelpers (steps)
+### (steps)
 + {{steps start end \[step\] \[delay\]}}
   + From (start) to (end) with optional (step)-width and (delay) extends the 1 second per 1 counter add
 
-### CustomHelpers (random)
+### sortedeach
++ {{sortedeach array sortedBy \[reverse\]}}
+  + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
+  + (reverse) = true um die Sortierung umzukehren
+
+### (random)
 + {{random start end}}
    + Deliver a random value between (start) and (end) and submit to the block as {{this}}
 
-### CustomHelpers (split)
+### (split)
 + {{split string separator [removeemptyentries]}}
   + (string) split with the delimiter (separator).
   + \[removeemptyentries\] if empty entries should be removed 'true'
 
-### CustomHelpers (substring)
+### (substring)
 + {{substring text startindex [length]}}
   + Substring from the Text (text) from Index (startindex) with optional maximum (length) characters
 
-### CustomHelpers (chararray)
+### (chararray)
 + {{chararray text}}
   + Split the Text into an array of characters
 
-### CustomHelpers (bar)
+### (bar)
 + {{bar data min max length \[char\] \[bgchar\]}}
   + Displays a bar for (data) in the rage of (min) to (max) with the total bar length of (length)
   + The string for filled signs (char) and background signs (bgchar) are optional 
 
-### CustomHelpers (use)
+### (use)
 + {{use data}}
   + Use this data for direct access
   + the {{else}} case will call when data == null is
 
-### CustomHelpers (set)
+### (set)
 + {{set key data}}
    + The data (data) are stored so that they can be recalled at any time via @ root.Data. (Key)
 
-### CustomHelpers (setblock)
+### (setblock)
 + {{setblock key}}
    + The data of the block are stored so that they can be recalled at any time via @ root.Data. (Key)
 
-### CustomHelpers (math)
+### (math)
 + {{math (lvalue) op (rvalue)}}
   + op = +, -, *, /, %
 
-### CustomHelpers (calc)
+### (calc)
 + {{calc (lvalue) op (rvalue)}}
   + op = +, -, *, /, %
   + Can be used with () inline in other commands
 
-### CustomHelpers (distance)
-+ {{distance (lVector) (rVector)}}
+### (distance)
++ {{distance (lVector) (rVector) [format]}}
   + Distance between (lVector) and (rVector)
+  + Optional a format
 
-### CustomHelpers (block)
+### (block)
 + {{block structure x y z}}
 
-### CustomHelpers (concat)
+### (concat)
 + {{concat a1 a2 a3 ...}}
   + Concatenate the values of a1 .. aN 
   + If a value is an array of texts (string []), the next parameter is considered the separator for those entries
 
-### CustomHelpers (islocked)
+### (islocked)
 + {{islocked structure device|x y z}}
   + Checks at the structure whether the device (device) or the device is locked at the position (x) (y) (z).
 
-### CustomHelpers (gettexture)
+### (gettexture)
 + {{gettexture block pos}}
   + Get the TexturId of the block from the side T=Top, B=Bottom,, N=North, S=South, W=West, E=East
 
-### CustomHelpers (settexture)
+### (settexture)
 + {{settexture block pos textureid}}
   + Set the TexturId of the block at the sides T=Top, B=Bottom,, N=North, S=South, W=West, E=East it could be many sides declared, komma separated
 
-### CustomHelpers (gettext)
+### (gettext)
 + {{gettext lcddevice}}
   + Gets the text from the  LCD (lcddevice)
 
-### CustomHelpers (settext)
+### (settext)
 + {{settext lcddevice text}}
   + Set the text of the LCD (lcddevice) with (text)
 
-### CustomHelpers (settextblock)
+### (settextblock)
 + {{settextblock lcddevice}}
   + Set the text of the LCD (lcddevice) from the nested block
 
-### CustomHelpers (setcolor)
+### (setcolor)
 + {{setcolor lcddevice (rgb hex)}}
   + Set the color of the LCD (lcddevice) with (rgb hex)
 
-### CustomHelpers (setbgcolor)
+### (setbgcolor)
 + {{setbrcolor lcddevice (rgb hex)}}
   + Set the bgcolor of the LCD (lcddevice) with (rgb hex)
 
-### CustomHelpers (entitybyname)
+### (entitybyname)
 + {{entitybyname name \[maxdistance\]}}
   + Returns the entities nearby and with the same fraction, with name (name) and the, optional, maximum distance \[maxdistance\]
 
-+ {{entitiesbyname names \[maxdistance\]}}
++ {{entitiesbyname names \[maxdistance\] \[types\]}}
   + Returns the entities nearby and with the same fraction, with names in (name; name *; *) and the, optional, maximum distance \[maxdistance\]
+  + \[types\] is only allowed in 'Elevated Scripts' and delivers all objects with the types (e.g. proxy and asteroid)
 
-### CustomHelpers (entitybyid)
+### (entitybyid)
 + {{entitybyid id}}
   + Get nearby Entity (with same faction) with (id)
 
-### CustomHelpers (entitiesbyid)
+### (entitiesbyid)
 + {{entitiesbyid ids}}
   + Get nearby Entity (with same faction) with IDs in (id1;id2;id3)
 
-### CustomHelpers (deconstruct)
+### (deconstruct)
 + {{deconstruct entity container \[CorePrefix\] \[RemoveItemsIds1,Id2,...\]}}
    + Deconstruct the entity 'entity' and moves parts to container named as 'container''
    + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
