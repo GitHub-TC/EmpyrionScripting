@@ -2,7 +2,6 @@
 using EmpyrionScripting.DataWrapper;
 using System;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace EmpyrionScripting
 {
@@ -11,6 +10,7 @@ namespace EmpyrionScripting
         public string PlayfieldName { get; set; }
         public IPlayfield Playfield { get; set; }
         public IEntity[] CurrentEntities { get; set; }
+        public IEntity[] AllEntities { get; set; }
         public bool PauseScripts { get; set; } = true;
         public ConcurrentDictionary<int, EventStore> EventStore { get; set; } = new ConcurrentDictionary<int, EventStore>();
         public ConcurrentDictionary<string, Func<object, string>> LcdCompileCache = new ConcurrentDictionary<string, Func<object, string>>();

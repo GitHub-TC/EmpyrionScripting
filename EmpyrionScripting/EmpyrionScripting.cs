@@ -239,8 +239,8 @@ namespace EmpyrionScripting
                 var timer = new Stopwatch();
                 timer.Start();
 
-                playfieldData.CurrentEntities = playfieldData.Playfield.Entities
-                    .Values
+                playfieldData.AllEntities     = playfieldData.Playfield.Entities.Values.ToArray();
+                playfieldData.CurrentEntities = playfieldData.AllEntities
                     .Where(E => E.Type == EntityType.BA ||
                                 E.Type == EntityType.CV ||
                                 E.Type == EntityType.SV ||
@@ -286,7 +286,7 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptRootData(playfieldData, playfieldData.CurrentEntities, playfieldData.Playfield, entity,
+                var entityScriptData = new ScriptRootData(playfieldData, playfieldData.AllEntities, playfieldData.CurrentEntities, playfieldData.Playfield, entity,
                     playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
 
                 var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword)).ToArray();
@@ -353,7 +353,7 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptSaveGameRootData(playfieldData, playfieldData.CurrentEntities, playfieldData.Playfield, entity, playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)))
+                var entityScriptData = new ScriptSaveGameRootData(playfieldData, playfieldData.AllEntities, playfieldData.CurrentEntities, playfieldData.Playfield, entity, playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)))
                 {
                     MainScriptPath = SaveGamesScripts.MainScriptPath,
                     ModApi = ModApi

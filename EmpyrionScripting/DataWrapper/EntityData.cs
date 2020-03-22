@@ -1,7 +1,5 @@
 ﻿using Eleon.Modding;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
@@ -33,7 +31,9 @@ namespace EmpyrionScripting.DataWrapper
         public EntityType EntityType => GetCurrent().Type;
 
         public Vector3 Pos => GetCurrent().Position;
+        public float Distance { get; set; }
         public FactionData Faction => GetCurrent().Faction;
+
 
         public virtual IEntity GetCurrent() => entity.TryGetTarget(out var e) ? e : null;
         public virtual IPlayfield GetCurrentPlayfield() => playfield.TryGetTarget(out var p) ? p : null;

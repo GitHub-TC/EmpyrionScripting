@@ -1,7 +1,9 @@
 ﻿using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
+using System.Collections;
 using System.IO;
+using System.Linq;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -30,6 +32,38 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 output.Write("{{steps}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("sortedeach")]
+        public static void SortedEachHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{sortedeach array sortedBy [reverse]}} helper must have two argument: (array) (sortedBy) (true|false)");
+
+            var root = rootObject as IScriptRootData;
+
+            try
+            {
+                var array       = ((IEnumerable)arguments[0]).OfType<object>();
+                var sortedBy    = arguments[1]?.ToString();
+                if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
+
+                if (array.Count() == 0) {
+                    options.Inverse(output, (object)context);
+                    return;
+                }
+
+                var getProperty = string.IsNullOrEmpty(sortedBy) ? null : array.First().GetType().GetProperty(sortedBy);
+
+                var sortedArray = reverse
+                    ? array.OrderByDescending(V => getProperty == null ? V : getProperty.GetValue(V))
+                    : array.OrderBy(V => getProperty == null ? V : getProperty.GetValue(V));
+
+                sortedArray.ForEach(V => options.Template(output, V));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{sortedeach}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

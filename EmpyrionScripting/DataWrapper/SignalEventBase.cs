@@ -1,5 +1,4 @@
-﻿using Eleon.Modding;
-using System;
+﻿using System;
 
 namespace EmpyrionScripting.DataWrapper
 {

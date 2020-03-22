@@ -33,7 +33,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .FirstOrDefault(E => Vector3.Distance(E.Position, root.E.Pos) <= distance);
 
                 if (found == null)  options.Inverse(output, context as object);
-                else                options.Template(output, new EntityData(root.GetCurrentPlayfield(), found));
+                else                options.Template(output, new EntityData(root.GetCurrentPlayfield(), found) { Distance = Vector3.Distance(found.Position, root.E.Pos) });
             }
             catch (Exception error)
             {
@@ -67,8 +67,7 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var entities = string.IsNullOrEmpty(selectedTypes)
                     ? root.GetCurrentEntites().Where(SafeIsNoProxyCheck)
-                    : root.GetCurrentPlayfield().Entities
-                        .Select(E => E.Value)
+                    : root.GetAllEntites()
                         .Where(E =>
                         {
                             try  { return new[] { E.Type.ToString() }.GetUniqueNames(selectedTypes).Any(); }
@@ -81,7 +80,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= distance);
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
-                else                               options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E)).ToArray());
+                else                               options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E) { Distance = Vector3.Distance(E.Position, root.E.Pos) }).ToArray());
             }
             catch (Exception error)
             {
@@ -107,7 +106,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .Where(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance);
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
-                else                               options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E)).ToArray());
+                else                               options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E) { Distance = Vector3.Distance(E.Position, root.E.Pos) }).ToArray());
             }
             catch (Exception error)
             {
@@ -133,7 +132,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .FirstOrDefault(E => Vector3.Distance(E.Position, root.E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance);
 
                 if (found == null) options.Inverse(output, context as object);
-                else               options.Template(output, new EntityData(root.GetCurrentPlayfield(), found));
+                else               options.Template(output, new EntityData(root.GetCurrentPlayfield(), found) { Distance = Vector3.Distance(found.Position, root.E.Pos) });
             }
             catch (Exception error)
             {

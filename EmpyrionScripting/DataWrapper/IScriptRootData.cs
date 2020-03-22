@@ -28,6 +28,7 @@ namespace EmpyrionScripting.DataWrapper
         int CycleCounter { get; }
 
         PlayfieldScriptData GetPlayfieldScriptData();
+        IEntity[] GetAllEntites();
         IEntity[] GetCurrentEntites();
         IPlayfield GetCurrentPlayfield();
         ConcurrentDictionary<string, object> GetPersistendData();

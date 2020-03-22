@@ -463,14 +463,18 @@ Syntaxdocu:
 + {{format data format}} = Daten (data) gemäß dem Format (format) ausgeben
   + https://docs.microsoft.com/de-de/dotnet/api/system.string.format?view=netframework-4.8#remarks-top
 
-+ {steps start end \[step\] \[delay\]}}
++ {{steps start end \[step\] \[delay\]}}
   + Von (start) nach (end) mit optional einer Schrittweite von (step) und einer (delay)-Sekunden geänderten Zeitbasis
 
-+ {split string separator \[removeemptyentries\]}}
++ {{sortedeach array sortedBy \[reverse\]}}
+  + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
+  + (reverse) = true um die Sortierung umzukehren
+  
++ {{split string separator \[removeemptyentries\]}}
   + (string) mit dem Trennzeichen (separator) zerteilen.
   + \[removeemptyentries\] falls leere Einträge entfernt werden sollen 'true'
 
-+ {random start end}}
++ {{random start end}}
   + Zufallswert zwischen (start) und (end) liefern und in den Block als {{this}} hereinreichen
 
 + {{bar data min max length \[char\] \[bgchar\]}}
@@ -1094,6 +1098,11 @@ DateTime format:
 ### (steps)
 + {{steps start end \[step\] \[delay\]}}
   + From (start) to (end) with optional (step)-width and (delay) extends the 1 second per 1 counter add
+
+### sortedeach
++ {{sortedeach array sortedBy \[reverse\]}}
+  + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
+  + (reverse) = true um die Sortierung umzukehren
 
 ### (random)
 + {{random start end}}

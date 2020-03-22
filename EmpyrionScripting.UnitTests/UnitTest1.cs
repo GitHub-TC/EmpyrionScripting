@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Eleon.Modding;
@@ -326,6 +327,7 @@ namespace EmpyrionScripting.UnitTests
 
             var lcdData = Substitute.For<IScriptRootData>();
             lcdData.E.Returns(E);
+            lcdData.DeviceLockAllowed.Returns(true);
 
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
@@ -377,6 +379,7 @@ namespace EmpyrionScripting.UnitTests
             s.E.Returns(e);
 
             var lcdData = Substitute.For<IScriptRootData>();
+            lcdData.DeviceLockAllowed.Returns(true);
 
             lcdData.E.Returns(e);
             lcdData.E.S.Returns(s);
@@ -467,6 +470,7 @@ namespace EmpyrionScripting.UnitTests
             // MOVE ==================================================================
 
             var lcdData = Substitute.For<IScriptRootData>();
+            lcdData.DeviceLockAllowed.Returns(true);
 
             lcdData.E.Returns(eCV);
             lcdData.E.S.Returns(sCV);
@@ -486,7 +490,7 @@ namespace EmpyrionScripting.UnitTests
             lcdMod.SaveGamesScripts.ReadSaveGamesScripts();
 
             var pf = new PlayfieldScriptData(lcdMod);
-            lcdMod.ExecFoundSaveGameScripts(pf, new ScriptSaveGameRootData(pf, null, null, null, null, null), Path.Combine(lcdMod.SaveGamesScripts.MainScriptPath, "CV"));
+            lcdMod.ExecFoundSaveGameScripts(pf, new ScriptSaveGameRootData(pf, null, null, null, null, null, null), Path.Combine(lcdMod.SaveGamesScripts.MainScriptPath, "CV"));
         }
 
         [TestMethod]
@@ -507,5 +511,88 @@ namespace EmpyrionScripting.UnitTests
         {
             var fg = HelpersTools.GetFileContent(@"C:\steamcmd\empyrion\Saves\Games\Test\Mods\EmpyrionScripting\Codes\x\..\Codes.txt");
         }
+
+        [TestMethod]
+        public void TestMethodSortedEachObject()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+            Assert.AreEqual(
+                "123",
+                lcdMod.ExecuteHandlebarScript(pf, "", "{{#split '3,2,1' ','}}{{#sortedeach . ''}}{{.}}{{/sortedeach}}{{/split}}")
+            );
+        }
+
+        [TestMethod]
+        public void TestMethodSortedEachObjectReverse()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+            Assert.AreEqual(
+                "321",
+                lcdMod.ExecuteHandlebarScript(pf, "", "{{#split '3,2,1' ','}}{{#sortedeach . '' true}}{{.}}{{/sortedeach}}{{/split}}")
+            );
+        }
+
+        [TestMethod]
+        public void TestMethodSortedEachTypeKey()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+            Assert.AreEqual(
+                "[1, c][2, a][3, b]",
+                lcdMod.ExecuteHandlebarScript(pf, new [] { 
+                    new KeyValuePair<int, string>(1, "c"),
+                    new KeyValuePair<int, string>(2, "a"),
+                    new KeyValuePair<int, string>(3, "b"),
+                }, "{{#sortedeach . 'Key'}}{{.}}{{/sortedeach}}")
+            );
+        }
+
+        [TestMethod]
+        public void TestMethodSortedEachTypeValue()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+            Assert.AreEqual(
+                "[2, a][3, b][1, c]",
+                lcdMod.ExecuteHandlebarScript(pf, new[] {
+                    new KeyValuePair<int, string>(1, "c"),
+                    new KeyValuePair<int, string>(2, "a"),
+                    new KeyValuePair<int, string>(3, "b"),
+                }, "{{#sortedeach . 'Value'}}{{.}}{{/sortedeach}}")
+            );
+        }
+
+        [TestMethod]
+        public void TestMethodSortedEachEntities()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var e1 = Substitute.For<IEntity>();
+            e1.Name.ReturnsForAnyArgs("a");
+            e1.Position.ReturnsForAnyArgs(new UnityEngine.Vector3(0,0,0));
+            e1.Type.ReturnsForAnyArgs(EntityType.BA);
+
+            var e2 = Substitute.For<IEntity>();
+            e2.Name.ReturnsForAnyArgs("b");
+            e2.Position.ReturnsForAnyArgs(new UnityEngine.Vector3(10, 10, 10));
+            e2.Type.ReturnsForAnyArgs(EntityType.BA);
+
+            pf.AllEntities = new[] { e1, e2 };
+
+            var data = new ScriptSaveGameRootData(pf, pf.AllEntities, pf.AllEntities, null, e1, null, null);
+
+            Assert.AreEqual(
+                "a:0 # b:17,32051 # ",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#entitiesbyname '*'}}{{#sortedeach . 'Distance'}}{{./Name}}:{{./Distance}} # {{/sortedeach}}{{/entitiesbyname}}")
+            );
+            Assert.AreEqual(
+                "b:17,32051 # a:0 # ",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#entitiesbyname '*'}}{{#sortedeach . 'Distance' true}}{{./Name}}:{{./Distance}} # {{/sortedeach}}{{/entitiesbyname}}")
+            );
+        }
+
     }
 }
