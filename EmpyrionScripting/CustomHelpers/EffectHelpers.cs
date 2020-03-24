@@ -33,11 +33,12 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("scroll")]
         public static void ScrollBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{scroll lines delay}} helper must have exactly two argument: (lines) (delay)");
+            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{scroll lines delay [step]}} helper must have at least two argument: (lines) (delay) [step]");
 
             var root = rootObject as IScriptRootData;
             int.TryParse(arguments[0]?.ToString(), out int lines);
             int.TryParse(arguments[1]?.ToString(), out int delay);
+            if(!int.TryParse(arguments.Get(2)?.ToString(), out var step)) step = 1;
 
             try
             {
@@ -51,14 +52,47 @@ namespace EmpyrionScripting.CustomHelpers
                 }
                 else
                 {
-                    var skip = (root.CycleCounter % (delay * overlapp)) / delay;
+                    var skip = root.CycleCounter / delay * step % textlines.Length;
                     output.Write(string.Join("\n", textlines.Skip(skip).Take(lines)));
+                    output.Write(string.Join("\n", textlines.Take(skip + lines - textlines.Length + 1)));
                     output.Write("\n");
                 }
             }
             catch (Exception error)
             {
                 output.Write("{{scroll}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("selectlines")]
+        public static void SelectLinesBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{selectlines lines from to}} helper must have at least two argument: (lines) (from) [to]");
+
+            var root = rootObject as IScriptRootData;
+            int.TryParse(arguments[0]?.ToString(), out int lines);
+            int.TryParse(arguments[1]?.ToString(), out int from);
+            int.TryParse(arguments.Get(2)?.ToString(), out int to);
+
+            try
+            {
+                var content = new StringWriter();
+                options.Template(content, context as object);
+                var textlines = content.ToString().Split('\n');
+                var overlapp = textlines.Length - lines;
+                if (overlapp <= 0)
+                {
+                    output.Write(content.ToString());
+                }
+                else
+                {
+                    output.Write(string.Join("\n", textlines.Skip(from).Take(to)));
+                    output.Write("\n");
+                }
+            }
+            catch (Exception error)
+            {
+                output.Write("{{selectlines}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

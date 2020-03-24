@@ -68,6 +68,11 @@ namespace EmpyrionScripting.CustomHelpers
                         var startsWith = N.Substring(0, N.Length - 1);
                         names.AddRange(sourceNames.Where(SN => SN.StartsWith(startsWith)));
                     }
+                    else if (N.StartsWith("*"))
+                    {
+                        var endsWith = N.Substring(1);
+                        names.AddRange(sourceNames.Where(SN => SN.EndsWith(endsWith)));
+                    }
                     else names.AddRange(sourceNames.Where(SN => SN == N));
                 });
 

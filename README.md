@@ -447,8 +447,9 @@ Syntaxdocu:
 * {{#intervall sec}}
   * Intervall in (sec) Sekunden
 
-* {{#scroll lines delay}}
+* {{#scroll lines delay \[step\]}}
   * Text scrollen mit (lines) Zeilen und einer Verzögerung von (delay) Sekunden
+  * Optional mit (step) Zeilen Schritten
 
 * {{#i18n Select 'Language'}}
   * Language: English,Deutsch,Français,Italiano,Spanish,...
@@ -468,6 +469,10 @@ Syntaxdocu:
 
 + {{sortedeach array sortedBy \[reverse\]}}
   + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
+  + (reverse) = true um die Sortierung umzukehren
+  
++ {{sort array sortedBy \[reverse\]}}
+  + Sortiert das Array nach (sortedBy)
   + (reverse) = true um die Sortierung umzukehren
   
 + {{split string separator \[removeemptyentries\]}}
@@ -1024,8 +1029,9 @@ Syntaxdocu:
   * intervall in seconds
 
 ### (scroll)
-* {{#scroll lines delay}}
+* {{#scroll lines delay \[step\]}}
   * Text scroll block with (lines) od text, scrolls with (delay) seconds
+  * optional (step) lines per step
 
 + {{#getitems structure 'box1; box2; fridge *; ...'}} = Determine all items from the containers (names) = 'box1; box2; fridge *; ...' and deliver them as a list e.g. for itemlist
 
@@ -1102,6 +1108,11 @@ DateTime format:
 ### sortedeach
 + {{sortedeach array sortedBy \[reverse\]}}
   + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
+  + (reverse) = true um die Sortierung umzukehren
+
+### sort
++ {{sort array sortedBy \[reverse\]}}
+  + Sortiert das Array nach (sortedBy)
   + (reverse) = true um die Sortierung umzukehren
 
 ### (random)
