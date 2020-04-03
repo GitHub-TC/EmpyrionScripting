@@ -533,10 +533,10 @@ Syntaxdocu:
 + {{gettext lcddevice}}
   + Liefert den Text des LCD (lcddevice)
 
-+ {{gettext lcddevice text}}
++ {{settext lcddevice text}}
   + Setzt den Text des LCD (lcddevice) mit dem Text (text)
 
-+ {{gettext lcddevice}}
++ {{settextblock lcddevice}}
   + Setzt den Text des LCD (lcddevice) mit dem Text des innenliegenden Blockes
 
 + {{setcolor lcddevice (rgb hex)}}

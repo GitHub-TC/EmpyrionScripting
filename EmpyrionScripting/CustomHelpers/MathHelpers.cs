@@ -20,13 +20,27 @@ namespace EmpyrionScripting.CustomHelpers
                                 ? arguments[1].GetType().GetField("Value").GetValue(arguments[1])
                                 : arguments[1]?.ToString();
 
-                if (arguments[0] is DateTime ||
-                    arguments[0] is TimeSpan) CalcWithTime  (op, output, options, arguments);
-                else                          CalcWithDouble(op, output, options, arguments);
+                if (     arguments[0] is DateTime ||
+                         arguments[0] is TimeSpan)  CalcWithTime  (op, output, options, arguments);
+                else if (arguments[0] is Vector3)   CalcWithVector(op, output, options, arguments);
+                else                                CalcWithDouble(op, output, options, arguments);
             }
             catch (Exception error)
             {
                 throw new HandlebarsException($"{{math}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a}")}]:{EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
+        private static void CalcWithVector(object op, TextWriter output, HelperOptions options, object[] arguments)
+        {
+            float.TryParse(arguments[2]?.ToString(), out var scalar);
+
+            switch (op)
+            {
+                case "+": options.Template(output, (Vector3)arguments[0] + (Vector3)arguments[2]); break;
+                case "-": options.Template(output, (Vector3)arguments[0] - (Vector3)arguments[2]); break;
+                case "*": options.Template(output, (Vector3)arguments[0] * scalar); break;
+                case "/": options.Template(output, (Vector3)arguments[0] / scalar); break;
             }
         }
 
