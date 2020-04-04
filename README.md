@@ -359,7 +359,7 @@ Welt
 # Technical
 Syntaxdocu:
 + http://handlebarsjs.com/
-+ http://handlebarsjs.com/reference.html#data
++ http://handlebarsjs.com/guide/
 + https://zordius.github.io/HandlebarsCookbook/index.html
 + https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
