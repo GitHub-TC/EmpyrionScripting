@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -660,6 +661,25 @@ namespace EmpyrionScripting.UnitTests
                 lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1 2}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
             );
 
+        }
+
+        [TestMethod]
+        public void TestMethodLookUp()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var dict = new ConcurrentDictionary<string, object>();
+
+            var data = Substitute.For<IScriptRootData>();
+            data.GetPersistendData().ReturnsForAnyArgs(dict);
+            data.Data = dict;
+
+            data.CycleCounter.Returns(0);
+            Assert.AreEqual(
+                "3",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{set 'index' 2}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{lookup . @root.Data.index}}{{/split}}")
+            );
         }
 
     }

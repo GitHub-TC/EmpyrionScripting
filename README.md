@@ -506,6 +506,12 @@ Syntaxdocu:
 + {{chararray text}}
   + Text als Array von Zeichen liefern
 
++ {{selectlines lines from to}}
+  + Liefert die Zeilen (from) bis (to) aus dem Text (lines)
+
++ {{lookup array index}} und + {{lookupblock array index}}
+  + Liefert das Element an der Position (index) beginnend mit 0
+
 ## Block
 + {{block structure x y z}}
   + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
@@ -1132,12 +1138,16 @@ DateTime format:
 + {{chararray text}}
   + Split the Text into an array of characters
 
-### (bar)
++ {{selectlines lines from to}}
+  + Returns the lines (from) to (to) from the text (lines)
+
++ {{lookup array index}} and {{lookupblock array index}}
+  + Returns the element at the position (index) starting with 0
+
 + {{bar data min max length \[char\] \[bgchar\]}}
   + Displays a bar for (data) in the rage of (min) to (max) with the total bar length of (length)
   + The string for filled signs (char) and background signs (bgchar) are optional 
 
-### (use)
 + {{use data}}
   + Use this data for direct access
   + the {{else}} case will call when data == null is

@@ -1,6 +1,7 @@
 ﻿using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -82,6 +83,41 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 output.Write("{{set}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("lookup")]
+        public static void LookUpHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{lookup array index}} helper must have two argument: (array) (index)");
+
+            try
+            {
+                int.TryParse(arguments[1]?.ToString(), out var index);
+                if      (arguments[0] is object[] arraydata) output.Write(arraydata.Skip(index).FirstOrDefault());
+                else if (arguments[0] is IList    listdata)  output.Write(listdata[index]);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{lookup}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("lookupblock")]
+        public static void LookUpBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{lookupblock array index}} helper must have two argument: (array) (index)");
+
+            try
+            {
+                int.TryParse(arguments[1]?.ToString(), out var index);
+                if      (arguments[0] is object[] arraydata)    options.Template(output, arraydata.Skip(index).FirstOrDefault());
+                else if (arguments[0] is IList    listdata)     options.Template(output, listdata[index]);
+                else                                            options.Inverse (output, (object)context);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{lookupblock}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
