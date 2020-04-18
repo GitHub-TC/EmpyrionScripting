@@ -42,7 +42,7 @@ namespace EmpyrionScripting.DataWrapper
         public float HealthMax => p == null ? 0 : p.HealthMax;
         public float Health => p == null ? 0 : p.Health;
         public FactionRole FactionRole => p == null ? 0 : p.FactionRole;
-        public FactionData FactionData => p == null ? new FactionData() : FactionData;
+        public FactionData FactionData => p == null ? new FactionData() : p.FactionData;
         public byte Origin => p == null ? (byte)0 : p.Origin;
         public string StartPlayfield => p?.StartPlayfield;
         public string SteamId => p?.SteamId;

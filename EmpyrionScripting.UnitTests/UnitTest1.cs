@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -591,6 +592,93 @@ namespace EmpyrionScripting.UnitTests
             Assert.AreEqual(
                 "b:17,32051 # a:0 # ",
                 lcdMod.ExecuteHandlebarScript(pf, data, "{{#entitiesbyname '*'}}{{#sortedeach . 'Distance' true}}{{./Name}}:{{./Distance}} # {{/sortedeach}}{{/entitiesbyname}}")
+            );
+        }
+
+        [TestMethod]
+        public void TestMethodScroll1()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var data = Substitute.For<IScriptRootData>();
+
+            data.CycleCounter.Returns(0);
+            Assert.AreEqual(
+                "1\n2\n3\n",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
+            );
+
+            data.CycleCounter.Returns(1);
+            Assert.AreEqual(
+                "2\n3\n4\n",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
+            );
+
+            data.CycleCounter.Returns(4);
+            Assert.AreEqual(
+                "5\n6\n7\n",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
+            );
+
+            data.CycleCounter.Returns(8);
+            Assert.AreEqual(
+                "9\n1\n2\n",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
+            );
+
+        }
+
+        [TestMethod]
+        public void TestMethodScroll2()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var data = Substitute.For<IScriptRootData>();
+
+            data.CycleCounter.Returns(0);
+            Assert.AreEqual(
+                "1\n2\n3\n",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1 2}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
+            );
+
+            data.CycleCounter.Returns(1);
+            Assert.AreEqual(
+                "3\n4\n5\n",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1 2}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
+            );
+
+            data.CycleCounter.Returns(4);
+            Assert.AreEqual(
+                "9\n1\n2\n",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1 2}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
+            );
+
+            data.CycleCounter.Returns(8);
+            Assert.AreEqual(
+                "7\n8\n9\n",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1 2}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
+            );
+
+        }
+
+        [TestMethod]
+        public void TestMethodLookUp()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var dict = new ConcurrentDictionary<string, object>();
+
+            var data = Substitute.For<IScriptRootData>();
+            data.GetPersistendData().ReturnsForAnyArgs(dict);
+            data.Data = dict;
+
+            data.CycleCounter.Returns(0);
+            Assert.AreEqual(
+                "3",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{set 'index' 2}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{lookup . @root.Data.index}}{{/split}}")
             );
         }
 

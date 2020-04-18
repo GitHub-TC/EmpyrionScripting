@@ -359,7 +359,7 @@ Welt
 # Technical
 Syntaxdocu:
 + http://handlebarsjs.com/
-+ http://handlebarsjs.com/reference.html#data
++ http://handlebarsjs.com/guide/
 + https://zordius.github.io/HandlebarsCookbook/index.html
 + https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
@@ -447,8 +447,9 @@ Syntaxdocu:
 * {{#intervall sec}}
   * Intervall in (sec) Sekunden
 
-* {{#scroll lines delay}}
+* {{#scroll lines delay \[step\]}}
   * Text scrollen mit (lines) Zeilen und einer Verzögerung von (delay) Sekunden
+  * Optional mit (step) Zeilen Schritten
 
 * {{#i18n Select 'Language'}}
   * Language: English,Deutsch,Français,Italiano,Spanish,...
@@ -468,6 +469,10 @@ Syntaxdocu:
 
 + {{sortedeach array sortedBy \[reverse\]}}
   + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
+  + (reverse) = true um die Sortierung umzukehren
+  
++ {{sort array sortedBy \[reverse\]}}
+  + Sortiert das Array nach (sortedBy)
   + (reverse) = true um die Sortierung umzukehren
   
 + {{split string separator \[removeemptyentries\]}}
@@ -501,6 +506,12 @@ Syntaxdocu:
 + {{chararray text}}
   + Text als Array von Zeichen liefern
 
++ {{selectlines lines from to}}
+  + Liefert die Zeilen (from) bis (to) aus dem Text (lines)
+
++ {{lookup array index}} und + {{lookupblock array index}}
+  + Liefert das Element an der Position (index) beginnend mit 0
+
 ## Block
 + {{block structure x y z}}
   + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
@@ -528,10 +539,10 @@ Syntaxdocu:
 + {{gettext lcddevice}}
   + Liefert den Text des LCD (lcddevice)
 
-+ {{gettext lcddevice text}}
++ {{settext lcddevice text}}
   + Setzt den Text des LCD (lcddevice) mit dem Text (text)
 
-+ {{gettext lcddevice}}
++ {{settextblock lcddevice}}
   + Setzt den Text des LCD (lcddevice) mit dem Text des innenliegenden Blockes
 
 + {{setcolor lcddevice (rgb hex)}}
@@ -1027,8 +1038,9 @@ Syntaxdocu:
   * intervall in seconds
 
 ### (scroll)
-* {{#scroll lines delay}}
+* {{#scroll lines delay \[step\]}}
   * Text scroll block with (lines) od text, scrolls with (delay) seconds
+  * optional (step) lines per step
 
 + {{#getitems structure 'box1; box2; fridge *; ...'}} = Determine all items from the containers (names) = 'box1; box2; fridge *; ...' and deliver them as a list e.g. for itemlist
 
@@ -1107,6 +1119,11 @@ DateTime format:
   + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
   + (reverse) = true um die Sortierung umzukehren
 
+### sort
++ {{sort array sortedBy \[reverse\]}}
+  + Sortiert das Array nach (sortedBy)
+  + (reverse) = true um die Sortierung umzukehren
+
 ### (random)
 + {{random start end}}
    + Deliver a random value between (start) and (end) and submit to the block as {{this}}
@@ -1124,12 +1141,16 @@ DateTime format:
 + {{chararray text}}
   + Split the Text into an array of characters
 
-### (bar)
++ {{selectlines lines from to}}
+  + Returns the lines (from) to (to) from the text (lines)
+
++ {{lookup array index}} and {{lookupblock array index}}
+  + Returns the element at the position (index) starting with 0
+
 + {{bar data min max length \[char\] \[bgchar\]}}
   + Displays a bar for (data) in the rage of (min) to (max) with the total bar length of (length)
   + The string for filled signs (char) and background signs (bgchar) are optional 
 
-### (use)
 + {{use data}}
   + Use this data for direct access
   + the {{else}} case will call when data == null is
