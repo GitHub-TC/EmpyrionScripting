@@ -1,6 +1,7 @@
 ﻿using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Generic;
@@ -189,7 +190,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        public static IList<IItemMoveInfo> Move(IScriptRootData root, ItemsData item, IStructureData structure, string namesSearch, int? maxLimit)
+        public static IList<IItemMoveInfo> Move(IScriptRootData root, IItemsData item, IStructureData structure, string namesSearch, int? maxLimit)
         {
             if (!root.DeviceLockAllowed)
             {
@@ -251,7 +252,7 @@ namespace EmpyrionScripting.CustomHelpers
             return moveInfos;
         }
 
-        private static int MoveItem(IScriptRootData root, ItemsSource S, string N, IStructureData targetStructure, int count, int? maxLimit)
+        private static int MoveItem(IScriptRootData root, IItemsSource S, string N, IStructureData targetStructure, int count, int? maxLimit)
         {
             var target = targetStructure?.GetCurrent()?.GetDevice<Eleon.Modding.IContainer>(N);
             if (target == null)
@@ -317,7 +318,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        public static IList<IItemMoveInfo> Fill(IScriptRootData root, ItemsData item, IStructureData structure, StructureTankType type, int maxLimit)
+        public static IList<IItemMoveInfo> Fill(IScriptRootData root, IItemsData item, IStructureData structure, StructureTankType type, int maxLimit)
         {
             if (!root.DeviceLockAllowed)
             {

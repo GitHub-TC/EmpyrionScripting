@@ -1,8 +1,9 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class ContainerSource
+    public class ContainerSource : IContainerSource
     {
         public IEntityData E { get; set; }
         public IContainer Container { get; set; }

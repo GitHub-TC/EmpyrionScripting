@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.Interface;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,25 +10,25 @@ namespace EmpyrionScripting.DataWrapper
 {
     public class StructureData : IStructureData
     {
-        private readonly Lazy<Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>>> _is;
+        private readonly Lazy<Tuple<ItemsData[], ConcurrentDictionary<string, IContainerSource>>> _is;
 
         public StructureData()
         {
             _n = new Lazy<string[]>(() => GetCurrent().GetAllCustomDeviceNames().OrderBy(N => N).ToArray());
-            _is = new Lazy<Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>>>(() => CollectAllItems(GetCurrent()));
+            _is = new Lazy<Tuple<ItemsData[], ConcurrentDictionary<string, IContainerSource>>>(() => CollectAllItems(GetCurrent()));
             _d = new Lazy<IEntityData[]>(() => GetCurrent()
                 .GetDockedVessels()
                 .Select(S => E.GetCurrentPlayfield().Entities.FirstOrDefault(E => E.Value.Structure?.Id == S.Id))
                 .Where(E => E.Value != null)
                 .Select(DockedE => new EntityData(E.GetCurrentPlayfield(), DockedE.Value)).ToArray());
             _s = new Lazy<WeakReference<IStructure>>(() => new WeakReference<IStructure>(E.GetCurrent().Structure));
-            _pilot = new Lazy<PlayerData>(() => new PlayerData(GetCurrent().Pilot));
-            _passengers = new Lazy<PlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
+            _pilot = new Lazy<IPlayerData>(() => new PlayerData(GetCurrent().Pilot));
+            _passengers = new Lazy<IPlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
             _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank, StructureTankType.Fuel));
             _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank, StructureTankType.Oxygen));
             _PentaxidTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().PentaxidTank, StructureTankType.Pentaxid));
-            _ControlPanelSignals = new Lazy<SignalData[]>(() => GetCurrent().GetControlPanelSignals().Select(S => new SignalData(this, S)).ToArray());
-            _BlockSignals = new Lazy<SignalData[]>(() => GetCurrent().GetBlockSignals().Select(S => new SignalData(this, S)).ToArray());
+            _ControlPanelSignals = new Lazy<ISignalData[]>(() => GetCurrent().GetControlPanelSignals().Select(S => new SignalData(this, S)).ToArray());
+            _BlockSignals = new Lazy<ISignalData[]>(() => GetCurrent().GetBlockSignals().Select(S => new SignalData(this, S)).ToArray());
         }
 
         public StructureData(IEntityData entity) : this()
@@ -45,7 +46,7 @@ namespace EmpyrionScripting.DataWrapper
         public string[] AllCustomDeviceNames => _n.Value;
         readonly Lazy<string[]> _n;
 
-        public ItemsData[] Items => _is.Value.Item1;
+        public IItemsData[] Items => _is.Value.Item1;
 
         public IEntityData[] DockedE => _d.Value;
         private readonly Lazy<IEntityData[]> _d;
@@ -58,12 +59,12 @@ namespace EmpyrionScripting.DataWrapper
 
         public string[] GetDeviceTypeNames => Enum.GetNames(typeof(DeviceTypeName));
 
-        public ConcurrentDictionary<string, ContainerSource> ContainerSource => _is.Value.Item2;
+        public ConcurrentDictionary<string, IContainerSource> ContainerSource => _is.Value.Item2;
 
-        private Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>> CollectAllItems(IStructure structure)
+        private Tuple<ItemsData[], ConcurrentDictionary<string, IContainerSource>> CollectAllItems(IStructure structure)
         {
             var allItems = new ConcurrentDictionary<int, ItemsData>();
-            var containerSource = new ConcurrentDictionary<string, ContainerSource>();
+            var containerSource = new ConcurrentDictionary<string, IContainerSource>();
 
             Parallel.ForEach(AllCustomDeviceNames, N =>
             {
@@ -80,7 +81,7 @@ namespace EmpyrionScripting.DataWrapper
                             .ForEach(I =>
                             {
                                 EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(I.id, out ItemInfo details);
-                                var source = new ItemsSource() { E = E, Id = I.id, Count = I.count, Container = container, CustomName = block.CustomName, Position = P };
+                                IItemsSource source = new ItemsSource() { E = E, Id = I.id, Count = I.count, Container = container, CustomName = block.CustomName, Position = P };
                                 allItems.AddOrUpdate(I.id,
                                 new ItemsData()
                                 {
@@ -95,17 +96,17 @@ namespace EmpyrionScripting.DataWrapper
                     });
             });
 
-            return new Tuple<ItemsData[], ConcurrentDictionary<string, ContainerSource>>(allItems.Values.OrderBy(I => I.Id).ToArray(), containerSource);
+            return new Tuple<ItemsData[], ConcurrentDictionary<string, IContainerSource>>(allItems.Values.OrderBy(I => I.Id).ToArray(), containerSource);
         }
 
         virtual public IStructure GetCurrent() => _s.Value.TryGetTarget(out var s) ? s : null;
         private readonly Lazy<WeakReference<IStructure>> _s;
 
-        public PlayerData Pilot => _pilot.Value;
-        private readonly Lazy<PlayerData> _pilot;
+        public IPlayerData Pilot => _pilot.Value;
+        private readonly Lazy<IPlayerData> _pilot;
 
-        public PlayerData[] Passengers => _passengers.Value;
-        private readonly Lazy<PlayerData[]> _passengers;
+        public IPlayerData[] Passengers => _passengers.Value;
+        private readonly Lazy<IPlayerData[]> _passengers;
 
         public IStructureTankWrapper FuelTank => _FuelTank.Value;
         private readonly Lazy<StructureTank> _FuelTank;
@@ -114,9 +115,9 @@ namespace EmpyrionScripting.DataWrapper
         public IStructureTankWrapper PentaxidTank => _PentaxidTank.Value;
         private readonly Lazy<StructureTank> _PentaxidTank;
 
-        public SignalData[] ControlPanelSignals => _ControlPanelSignals.Value;
-        private readonly Lazy<SignalData[]> _ControlPanelSignals;
-        public SignalData[] BlockSignals => _BlockSignals.Value;
-        private readonly Lazy<SignalData[]> _BlockSignals;
+        public ISignalData[] ControlPanelSignals => _ControlPanelSignals.Value;
+        private readonly Lazy<ISignalData[]> _ControlPanelSignals;
+        public ISignalData[] BlockSignals => _BlockSignals.Value;
+        private readonly Lazy<ISignalData[]> _BlockSignals;
     }
 }

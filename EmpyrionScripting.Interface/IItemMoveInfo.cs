@@ -1,6 +1,4 @@
-﻿using EmpyrionScripting.DataWrapper;
-
-namespace EmpyrionScripting.DataWrapper
+﻿namespace EmpyrionScripting.Interface
 {
     public interface IItemMoveInfo
     {

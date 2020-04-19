@@ -6,6 +6,7 @@ using System.Linq;
 using Eleon.Modding;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -87,9 +88,9 @@ namespace EmpyrionScripting.UnitTests
             var S = Substitute.For<IStructureData>();
             S.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC" });
             S.Items.Returns(new[] {
-                new ItemsData(){ Id = 1, Count = 10, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10 } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20 } }.ToList()  },
-                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
+                new ItemsData(){ Id = 1, Count = 10, Name = "a", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10 } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20 } }.ToList()  },
+                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
             });
 
             var E = Substitute.For<IEntityData>();
@@ -112,9 +113,9 @@ namespace EmpyrionScripting.UnitTests
             var S = Substitute.For<IStructureData>();
             S.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
             S.Items.Returns(new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10 }, new ItemsSource() { CustomName = "BoxX", Id = 1, Count = 1 } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20 } }.ToList()  },
-                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10 }, new ItemsSource() { CustomName = "BoxX", Id = 1, Count = 1 } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20 } }.ToList()  },
+                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
             });
 
             var E = Substitute.For<IEntityData>();
@@ -318,11 +319,11 @@ namespace EmpyrionScripting.UnitTests
             var s = Substitute.For<IStructureData>();
             s.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
             s.Items.Returns(new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB } }.ToList() },
-                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB } }.ToList() },
+                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
             });
-            s.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, ContainerSource>() {
+            s.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, IContainerSource>() {
                 ["BoxA"] = new ContainerSource() { Container = boxA, CustomName = "BoxA"},
                 ["BoxB"] = new ContainerSource() { Container = boxB, CustomName = "BoxB"},
             });
@@ -364,11 +365,11 @@ namespace EmpyrionScripting.UnitTests
             var s = Substitute.For<IStructureData>();
             s.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
             s.Items.Returns(new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA, E = e } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB, E = e } }.ToList() },
-                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA, E = e } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB, E = e } }.ToList() },
+                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
             });
-            s.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, ContainerSource>()
+            s.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, IContainerSource>()
             {
                 ["BoxA"] = new ContainerSource() { Container = boxA, CustomName = "BoxA" },
                 ["BoxB"] = new ContainerSource() { Container = boxB, CustomName = "BoxB" },
@@ -414,11 +415,11 @@ namespace EmpyrionScripting.UnitTests
             var sSV = Substitute.For<IStructureData>();
             sSV.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
             sSV.Items.Returns(new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = SVboxA, E = eSV } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = SVboxB, E = eSV } }.ToList() },
-                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = SVboxA, E = eSV } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = SVboxB, E = eSV } }.ToList() },
+                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
             });
-            sSV.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, ContainerSource>()
+            sSV.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, IContainerSource>()
             {
                 ["BoxA"] = new ContainerSource() { Container = SVboxA, CustomName = "BoxA" },
                 ["BoxB"] = new ContainerSource() { Container = SVboxB, CustomName = "BoxB" },
@@ -450,11 +451,11 @@ namespace EmpyrionScripting.UnitTests
             var sCV = Substitute.For<IStructureData>();
             sCV.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
             sCV.Items.Returns(new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = CVboxA, E = eCV } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = CVboxB, E = eCV } }.ToList() },
-                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = CVboxA, E = eCV } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = CVboxB, E = eCV } }.ToList() },
+                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
             });
-            sCV.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, ContainerSource>()
+            sCV.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, IContainerSource>()
             {
                 ["BoxA"] = new ContainerSource() { Container = CVboxA, CustomName = "BoxA" },
                 ["BoxB"] = new ContainerSource() { Container = CVboxB, CustomName = "BoxB" },

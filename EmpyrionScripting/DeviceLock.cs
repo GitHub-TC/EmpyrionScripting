@@ -3,6 +3,7 @@ using System.Threading;
 using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting
 {

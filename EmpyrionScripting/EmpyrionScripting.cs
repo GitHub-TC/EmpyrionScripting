@@ -5,6 +5,7 @@ using EmpyrionNetAPITools.Extensions;
 using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
@@ -156,7 +157,7 @@ namespace EmpyrionScripting
 
             var stores = data.EventStore?.Values.ToArray();
             data.EventStore?.Clear();
-            stores?.ForEach(S => S.Dispose());
+            stores?.ForEach(S => ((EventStore)S).Dispose());
         }
 
         public void StartAllScriptsForPlayfieldServer()
@@ -294,7 +295,7 @@ namespace EmpyrionScripting
             try
             {
                 var entityScriptData = new ScriptRootData(playfieldData, playfieldData.AllEntities, playfieldData.CurrentEntities, playfieldData.Playfield, entity,
-                    playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
+                    playfieldData.PersistendData, (EventStore)playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
 
                 var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword) || N.StartsWith(CsKeyword)).ToArray();
                 Log($"ProcessAllInGameScripts: #{deviceNames.Length}", LogLevel.Debug);
@@ -361,7 +362,9 @@ namespace EmpyrionScripting
 
             try
             {
-                var entityScriptData = new ScriptSaveGameRootData(playfieldData, playfieldData.AllEntities, playfieldData.CurrentEntities, playfieldData.Playfield, entity, playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)))
+                var entityScriptData = new ScriptSaveGameRootData(playfieldData, 
+                    playfieldData.AllEntities, playfieldData.CurrentEntities, playfieldData.Playfield, entity, playfieldData.PersistendData, 
+                    (EventStore)playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)))
                 {
                     MainScriptPath = SaveGamesScripts.MainScriptPath,
                     ModApi = ModApi
@@ -553,10 +556,10 @@ namespace EmpyrionScripting
                             .WithOptimizationLevel(OptimizationLevel.Release)
 
                             .WithImports   (Configuration.Current.CsUsings)
-                            .AddImports("EmpyrionScripting", "EmpyrionScripting.DataWrapper", "EmpyrionScripting.CustomHelpers")
+                            .AddImports("EmpyrionScripting", "EmpyrionScripting.DataWrapper", "EmpyrionScripting.CustomHelpers", "EmpyrionScripting.Interface")
 
                             .WithReferences(Configuration.Current.CsAssemblyReferences)
-                            .AddReferences(typeof(EmpyrionScripting).Assembly.Location);
+                            .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location);
 
                     var csScript = CSharpScript.Create<object>("Console.SetOut(ScriptOutput);\n" + script, options, typeof(IScriptRootData), loader);
                     var c = csScript.Compile();

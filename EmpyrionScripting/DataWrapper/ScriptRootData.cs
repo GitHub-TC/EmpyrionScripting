@@ -1,6 +1,7 @@
 ﻿using Eleon.Modding;
 using EmpyrionNetAPIAccess;
 using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.Interface;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,11 +11,6 @@ using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public enum ScriptLanguage
-    {
-        Handlebar,
-        Cs
-    }
 
     public class ScriptRootData : IScriptRootData
     {
@@ -27,7 +23,7 @@ namespace EmpyrionScripting.DataWrapper
         private IPlayfield playfield;
         private IEntity entity;
 
-        public EventStore SignalEventStore { get; }
+        public IEventStore SignalEventStore { get; }
 
         public ScriptRootData()
         {
@@ -52,7 +48,7 @@ namespace EmpyrionScripting.DataWrapper
             SignalEventStore = eventStore;
         }
 
-        public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.allEntities, data.currentEntities, data.playfield, data.entity, data._PersistendData, data.SignalEventStore)
+        public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.allEntities, data.currentEntities, data.playfield, data.entity, data._PersistendData, (EventStore)data.SignalEventStore)
         {
             _p = data._p;
             _e = data._e;
@@ -61,8 +57,8 @@ namespace EmpyrionScripting.DataWrapper
 
         public string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
 
-        public CsScriptFunctions CsRoot => new CsScriptFunctions(this);
-        public PlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
+        public ICsScriptFunctions CsRoot => new CsScriptFunctions(this);
+        public IPlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
         public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;
         public IEntity[] GetAllEntites() => allEntities;
         public IEntity[] GetCurrentEntites() => currentEntities;
@@ -72,8 +68,8 @@ namespace EmpyrionScripting.DataWrapper
         public string OreIds => "2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297";
         public string IngotIds => "2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298";
 
-        public PlayfieldData P { get => _p == null ? _p = new PlayfieldData(playfield) : _p; set => _p = value; }
-        private PlayfieldData _p;
+        public IPlayfieldData P { get => _p == null ? _p = new PlayfieldData(playfield) : _p; set => _p = value; }
+        private IPlayfieldData _p;
 
         public IEntityData E => _e.Value; 
         private readonly Lazy<IEntityData> _e;
@@ -89,11 +85,11 @@ namespace EmpyrionScripting.DataWrapper
         public ScriptLanguage ScriptLanguage { get; set; }
         public string Script { get; set; }
         public TextWriter ScriptOutput { get; set; }
-        public DisplayOutputConfiguration DisplayType { get; set; }
+        public IDisplayOutputConfiguration DisplayType { get; set; }
         public string Error { get; set; }
         public string ScriptId { get; set; }
 
-        public int CycleCounter => GetPlayfieldScriptData().CycleCounter(ScriptId);
-        public virtual bool DeviceLockAllowed => GetPlayfieldScriptData().DeviceLockAllowed(ScriptId);
+        public int CycleCounter => ((PlayfieldScriptData)GetPlayfieldScriptData()).CycleCounter(ScriptId);
+        public virtual bool DeviceLockAllowed => ((PlayfieldScriptData)GetPlayfieldScriptData()).DeviceLockAllowed(ScriptId);
     }
 }

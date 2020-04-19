@@ -1,10 +1,11 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class SignalData
+    public class SignalData : ISignalData
     {
-        private readonly SenderSignal   _Signal;
+        private readonly SenderSignal _Signal;
         private readonly IStructureData _Structure;
         bool? currentState;
 

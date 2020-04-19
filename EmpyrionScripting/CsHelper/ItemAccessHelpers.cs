@@ -1,11 +1,12 @@
 ﻿using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting.CsHelper
 {
     public partial class CsScriptFunctions
     {
-        public ItemsData[] Items(IStructureData structure, string names)
+        public IItemsData[] Items(IStructureData structure, string names)
         {
             return ItemAccessHelpers.Items(structure, names);
         }

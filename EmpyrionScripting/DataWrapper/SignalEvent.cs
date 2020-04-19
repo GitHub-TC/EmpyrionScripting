@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting.DataWrapper
 {

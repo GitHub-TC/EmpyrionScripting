@@ -1,4 +1,5 @@
 ﻿using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
@@ -25,7 +26,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var uniqueNames = root.SignalEventStore.GetEvents().Keys.GetUniqueNames(namesSearch).ToDictionary(N => N);
 
                 var signals = root.SignalEventStore.GetEvents().Where(S => uniqueNames.ContainsKey(S.Key)).Select(S => S.Value).ToArray();
-                if (signals != null && signals.Length > 0) signals.ForEach(S => options.Template(output, S.Select(subS => isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), subS) : (object)new SignalEvent(root.GetCurrentPlayfield(), subS)).Reverse().ToArray()));
+                if (signals != null && signals.Length > 0) signals.ForEach(S => options.Template(output, S.OfType<SignalEventBase>().Select(subS => isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), subS) : (object)new SignalEvent(root.GetCurrentPlayfield(), subS)).Reverse().ToArray()));
                 else                                       options.Inverse(output, context as object);
             }
             catch (Exception error)
@@ -55,7 +56,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 if (signals != null && signals.Length > 1)
                 {
-                    SignalEventBase found = signals
+                    ISignalEventBase found = signals
                         .Where(S => {
                             var currentSignal = S[S.Count - 1];
 
@@ -73,8 +74,8 @@ namespace EmpyrionScripting.CustomHelpers
 
                     if (found != null) options.Template(output, 
                         isElevatedScript 
-                        ? new SignalEventElevated(root.GetCurrentPlayfield(), found) 
-                        : (object)new SignalEvent(root.GetCurrentPlayfield(), found)
+                        ? new SignalEventElevated(root.GetCurrentPlayfield(), (SignalEventBase)found) 
+                        : (object)new SignalEvent(root.GetCurrentPlayfield(), (SignalEventBase)found)
                         );
                 }
                 else options.Inverse(output, context as object);
@@ -97,7 +98,7 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var uniqueNames = structure.ControlPanelSignals.Select(S => S.Name).GetUniqueNames(namesSearch).ToDictionary(N => N);
 
-                var signals = new List<SignalData>();
+                var signals = new List<ISignalData>();
 
                 signals.AddRange(structure.ControlPanelSignals.Where(S => uniqueNames.ContainsKey(S.Name)));
                 signals.AddRange(structure.BlockSignals       .Where(S => uniqueNames.ContainsKey(S.Name)));
@@ -267,6 +268,7 @@ namespace EmpyrionScripting.CustomHelpers
                         {
                             start
                                 .Where(S => S.State)
+                                .OfType<SignalEventBase>()
                                 .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
                                 _ => new StopWatchData() {   Start = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S) }, 
                                 (_, s) =>                { s.Start = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S); s.Stop = null; return s; }));
@@ -282,6 +284,7 @@ namespace EmpyrionScripting.CustomHelpers
                         {
                             stop
                                 .Where(S => S.State)
+                                .OfType<SignalEventBase>()
                                 .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
                                 _ => new StopWatchData() {   Stop = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S) }, 
                                 (_, s) => {

@@ -112,7 +112,6 @@
     <Compile Include="CsHelper\ItemAccessHelpers.cs" />
     <Compile Include="CustomHelpers\DialogHelpers.cs" />
     <Compile Include="CustomHelpers\EntityAccessHelpers.cs" />
-    <Compile Include="DataWrapper\IItemMoveInfo.cs" />
     <Compile Include="CustomHelpers\LcdHelpers.cs" />
     <Compile Include="CustomHelpers\SignalHelpers.cs" />
     <Compile Include="CustomHelpers\TeleporterHelpers.cs" />
@@ -122,10 +121,6 @@
     <Compile Include="DataWrapper\ContainerSource.cs" />
     <Compile Include="CustomHelpers\BlockHelpers.cs" />
     <Compile Include="CustomHelpers\ConveyorHelpers.cs" />
-    <Compile Include="DataWrapper\IEntityData.cs" />
-    <Compile Include="DataWrapper\IScriptRootData.cs" />
-    <Compile Include="DataWrapper\IStructureData.cs" />
-    <Compile Include="DataWrapper\IStructureTankWrapper.cs" />
     <Compile Include="DataWrapper\SignalData.cs" />
     <Compile Include="DataWrapper\SignalEvent.cs" />
     <Compile Include="DataWrapper\SignalEventBase.cs" />
@@ -181,6 +176,12 @@
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.3.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.3.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EmpyrionScripting.Interface\EmpyrionScripting.Interface.csproj">
+      <Project>{dd121666-d54d-47e7-ab4d-b7f79bf1278d}</Project>
+      <Name>EmpyrionScripting.Interface</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

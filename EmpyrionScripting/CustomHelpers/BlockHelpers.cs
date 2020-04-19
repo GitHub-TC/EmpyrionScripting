@@ -1,4 +1,5 @@
 ﻿using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
 using System;
 using System.IO;

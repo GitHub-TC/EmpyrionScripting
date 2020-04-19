@@ -1,4 +1,4 @@
-﻿namespace EmpyrionScripting.DataWrapper
+﻿namespace EmpyrionScripting.Interface
 {
     public enum StructureTankType
     {

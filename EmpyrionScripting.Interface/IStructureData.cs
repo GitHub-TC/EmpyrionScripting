@@ -1,14 +1,14 @@
 ﻿using System.Collections.Concurrent;
 using Eleon.Modding;
 
-namespace EmpyrionScripting.DataWrapper
+namespace EmpyrionScripting.Interface
 {
     public interface IStructureData
     {
         string[] AllCustomDeviceNames { get; }
-        SignalData[] ControlPanelSignals { get; }
-        SignalData[] BlockSignals { get; }
-        ConcurrentDictionary<string, ContainerSource> ContainerSource { get; }
+        ISignalData[] ControlPanelSignals { get; }
+        ISignalData[] BlockSignals { get; }
+        ConcurrentDictionary<string, IContainerSource> ContainerSource { get; }
         float DamageLevel { get; }
         IEntityData[] DockedE { get; }
         IEntityData E { get; }
@@ -16,12 +16,12 @@ namespace EmpyrionScripting.DataWrapper
         bool IsOfflineProtectable { get; }
         bool IsPowerd { get; }
         bool IsReady { get; }
-        ItemsData[] Items { get; }
+        IItemsData[] Items { get; }
         IStructureTankWrapper OxygenTank { get; }
         IStructureTankWrapper FuelTank { get; }
         IStructureTankWrapper PentaxidTank { get; }
-        PlayerData[] Passengers { get; }
-        PlayerData Pilot { get; }
+        IPlayerData[] Passengers { get; }
+        IPlayerData Pilot { get; }
 
         IStructure GetCurrent();
     }

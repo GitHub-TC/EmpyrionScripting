@@ -1,5 +1,6 @@
 ﻿using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;

@@ -1,9 +1,10 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.Interface;
 using System.Collections.Generic;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class LimitedPlayerData
+    public class LimitedPlayerData : ILimitedPlayerData
     {
         protected IPlayer p;
 
@@ -16,7 +17,7 @@ namespace EmpyrionScripting.DataWrapper
         public string Name => p?.Name;
     }
 
-    public class PlayerData : LimitedPlayerData
+    public class PlayerData : LimitedPlayerData, IPlayerData
     {
         public PlayerData(IPlayer p) : base(p)
         {

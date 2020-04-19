@@ -1,5 +1,6 @@
 ﻿using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace EmpyrionScripting
             lock (ExecQueue) found = ExecQueue.TryDequeue(out data);
             if (!found) return false;
 
-            data.GetPlayfieldScriptData().IncrementCycleCounter(data.ScriptId);
+            ((PlayfieldScriptData)data.GetPlayfieldScriptData()).IncrementCycleCounter(data.ScriptId);
 
             if (!ThreadPool.QueueUserWorkItem(ExecScript, data))
             {
