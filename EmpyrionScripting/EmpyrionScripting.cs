@@ -2,15 +2,21 @@
 using EmpyrionNetAPIDefinitions;
 using EmpyrionNetAPITools;
 using EmpyrionNetAPITools.Extensions;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +29,7 @@ namespace EmpyrionScripting
 
         private const string TargetsKeyword  = "Targets:";
         private const string ScriptKeyword   = "Script:";
+        private const string CsKeyword       = "C#:";
         ModGameAPI legacyApi;
 
         public static EmpyrionScripting EmpyrionScriptingInstance { get; set; }
@@ -110,7 +117,7 @@ namespace EmpyrionScripting
         private void SetupHandlebarsComponent()
         {
             Handlebars.Configuration.TextEncoder = null;
-            HelpersTools.ScanHandlebarHelpers();
+            HandlebarsHelpers.ScanHandlebarHelpers();
         }
 
         private void Application_OnPlayfieldLoaded(IPlayfield playfield)
@@ -289,7 +296,7 @@ namespace EmpyrionScripting
                 var entityScriptData = new ScriptRootData(playfieldData, playfieldData.AllEntities, playfieldData.CurrentEntities, playfieldData.Playfield, entity,
                     playfieldData.PersistendData, playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
 
-                var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword)).ToArray();
+                var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword) || N.StartsWith(CsKeyword)).ToArray();
                 Log($"ProcessAllInGameScripts: #{deviceNames.Length}", LogLevel.Debug);
 
                 int count = 0;
@@ -306,11 +313,12 @@ namespace EmpyrionScripting
 
                         var data = new ScriptRootData(entityScriptData)
                         {
-                            Script = lcd.GetText(),
-                            Error  = L,
+                            ScriptLanguage  = N.StartsWith(ScriptKeyword) ? ScriptLanguage.Handlebar : ScriptLanguage.Cs,
+                            Script          = lcd.GetText(),
+                            Error           = L,
                         };
 
-                        AddTargetsAndDisplayType(data, N.Substring(ScriptKeyword.Length));
+                        AddTargetsAndDisplayType(data, N.Substring(N.IndexOf(':') + 1));
 
                         if (Configuration.Current.ScriptTracking)
                         {
@@ -400,13 +408,27 @@ namespace EmpyrionScripting
 
                     var path = S.NormalizePath();
 
-                    if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + SaveGamesScripts.ScriptExtension, out var C))
+                    if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + ".hbs", out var hbsCode))
                     {
                         var data = new ScriptSaveGameRootData(entityScriptData)
                         {
-                            Script      = C,
-                            ScriptId    = entityScriptData.E.Id + "/" + S,
-                            ScriptPath  = Path.GetDirectoryName(path)
+                            ScriptLanguage = ScriptLanguage.Handlebar,
+                            Script         = hbsCode,
+                            ScriptId       = entityScriptData.E.Id + "/" + S,
+                            ScriptPath     = Path.GetDirectoryName(path)
+                        };
+                        playfieldData.ScriptExecQueue.Add(data);
+
+                        Interlocked.Increment(ref count);
+                    }
+                    else if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + ".cs", out var csCode))
+                    {
+                        var data = new ScriptSaveGameRootData(entityScriptData)
+                        {
+                            ScriptLanguage = ScriptLanguage.Cs,
+                            Script         = csCode,
+                            ScriptId       = entityScriptData.E.Id + "/" + S,
+                            ScriptPath     = Path.GetDirectoryName(path)
                         };
                         playfieldData.ScriptExecQueue.Add(data);
 
@@ -449,7 +471,7 @@ namespace EmpyrionScripting
                 }
             }
 
-            data.LcdTargets.AddRange(data.E.S.AllCustomDeviceNames.GetUniqueNames(targets).Where(N => !N.StartsWith(ScriptKeyword)));
+            data.LcdTargets.AddRange(data.E.S.AllCustomDeviceNames.GetUniqueNames(targets).Where(N => !N.StartsWith(ScriptKeyword) && !N.StartsWith(CsKeyword)));
         }
 
         public void ProcessScript<T>(PlayfieldScriptData playfieldData, T data) where T : IScriptRootData
@@ -458,7 +480,9 @@ namespace EmpyrionScripting
             {
                 if (playfieldData.PauseScripts) return;
 
-                var result = ExecuteHandlebarScript(playfieldData, data, data.Script).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var result = data.ScriptLanguage == ScriptLanguage.Handlebar
+                    ? ExecuteHandlebarScript(playfieldData, data, data.Script).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    : ExecuteCsScript       (playfieldData, data, data.Script).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (result.Length > 0 && result[0].StartsWith(TargetsKeyword))
                 {
@@ -512,6 +536,55 @@ namespace EmpyrionScripting
                 generator = Handlebars.Compile(script);
                 playfieldData.LcdCompileCache.TryAdd(script, generator);
             }
+
+            return generator(data);
+        }
+
+        public string ExecuteCsScript<T>(PlayfieldScriptData playfieldData, T data, string script) where T : IScriptRootData
+        {
+            if (!playfieldData.LcdCompileCache.TryGetValue(script, out Func<object, string> generator))
+            {
+                using (var loader = new InteractiveAssemblyLoader())
+                {
+                    var options = ScriptOptions.Default
+                            .WithAllowUnsafe(false)
+                            .WithEmitDebugInformation(false)
+                            .WithCheckOverflow(true)
+                            .WithOptimizationLevel(OptimizationLevel.Release)
+
+                            .WithImports   (Configuration.Current.CsUsings)
+                            .AddImports("EmpyrionScripting", "EmpyrionScripting.DataWrapper", "EmpyrionScripting.CustomHelpers")
+
+                            .WithReferences(Configuration.Current.CsAssemblyReferences)
+                            .AddReferences(typeof(EmpyrionScripting).Assembly.Location);
+
+                    var csScript = CSharpScript.Create<object>("Console.SetOut(ScriptOutput);\n" + script, options, typeof(IScriptRootData), loader);
+                    var c = csScript.Compile();
+
+                    generator = rootData =>
+                        {
+                            if (Configuration.Current.CsScriptsAllowed == CsScriptsAllowed.SaveGameScripts && !(rootData is ScriptSaveGameRootData))                                          return "C# scripts only allowed in SaveGameScripts";
+                            if (Configuration.Current.CsScriptsAllowed == CsScriptsAllowed.AdminStructures && ((IScriptRootData)rootData).E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts only allowed on AdminStructures";
+
+                            string exceptionMessage = null;
+                            var isElevatedScript    = rootData is ScriptSaveGameRootData || ((IScriptRootData)rootData).E.GetCurrent().Faction.Group == FactionGroup.Admin;
+                            try
+                            {
+                                var output = new StringWriter();
+                                ((IScriptRootData)rootData).ScriptOutput = output;
+                                object result = csScript.RunAsync(rootData, ex => { exceptionMessage = $"Exception: {(isElevatedScript ? ex.ToString() : ex.Message)}"; return true; }).GetAwaiter().GetResult().ReturnValue;
+                                if (result != null) output.Write(result.ToString());
+                                return exceptionMessage ?? output.ToString();
+                            }
+                            catch (Exception error)
+                            {
+                                return isElevatedScript ? error.ToString() : error.Message;
+                            }
+                        };
+
+                    playfieldData.LcdCompileCache.TryAdd(script, generator);
+                }
+            }                                                      
 
             return generator(data);
         }

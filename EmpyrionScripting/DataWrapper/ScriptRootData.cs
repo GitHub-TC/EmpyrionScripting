@@ -1,13 +1,21 @@
 ﻿using Eleon.Modding;
 using EmpyrionNetAPIAccess;
+using EmpyrionScripting.CsHelper;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
 {
+    public enum ScriptLanguage
+    {
+        Handlebar,
+        Cs
+    }
+
     public class ScriptRootData : IScriptRootData
     {
         private static readonly Assembly CurrentAssembly = Assembly.GetAssembly(typeof(ScriptRootData));
@@ -53,6 +61,7 @@ namespace EmpyrionScripting.DataWrapper
 
         public string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
 
+        public CsScriptFunctions CsRoot => new CsScriptFunctions(this);
         public PlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
         public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;
         public IEntity[] GetAllEntites() => allEntities;
@@ -77,7 +86,9 @@ namespace EmpyrionScripting.DataWrapper
         public bool BackgroundColorChanged { get; set; }
         public Color BackgroundColor { get; set; }
         public ConcurrentDictionary<string, object> Data { get; set; } = new ConcurrentDictionary<string, object>();
+        public ScriptLanguage ScriptLanguage { get; set; }
         public string Script { get; set; }
+        public TextWriter ScriptOutput { get; set; }
         public DisplayOutputConfiguration DisplayType { get; set; }
         public string Error { get; set; }
         public string ScriptId { get; set; }

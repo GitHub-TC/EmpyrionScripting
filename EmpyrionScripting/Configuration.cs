@@ -18,10 +18,19 @@ namespace EmpyrionScripting
         public int Amount { get; set; }
     }
 
+    public enum CsScriptsAllowed
+    {
+        SaveGameScripts = 0,
+        AdminStructures = 1,
+        Everywhere      = 2,
+    }
+
     public class Configuration
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public LogLevel LogLevel { get; set; } = LogLevel.Message;
+        [JsonConverter(typeof(StringEnumConverter))]
+        public CsScriptsAllowed CsScriptsAllowed { get; set; } = CsScriptsAllowed.AdminStructures;
         public int InGameScriptsIntervallMS { get; set; } = 1000;
         public int DeviceLockOnlyAllowedEveryXCycles { get; set; } = 10;
         public int SaveGameScriptsIntervallMS { get; set; } = 10000;
@@ -38,6 +47,8 @@ namespace EmpyrionScripting
             [StructureTankType.Fuel    ] = new[] { new AllowedItem(2373, 300), new AllowedItem(2287, 150), new AllowedItem(2266, 30) },
             [StructureTankType.Pentaxid] = new[] { new AllowedItem(2294, 1), new AllowedItem(2293, 2) }
         };
+        public string[] CsUsings { get; set; } = new[] { "System", "System.Text", "System.Linq" };
+        public string[] CsAssemblyReferences { get; set; } = new[] { "System.Core", "System.Numerics" };
     }
 
 }

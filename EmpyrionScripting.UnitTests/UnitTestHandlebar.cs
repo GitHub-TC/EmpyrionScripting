@@ -12,7 +12,7 @@ using NSubstitute;
 namespace EmpyrionScripting.UnitTests
 {
     [TestClass]
-    public class UnitTest1
+    public partial class UnitTestHandlebar
     {
         class Item
         {
@@ -284,6 +284,8 @@ namespace EmpyrionScripting.UnitTests
         {
             var localization = new Localization(@"C:\steamcmd\empyrion\Content");
             var items        = new ItemInfos   (@"C:\steamcmd\empyrion\Content", localization).ItemInfo;
+
+            Assert.IsTrue(items.Count() > 0);
         }
 
         [TestMethod]
@@ -291,7 +293,11 @@ namespace EmpyrionScripting.UnitTests
         {
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
-            var outtext = lcdMod.ExecuteHandlebarScript(pf, "", "{{#scroll 5 1}}\nLine 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10\nLine 11\nLine 12\nLine 13\n{{/scroll}}");
+            var data = Substitute.For<IScriptRootData>();
+            data.CycleCounter.Returns(0);
+
+            var outtext = lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 5 1}}\nLine 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10\nLine 11\nLine 12\nLine 13\n{{/scroll}}");
+            Assert.AreEqual("Line 1\nLine 2\nLine 3\nLine 4\nLine 5\n", outtext);
         }
 
         [TestMethod]
@@ -333,15 +339,6 @@ namespace EmpyrionScripting.UnitTests
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual("9-1", lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#items E.S 'BoxA'}}{{move this ../E.S 'BoxB'}}{{Count}}-{{Id}}{{/move}}{{/items}}"));
-        }
-
-        class MockDeviceLock : IDeviceLock
-        {
-            public bool Success => true;
-
-            public void Dispose()
-            {
-            }
         }
 
         [TestMethod]
@@ -511,6 +508,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodFileCache()
         {
             var fg = HelpersTools.GetFileContent(@"C:\steamcmd\empyrion\Saves\Games\Test\Mods\EmpyrionScripting\Codes\x\..\Codes.txt");
+            Assert.AreEqual(null, fg);
         }
 
         [TestMethod]

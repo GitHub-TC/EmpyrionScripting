@@ -8,7 +8,7 @@ using System.Linq;
 namespace EmpyrionScripting.CustomHelpers
 {
     [HandlebarHelpers]
-    public class ItemAccessHelpers
+    public static class ItemAccessHelpers
     {
         [HandlebarTag("items")]
         public static void ItemsBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
@@ -20,30 +20,10 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
+                var allItems = Items(structure, namesSearch);
 
-                var allItems = new ConcurrentDictionary<int, ItemsData>();
-                structure.Items
-                    .SelectMany(I => I.Source.Where(S => S.CustomName != null && uniqueNames.Contains(S.CustomName)))
-                    .ForEach(I =>
-                    {
-                        ItemInfo details = null;
-                        EmpyrionScripting.ItemInfos?.ItemInfo.TryGetValue(I.Id, out details);
-                        allItems.AddOrUpdate(I.Id,
-                        new ItemsData()
-                        {
-                            Source  = new[] { I }.ToList(),
-                            Id      = I.Id,
-                            Count   = I.Count,
-                            Key     = details == null ? I.Id.ToString() : details.Key,
-                            Name    = details == null ? I.Id.ToString() : details.Name,
-                        },
-                        (K, U) => U.AddCount(I.Count, I));
-                    });
-
-
-                if (allItems.Count > 0) allItems.Values.OrderBy(I => I.Id).ForEach(I => options.Template(output, I));
-                else                    options.Inverse(output, context as object);
+                if (allItems.Length > 0) allItems.ForEach(I => options.Template(output, I));
+                else                     options.Inverse(output, context as object);
             }
             catch (Exception error)
             {
@@ -61,35 +41,41 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
+                var allItems = Items(structure, namesSearch);
 
-                var allItems = new ConcurrentDictionary<int, ItemsData>();
-                structure.Items
-                    .SelectMany(I => I.Source.Where(S => S.CustomName != null && uniqueNames.Contains(S.CustomName)))
-                    .ForEach(I =>
-                    {
-                        ItemInfo details = null;
-                        EmpyrionScripting.ItemInfos?.ItemInfo.TryGetValue(I.Id, out details);
-                        allItems.AddOrUpdate(I.Id,
-                        new ItemsData()
-                        {
-                            Source  = new[] { I }.ToList(),
-                            Id      = I.Id,
-                            Count   = I.Count,
-                            Key     = details == null ? I.Id.ToString() : details.Key,
-                            Name    = details == null ? I.Id.ToString() : details.Name,
-                        },
-                        (K, U) => U.AddCount(I.Count, I));
-                    });
-
-
-                if (allItems.Count > 0) options.Template(output, allItems.Values.OrderBy(I => I.Id).ToArray());
-                else                    options.Inverse(output, context as object);
+                if (allItems.Length > 0) options.Template(output, allItems);
+                else                     options.Inverse(output, context as object);
             }
             catch (Exception error)
             {
                 output.Write("{{getitems}} error " + EmpyrionScripting.ErrorFilter(error));
             }
+        }
+
+        public static ItemsData[] Items(IStructureData structure, string names)
+        {
+            var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(names);
+
+            var allItems = new ConcurrentDictionary<int, ItemsData>();
+            structure.Items
+                .SelectMany(I => I.Source.Where(S => S.CustomName != null && uniqueNames.Contains(S.CustomName)))
+                .ForEach(I =>
+                {
+                    ItemInfo details = null;
+                    EmpyrionScripting.ItemInfos?.ItemInfo.TryGetValue(I.Id, out details);
+                    allItems.AddOrUpdate(I.Id,
+                    new ItemsData()
+                    {
+                        Source  = new[] { I }.ToList(),
+                        Id      = I.Id,
+                        Count   = I.Count,
+                        Key     = details == null ? I.Id.ToString() : details.Key,
+                        Name    = details == null ? I.Id.ToString() : details.Name,
+                    },
+                    (K, U) => U.AddCount(I.Count, I));
+                });
+
+            return allItems.Values.OrderBy(I => I.Id).ToArray();
         }
 
         [HandlebarTag("itemlist")]
