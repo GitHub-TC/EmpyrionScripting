@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -27,6 +28,9 @@ namespace EmpyrionScripting.DataWrapper
 
         public ScriptRootData()
         {
+            Console = new ConsoleMock(this);
+            CsRoot  = new CsScriptFunctions(this);
+
             _e = new Lazy<IEntityData>(() => new EntityData(playfield, entity));
         }
 
@@ -39,13 +43,14 @@ namespace EmpyrionScripting.DataWrapper
             ConcurrentDictionary<string, object> persistendData, 
             EventStore eventStore) : this()
         {
-            _PlayfieldScriptData = playfieldScriptData;
-            _PersistendData = persistendData;
-            this.currentEntities = currentEntities;
-            this.allEntities = allEntities;
-            this.playfield = playfield;
-            this.entity = entity;
-            SignalEventStore = eventStore;
+            _PlayfieldScriptData        = playfieldScriptData;
+            _PersistendData             = persistendData;
+            this.currentEntities        = currentEntities;
+            this.allEntities            = allEntities;
+            this.playfield              = playfield;
+            this.entity                 = entity;
+            SignalEventStore            = eventStore;
+            IsElevatedScript = this is ScriptSaveGameRootData || entity?.Faction.Group == FactionGroup.Admin;
         }
 
         public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.allEntities, data.currentEntities, data.playfield, data.entity, data._PersistendData, (EventStore)data.SignalEventStore)
@@ -57,11 +62,17 @@ namespace EmpyrionScripting.DataWrapper
 
         public string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
 
-        public ICsScriptFunctions CsRoot => new CsScriptFunctions(this);
+        public bool IsElevatedScript { get; }
+        public ICsScriptFunctions CsRoot { get; }
+        public IConsoleMock Console { get; }
+
         public IPlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
         public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;
-        public IEntity[] GetAllEntites() => allEntities;
-        public IEntity[] GetCurrentEntites() => currentEntities;
+        public IEnumerable<IEntity> AllEntities => IsElevatedScript ? allEntities : Enumerable.Empty<IEntity>();
+        public IEnumerable<IEntity> Entites => currentEntities
+                    .Where(SafeIsNoProxyCheck)
+                    .Where(e => e.Faction.Id == E.GetCurrent().Faction.Id)
+                    .Where(e => IsElevatedScript || Vector3.Distance(e.Position, E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance);
 
         public IPlayfield GetCurrentPlayfield() => playfield;
 
@@ -91,5 +102,12 @@ namespace EmpyrionScripting.DataWrapper
 
         public int CycleCounter => ((PlayfieldScriptData)GetPlayfieldScriptData()).CycleCounter(ScriptId);
         public virtual bool DeviceLockAllowed => ((PlayfieldScriptData)GetPlayfieldScriptData()).DeviceLockAllowed(ScriptId);
+
+        private static bool SafeIsNoProxyCheck(IEntity entity)
+        {
+            try { return entity != null && entity.Type != EntityType.Proxy; }
+            catch { return false; }
+        }
+
     }
 }

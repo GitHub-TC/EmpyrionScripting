@@ -656,7 +656,7 @@ namespace EmpyrionScripting.UnitTests
 
             data.CycleCounter.Returns(8);
             Assert.AreEqual(
-                "7\n8\n9\n",
+                "8\n9\n1\n",
                 lcdMod.ExecuteHandlebarScript(pf, data, "{{#scroll 3 1 2}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{#each .}}{{.}}\n{{/each}}{{/split}}{{/scroll}}")
             );
 

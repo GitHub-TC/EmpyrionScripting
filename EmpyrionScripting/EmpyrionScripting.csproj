@@ -109,6 +109,8 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="CsHelper\ConveyorHelpers.cs" />
     <Compile Include="CsHelper\CsScriptFunctions.cs" />
+    <Compile Include="CsHelper\EffectHelpers.cs" />
+    <Compile Include="CsHelper\EntityAccessHelpers.cs" />
     <Compile Include="CsHelper\ItemAccessHelpers.cs" />
     <Compile Include="CustomHelpers\DialogHelpers.cs" />
     <Compile Include="CustomHelpers\EntityAccessHelpers.cs" />
@@ -117,6 +119,7 @@
     <Compile Include="CustomHelpers\TeleporterHelpers.cs" />
     <Compile Include="DataWrapper\BlockData.cs" />
     <Compile Include="CustomHelpers\MathHelpers.cs" />
+    <Compile Include="CsHelper\ConsoleMock.cs" />
     <Compile Include="DataWrapper\ContainerData.cs" />
     <Compile Include="DataWrapper\ContainerSource.cs" />
     <Compile Include="CustomHelpers\BlockHelpers.cs" />

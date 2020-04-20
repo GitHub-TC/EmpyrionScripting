@@ -1,5 +1,4 @@
-﻿using EmpyrionScripting.DataWrapper;
-using EmpyrionScripting.Interface;
+﻿using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting.CsHelper
 {

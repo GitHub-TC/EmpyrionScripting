@@ -2,7 +2,6 @@
 using EmpyrionNetAPIDefinitions;
 using EmpyrionNetAPITools;
 using EmpyrionNetAPITools.Extensions;
-using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
@@ -17,7 +16,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -561,27 +559,31 @@ namespace EmpyrionScripting
                             .WithReferences(Configuration.Current.CsAssemblyReferences)
                             .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location);
 
-                    var csScript = CSharpScript.Create<object>("Console.SetOut(ScriptOutput);\n" + script, options, typeof(IScriptRootData), loader);
+                    var csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
                     var c = csScript.Compile();
 
-                    generator = rootData =>
+                    generator = rootObject =>
                         {
-                            if (Configuration.Current.CsScriptsAllowed == CsScriptsAllowed.SaveGameScripts && !(rootData is ScriptSaveGameRootData))                                          return "C# scripts only allowed in SaveGameScripts";
-                            if (Configuration.Current.CsScriptsAllowed == CsScriptsAllowed.AdminStructures && ((IScriptRootData)rootData).E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts only allowed on AdminStructures";
+                            var root = rootObject as IScriptRootData;
+                            if (Configuration.Current.CsScriptsAllowed == CsScriptsAllowed.SaveGameScripts && !(root is ScriptSaveGameRootData))                       return "C# scripts only allowed in SaveGameScripts";
+                            if (Configuration.Current.CsScriptsAllowed == CsScriptsAllowed.AdminStructures && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts only allowed on AdminStructures";
 
                             string exceptionMessage = null;
-                            var isElevatedScript    = rootData is ScriptSaveGameRootData || ((IScriptRootData)rootData).E.GetCurrent().Faction.Group == FactionGroup.Admin;
                             try
                             {
-                                var output = new StringWriter();
-                                ((IScriptRootData)rootData).ScriptOutput = output;
-                                object result = csScript.RunAsync(rootData, ex => { exceptionMessage = $"Exception: {(isElevatedScript ? ex.ToString() : ex.Message)}"; return true; }).GetAwaiter().GetResult().ReturnValue;
-                                if (result != null) output.Write(result.ToString());
-                                return exceptionMessage ?? output.ToString();
+                                using (var output = new StringWriter())
+                                {
+                                    root.ScriptOutput = output;
+
+                                    object result = csScript.RunAsync(root, ex => { exceptionMessage = $"Exception: {(root.IsElevatedScript ? ex.ToString() : ex.Message)}"; return true; }).GetAwaiter().GetResult().ReturnValue;
+                                    output.Write(result?.ToString());
+
+                                    return exceptionMessage ?? output.ToString();
+                                }
                             }
                             catch (Exception error)
                             {
-                                return isElevatedScript ? error.ToString() : error.Message;
+                                return root.IsElevatedScript ? error.ToString() : error.Message;
                             }
                         };
 

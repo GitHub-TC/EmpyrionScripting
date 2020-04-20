@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Eleon.Modding;
-using EmpyrionScripting;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
@@ -65,9 +64,10 @@ namespace EmpyrionScripting.UnitTests
             data.P = new PlayfieldData(playfield);
             data.GetPersistendData().ReturnsForAnyArgs(dict);
             data.Data = dict;
+            data.Console.Returns(new CsHelper.ConsoleMock(data));
 
             data.CycleCounter.Returns(0);
-            Assert.AreEqual("PlayfieldTestName", lcdMod.ExecuteCsScript(pf, data, "return P.Name;"));
+            Assert.AreEqual("PlayfieldTestName", lcdMod.ExecuteCsScript(pf, data, "Console.Write(P.Name);"));
         }
 
         [TestMethod]
@@ -244,6 +244,7 @@ namespace EmpyrionScripting.UnitTests
             var lcdData = Substitute.For<IScriptRootData>();
             lcdData.DeviceLockAllowed.Returns(true);
             lcdData.CsRoot.Returns(new CsHelper.CsScriptFunctions(lcdData));
+            lcdData.Console.Returns(new CsHelper.ConsoleMock(lcdData));
 
             lcdData.E.Returns(eCV);
             lcdData.E.S.Returns(sCV);

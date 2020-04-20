@@ -123,9 +123,8 @@ namespace EmpyrionScripting.CustomHelpers
             var root                = rootObject as IScriptRootData;
             var structure           = arguments[0] as IStructureData;
             var namesSearch         = arguments[1].ToString();
-            var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
 
-            if (!isElevatedScript) throw new HandlebarsException("only allowed in elevated scripts");
+            if (!root.IsElevatedScript) throw new HandlebarsException("only allowed in elevated scripts");
 
             var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch).ToDictionary(N => N);
 

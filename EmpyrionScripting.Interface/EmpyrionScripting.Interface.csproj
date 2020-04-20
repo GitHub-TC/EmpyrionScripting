@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IConsoleMock.cs" />
     <Compile Include="IContainerSource.cs" />
     <Compile Include="ICsScriptFunctions.cs" />
     <Compile Include="IDisplayOutputConfiguration.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="IPlayerData.cs" />
     <Compile Include="IPlayfieldData.cs" />
     <Compile Include="IPlayfieldScriptData.cs" />
+    <Compile Include="IScriptModData.cs" />
     <Compile Include="IScriptRootData.cs" />
     <Compile Include="ISignalData.cs" />
     <Compile Include="ISignalEventBase.cs" />

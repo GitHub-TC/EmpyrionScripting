@@ -1,7 +1,7 @@
-﻿using EmpyrionScripting.DataWrapper;
-using EmpyrionScripting.Interface;
+﻿using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -45,24 +45,28 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var content = new StringWriter();
                 options.Template(content, context as object);
-                var textlines = content.ToString().Split('\n');
-                var overlapp = textlines.Length - lines;
-                if (overlapp <= 0)
-                {
-                    output.Write(content.ToString());
-                }
-                else
-                {
-                    var skip = root.CycleCounter / delay * step % textlines.Length;
-                    output.Write(string.Join("\n", textlines.Skip(skip).Take(lines)));
-                    output.Write(string.Join("\n", textlines.Take(skip + lines - textlines.Length + 1)));
-                    output.Write("\n");
-                }
+
+                Scroll(root, content.ToString(), lines, delay, step).ForEach(L => output.Write($"{L}\n"));
             }
             catch (Exception error)
             {
                 output.Write("{{scroll}} error " + EmpyrionScripting.ErrorFilter(error));
             }
+        }
+
+        public static IList<string> Scroll(IScriptRootData root, string content, int lines, int delay, int step)
+        {
+            var textlines = content.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var outputLines = new List<string>(textlines);
+            var overlapp = textlines.Length - lines;
+            if (overlapp > 0)
+            {
+                var skip = root.CycleCounter / delay * step % textlines.Length;
+                outputLines = textlines.Skip(skip).Take(lines).ToList();
+                outputLines.AddRange(textlines.Take(skip + lines - textlines.Length));
+            }
+
+            return outputLines;
         }
 
         [HandlebarTag("selectlines")]

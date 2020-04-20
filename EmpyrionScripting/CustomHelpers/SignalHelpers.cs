@@ -18,7 +18,6 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 1) throw new HandlebarsException("{{signalevents names}} helper must have exactly one argument: (name1;name2...)");
 
             var root             = rootObject as IScriptRootData;
-            var isElevatedScript = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
             var namesSearch      = arguments[0].ToString();
 
             try
@@ -26,7 +25,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var uniqueNames = root.SignalEventStore.GetEvents().Keys.GetUniqueNames(namesSearch).ToDictionary(N => N);
 
                 var signals = root.SignalEventStore.GetEvents().Where(S => uniqueNames.ContainsKey(S.Key)).Select(S => S.Value).ToArray();
-                if (signals != null && signals.Length > 0) signals.ForEach(S => options.Template(output, S.OfType<SignalEventBase>().Select(subS => isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), subS) : (object)new SignalEvent(root.GetCurrentPlayfield(), subS)).Reverse().ToArray()));
+                if (signals != null && signals.Length > 0) signals.ForEach(S => options.Template(output, S.OfType<SignalEventBase>().Select(subS => root.IsElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), subS) : (object)new SignalEvent(root.GetCurrentPlayfield(), subS)).Reverse().ToArray()));
                 else                                       options.Inverse(output, context as object);
             }
             catch (Exception error)
@@ -41,7 +40,6 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2) throw new HandlebarsException("{{triggerifsignalgoes names state}} helper must have exactly two arguments: (name1,name2,...) (boolstate)");
 
             var root                = rootObject as IScriptRootData;
-            var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
             var namesSearch         = arguments[0].ToString();
 
             try
@@ -73,7 +71,7 @@ namespace EmpyrionScripting.CustomHelpers
 
 
                     if (found != null) options.Template(output, 
-                        isElevatedScript 
+                        root.IsElevatedScript 
                         ? new SignalEventElevated(root.GetCurrentPlayfield(), (SignalEventBase)found) 
                         : (object)new SignalEvent(root.GetCurrentPlayfield(), (SignalEventBase)found)
                         );
@@ -252,7 +250,6 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{stopwatch startsignal stopsignal [resetsignal]}} helper must have at least three argument: startsignal stopsignal [resetsignal]");
 
             var root                = rootObject as IScriptRootData;
-            var isElevatedScript    = rootObject is ScriptSaveGameRootData || root.E.GetCurrent().Faction.Group == FactionGroup.Admin;
             var startSignal         = arguments[0].ToString();
             var stopSignal          = arguments[1].ToString();
             var resetSignal         = arguments.Length == 3 ? arguments[2].ToString() : null;
@@ -270,8 +267,8 @@ namespace EmpyrionScripting.CustomHelpers
                                 .Where(S => S.State)
                                 .OfType<SignalEventBase>()
                                 .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
-                                _ => new StopWatchData() {   Start = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S) }, 
-                                (_, s) =>                { s.Start = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S); s.Stop = null; return s; }));
+                                _ => new StopWatchData() {   Start = root.IsElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S) }, 
+                                (_, s) =>                { s.Start = root.IsElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S); s.Stop = null; return s; }));
                             start.Clear();
                         }
                     });
@@ -286,9 +283,9 @@ namespace EmpyrionScripting.CustomHelpers
                                 .Where(S => S.State)
                                 .OfType<SignalEventBase>()
                                 .ForEach(S => stopWatchData.AddOrUpdate(S.TriggeredByEntityId, 
-                                _ => new StopWatchData() {   Stop = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S) }, 
+                                _ => new StopWatchData() {   Stop = root.IsElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S) }, 
                                 (_, s) => {
-                                    s.Stop          = isElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S);
+                                    s.Stop          = root.IsElevatedScript ? new SignalEventElevated(root.GetCurrentPlayfield(), S) : (SignalEventBase)new SignalEvent(root.GetCurrentPlayfield(), S);
                                     if(s.Start != null) { 
                                         s.TimeTaken     = s.Stop.TimeStamp - s.Start.TimeStamp;
                                         s.BestTimeTaken = !s.BestTimeTaken.HasValue || s.BestTimeTaken > s.TimeTaken ? s.TimeTaken : s.BestTimeTaken;
