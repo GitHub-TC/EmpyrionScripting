@@ -1,6 +1,7 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
 using System;
 using System.Collections.Concurrent;
 

@@ -2,6 +2,7 @@
 using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Generic;

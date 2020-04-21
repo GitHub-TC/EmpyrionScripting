@@ -1,7 +1,8 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.Interface;
 using System.Collections.Concurrent;
 
-namespace EmpyrionScripting.Interface
+namespace EmpyrionScripting.Internal.Interface
 {
     public interface IPlayfieldScriptData
     {

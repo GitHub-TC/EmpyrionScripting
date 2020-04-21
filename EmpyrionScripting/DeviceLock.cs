@@ -2,7 +2,7 @@
 using System.Threading;
 using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
-using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
 
 namespace EmpyrionScripting
 {

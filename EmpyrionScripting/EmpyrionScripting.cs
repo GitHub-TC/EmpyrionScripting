@@ -5,6 +5,7 @@ using EmpyrionNetAPITools.Extensions;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;

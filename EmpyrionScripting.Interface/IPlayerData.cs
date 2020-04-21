@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EmpyrionScripting.Interface
 {
-    public interface IPlayerData
+    public interface IPlayerData : ILimitedPlayerData
     {
         List<ItemStack> Bag { get; }
         float BodyTemp { get; }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EmpyrionScripting
+namespace EmpyrionScripting.Internal.Interface
 {
     public interface IDeviceLock : IDisposable
     {

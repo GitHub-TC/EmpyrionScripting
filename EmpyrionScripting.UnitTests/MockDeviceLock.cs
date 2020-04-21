@@ -1,4 +1,6 @@
-﻿namespace EmpyrionScripting.UnitTests
+﻿using EmpyrionScripting.Internal.Interface;
+
+namespace EmpyrionScripting.UnitTests
 {
     public class MockDeviceLock : IDeviceLock
     {

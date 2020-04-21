@@ -1,11 +1,6 @@
 ﻿using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmpyrionScripting.CsHelper
 {

@@ -2,6 +2,7 @@
 using EmpyrionNetAPIAccess;
 using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

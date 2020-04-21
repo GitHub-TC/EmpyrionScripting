@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Eleon.Modding;
+using EmpyrionScripting.Interface;
 
-namespace EmpyrionScripting.Interface
+namespace EmpyrionScripting.Internal.Interface
 {
 
     public interface IScriptRootData : IScriptModData

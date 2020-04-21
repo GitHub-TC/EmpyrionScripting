@@ -7,6 +7,7 @@ using Eleon.Modding;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
