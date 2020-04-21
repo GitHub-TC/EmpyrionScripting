@@ -25,7 +25,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var found = root.Entites                    .Where(E => E.Name == namesSearch)
+                var found = root.GetEntities().Where(E => E.Name == namesSearch)
                     .FirstOrDefault(E => Vector3.Distance(E.Position, root.E.Pos) <= distance);
 
                 if (found == null)  options.Inverse(output, context as object);
@@ -55,7 +55,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var entities = string.IsNullOrEmpty(selectedTypes)
-                    ? root.Entites                    : root.AllEntities                        .Where(E =>
+                    ? root.GetEntities() : root.GetAllEntities().Where(E =>
                         {
                             try  { return new[] { E.Type.ToString() }.GetUniqueNames(selectedTypes).Any(); }
                             catch{ return false; }
@@ -85,7 +85,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var found = root.Entites.Where(E => new[] { E.Id.ToString() }.GetUniqueNames(idsSearch).Any());
+                var found = root.GetEntities().Where(E => new[] { E.Id.ToString() }.GetUniqueNames(idsSearch).Any());
 
                 if (found == null || !found.Any()) options.Inverse(output, context as object);
                 else                               options.Template(output, found.Select(E => new EntityData(root.GetCurrentPlayfield(), E) { Distance = Vector3.Distance(E.Position, root.E.Pos) }).ToArray());
@@ -107,7 +107,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var found = root.Entites.FirstOrDefault(E => E.Id == id);
+                var found = root.GetEntities().FirstOrDefault(E => E.Id == id);
 
                 if (found == null) options.Inverse(output, context as object);
                 else               options.Template(output, new EntityData(root.GetCurrentPlayfield(), found) { Distance = Vector3.Distance(found.Position, root.E.Pos) });

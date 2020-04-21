@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Eleon.Modding;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,5 +29,8 @@ namespace EmpyrionScripting.Interface
         int CycleCounter { get; }
         bool IsElevatedScript { get; }
         ConcurrentDictionary<string, object> GetPersistendData();
+        IEnumerable<IEntity> GetAllEntities();
+        IEnumerable<IEntity> GetEntities();
+        IPlayfield GetCurrentPlayfield();
     }
 }

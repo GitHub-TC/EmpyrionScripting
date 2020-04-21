@@ -69,11 +69,12 @@ namespace EmpyrionScripting.DataWrapper
 
         public IPlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
         public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;
-        public IEnumerable<IEntity> AllEntities => IsElevatedScript ? allEntities : Enumerable.Empty<IEntity>();
-        public IEnumerable<IEntity> Entites => currentEntities
-                    .Where(SafeIsNoProxyCheck)
-                    .Where(e => e.Faction.Id == E.GetCurrent().Faction.Id)
-                    .Where(e => IsElevatedScript || Vector3.Distance(e.Position, E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance);
+
+        public IEnumerable<IEntity> GetAllEntities() => IsElevatedScript ? allEntities : Enumerable.Empty<IEntity>();
+        public IEnumerable<IEntity> GetEntities() => currentEntities
+                .Where(SafeIsNoProxyCheck)
+                .Where(e => e.Faction.Id == E.GetCurrent().Faction.Id)
+                .Where(e => IsElevatedScript || Vector3.Distance(e.Position, E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance);
 
         public IPlayfield GetCurrentPlayfield() => playfield;
 
