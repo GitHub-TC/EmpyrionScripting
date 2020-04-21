@@ -1,8 +1,9 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class BlockData
+    public class BlockData : IBlockData
     {
         private IBlock      _block;
         private IDevice     _device;

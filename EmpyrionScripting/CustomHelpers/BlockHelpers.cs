@@ -21,18 +21,25 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
+                var blocks = Devices(structure, namesSearch);
 
-                var blocks = uniqueNames
-                    .SelectMany(N => structure.GetCurrent().GetDevicePositions(N)
-                        .Select(V => new BlockData(structure.GetCurrent(), V))).ToArray();
                 if (blocks != null && blocks.Length > 0) options.Template(output, blocks);
-                else                                     options.Inverse (output, context as object);
+                else                                     options.Inverse(output, context as object);
             }
             catch (Exception error)
             {
                 output.Write("{{devices}} error " + EmpyrionScripting.ErrorFilter(error));
             }
+        }
+
+        public static IBlockData[] Devices(IStructureData structure, string names)
+        {
+            var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(names);
+
+            return uniqueNames
+                .SelectMany(N => structure.GetCurrent().GetDevicePositions(N)
+                .Select(V => new BlockData(structure.GetCurrent(), V)))
+                .ToArray();
         }
 
         [HandlebarTag("devicesoftype")]
@@ -45,22 +52,29 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                if(!Enum.TryParse<DeviceTypeName>(typeSearch, true, out var deviceType)) {
+                if (!Enum.TryParse<DeviceTypeName>(typeSearch, true, out var deviceType))
+                {
                     output.Write("{{devicesoftype}} error unknown device " + typeSearch);
                 }
 
-                var blocks = structure?.GetCurrent()
-                                .GetDevices(deviceType)?
-                                .Values()
-                                .Select(V => new BlockData(structure.GetCurrent(), V))
-                                .ToArray();
+                var blocks = DevicesOfType(structure, deviceType);
+
                 if (blocks != null && blocks.Length > 0) options.Template(output, blocks);
-                else                                     options.Inverse (output, context as object);
+                else                                     options.Inverse(output, context as object);
             }
             catch (Exception error)
             {
                 output.Write("{{devicesoftype}} error " + EmpyrionScripting.ErrorFilter(error));
             }
+        }
+
+        public static IBlockData[] DevicesOfType(IStructureData structure, DeviceTypeName deviceType)
+        {
+            return structure?.GetCurrent()
+                            .GetDevices(deviceType)?
+                            .Values()
+                            .Select(V => new BlockData(structure.GetCurrent(), V))
+                            .ToArray();
         }
 
         [HandlebarTag("block")]
