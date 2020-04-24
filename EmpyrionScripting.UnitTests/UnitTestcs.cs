@@ -20,7 +20,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsSimpleTextReturn()
         {
             var lcdMod = new EmpyrionScripting();
-            EmpyrionScripting.Configuration.Current.CsScriptsAllowed = CsScriptsAllowed.Everywhere;
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
             var pf = new PlayfieldScriptData(lcdMod);
 
             var dict = new ConcurrentDictionary<string, object>();
@@ -37,7 +37,8 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsScriptWithException()
         {
             var lcdMod = new EmpyrionScripting();
-            EmpyrionScripting.Configuration.Current.CsScriptsAllowed = CsScriptsAllowed.Everywhere;
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
             var dict = new ConcurrentDictionary<string, object>();
@@ -54,7 +55,8 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsPlayfieldName()
         {
             var lcdMod = new EmpyrionScripting();
-            EmpyrionScripting.Configuration.Current.CsScriptsAllowed = CsScriptsAllowed.Everywhere;
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
             var dict = new ConcurrentDictionary<string, object>();
@@ -75,7 +77,8 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsExtMethods()
         {
             var lcdMod = new EmpyrionScripting();
-            EmpyrionScripting.Configuration.Current.CsScriptsAllowed = CsScriptsAllowed.Everywhere;
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
             var dict = new ConcurrentDictionary<string, object>();
@@ -97,7 +100,8 @@ namespace EmpyrionScripting.UnitTests
             ConveyorHelpers.CreateDeviceLock = (R, P, S, V) => new MockDeviceLock();
 
             var lcdMod = new EmpyrionScripting();
-            EmpyrionScripting.Configuration.Current.CsScriptsAllowed = CsScriptsAllowed.Everywhere;
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
             var dict = new ConcurrentDictionary<string, object>();
@@ -250,8 +254,9 @@ namespace EmpyrionScripting.UnitTests
             lcdData.E.Returns(eCV);
             lcdData.E.S.Returns(sCV);
             var lcdMod = new EmpyrionScripting();
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var s = new StringBuilder();
-            EmpyrionScripting.Configuration.Current.CsScriptsAllowed = CsScriptsAllowed.Everywhere;
             var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual("SVa:1#9 SVa:BoxA->CVb:BoxB", lcdMod.ExecuteCsScript(pf, lcdData, @"
                 E.S.DockedE.ForEach(e => { 

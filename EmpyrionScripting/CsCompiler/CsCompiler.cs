@@ -1,0 +1,152 @@
+﻿using Eleon.Modding;
+using EmpyrionNetAPITools;
+using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
+using System.Threading;
+
+namespace EmpyrionScripting.CsCompiler
+{
+    public class CsCompiler
+    {
+        public ConfigurationManager<CsCompilerConfiguration> Configuration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
+        public ConfigurationManager<CsCompilerConfiguration> UnkownConfiguration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
+        public ConfigurationManager<CsCompilerConfiguration> DefaultConfiguration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
+        public string SaveGameModPath { get; }
+
+        public CsCompiler(string saveGameModPath)
+        {
+            SaveGameModPath = saveGameModPath;
+
+            LoadConfiguration();
+        }
+
+        private void LoadConfiguration()
+        {
+            if(EmpyrionScripting.ModApi != null) ConfigurationManager<CsCompilerConfiguration>.Log = EmpyrionScripting.ModApi.Log;
+
+            Configuration = new ConfigurationManager<CsCompilerConfiguration>()
+            {
+                ConfigFilename = Path.Combine(SaveGameModPath, "CsCompilerConfiguration.json")
+            };
+            Configuration.Load();
+            Configuration.Save();
+
+            DefaultConfiguration = new ConfigurationManager<CsCompilerConfiguration>()
+            {
+                ConfigFilename = Path.Combine(Path.GetDirectoryName(typeof(EmpyrionScripting).Assembly.Location), "DefaultCsCompilerConfiguration.json")
+            };
+            DefaultConfiguration.Load();
+
+            UnkownConfiguration = new ConfigurationManager<CsCompilerConfiguration>()
+            {
+                ConfigFilename = Path.Combine(SaveGameModPath, "UnkownCsCompilerConfiguration.json")
+            };
+            UnkownConfiguration.Load();
+        }
+
+        private void AnalyzeDiagnostics(ImmutableArray<Diagnostic> diagnostics, List<string> messages, ref bool success)
+        {
+            success = success && !diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
+
+            var orderedDiagnostics = diagnostics
+                .Where(d => d.Severity >= DiagnosticSeverity.Warning)
+                .OrderByDescending(d => d.Severity);
+
+            foreach (var diagnostic in orderedDiagnostics)
+            {
+                var lineSpan = diagnostic.Location.GetMappedLineSpan();
+                var message = string.Format("{0}({1},{2}): {3}: {4}",
+                    lineSpan.Path,
+                    lineSpan.StartLinePosition.Line + 1,
+                    lineSpan.StartLinePosition.Character,
+                    diagnostic.Severity == DiagnosticSeverity.Warning ? "Warning" : "ERROR",
+                    diagnostic.GetMessage());
+
+                messages.Add(message);
+            }
+        }
+
+
+        internal Func<object, string> GetExec<T>(CsScriptsAllowed csScriptsAllowed, T data, string script) where T : IScriptRootData
+        {
+            using (var loader = new InteractiveAssemblyLoader())
+            {
+                var options = ScriptOptions.Default
+                        .WithAllowUnsafe(false)
+                        .WithEmitDebugInformation(false)
+                        .WithCheckOverflow(true)
+                        .WithOptimizationLevel(OptimizationLevel.Release)
+
+                        .WithImports(DefaultConfiguration.Current.Usings)
+                        .AddImports(Configuration.Current.Usings)
+
+                        .WithReferences(DefaultConfiguration.Current.AssemblyReferences)
+                        .AddReferences(Configuration.Current.AssemblyReferences)
+                        .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location);
+
+                var csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
+                var c = csScript.Compile();
+
+                var compilation = csScript.GetCompilation();
+
+                var WhitelistDiagnosticAnalyzer = new WhitelistDiagnosticAnalyzer(DefaultConfiguration, Configuration, UnkownConfiguration);
+
+                var analyzerCompilation = compilation
+                    .WithAnalyzers(ImmutableArray.Create<DiagnosticAnalyzer>(WhitelistDiagnosticAnalyzer))
+                    .GetAnalysisResultAsync(CancellationToken.None)
+                    .GetAwaiter().GetResult().CompilationDiagnostics;
+
+                var messages = new List<string>();
+                bool success = true;
+                analyzerCompilation.ForEach(A => AnalyzeDiagnostics(A.Value, messages, ref success));
+
+                if (WhitelistDiagnosticAnalyzer.UnkownConfigurationIsChanged)
+                {
+                    UnkownConfiguration.Current.AddNewSymbols();
+                    UnkownConfiguration.Save();
+                }
+
+                return rootObject =>
+                {
+                    if (!success) return string.Join("\n", messages);
+
+                    var root = rootObject as IScriptRootData;
+                    if (csScriptsAllowed == CsScriptsAllowed.SaveGameScripts && !(root is ScriptSaveGameRootData))                       return "C# scripts only allowed in SaveGameScripts";
+                    if (csScriptsAllowed == CsScriptsAllowed.AdminStructures && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts only allowed on AdminStructures";
+
+                    if (WhitelistDiagnosticAnalyzer.PermissionNeeded == ModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "This script only allowed in SaveGameScripts";
+                    if (WhitelistDiagnosticAnalyzer.PermissionNeeded == ModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "This script only allowed on AdminStructures";
+
+                    string exceptionMessage = null;
+                    try
+                    {
+                        using (var output = new StringWriter())
+                        {
+                            root.ScriptOutput = output;
+
+                            object result = csScript.RunAsync(root, ex => { exceptionMessage = $"Exception: {(root.IsElevatedScript ? ex.ToString() : ex.Message)}"; return true; }).GetAwaiter().GetResult().ReturnValue;
+                            output.Write(result?.ToString());
+
+                            return exceptionMessage ?? output.ToString();
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        return root.IsElevatedScript ? error.ToString() : error.Message;
+                    }
+                };
+            }
+        }
+    }
+}

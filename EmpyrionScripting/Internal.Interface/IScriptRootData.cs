@@ -13,5 +13,8 @@ namespace EmpyrionScripting.Internal.Interface
         TextWriter ScriptOutput { get; set; }
 
         IPlayfieldScriptData GetPlayfieldScriptData();
+        IEnumerable<IEntity> GetAllEntities();
+        IEnumerable<IEntity> GetEntities();
+        IPlayfield GetCurrentPlayfield();
     }
 }

@@ -1,0 +1,54 @@
+{
+  "WithinLearnMode": true,
+  "Usings": [
+    "System",
+    "System.Text",
+    "System.Linq",
+    "System.Numerics",
+    "System.Collections.Generic",
+    "System.Collections.Concurrent",
+    "EmpyrionScripting",
+    "EmpyrionScripting.DataWrapper",
+    "EmpyrionScripting.CustomHelpers",
+    "EmpyrionScripting.Interface"
+  ],
+  "AssemblyReferences": [
+    "Syste.Core",
+    "System.Numerics"
+  ],
+  "SymbolPermissions": {
+    "Player": [
+      "EmpyrionScripting.Interface.IPlayfieldData.Name",
+      "EmpyrionScripting.Interface.IScriptModData.P",
+      "EmpyrionScripting.Interface.IScriptModData.Console",
+      "EmpyrionScripting.Interface.IConsoleMock.Write",
+      "EmpyrionScripting.Interface.ICsScriptFunctions.Fill",
+      "EmpyrionScripting.Interface.IEntityData.S",
+      "EmpyrionScripting.Interface.IItemMoveInfo",
+      "EmpyrionScripting.Interface.IItemMoveInfo.Count",
+      "EmpyrionScripting.Interface.IItemMoveInfo.Id",
+      "EmpyrionScripting.Interface.IItemMoveInfo.Source",
+      "EmpyrionScripting.Interface.IItemsData.Id",
+      "EmpyrionScripting.Interface.IScriptModData.CsRoot",
+      "EmpyrionScripting.Interface.IScriptModData.E",
+      "EmpyrionScripting.Interface.IStructureData.DockedE",
+      "EmpyrionScripting.Interface.IStructureData.Items",
+      "EmpyrionScripting.Interface.StructureTankType",
+      "EmpyrionScripting.Interface.StructureTankType.Fuel",
+      "EmpyrionScripting.CustomHelpers.HelpersTools.GetUniqueNames",
+      "EmpyrionScripting.EnumerableExtensions.ForEach",
+      "EmpyrionScripting.Interface.ICsScriptFunctions.Items",
+      "EmpyrionScripting.Interface.ICsScriptFunctions.Move",
+      "EmpyrionScripting.Interface.IEntityData.Name",
+      "EmpyrionScripting.Interface.IItemMoveInfo.Destination",
+      "EmpyrionScripting.Interface.IItemMoveInfo.DestinationE",
+      "EmpyrionScripting.Interface.IItemMoveInfo.SourceE",
+      "System.string.Join",
+      "System.Exception",
+      "System.Linq.Enumerable.First"
+    ],
+    "Admin": [],
+    "SaveGame": [
+    ]
+  }
+}

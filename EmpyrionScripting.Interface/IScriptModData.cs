@@ -29,8 +29,5 @@ namespace EmpyrionScripting.Interface
         int CycleCounter { get; }
         bool IsElevatedScript { get; }
         ConcurrentDictionary<string, object> GetPersistendData();
-        IEnumerable<IEntity> GetAllEntities();
-        IEnumerable<IEntity> GetEntities();
-        IPlayfield GetCurrentPlayfield();
     }
 }

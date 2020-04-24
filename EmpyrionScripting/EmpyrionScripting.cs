@@ -8,9 +8,6 @@ using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -44,6 +41,8 @@ namespace EmpyrionScripting
         public int InGameScriptsCount { get; private set; }
         public int SaveGameScriptsCount { get; private set; }
 
+        public CsCompiler.CsCompiler CsCompiler { get; set; }
+
         public ConcurrentDictionary<string, PlayfieldScriptData> PlayfieldData { get; set; } = new ConcurrentDictionary<string, PlayfieldScriptData>();
 
         public EmpyrionScripting()
@@ -74,6 +73,8 @@ namespace EmpyrionScripting
                 SaveGamesScripts.ReadSaveGamesScripts();
 
                 TaskTools.Log = ModApi.LogError;
+
+                CsCompiler = new CsCompiler.CsCompiler(SaveGameModPath);
 
                 ModApi.Application.OnPlayfieldLoaded    += Application_OnPlayfieldLoaded;
                 ModApi.Application.OnPlayfieldUnloading += Application_OnPlayfieldUnloading;
@@ -546,50 +547,8 @@ namespace EmpyrionScripting
         {
             if (!playfieldData.LcdCompileCache.TryGetValue(script, out Func<object, string> generator))
             {
-                using (var loader = new InteractiveAssemblyLoader())
-                {
-                    var options = ScriptOptions.Default
-                            .WithAllowUnsafe(false)
-                            .WithEmitDebugInformation(false)
-                            .WithCheckOverflow(true)
-                            .WithOptimizationLevel(OptimizationLevel.Release)
-
-                            .WithImports   (Configuration.Current.CsUsings)
-                            .AddImports("EmpyrionScripting", "EmpyrionScripting.DataWrapper", "EmpyrionScripting.CustomHelpers", "EmpyrionScripting.Interface")
-
-                            .WithReferences(Configuration.Current.CsAssemblyReferences)
-                            .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location);
-
-                    var csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
-                    var c = csScript.Compile();
-
-                    generator = rootObject =>
-                        {
-                            var root = rootObject as IScriptRootData;
-                            if (Configuration.Current.CsScriptsAllowed == CsScriptsAllowed.SaveGameScripts && !(root is ScriptSaveGameRootData))                       return "C# scripts only allowed in SaveGameScripts";
-                            if (Configuration.Current.CsScriptsAllowed == CsScriptsAllowed.AdminStructures && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts only allowed on AdminStructures";
-
-                            string exceptionMessage = null;
-                            try
-                            {
-                                using (var output = new StringWriter())
-                                {
-                                    root.ScriptOutput = output;
-
-                                    object result = csScript.RunAsync(root, ex => { exceptionMessage = $"Exception: {(root.IsElevatedScript ? ex.ToString() : ex.Message)}"; return true; }).GetAwaiter().GetResult().ReturnValue;
-                                    output.Write(result?.ToString());
-
-                                    return exceptionMessage ?? output.ToString();
-                                }
-                            }
-                            catch (Exception error)
-                            {
-                                return root.IsElevatedScript ? error.ToString() : error.Message;
-                            }
-                        };
-
-                    playfieldData.LcdCompileCache.TryAdd(script, generator);
-                }
+                generator = CsCompiler.GetExec(Configuration.Current.CsScriptsAllowed, data, script);
+                playfieldData.LcdCompileCache.TryAdd(script, generator);
             }                                                      
 
             return generator(data);
