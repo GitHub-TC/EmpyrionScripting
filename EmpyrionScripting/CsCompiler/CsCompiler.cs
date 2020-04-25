@@ -1,5 +1,4 @@
-﻿using Eleon.Modding;
-using EmpyrionNetAPITools;
+﻿using EmpyrionNetAPITools;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
@@ -20,7 +19,7 @@ namespace EmpyrionScripting.CsCompiler
     public class CsCompiler
     {
         public ConfigurationManager<CsCompilerConfiguration> Configuration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
-        public ConfigurationManager<CsCompilerConfiguration> UnkownConfiguration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
+        public ConfigurationManager<CsSymbolsConfiguration> UnkownConfiguration { get; set; } = new ConfigurationManager<CsSymbolsConfiguration>() { Current = new CsSymbolsConfiguration() };
         public ConfigurationManager<CsCompilerConfiguration> DefaultConfiguration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
         public string SaveGameModPath { get; }
 
@@ -48,9 +47,9 @@ namespace EmpyrionScripting.CsCompiler
             };
             DefaultConfiguration.Load();
 
-            UnkownConfiguration = new ConfigurationManager<CsCompilerConfiguration>()
+            UnkownConfiguration = new ConfigurationManager<CsSymbolsConfiguration>()
             {
-                ConfigFilename = Path.Combine(SaveGameModPath, "UnkownCsCompilerConfiguration.json")
+                ConfigFilename = Path.Combine(SaveGameModPath, "UnkownCsCompilerSymbols.json")
             };
             UnkownConfiguration.Load();
         }
@@ -78,7 +77,7 @@ namespace EmpyrionScripting.CsCompiler
         }
 
 
-        internal Func<object, string> GetExec<T>(CsScriptsAllowed csScriptsAllowed, T data, string script) where T : IScriptRootData
+        internal Func<object, string> GetExec<T>(CsModPermission csScriptsAllowed, T data, string script) where T : IScriptRootData
         {
             using (var loader = new InteractiveAssemblyLoader())
             {
@@ -96,8 +95,6 @@ namespace EmpyrionScripting.CsCompiler
                         .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location);
 
                 var csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
-                var c = csScript.Compile();
-
                 var compilation = csScript.GetCompilation();
 
                 var WhitelistDiagnosticAnalyzer = new WhitelistDiagnosticAnalyzer(DefaultConfiguration, Configuration, UnkownConfiguration);
@@ -115,6 +112,12 @@ namespace EmpyrionScripting.CsCompiler
                 {
                     UnkownConfiguration.Current.AddNewSymbols();
                     UnkownConfiguration.Save();
+
+                    Configuration.Current.PrepareForSave();
+                    Configuration.Save();
+
+                    DefaultConfiguration.Current.PrepareForSave();
+                    DefaultConfiguration.Save();
                 }
 
                 return rootObject =>
@@ -122,11 +125,11 @@ namespace EmpyrionScripting.CsCompiler
                     if (!success) return string.Join("\n", messages);
 
                     var root = rootObject as IScriptRootData;
-                    if (csScriptsAllowed == CsScriptsAllowed.SaveGameScripts && !(root is ScriptSaveGameRootData))                       return "C# scripts only allowed in SaveGameScripts";
-                    if (csScriptsAllowed == CsScriptsAllowed.AdminStructures && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts only allowed on AdminStructures";
+                    if (csScriptsAllowed == CsModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "C# scripts are only allowed in SaveGameScripts";
+                    if (csScriptsAllowed == CsModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts are only allowed on admin structures";
 
-                    if (WhitelistDiagnosticAnalyzer.PermissionNeeded == ModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "This script only allowed in SaveGameScripts";
-                    if (WhitelistDiagnosticAnalyzer.PermissionNeeded == ModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "This script only allowed on AdminStructures";
+                    if (WhitelistDiagnosticAnalyzer.PermissionNeeded == CsModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "This script is only allowed in SaveGameScripts";
+                    if (WhitelistDiagnosticAnalyzer.PermissionNeeded == CsModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "This script is only allowed on admin structures";
 
                     string exceptionMessage = null;
                     try

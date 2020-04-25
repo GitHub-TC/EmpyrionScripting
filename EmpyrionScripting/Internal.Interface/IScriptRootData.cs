@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using Eleon.Modding;
+﻿using System.IO;
 using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting.Internal.Interface
@@ -11,10 +9,10 @@ namespace EmpyrionScripting.Internal.Interface
         ScriptLanguage ScriptLanguage { get; set; }
         string Script { get; set; }
         TextWriter ScriptOutput { get; set; }
+        bool ColorChanged { get; set; }
+        bool BackgroundColorChanged { get; set; }
+        bool FontSizeChanged { get; set; }
 
         IPlayfieldScriptData GetPlayfieldScriptData();
-        IEnumerable<IEntity> GetAllEntities();
-        IEnumerable<IEntity> GetEntities();
-        IPlayfield GetCurrentPlayfield();
     }
 }

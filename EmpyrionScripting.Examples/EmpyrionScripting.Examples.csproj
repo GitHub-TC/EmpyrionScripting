@@ -4,18 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DD121666-D54D-47E7-AB4D-B7F79BF1278D}</ProjectGuid>
+    <ProjectGuid>{28D9AD16-EDED-420D-BDCD-9F823327177D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EmpyrionScripting.Interface</RootNamespace>
-    <AssemblyName>EmpyrionScripting.Interface</AssemblyName>
+    <RootNamespace>EmpyrionScripting.Examples</RootNamespace>
+    <AssemblyName>EmpyrionScripting.Examples</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <NuspecFile>EmpyrionScripting.Interface.nuspec</NuspecFile>
-    <NuspecBasePath>$(ProjectPath)</NuspecBasePath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,40 +50,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IBlockData.cs" />
-    <Compile Include="IConsoleMock.cs" />
-    <Compile Include="IContainerSource.cs" />
-    <Compile Include="ICsScriptFunctions.cs" />
-    <Compile Include="IDisplayOutputConfiguration.cs" />
-    <Compile Include="IEntityData.cs" />
-    <Compile Include="IEventStore.cs" />
-    <Compile Include="IItemMoveInfo.cs" />
-    <Compile Include="IItemsData.cs" />
-    <Compile Include="IItemsSource.cs" />
-    <Compile Include="ILimitedPlayerData.cs" />
-    <Compile Include="IPlayerData.cs" />
-    <Compile Include="IPlayfieldData.cs" />
-    <Compile Include="IScriptModData.cs" />
-    <Compile Include="ISignalData.cs" />
-    <Compile Include="ISignalEventBase.cs" />
-    <Compile Include="IStructureData.cs" />
-    <Compile Include="IStructureTankWrapper.cs" />
+    <Compile Include="Examples.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScriptLanguage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="EmpyrionScripting.Interface.nuspec" />
+    <ProjectReference Include="..\EmpyrionScripting.Interface\EmpyrionScripting.Interface.csproj">
+      <Project>{dd121666-d54d-47e7-ab4d-b7f79bf1278d}</Project>
+      <Name>EmpyrionScripting.Interface</Name>
+    </ProjectReference>
   </ItemGroup>
-  <Target Name="CopyPackage" AfterTargets="Pack">
-    <Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="F:\NuGet.Local\Debug\$(PackageId).$(PackageVersion)\" />
-  </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <Copyright>Copyright © 2020</Copyright>
-    <PackageId>EmpyrionScripting.Interface</PackageId>
-    <Company>ASTIC/TC</Company>
-    <Authors>ASTIC</Authors>
-    <Version>1.0.0</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
 </Project>

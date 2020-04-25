@@ -8,7 +8,5 @@ namespace EmpyrionScripting.Interface
         string CustomName { get; set; }
         IEntityData E { get; set; }
         VectorInt3 Position { get; set; }
-        float VolumeCapacity { get; }
-        float DecayFactor { get; }
     }
 }

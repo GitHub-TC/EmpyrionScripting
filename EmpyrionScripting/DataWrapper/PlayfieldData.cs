@@ -27,7 +27,5 @@ namespace EmpyrionScripting.DataWrapper
 
         public IEnumerable<ILimitedPlayerData> Players => _p == null ? _p = playfield.Players.Values.Select(P => new LimitedPlayerData(P)) : _p;
         IEnumerable<ILimitedPlayerData> _p;
-        public IEnumerable<ILimitedPlayerData> Player => Players;
-
     }
 }

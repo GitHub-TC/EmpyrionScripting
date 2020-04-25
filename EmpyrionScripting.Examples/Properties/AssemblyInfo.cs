@@ -1,15 +1,16 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EmpyrionScripting.Interface")]
-[assembly: AssemblyDescription("A interface to the EmpyrionScriptingMod C#")]
+[assembly: AssemblyTitle("EmpyrionScripting.Examples")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("ASTIC/TC")]
-[assembly: AssemblyProduct("EmpyrionScripting.Interface")]
-[assembly: AssemblyCopyright("Copyright © 2020")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("EmpyrionScripting.Examples")]
+[assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -19,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("dd121666-d54d-47e7-ab4d-b7f79bf1278d")]
+[assembly: Guid("28d9ad16-eded-420d-bdcd-9f823327177d")]
 
 // Version information for an assembly consists of the following four values:
 //

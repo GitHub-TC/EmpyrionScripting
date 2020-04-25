@@ -106,7 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EmpyrionScripting.Interface\EmpyrionScripting.Interface.csproj">
-      <Project>{DD121666-D54D-47E7-AB4D-B7F79BF1278D}</Project>
+      <Project>{dd121666-d54d-47e7-ab4d-b7f79bf1278d}</Project>
       <Name>EmpyrionScripting.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\EmpyrionScripting\EmpyrionScripting.csproj">

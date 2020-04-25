@@ -142,7 +142,6 @@
     <Compile Include="CsCompiler\AnalysisExtensions.cs" />
     <Compile Include="CsCompiler\CsCompiler.cs" />
     <Compile Include="CsCompiler\CsCompilerConfiguration.cs" />
-    <Compile Include="CsCompiler\ModPermission.cs" />
     <Compile Include="CsCompiler\WhitelistDiagnosticAnalyzer.cs" />
     <Compile Include="CsHelper\BlockHelpers.cs" />
     <Compile Include="CsHelper\ConveyorHelpers.cs" />
@@ -228,10 +227,10 @@
       <Name>EmpyrionScripting.Interface</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetDir)*.dll" "C:\steamcmd\empyrion\Content\Mods\EmpyrionScripting" /Y
+xcopy "$(TargetDir)*.json" "C:\steamcmd\empyrion\Content\Mods\EmpyrionScripting" /Y
 xcopy "$(TargetDir)*.yaml" "C:\steamcmd\empyrion\Content\Mods\EmpyrionScripting" /Y</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
 using System.Collections.Immutable;
 
 namespace EmpyrionScripting.CsCompiler
@@ -17,19 +18,19 @@ namespace EmpyrionScripting.CsCompiler
         public WhitelistDiagnosticAnalyzer(
             ConfigurationManager<CsCompilerConfiguration> defaultConfiguration, 
             ConfigurationManager<CsCompilerConfiguration> configuration, 
-            ConfigurationManager<CsCompilerConfiguration> unkownConfiguration)
+            ConfigurationManager<CsSymbolsConfiguration> unkownConfiguration)
         {
             DefaultConfiguration = defaultConfiguration;
-            Configuration        = configuration;
+            Configuration = configuration;
             UnkownConfiguration  = unkownConfiguration;
         }
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(PROHIBITED_OBJECT_RULE);
 
-        public ModPermission PermissionNeeded { get; set; }
+        public CsModPermission PermissionNeeded { get; set; }
         public ConfigurationManager<CsCompilerConfiguration> DefaultConfiguration { get; }
         public ConfigurationManager<CsCompilerConfiguration> Configuration { get; }
-        public ConfigurationManager<CsCompilerConfiguration> UnkownConfiguration { get; }
+        public ConfigurationManager<CsSymbolsConfiguration> UnkownConfiguration { get; }
         public bool UnkownConfigurationIsChanged { get; set; }
 
         public override void Initialize(AnalysisContext context)
@@ -53,30 +54,56 @@ namespace EmpyrionScripting.CsCompiler
             if (info.Symbol == null || info.Symbol.IsInSource()) return;
 
             var fullName = info.Symbol.GetFullMetadataName();
-            if (DefaultConfiguration.Current.Symbols.Value.TryGetValue(fullName, out var defaultPermission))
-            {
-                if (PermissionNeeded < defaultPermission) PermissionNeeded = defaultPermission;
-                return;
-            }
-
-            if (Configuration.Current.Symbols.Value.TryGetValue(fullName, out var permission))
-            {
-                if (PermissionNeeded < permission) PermissionNeeded = permission;
-                return;
-            }
+            if (FoundPermission(fullName)) return;
+            if (FoundPermissionWithWildcard(fullName)) return;
 
             if (Configuration.Current.WithinLearnMode)
             {
-                UnkownConfiguration.Current.Symbols.Value.TryAdd(fullName, ModPermission.SaveGame);
+                UnkownConfiguration.Current.Symbols.Value.TryAdd(fullName, CsModPermission.SaveGame);
                 UnkownConfigurationIsChanged = true;
             }
-            else
+
+            PermissionNeeded = CsModPermission.SaveGame;  // Im SaveGame ist alles erlaubt
+        }
+
+        private bool FoundPermissionWithWildcard(string name)
+        {
+            var testName = name;
+            while(true)
             {
-                var diagnostic = Diagnostic.Create(PROHIBITED_OBJECT_RULE, node.GetLocation(), info.Symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
-                context.ReportDiagnostic(diagnostic);
+                if (DefaultConfiguration.Current.Symbols.Value.TryGetValue(testName + ".*", out var defaultPermission))
+                {
+                    if (PermissionNeeded < defaultPermission) PermissionNeeded = defaultPermission;
+                    return true;
+                }
+
+                if (Configuration.Current.Symbols.Value.TryGetValue(testName + ".*", out var permission))
+                {
+                    if (PermissionNeeded < permission) PermissionNeeded = permission;
+                    return true;
+                }
+
+                var lastDotPos = testName.LastIndexOf('.');
+                if (lastDotPos > 0) testName = testName.Substring(0, lastDotPos);
+                else                return false;
+            };
+        }
+
+        private bool FoundPermission(string name)
+        {
+            if (DefaultConfiguration.Current.Symbols.Value.TryGetValue(name, out var defaultPermission))
+            {
+                if (PermissionNeeded < defaultPermission) PermissionNeeded = defaultPermission;
+                return true;
             }
 
-            PermissionNeeded = ModPermission.SaveGame;  // Im SaveGame ist alles erlaubt
+            if (Configuration.Current.Symbols.Value.TryGetValue(name, out var permission))
+            {
+                if (PermissionNeeded < permission) PermissionNeeded = permission;
+                return true;
+            }
+
+            return false;
         }
 
         bool IsQualifiedName(SyntaxNode arg)

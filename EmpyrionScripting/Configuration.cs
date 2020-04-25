@@ -18,19 +18,18 @@ namespace EmpyrionScripting
         public int Amount { get; set; }
     }
 
-    public enum CsScriptsAllowed
+    public enum CsModPermission
     {
-        SaveGameScripts = 0,
-        AdminStructures = 1,
-        Everywhere      = 2,
+        Player,
+        Admin,
+        SaveGame,
     }
-
     public class Configuration
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public LogLevel LogLevel { get; set; } = LogLevel.Message;
         [JsonConverter(typeof(StringEnumConverter))]
-        public CsScriptsAllowed CsScriptsAllowed { get; set; } = CsScriptsAllowed.Everywhere;
+        public CsModPermission CsScriptsAllowedFor { get; set; } = CsModPermission.Player;
         public int InGameScriptsIntervallMS { get; set; } = 1000;
         public int DeviceLockOnlyAllowedEveryXCycles { get; set; } = 10;
         public int SaveGameScriptsIntervallMS { get; set; } = 10000;

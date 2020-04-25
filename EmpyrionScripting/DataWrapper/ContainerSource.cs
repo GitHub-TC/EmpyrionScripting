@@ -9,5 +9,7 @@ namespace EmpyrionScripting.DataWrapper
         public IContainer Container { get; set; }
         public string CustomName { get; set; }
         public VectorInt3 Position { get; set; }
+        public float VolumeCapacity => Container.VolumeCapacity;
+        public float DecayFactor => Container.DecayFactor;
     }
 }

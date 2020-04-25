@@ -110,8 +110,7 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var root = rootObject as IScriptRootData;
                 int.TryParse(arguments[0]?.ToString(), NumberStyles.HexNumber, null, out int color);
-                root.Color        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
-                root.ColorChanged = true;
+                root.Color = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
             }
             catch (Exception error)
             {
@@ -128,8 +127,7 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var root = rootObject as IScriptRootData;
                 int.TryParse(arguments[0]?.ToString(), NumberStyles.HexNumber, null, out int color);
-                root.BackgroundColor        = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
-                root.BackgroundColorChanged = true;
+                root.BackgroundColor = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
             }
             catch (Exception error)
             {

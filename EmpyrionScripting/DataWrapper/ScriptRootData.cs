@@ -89,11 +89,14 @@ namespace EmpyrionScripting.DataWrapper
 
         public List<string> LcdTargets { get; set; } = new List<string>();
         public bool FontSizeChanged { get; set; }
-        public int FontSize { get; set; }
+        public int FontSize { get => _FontSize; set { _FontSize = value; FontSizeChanged = true; } }
+        int _FontSize;
         public bool ColorChanged { get; set; }
-        public Color Color { get; set; }
+        public Color Color { get => _Color; set { _Color = value; ColorChanged = true; } }
+        Color _Color;
         public bool BackgroundColorChanged { get; set; }
-        public Color BackgroundColor { get; set; }
+        public Color BackgroundColor { get => _BackgroundColor; set { _BackgroundColor = value; BackgroundColorChanged = true; } }
+        Color _BackgroundColor;
         public ConcurrentDictionary<string, object> Data { get; set; } = new ConcurrentDictionary<string, object>();
         public ScriptLanguage ScriptLanguage { get; set; }
         public string Script { get; set; }

@@ -547,7 +547,7 @@ namespace EmpyrionScripting
         {
             if (!playfieldData.LcdCompileCache.TryGetValue(script, out Func<object, string> generator))
             {
-                generator = CsCompiler.GetExec(Configuration.Current.CsScriptsAllowed, data, script);
+                generator = CsCompiler.GetExec(Configuration.Current.CsScriptsAllowedFor, data, script);
                 playfieldData.LcdCompileCache.TryAdd(script, generator);
             }                                                      
 
