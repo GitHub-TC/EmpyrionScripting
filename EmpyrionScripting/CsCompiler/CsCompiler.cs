@@ -1,4 +1,5 @@
 ﻿using EmpyrionNetAPITools;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
@@ -12,7 +13,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace EmpyrionScripting.CsCompiler
 {
@@ -76,9 +79,15 @@ namespace EmpyrionScripting.CsCompiler
             }
         }
 
-
         internal Func<object, string> GetExec<T>(CsModPermission csScriptsAllowed, T data, string script) where T : IScriptRootData
         {
+            var messages = new List<string>();
+            bool success = true;
+            MethodInfo mainMethod = null;
+
+            Script<object> csScript = null;
+            CsModPermission permissionNeeded;
+
             using (var loader = new InteractiveAssemblyLoader())
             {
                 var options = ScriptOptions.Default
@@ -94,7 +103,7 @@ namespace EmpyrionScripting.CsCompiler
                         .AddReferences(Configuration.Current.AssemblyReferences)
                         .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location);
 
-                var csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
+                csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
                 var compilation = csScript.GetCompilation();
 
                 var WhitelistDiagnosticAnalyzer = new WhitelistDiagnosticAnalyzer(DefaultConfiguration, Configuration, UnkownConfiguration);
@@ -104,8 +113,6 @@ namespace EmpyrionScripting.CsCompiler
                     .GetAnalysisResultAsync(CancellationToken.None)
                     .GetAwaiter().GetResult().CompilationDiagnostics;
 
-                var messages = new List<string>();
-                bool success = true;
                 analyzerCompilation.ForEach(A => AnalyzeDiagnostics(A.Value, messages, ref success));
 
                 if (WhitelistDiagnosticAnalyzer.UnkownConfigurationIsChanged)
@@ -120,36 +127,91 @@ namespace EmpyrionScripting.CsCompiler
                     DefaultConfiguration.Save();
                 }
 
-                return rootObject =>
+                permissionNeeded = WhitelistDiagnosticAnalyzer.PermissionNeeded;
+
+                Assembly assembly = null;
+
+                if (compilation.Assembly.TypeNames.Contains("ModMain"))
                 {
-                    if (!success) return string.Join("\n", messages);
-
-                    var root = rootObject as IScriptRootData;
-                    if (csScriptsAllowed == CsModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "C# scripts are only allowed in SaveGameScripts";
-                    if (csScriptsAllowed == CsModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts are only allowed on admin structures";
-
-                    if (WhitelistDiagnosticAnalyzer.PermissionNeeded == CsModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "This script is only allowed in SaveGameScripts";
-                    if (WhitelistDiagnosticAnalyzer.PermissionNeeded == CsModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "This script is only allowed on admin structures";
-
-                    string exceptionMessage = null;
-                    try
+                    using (var assemblyStream = new MemoryStream())
                     {
-                        using (var output = new StringWriter())
+                        try
                         {
-                            root.ScriptOutput = output;
+                            var result = compilation.Emit(assemblyStream);
+                            var resultSuccess = result.Success;
 
-                            object result = csScript.RunAsync(root, ex => { exceptionMessage = $"Exception: {(root.IsElevatedScript ? ex.ToString() : ex.Message)}"; return true; }).GetAwaiter().GetResult().ReturnValue;
-                            output.Write(result?.ToString());
+                            if (resultSuccess)
+                            {
+                                assembly = Assembly.ReflectionOnlyLoad(assemblyStream.ToArray());
+                                var callMainType = assembly.GetTypes().SingleOrDefault(MT => MT.Name == "ModMain");
+                                mainMethod = callMainType.GetMethod("Main");
 
-                            return exceptionMessage ?? output.ToString();
+                                if (mainMethod != null)
+                                {
+                                    assemblyStream.Seek(0, SeekOrigin.Begin);
+                                    assembly = Assembly.Load(assemblyStream.ToArray());
+
+                                    callMainType = assembly.GetTypes().SingleOrDefault(MT => MT.Name == "ModMain");
+                                    mainMethod = callMainType.GetMethod("Main");
+                                }
+                            }
+                        }
+                        catch (Exception loadError)
+                        {
+                            messages.Add($"Assembly:{loadError}");
                         }
                     }
-                    catch (Exception error)
-                    {
-                        return root.IsElevatedScript ? error.ToString() : error.Message;
-                    }
-                };
+                }
             }
+
+            return rootObject =>
+            {
+                if (!success) return string.Join("\n", messages);
+
+                var root = rootObject as IScriptRootData;
+                if (csScriptsAllowed == CsModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "C# scripts are only allowed in SaveGameScripts";
+                if (csScriptsAllowed == CsModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts are only allowed on admin structures";
+
+                if (permissionNeeded == CsModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "This script is only allowed in SaveGameScripts";
+                if (permissionNeeded == CsModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "This script is only allowed on admin structures";
+
+                string exceptionMessage = null;
+                try
+                {
+                    using (var output = new StringWriter())
+                    {
+                        root.ScriptOutput = output;
+                        object result = null;
+
+                        if (mainMethod != null)
+                        {
+                            if(root.CsRoot is CsScriptFunctions csRoot) csRoot.Root = root;
+                            result = mainMethod.Invoke(null, new[] { root as IScriptModData });
+                        }
+                        else
+                        {
+                            result = csScript
+                                .RunAsync(root, ex => { exceptionMessage = $"Exception: {(root.IsElevatedScript ? ex.ToString() : ex.Message)}"; return true; })
+                                .ConfigureAwait(true)
+                                .GetAwaiter()
+                                .GetResult()
+                                .ReturnValue;
+                        }
+
+                        if (result is Action action)                            action();
+                        else if (result is Action<IScriptModData> simpleaction) simpleaction(root);
+                        else if (result is Func<IScriptModData, object> func)   output.Write(func(root)?.ToString());
+                        else if (result is Task task)                           task.RunSynchronously();
+                        else                                                    output.Write(result?.ToString());
+
+                        return exceptionMessage ?? output.ToString();
+                    }
+                }
+                catch (Exception error)
+                {
+                    return root.IsElevatedScript ? error.ToString() : error.Message;
+                }
+            };
         }
     }
 }

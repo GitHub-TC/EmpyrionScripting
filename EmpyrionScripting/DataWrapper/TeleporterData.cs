@@ -22,8 +22,9 @@ namespace EmpyrionScripting.DataWrapper
         public string Destination { 
             get => $"{DeviceName}@{Target}:{Playfield}"; 
             set {
+                // TODO: Target sind noch falsch
                 var data = value?.Split('@', ':', '#');
-                _teleporter.TargetData = new Eleon.Modding.TeleporterData($"{data[0]}@{data[1]}", data[2], data.Length == 4 && byte.TryParse(data[3], out var origin) ? origin : (byte)255);
+                _teleporter.TargetData = new Eleon.Modding.TeleporterData($"{data[0]}@{data[1]}", data[2], data[3], data.Length == 5 && byte.TryParse(data[4], out var origin) ? origin : (byte)255);
             }
         }
 

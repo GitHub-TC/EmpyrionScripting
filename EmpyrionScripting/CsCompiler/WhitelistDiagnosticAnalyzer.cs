@@ -54,6 +54,9 @@ namespace EmpyrionScripting.CsCompiler
             if (info.Symbol == null || info.Symbol.IsInSource()) return;
 
             var fullName = info.Symbol.GetFullMetadataName();
+            var genericTypePos = fullName.IndexOf('`');
+            if (genericTypePos >= 0) fullName = fullName.Substring(0, genericTypePos);
+
             if (FoundPermission(fullName)) return;
             if (FoundPermissionWithWildcard(fullName)) return;
 

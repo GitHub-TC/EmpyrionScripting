@@ -25,6 +25,7 @@ namespace EmpyrionScripting.Interface
         string ScriptId { get; set; }
         int CycleCounter { get; }
         bool IsElevatedScript { get; }
+        string Version { get; }
 
         IEnumerable<IEntity> GetAllEntities();
         IPlayfield GetCurrentPlayfield();

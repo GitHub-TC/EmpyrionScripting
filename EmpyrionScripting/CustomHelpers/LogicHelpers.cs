@@ -22,13 +22,14 @@ namespace EmpyrionScripting.CustomHelpers
                 else if(bool.TryParse(test, out var boolresult))
                 {
                     if(boolresult) options.Template(output, context as object);
-                    else       options.Inverse(output,  context as object);
+                    else           options.Inverse(output,  context as object);
                 }
                 else if(int.TryParse(test, out var intresult))
                 {
                     if(intresult == 0) options.Inverse(output, context as object); 
                     else               options.Template(output, context as object);
                 }
+                else options.Template(output, context as object);
 
             }
             catch (Exception error)

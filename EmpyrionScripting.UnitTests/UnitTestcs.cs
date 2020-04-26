@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Eleon.Modding;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
@@ -271,6 +272,77 @@ namespace EmpyrionScripting.UnitTests
             "));
         }
 
+        [TestMethod]
+        public void TestMethodCsReturnAction()
+        {
+            var lcdMod = new EmpyrionScripting();
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var dict = new ConcurrentDictionary<string, object>();
+
+            var data = Substitute.For<IScriptRootData>();
+            data.GetPersistendData().ReturnsForAnyArgs(dict);
+            data.Data = dict;
+
+            data.CycleCounter.Returns(0);
+            Assert.AreEqual("", lcdMod.ExecuteCsScript(pf, data, "return new Action(() => {});"));
+        }
+
+        [TestMethod]
+        public void TestMethodCsReturnFunc()
+        {
+            var lcdMod = new EmpyrionScripting();
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var dict = new ConcurrentDictionary<string, object>();
+
+            var data = Substitute.For<IScriptRootData>();
+            data.GetPersistendData().ReturnsForAnyArgs(dict);
+            data.Data = dict;
+
+            data.CycleCounter.Returns(0);
+            Assert.AreEqual("42", lcdMod.ExecuteCsScript(pf, data, "return new Func<IScriptModData, object>((d) => { return 42;});"));
+        }
+
+        [TestMethod]
+        public void TestMethodCsReturnTask()
+        {
+            var lcdMod = new EmpyrionScripting();
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var dict = new ConcurrentDictionary<string, object>();
+
+            var data = Substitute.For<IScriptRootData>();
+            data.GetPersistendData().ReturnsForAnyArgs(dict);
+            data.Data = dict;
+
+            data.CycleCounter.Returns(0);
+            Assert.AreEqual("", lcdMod.ExecuteCsScript(pf, data, "return new Task(async () => {});"));
+        }
+
+        [TestMethod]
+        public void TestMethodCsAssemlbyReturn()
+        {
+            var lcdMod = new EmpyrionScripting();
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var dict = new ConcurrentDictionary<string, object>();
+
+            var data = Substitute.For<IScriptRootData>();
+            data.GetPersistendData().ReturnsForAnyArgs(dict);
+            data.Data = dict;
+
+            data.CycleCounter.Returns(0);
+            Assert.AreEqual("42", lcdMod.ExecuteCsScript(pf, data, "public class ModMain { public static int Main(IScriptModData root) { return 42; }}"));
+        }
 
     }
 }
