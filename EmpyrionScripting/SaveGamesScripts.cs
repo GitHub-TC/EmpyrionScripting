@@ -23,7 +23,9 @@ namespace EmpyrionScripting
             MainScriptPath = Path.Combine(SaveGameModPath, "Scripts");
             Directory.CreateDirectory(MainScriptPath);
 
-            SaveGameScriptsWatcher = new FileSystemWatcher(MainScriptPath, "*.*")
+            ModApi?.Log($"SaveGameScript: FileSystemWatcher: {MainScriptPath}");
+
+            SaveGameScriptsWatcher = new FileSystemWatcher(MainScriptPath)
             {
                 IncludeSubdirectories = true,
             };
@@ -75,6 +77,6 @@ namespace EmpyrionScripting
             SaveGameScripts.Keys.ForEach(F => ModApi?.Log($"SaveGameScript: found script: {F}"));
         }
 
-        private bool IsScriptFile(string fileext) => fileext == "cs" || fileext == "hbs";
+        private bool IsScriptFile(string fileext) => fileext == ".cs" || fileext == ".hbs";
     }
 }

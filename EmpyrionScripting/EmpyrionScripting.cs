@@ -444,9 +444,10 @@ namespace EmpyrionScripting
                             .ForEach(F => {
                                 var data = new ScriptSaveGameRootData(entityScriptData)
                                 {
-                                    Script      = F.Value,
-                                    ScriptId    = entityScriptData.E.Id + "/" + F.Key,
-                                    ScriptPath  = Path.GetDirectoryName(F.Key)
+                                    ScriptLanguage  = Path.GetExtension(F.Key).Equals(".cs", StringComparison.InvariantCultureIgnoreCase) ? ScriptLanguage.Cs : ScriptLanguage.Handlebar,
+                                    Script          = F.Value,
+                                    ScriptId        = entityScriptData.E.Id + "/" + F.Key,
+                                    ScriptPath      = Path.GetDirectoryName(F.Key)
                                 };
                                 playfieldData.ScriptExecQueue.Add(data);
 

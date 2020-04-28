@@ -1,25 +1,26 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.Interface;
 using System.Collections.Concurrent;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class ScriptSaveGameRootData : ScriptRootData
+    public class ScriptSaveGameRootData : ScriptRootData, IScriptSaveGameRootData
     {
-        public ScriptSaveGameRootData() :base()
+        public ScriptSaveGameRootData() : base()
         {
         }
         public ScriptSaveGameRootData(ScriptSaveGameRootData data) : base(data)
         {
-            ScriptPath     = data.ScriptPath;
+            ScriptPath = data.ScriptPath;
             MainScriptPath = data.MainScriptPath;
         }
         public ScriptSaveGameRootData(
             PlayfieldScriptData playfieldScriptData,
             IEntity[] allEntities,
-            IEntity[] currentEntities, 
-            IPlayfield playfield, 
-            IEntity entity, 
-            ConcurrentDictionary<string, object> persistendData, 
+            IEntity[] currentEntities,
+            IPlayfield playfield,
+            IEntity entity,
+            ConcurrentDictionary<string, object> persistendData,
             EventStore eventStore) : base(playfieldScriptData, allEntities, currentEntities, playfield, entity, persistendData, eventStore)
         {
         }

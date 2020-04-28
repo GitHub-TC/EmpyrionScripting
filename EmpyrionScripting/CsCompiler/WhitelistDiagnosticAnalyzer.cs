@@ -17,12 +17,10 @@ namespace EmpyrionScripting.CsCompiler
 
         public WhitelistDiagnosticAnalyzer(
             ConfigurationManager<CsCompilerConfiguration> defaultConfiguration, 
-            ConfigurationManager<CsCompilerConfiguration> configuration, 
-            ConfigurationManager<CsSymbolsConfiguration> unkownConfiguration)
+            ConfigurationManager<CsCompilerConfiguration> configuration)
         {
             DefaultConfiguration = defaultConfiguration;
             Configuration = configuration;
-            UnkownConfiguration  = unkownConfiguration;
         }
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(PROHIBITED_OBJECT_RULE);
@@ -30,8 +28,7 @@ namespace EmpyrionScripting.CsCompiler
         public CsModPermission PermissionNeeded { get; set; }
         public ConfigurationManager<CsCompilerConfiguration> DefaultConfiguration { get; }
         public ConfigurationManager<CsCompilerConfiguration> Configuration { get; }
-        public ConfigurationManager<CsSymbolsConfiguration> UnkownConfiguration { get; }
-        public bool UnkownConfigurationIsChanged { get; set; }
+        public bool ConfigurationIsChanged { get; set; }
 
         public override void Initialize(AnalysisContext context)
         {
@@ -62,8 +59,8 @@ namespace EmpyrionScripting.CsCompiler
 
             if (Configuration.Current.WithinLearnMode)
             {
-                UnkownConfiguration.Current.Symbols.Value.TryAdd(fullName, CsModPermission.SaveGame);
-                UnkownConfigurationIsChanged = true;
+                Configuration.Current.Symbols.Value.TryAdd(fullName, CsModPermission.SaveGame);
+                ConfigurationIsChanged = true;
             }
 
             PermissionNeeded = CsModPermission.SaveGame;  // Im SaveGame ist alles erlaubt

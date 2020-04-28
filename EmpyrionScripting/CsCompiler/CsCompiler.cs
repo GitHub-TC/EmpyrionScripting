@@ -22,7 +22,6 @@ namespace EmpyrionScripting.CsCompiler
     public class CsCompiler
     {
         public ConfigurationManager<CsCompilerConfiguration> Configuration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
-        public ConfigurationManager<CsSymbolsConfiguration> UnkownConfiguration { get; set; } = new ConfigurationManager<CsSymbolsConfiguration>() { Current = new CsSymbolsConfiguration() };
         public ConfigurationManager<CsCompilerConfiguration> DefaultConfiguration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
         public string SaveGameModPath { get; }
 
@@ -49,12 +48,6 @@ namespace EmpyrionScripting.CsCompiler
                 ConfigFilename = Path.Combine(Path.GetDirectoryName(typeof(EmpyrionScripting).Assembly.Location), "DefaultCsCompilerConfiguration.json")
             };
             DefaultConfiguration.Load();
-
-            UnkownConfiguration = new ConfigurationManager<CsSymbolsConfiguration>()
-            {
-                ConfigFilename = Path.Combine(SaveGameModPath, "UnkownCsCompilerSymbols.json")
-            };
-            UnkownConfiguration.Load();
         }
 
         private void AnalyzeDiagnostics(ImmutableArray<Diagnostic> diagnostics, List<string> messages, ref bool success)
@@ -106,7 +99,7 @@ namespace EmpyrionScripting.CsCompiler
                 csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
                 var compilation = csScript.GetCompilation();
 
-                var WhitelistDiagnosticAnalyzer = new WhitelistDiagnosticAnalyzer(DefaultConfiguration, Configuration, UnkownConfiguration);
+                var WhitelistDiagnosticAnalyzer = new WhitelistDiagnosticAnalyzer(DefaultConfiguration, Configuration);
 
                 var analyzerCompilation = compilation
                     .WithAnalyzers(ImmutableArray.Create<DiagnosticAnalyzer>(WhitelistDiagnosticAnalyzer))
@@ -115,11 +108,8 @@ namespace EmpyrionScripting.CsCompiler
 
                 analyzerCompilation.ForEach(A => AnalyzeDiagnostics(A.Value, messages, ref success));
 
-                if (WhitelistDiagnosticAnalyzer.UnkownConfigurationIsChanged)
+                if (WhitelistDiagnosticAnalyzer.ConfigurationIsChanged)
                 {
-                    UnkownConfiguration.Current.AddNewSymbols();
-                    UnkownConfiguration.Save();
-
                     Configuration.Current.PrepareForSave();
                     Configuration.Save();
 
