@@ -2,7 +2,7 @@
 
 namespace EmpyrionScripting.Interface
 {
-    public interface IScriptSaveGameRootData
+    public interface IScriptSaveGameRootData : IScriptModData
     {
         string MainScriptPath { get; set; }
         IModApi ModApi { get; set; }

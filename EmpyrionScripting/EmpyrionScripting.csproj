@@ -36,20 +36,20 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EmpyrionNetApi, Version=5.0.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EmpyrionNetAPI.5.0.6\lib\net461\EmpyrionNetApi.dll</HintPath>
+    <Reference Include="EmpyrionNetApi, Version=5.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\EmpyrionNetAPI.5.1.0\lib\net461\EmpyrionNetApi.dll</HintPath>
     </Reference>
     <Reference Include="EmpyrionNetApiBroker, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EmpyrionNetAPI.5.0.6\lib\net461\EmpyrionNetApiBroker.dll</HintPath>
+      <HintPath>..\packages\EmpyrionNetAPI.5.1.0\lib\net461\EmpyrionNetApiBroker.dll</HintPath>
     </Reference>
     <Reference Include="EmpyrionNetApiDefinitions, Version=5.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EmpyrionNetAPI.5.0.6\lib\net461\EmpyrionNetApiDefinitions.dll</HintPath>
+      <HintPath>..\packages\EmpyrionNetAPI.5.1.0\lib\net461\EmpyrionNetApiDefinitions.dll</HintPath>
     </Reference>
     <Reference Include="EmpyrionNetApiModBase, Version=1.0.0.3, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EmpyrionNetAPI.5.0.6\lib\net461\EmpyrionNetApiModBase.dll</HintPath>
+      <HintPath>..\packages\EmpyrionNetAPI.5.1.0\lib\net461\EmpyrionNetApiModBase.dll</HintPath>
     </Reference>
     <Reference Include="EmpyrionNetApiTools, Version=5.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EmpyrionNetAPI.5.0.6\lib\net461\EmpyrionNetApiTools.dll</HintPath>
+      <HintPath>..\packages\EmpyrionNetAPI.5.1.0\lib\net461\EmpyrionNetApiTools.dll</HintPath>
     </Reference>
     <Reference Include="Handlebars">
       <HintPath>..\dependencies\Handlebars.dll</HintPath>

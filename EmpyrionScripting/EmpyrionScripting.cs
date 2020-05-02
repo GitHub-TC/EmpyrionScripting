@@ -74,7 +74,11 @@ namespace EmpyrionScripting
 
                 TaskTools.Log = ModApi.LogError;
 
-                CsCompiler = new CsCompiler.CsCompiler(SaveGameModPath);
+                CsCompiler = new CsCompiler.CsCompiler(SaveGameModPath)
+                {
+                    Log = Log
+                };
+                CsCompiler.ConfigurationChanged += CsCompiler_ConfigurationChanged;
 
                 ModApi.Application.OnPlayfieldLoaded    += Application_OnPlayfieldLoaded;
                 ModApi.Application.OnPlayfieldUnloading += Application_OnPlayfieldUnloading;
@@ -96,6 +100,11 @@ namespace EmpyrionScripting
 
             ModApi.Log("EmpyrionScripting Mod init finish");
 
+        }
+
+        private void CsCompiler_ConfigurationChanged(object sender, EventArgs e)
+        {
+            PlayfieldData.ForEach(P => P.Value?.LcdCompileCache?.Clear());
         }
 
         private void LoadConfiguration()
@@ -402,6 +411,9 @@ namespace EmpyrionScripting
 
         public int ExecFoundSaveGameScripts(PlayfieldScriptData playfieldData, ScriptSaveGameRootData entityScriptData, params string[] scriptLocations)
         {
+            scriptLocations                      .ForEach(L => Log($"SaveGameScriptLocation: {L}",  LogLevel.Debug));
+            SaveGamesScripts.SaveGameScripts.Keys.ForEach(L => Log($"SaveGameScripts: {L}",         LogLevel.Debug));
+
             int count = 0;
             scriptLocations
                 .Where(S => !string.IsNullOrEmpty(S))
@@ -411,7 +423,7 @@ namespace EmpyrionScripting
 
                     var path = S.NormalizePath();
 
-                    if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + ".hbs", out var hbsCode))
+                    if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + ".HBS", out var hbsCode))
                     {
                         var data = new ScriptSaveGameRootData(entityScriptData)
                         {
@@ -424,7 +436,7 @@ namespace EmpyrionScripting
 
                         Interlocked.Increment(ref count);
                     }
-                    else if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + ".cs", out var csCode))
+                    else if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + ".CS", out var csCode))
                     {
                         var data = new ScriptSaveGameRootData(entityScriptData)
                         {
@@ -563,17 +575,26 @@ namespace EmpyrionScripting
 
         public void Game_Update()
         {
-            if (PlayfieldData.Count > 0 && !PlayfieldData.Values.Any(PF => PF.PauseScripts) && (DateTime.Now - LastAlive).TotalSeconds > 120) RestartAllScriptsForPlayfieldServer();
-            //if (!ThreadPool.QueueUserWorkItem(QueueScriptExecuting, null)) Log($"EmpyrionScripting Mod: Game_Update NorThreadPoolFree", LogLevel.Debug);
-            QueueScriptExecuting(null);
-        }
+            try
+            {
+                if (PlayfieldData.Count > 0 && !PlayfieldData.Values.Any(PF => PF.PauseScripts) && (DateTime.Now - LastAlive).TotalSeconds > 120) RestartAllScriptsForPlayfieldServer();
+            }
+            catch (Exception error)
+            {
+                Log($"Game_Update: RestartAllScriptsForPlayfieldServer: {error}", LogLevel.Error);
+            }
 
-        private void QueueScriptExecuting(object state)
-        {
-            PlayfieldData.Values.ForEach(PF => { 
-                Log($"QueueScriptExecuting: QueueCount:{PF.ScriptExecQueue.QueueCount} ScriptsCount:{PF.ScriptExecQueue.ScriptsCount}", LogLevel.Debug);
-                for (int i = Configuration.Current.ScriptsParallelExecution - 1; i >= 0 && PF.ScriptExecQueue.ExecNext(); i--);
-            });
+            try
+            {
+                PlayfieldData.Values.ForEach(PF => {
+                    //Log($"QueueScriptExecuting: QueueCount:{PF.ScriptExecQueue.QueueCount} ScriptsCount:{PF.ScriptExecQueue.ScriptsCount}", LogLevel.Debug);
+                    for (int i = Configuration.Current.ScriptsParallelExecution - 1; i >= 0 && PF.ScriptExecQueue.ExecNext(); i--) ;
+                });
+            }
+            catch (Exception error)
+            {
+                Log($"Game_Update: ScriptExecQueue.ExecNext: {error}", LogLevel.Error);
+            }
         }
 
         public static void RestartAllScriptsForPlayfieldServer()

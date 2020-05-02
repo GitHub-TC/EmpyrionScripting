@@ -11,7 +11,8 @@
     "System.Linq",
     "System.Numerics",
     "System.Text",
-    "System.Threading.Tasks"
+    "System.Threading.Tasks",
+    "Eleon.Modding"
   ],
   "AssemblyReferences": [
     "ModApi",
@@ -141,7 +142,11 @@
       "System.Nullable<T>.*",
       "System.Threading.Tasks.Task.*",
       "System.string.*",
-      "UnityEngine.Vector3.*"
+      "UnityEngine.Vector3.*",
+      "System.int.*",
+      "System.Int32.*",
+      "System.String.*",
+      "Newtonsoft.Json"
     ],
     "Admin": [
       "Eleon.Modding.IContainer.*",
@@ -153,8 +158,12 @@
       "EmpyrionScripting.Interface.IScriptModData.GetCurrentPlayfield",
       "EmpyrionScripting.Interface.IScriptModData.GetEntities",
       "EmpyrionScripting.Interface.IScriptModData.GetPersistendData",
-      "EmpyrionScripting.Interface.IStructureData.GetCurrent"
+      "EmpyrionScripting.Interface.IStructureData.GetCurrent",
+      "EmpyrionScripting.CsHelper.GetDevices"
     ],
-    "SaveGame": []
+    "SaveGame": [
+      "EmpyrionScripting.Interface.IScriptSaveGameRootData.*",
+      "System.IO.*"
+    ]
   }
 }

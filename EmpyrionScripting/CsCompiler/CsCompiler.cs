@@ -1,4 +1,5 @@
-﻿using EmpyrionNetAPITools;
+﻿using EmpyrionNetAPIDefinitions;
+using EmpyrionNetAPITools;
 using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
@@ -24,6 +25,7 @@ namespace EmpyrionScripting.CsCompiler
         public ConfigurationManager<CsCompilerConfiguration> Configuration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
         public ConfigurationManager<CsCompilerConfiguration> DefaultConfiguration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
         public string SaveGameModPath { get; }
+        public event EventHandler ConfigurationChanged;
 
         public CsCompiler(string saveGameModPath)
         {
@@ -31,6 +33,8 @@ namespace EmpyrionScripting.CsCompiler
 
             LoadConfiguration();
         }
+
+        public Action<string, LogLevel> Log { get; set; }
 
         private void LoadConfiguration()
         {
@@ -40,6 +44,7 @@ namespace EmpyrionScripting.CsCompiler
             {
                 ConfigFilename = Path.Combine(SaveGameModPath, "CsCompilerConfiguration.json")
             };
+            Configuration.ConfigFileLoaded += (o , a) => ConfigurationChanged?.Invoke(this, EventArgs.Empty);
             Configuration.Load();
             Configuration.Save();
 
@@ -47,6 +52,7 @@ namespace EmpyrionScripting.CsCompiler
             {
                 ConfigFilename = Path.Combine(Path.GetDirectoryName(typeof(EmpyrionScripting).Assembly.Location), "DefaultCsCompilerConfiguration.json")
             };
+            DefaultConfiguration.ConfigFileLoaded += (o, a) => ConfigurationChanged?.Invoke(this, EventArgs.Empty); ;
             DefaultConfiguration.Load();
         }
 
@@ -72,7 +78,7 @@ namespace EmpyrionScripting.CsCompiler
             }
         }
 
-        internal Func<object, string> GetExec<T>(CsModPermission csScriptsAllowed, T data, string script) where T : IScriptRootData
+        internal Func<object, string> GetExec<T>(CsModPermission csScriptsAllowed, T rootObjectCompileTime, string script) where T : IScriptRootData
         {
             var messages = new List<string>();
             bool success = true;
@@ -80,6 +86,7 @@ namespace EmpyrionScripting.CsCompiler
 
             Script<object> csScript = null;
             CsModPermission permissionNeeded;
+            var rootCompileTime = rootObjectCompileTime as IScriptRootData;
 
             using (var loader = new InteractiveAssemblyLoader())
             {
@@ -154,6 +161,8 @@ namespace EmpyrionScripting.CsCompiler
                 }
             }
 
+            if(messages.Count > 0) Log?.Invoke($"C# Compile [{rootCompileTime.ScriptId}]:{string.Join("\n", messages)}", LogLevel.Error);
+
             return rootObject =>
             {
                 if (!success) return string.Join("\n", messages);
@@ -199,7 +208,12 @@ namespace EmpyrionScripting.CsCompiler
                 }
                 catch (Exception error)
                 {
+                    exceptionMessage = error.ToString();
                     return root.IsElevatedScript ? error.ToString() : error.Message;
+                }
+                finally
+                {
+                    if (!string.IsNullOrEmpty(exceptionMessage)) Log?.Invoke($"C# Run [{root.ScriptId}]:{exceptionMessage}", LogLevel.Error);
                 }
             };
         }

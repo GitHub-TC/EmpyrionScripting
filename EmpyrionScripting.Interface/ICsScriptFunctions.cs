@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Eleon.Modding;
+using System;
+using System.Collections.Generic;
 
 namespace EmpyrionScripting.Interface
 {
@@ -21,5 +23,8 @@ namespace EmpyrionScripting.Interface
         IItemsData[] Items(IStructureData structure, string names);
         IList<IItemMoveInfo> Fill(IItemsData item, IStructureData structure, StructureTankType type, int? maxLimit = null);
         IList<IItemMoveInfo> Move(IItemsData item, IStructureData structure, string names, int? maxLimit = null);
+        void WithLockedDevice(IStructureData structure, IBlockData block, Action action, Action lockFailed = null);
+        bool IsLocked(IStructureData structure, IBlockData block);
+        T[] GetDevices<T>(params IBlockData[] block) where T : class, IDevice;
     }
 }
