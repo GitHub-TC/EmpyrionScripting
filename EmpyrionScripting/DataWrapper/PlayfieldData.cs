@@ -25,6 +25,11 @@ namespace EmpyrionScripting.DataWrapper
         public string PlanetClass => playfield.PlanetClass;
         public bool IsPvP => playfield.IsPvP;
 
+        public VectorInt3 SolarSystemCoordinates => playfield.SolarSystemCoordinates;
+        public string SolarSystemName            => playfield.SolarSystemName;
+
+        public float GetTerrainHeightAt(float x, float z) => playfield.GetTerrainHeightAt(x, z);
+
         public IEnumerable<ILimitedPlayerData> Players => _p == null ? _p = playfield.Players.Values.Select(P => new LimitedPlayerData(P)) : _p;
         IEnumerable<ILimitedPlayerData> _p;
     }

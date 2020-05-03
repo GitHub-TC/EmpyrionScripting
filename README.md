@@ -519,8 +519,11 @@ Syntaxdocu:
 + {{gettexture block pos}}
   + Liefert die TexturId des Blocks von der Seite T=Top, B=Bottom,, N=North, S=South, W=West, E=East
 
-+ {{settexture block pos textureid}}
-  + Setzt die TexturId des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden
++ {{settexture block textureid [pos]}}
+  + Setzt die TexturId des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden, wenn keine Position angegeben wird wird der ganze Block gesetzt
+
++ {{setcolor block colorid [pos]}}
+  + Setzt die Farbe des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden, wenn keine Position angegeben wird wird der ganze Block gesetzt
 
 ## Rechnen
 + {{math (lvalue) op (rvalue)}}
@@ -1193,9 +1196,11 @@ DateTime format:
 + {{gettexture block pos}}
   + Get the TexturId of the block from the side T=Top, B=Bottom,, N=North, S=South, W=West, E=East
 
-### (settexture)
-+ {{settexture block pos textureid}}
-  + Set the TexturId of the block at the sides T=Top, B=Bottom,, N=North, S=South, W=West, E=East it could be many sides declared, komma separated
++ {{settexture block textureid [pos]}}
+  + Sets the texture ID of the block on the sides T = Top, B = Bottom, N = North, S = South, W = West, E = East several can be specified separated by commas, if no position is given the whole Block set
+
++ {{setcolor block colorid [pos]}}
+  + Sets the color of the block on the sides T = Top, B = Bottom, N = North, S = South, W = West, E = East several can be specified separated by commas, if no position is given the whole Block set
 
 ### (gettext)
 + {{gettext lcddevice}}

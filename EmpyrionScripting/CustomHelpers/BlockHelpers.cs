@@ -151,15 +151,21 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("settexture")]
         public static void SetTextureBlockHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 3) throw new HandlebarsException("{{settexture block pos textureid}} helper must have exactly three argument: (block) (T,B,N,S,W,E) (texture)");
+            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{settexture block textureid [pos]}} helper must have at least two argument: (block) (texture) [T,B,N,S,W,E]");
 
             var block = arguments[0] as BlockData;
-            var pos   = arguments[1].ToString();
-            int.TryParse(arguments[2].ToString(), out var textureId);
+            int.TryParse(arguments[1].ToString(), out var textureId);
+            var pos   = arguments.Get(2)?.ToString();
 
             try
             {
                 int? top = null, bottom = null, north = null, south = null, west = null, east = null;
+
+                if (string.IsNullOrEmpty(pos))
+                {
+                    block.SetTextureForWholeBlock(textureId);
+                    return;
+                }
 
                 pos.ToUpper()
                     .Split(',')
@@ -177,7 +183,80 @@ namespace EmpyrionScripting.CustomHelpers
                         }
                     );
 
-                block.GetBlock().SetTextures(top, bottom, north, south, west, east);
+                block.SetTextures(top, bottom, north, south, west, east);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("getcolor")]
+        public static void GetColorBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{getcolor block pos}} helper must have exactly two argument: (block) '(T|B|N|S|W|E)'");
+
+            var block = arguments[0] as BlockData;
+            var pos   = arguments[1].ToString();
+
+            try
+            {
+                var colorId = -1;
+                switch (pos.ToUpper())
+                {
+                    case "T": colorId = block.Top;    break;
+                    case "B": colorId = block.Bottom; break;
+                    case "N": colorId = block.North;  break;
+                    case "S": colorId = block.South;  break;
+                    case "W": colorId = block.West;   break;
+                    case "E": colorId = block.East;   break;
+                }
+
+                if (colorId != -1) options.Template(output, colorId);
+                else                 options.Inverse(output, context as object);
+            }
+            catch (Exception error)
+            {
+                output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("setcolor")]
+        public static void SetColorBlockHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{setcolor block colorid [pos]}} helper must have at least two argument: (block) (color) [T,B,N,S,W,E]");
+
+            var block = arguments[0] as BlockData;
+            int.TryParse(arguments[1].ToString(), out var colorId);
+            var pos   = arguments.Get(2)?.ToString();
+
+            try
+            {
+                int? top = null, bottom = null, north = null, south = null, west = null, east = null;
+
+                if (string.IsNullOrEmpty(pos))
+                {
+                    block.SetColorForWholeBlock(colorId);
+                    return;
+                }
+
+                pos.ToUpper()
+                    .Split(',')
+                    .Select(P => P.Trim())
+                    .ForEach(P => { 
+                            switch (P)
+                            {
+                                case "T": top       = colorId; break;
+                                case "B": bottom    = colorId; break;
+                                case "N": north     = colorId; break;
+                                case "S": south     = colorId; break;
+                                case "W": west      = colorId; break;
+                                case "E": east      = colorId; break;
+                            }
+                        }
+                    );
+
+                block.SetColors(top, bottom, north, south, west, east);
             }
             catch (Exception error)
             {

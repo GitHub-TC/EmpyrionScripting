@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Eleon.Modding;
+using System.Collections.Generic;
 
 namespace EmpyrionScripting.Interface
 {
@@ -10,5 +11,9 @@ namespace EmpyrionScripting.Interface
         string PlanetType { get; }
         string PlayfieldType { get; }
         IEnumerable<ILimitedPlayerData> Players { get; }
+        VectorInt3 SolarSystemCoordinates { get; }
+        string SolarSystemName { get; }
+
+        float GetTerrainHeightAt(float x, float z);
     }
 }
