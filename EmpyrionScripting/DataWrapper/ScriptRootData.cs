@@ -110,7 +110,7 @@ namespace EmpyrionScripting.DataWrapper
 
         private static bool SafeIsNoProxyCheck(IEntity entity)
         {
-            try { return entity != null && entity.Type != EntityType.Proxy; }
+            try { return entity != null && entity.Type != EntityType.Proxy && entity.Type != EntityType.Unknown; }
             catch { return false; }
         }
 

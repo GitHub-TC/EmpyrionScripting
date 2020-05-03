@@ -66,7 +66,7 @@ namespace EmpyrionScripting.DataWrapper
         public int South { get => GetTexture().textureSouth;    set => _block?.SetTextures(null, null, null, value, null, null); }
         public int West { get => GetTexture().textureWest;      set => _block?.SetTextures(null, null, null, null, value, null); }
         public int East { get => GetTexture().textureEast;      set => _block?.SetTextures(null, null, null, null, null, value); }
-        public bool SwitchState { get { var s = GetData()._block?.GetSwitchState(); return s == null ? false : s.Value; }  set => GetData()._block?.SetSwitchState(value); }
+        public bool SwitchState { get { var s = GetData()._block?.GetSwitchState(); return s == null ? false : s.Value; }  set { var s = GetData()._block?.GetSwitchState(); if(s != value) GetData()._block?.SetSwitchState(value); } }
         public int Damage => _block.GetDamage();
         public int HitPoints => _block.GetHitPoints();
         public string CustomName => _block.CustomName;

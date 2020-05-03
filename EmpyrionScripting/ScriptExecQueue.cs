@@ -44,6 +44,18 @@ namespace EmpyrionScripting
             }
         }
 
+        public void CheckForEmergencyRestart()
+        {
+            lock (ExecQueue)
+            {
+                if (ExecQueue.IsEmpty && WaitForExec.Count > 0)
+                {
+                    Log($"EmpyrionScripting Mod: ExecQueue restart... #{WaitForExec.Count}", LogLevel.Message);
+                    WaitForExec.ForEach(D => ExecQueue.Enqueue(D.Value)); // robust error restart
+                }
+            }
+        }
+
         static public Action<string, LogLevel> Log { get; set; }
         public int ScriptsCount { get; set; }
         public int QueueCount => ExecQueue.Count;
@@ -71,7 +83,7 @@ namespace EmpyrionScripting
 
             try
             {
-                if (data.E.EntityType == EntityType.Proxy)
+                if (data.E.EntityType == EntityType.Proxy || data.E.EntityType == EntityType.Unknown)
                 {
                     lock (ExecQueue) WaitForExec.TryRemove(data.ScriptId, out _);
                     return;
@@ -112,8 +124,11 @@ namespace EmpyrionScripting
             try                     { ScriptRunInfo = new ConcurrentDictionary<string, ScriptInfo>(ScriptRunInfo.Where(S => S.Value.RunningInstances > 0).ToArray()); }
             catch (Exception error) { ScriptRunInfo.Clear(); Log($"EmpyrionScripting Mod: Clear => {error}", LogLevel.Error); }
 
-            WaitForExec.Clear();
-            ExecQueue = new ConcurrentQueue<IScriptRootData>();
+            lock (ExecQueue)
+            {
+                WaitForExec.Clear();
+                while (ExecQueue.TryDequeue(out _)) ;
+            }
         }
     }
 }

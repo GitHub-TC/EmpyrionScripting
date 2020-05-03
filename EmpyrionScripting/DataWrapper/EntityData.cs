@@ -9,6 +9,7 @@ namespace EmpyrionScripting.DataWrapper
     {
         private readonly WeakReference<IEntity> entity;
         private readonly WeakReference<IPlayfield> playfield;
+        private EntityType LastKnownType;
 
         public EntityData(bool isPublic)
         {
@@ -29,7 +30,20 @@ namespace EmpyrionScripting.DataWrapper
 
         public int Id => GetCurrent().Id;
         public virtual string Name => GetCurrent().Name;
-        public EntityType EntityType => GetCurrent().Type;
+        public EntityType EntityType
+        {
+            get {
+                try
+                {
+                    return LastKnownType = GetCurrent() == null ? EntityType.Unknown : GetCurrent().Type;
+                }
+                catch (Exception error)
+                {
+                    EmpyrionScripting.Log($"WeakReference<IEntity> LastKnownType:{LastKnownType} but nothing in game? {error}", EmpyrionNetAPIDefinitions.LogLevel.Message);
+                    return EntityType.Unknown;
+                }
+            }
+        }
 
         public Vector3 Pos => GetCurrent().Position;
         public float Distance { get; set; }

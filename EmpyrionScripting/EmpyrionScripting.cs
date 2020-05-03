@@ -104,7 +104,14 @@ namespace EmpyrionScripting
 
         private void CsCompiler_ConfigurationChanged(object sender, EventArgs e)
         {
-            PlayfieldData.ForEach(P => P.Value?.LcdCompileCache?.Clear());
+            PlayfieldData.ForEach(P =>
+            {
+                ModApi.Log($"CsCompiler_ConfigurationChanged: {P.Key} {(P.Value == null ? "null" : (P.Value.PauseScripts ? "always stopped" : "scripts running"))}");
+
+                DisplayScriptInfos();
+                P.Value?.ScriptExecQueue?.Clear();
+                P.Value?.LcdCompileCache?.Clear();
+            });
         }
 
         private void LoadConfiguration()
@@ -213,6 +220,7 @@ namespace EmpyrionScripting
                     if (PF.PauseScripts || Configuration.Current.LogLevel > LogLevel.Message) return;
 
                     DisplayScriptInfos();
+                    PF.ScriptExecQueue.CheckForEmergencyRestart();
                 });
             }, "ScriptInfos");
 
@@ -299,7 +307,7 @@ namespace EmpyrionScripting
         private int ProcessAllInGameScripts(PlayfieldScriptData playfieldData, IEntity entity)
         {
             Log($"ProcessAllInGameScripts: {entity.Name}:{entity.Type} Pause:{playfieldData.PauseScripts}", LogLevel.Debug);
-            if (entity.Type == EntityType.Proxy || playfieldData.PauseScripts) return 0;
+            if (entity.Type == EntityType.Proxy || entity.Type == EntityType.Unknown || playfieldData.PauseScripts) return 0;
 
             try
             {
@@ -332,7 +340,7 @@ namespace EmpyrionScripting
 
                         if (Configuration.Current.ScriptTracking)
                         {
-                            var trackfile = GetTrackingFileName(entity, data.Script.GetHashCode().ToString());
+                            var trackfile = GetTrackingFileName(entity, data);
                             if(!File.Exists(trackfile)) File.WriteAllText(trackfile, data.Script);
                         }
 
@@ -352,14 +360,17 @@ namespace EmpyrionScripting
             }
             catch (Exception error)
             {
-                if (Configuration.Current.ScriptTrackingError) File.WriteAllText(GetTrackingFileName(entity, string.Empty) + ".error", error.ToString());
+                if (Configuration.Current.ScriptTrackingError) File.WriteAllText(GetTrackingFileName(entity, "InGameScript") + ".error", error.ToString());
                 return 0;
             }
         }
 
-        private string GetTrackingFileName(IEntity entity, string scriptid)
+        private string GetTrackingFileName(IEntity entity, ScriptRootData root) 
+            => GetTrackingFileName(entity, $"{root.Script.GetHashCode().ToString()}{(root.ScriptLanguage == ScriptLanguage.Cs ? ".cs" : ".hbs")}");
+
+        private string GetTrackingFileName(IEntity entity, string scriptInfo)
         {
-            var trackfile = Path.Combine(SaveGameModPath, "ScriptTracking", entity == null ? "" : entity.Id.ToString(), $"{entity?.Id}-{entity?.Type}-{scriptid}.hbs");
+            var trackfile = Path.Combine(SaveGameModPath, "ScriptTracking", entity == null ? "" : entity.Id.ToString(), $"{entity?.Id}-{entity?.Type}-{scriptInfo}");
             Directory.CreateDirectory(Path.GetDirectoryName(trackfile));
             return trackfile;
         }
@@ -367,7 +378,7 @@ namespace EmpyrionScripting
         private int ProcessAllSaveGameScripts(PlayfieldScriptData playfieldData, IEntity entity)
         {
             Log($"ProcessAllSaveGameScripts: {entity.Name}:{entity.Type} Pause:{playfieldData.PauseScripts}", LogLevel.Debug);
-            if (entity.Type == EntityType.Proxy || playfieldData.PauseScripts) return 0;
+            if (entity.Type == EntityType.Proxy || entity.Type == EntityType.Unknown || playfieldData.PauseScripts) return 0;
 
             try
             {
@@ -496,9 +507,13 @@ namespace EmpyrionScripting
             {
                 if (playfieldData.PauseScripts) return;
 
-                var result = data.ScriptLanguage == ScriptLanguage.Handlebar
-                    ? ExecuteHandlebarScript(playfieldData, data, data.Script).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                    : ExecuteCsScript       (playfieldData, data, data.Script).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var stringBlankLines = data.ScriptLanguage == ScriptLanguage.Handlebar ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None;
+
+                var result = 
+                    (data.ScriptLanguage == ScriptLanguage.Handlebar
+                        ? ExecuteHandlebarScript(playfieldData, data, data.Script)
+                        : ExecuteCsScript       (playfieldData, data, data.Script)
+                    ).Split(new[] { '\n' }, stringBlankLines);
 
                 if (result.Length > 0 && result[0].StartsWith(TargetsKeyword))
                 {
@@ -523,7 +538,7 @@ namespace EmpyrionScripting
                         if (data.DisplayType == null) L.SetText(string.Join("\n", result));
                         else
                         {
-                            var text = L.GetText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                            var text = L.GetText().Split(new[] { '\n' }, stringBlankLines);
 
                             L.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
                                     ? text  .Concat(result).TakeLast(data.DisplayType.Lines)
