@@ -1,5 +1,6 @@
 ﻿using HandlebarsDotNet;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -33,7 +34,7 @@ namespace EmpyrionScripting.CustomHelpers
 
         private static void CalcWithVector(object op, TextWriter output, HelperOptions options, object[] arguments)
         {
-            float.TryParse(arguments[2]?.ToString(), out var scalar);
+            float.TryParse(arguments[2]?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var scalar);
 
             switch (op)
             {
@@ -61,8 +62,8 @@ namespace EmpyrionScripting.CustomHelpers
 
         private static void CalcWithDouble(object op, TextWriter output, HelperOptions options, object[] arguments)
         {
-            double.TryParse(arguments[0]?.ToString(), out var left);
-            double.TryParse(arguments[2]?.ToString(), out var right);
+            double.TryParse(arguments[0]?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var left);
+            double.TryParse(arguments[2]?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var right);
 
             switch (op)
             {
@@ -81,11 +82,11 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                double.TryParse(arguments[0]?.ToString(), out var left);
+                double.TryParse(arguments[0]?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var left);
                 var op = HandlebarsUtils.IsUndefinedBindingResult(arguments[1])
                                 ? arguments[1].GetType().GetField("Value").GetValue(arguments[1])
                                 : arguments[1]?.ToString();
-                double.TryParse(arguments[2]?.ToString(), out var right);
+                double.TryParse(arguments[2]?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var right);
 
                 switch (op)
                 {

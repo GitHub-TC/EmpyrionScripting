@@ -24,6 +24,14 @@ namespace EmpyrionScripting
         Admin,
         SaveGame,
     }
+
+    public enum ExecMethod
+    {
+        None,
+        ThreadPool,
+        Direct
+    }
+
     public class Configuration
     {
         [JsonConverter(typeof(StringEnumConverter))]
@@ -36,6 +44,8 @@ namespace EmpyrionScripting
         public bool ScriptTracking { get; set; }
         public float EntityAccessMaxDistance { get; set; } = 500;
         public int DelayStartForNSecondsOnPlayfieldLoad { get; set; } = 30;
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ExecMethod ExecMethod { get; set; } = ExecMethod.ThreadPool;
         public int ScriptsParallelExecution { get; set; } = 2;
         public bool ScriptTrackingError { get; set; }
         public int MaxStoredEventsPerSignal { get; set; } = 10;

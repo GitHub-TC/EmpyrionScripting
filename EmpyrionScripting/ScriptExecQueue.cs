@@ -51,6 +51,12 @@ namespace EmpyrionScripting
                 if (ExecQueue.IsEmpty && WaitForExec.Count > 0)
                 {
                     Log($"EmpyrionScripting Mod: ExecQueue restart... #{WaitForExec.Count}", LogLevel.Message);
+                    ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out var availableCompletionPortThreads);
+                    Log($"EmpyrionScripting Mod: ThreadPool available: WorkerThreads:{availableWorkerThreads} CompletionPortThreads:{availableCompletionPortThreads}", LogLevel.Message);
+                    ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);
+                    Log($"EmpyrionScripting Mod: ThreadPool max: WorkerThreads:{maxWorkerThreads} CompletionPortThreads:{maxCompletionPortThreads}", LogLevel.Message);
+                    ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
+                    Log($"EmpyrionScripting Mod: ThreadPool min: WorkerThreads:{minWorkerThreads} CompletionPortThreads:{minCompletionPortThreads}", LogLevel.Message);
                     WaitForExec.Clear(); // robust error restart with fresh data
                 }
             }
@@ -61,6 +67,16 @@ namespace EmpyrionScripting
         public int QueueCount => ExecQueue.Count;
 
         public bool ExecNext()
+        {
+            switch (EmpyrionScripting.Configuration.Current.ExecMethod)
+            {
+                case ExecMethod.ThreadPool: return ThreadPoolExecNext();
+                case ExecMethod.Direct:     return DirectExecNext();
+                default:                    return false;  
+            }
+        }
+
+        public bool ThreadPoolExecNext()
         {
             var              found = false;
             IScriptRootData  data  = null;
@@ -74,6 +90,27 @@ namespace EmpyrionScripting
                 Log($"EmpyrionScripting Mod: ExecNext NorThreadPoolFree {data.ScriptId}", LogLevel.Debug);
                 return false;
             }
+            return true;
+        }
+
+        public bool DirectExecNext()
+        {
+            var found = false;
+            IScriptRootData data = null;
+            lock (ExecQueue) found = ExecQueue.TryDequeue(out data);
+            if (!found) return false;
+
+            ((PlayfieldScriptData)data.GetPlayfieldScriptData()).IncrementCycleCounter(data.ScriptId);
+
+            try
+            {
+                ExecScript(data);
+            }
+            catch (Exception error)
+            {
+                Log($"EmpyrionScripting Mod: DirectExecNext {data.ScriptId}:{error}", LogLevel.Debug);
+            }
+
             return true;
         }
 
