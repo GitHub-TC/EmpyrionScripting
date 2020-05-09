@@ -1,4 +1,5 @@
-﻿using Eleon.Modding;
+﻿using EcfParser;
+using Eleon.Modding;
 using System;
 using System.Collections.Generic;
 
@@ -26,5 +27,8 @@ namespace EmpyrionScripting.Interface
         void WithLockedDevice(IStructureData structure, IBlockData block, Action action, Action lockFailed = null);
         bool IsLocked(IStructureData structure, IBlockData block);
         T[] GetDevices<T>(params IBlockData[] block) where T : class, IDevice;
+        object ConfigFindAttribute(int id, string name);
+        EcfBlock ConfigFindBlockById(int id);
+        EcfBlock ConfigFindBlockByName(string name);
     }
 }

@@ -51,7 +51,7 @@ namespace EmpyrionScripting
                 if (ExecQueue.IsEmpty && WaitForExec.Count > 0)
                 {
                     Log($"EmpyrionScripting Mod: ExecQueue restart... #{WaitForExec.Count}", LogLevel.Message);
-                    WaitForExec.ForEach(D => ExecQueue.Enqueue(D.Value)); // robust error restart
+                    WaitForExec.Clear(); // robust error restart with fresh data
                 }
             }
         }

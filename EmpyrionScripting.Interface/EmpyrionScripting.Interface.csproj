@@ -80,6 +80,12 @@
   <ItemGroup>
     <None Include="EmpyrionScripting.Interface.nuspec" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EcfParser\EcfParser.csproj">
+      <Project>{6EB355C6-6A17-41D8-8821-70754904F57A}</Project>
+      <Name>EcfParser</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Target Name="CopyPackage" AfterTargets="Pack">
     <Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="F:\NuGet.Local\Debug\$(PackageId).$(PackageVersion)\" />
   </Target>

@@ -5,6 +5,7 @@
     "EmpyrionScripting.CustomHelpers",
     "EmpyrionScripting.DataWrapper",
     "EmpyrionScripting.Interface",
+    "EcfParser",
     "System",
     "System.Collections.Concurrent",
     "System.Collections.Generic",
@@ -22,6 +23,9 @@
   ],
   "SymbolPermissions": {
     "Player": [
+      "EcfFile.*",
+      "EcfAttribute.*",
+      "EcfBlock.*",
       "DeviceTypeName.*",
       "Eleon.Modding.IContainer.Contains",
       "Eleon.Modding.IContainer.GetContent",

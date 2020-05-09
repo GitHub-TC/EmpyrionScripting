@@ -222,6 +222,10 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.3.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EcfParser\EcfParser.csproj">
+      <Project>{6EB355C6-6A17-41D8-8821-70754904F57A}</Project>
+      <Name>EcfParser</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EmpyrionScripting.Interface\EmpyrionScripting.Interface.csproj">
       <Project>{dd121666-d54d-47e7-ab4d-b7f79bf1278d}</Project>
       <Name>EmpyrionScripting.Interface</Name>

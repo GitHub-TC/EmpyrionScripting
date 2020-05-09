@@ -390,6 +390,9 @@ Syntaxdocu:
   * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
     Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
 
++ {{itemconfig id attrname}}
+  + Liest aus Konfiguration des Items 'id' das Attribut 'attrname'
+
 ## Verschieben/Auffüllen/Verarbeiten
 + {{move item structure names \[maxLimit\]}}
   + Item (item) in die Struktur (structure) in die Container mit den Namen (names) verschieben
@@ -1030,6 +1033,10 @@ Syntaxdocu:
     * Value: '1,2,3,42'
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
+
+## Items
++ {{itemconfig id attrname}}
+  + Reads the attribute 'attrname' from the configuration of the item 'id'
 
 ### (if)
 * {{#if data}}

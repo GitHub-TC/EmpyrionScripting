@@ -344,5 +344,14 @@ namespace EmpyrionScripting.UnitTests
             Assert.AreEqual("42", lcdMod.ExecuteCsScript(pf, data, "public class ModMain { public static int Main(IScriptModData root) { return 42; }}"));
         }
 
+        [TestMethod]
+        public void TestMethodCsConfigFindAttribute()
+        {
+            var configFile = @"C:\SteamGames\steamapps\common\Empyrion - Galactic Survival\Content\Configuration\Config_Example.ecf";
+
+            var ecf = EcfParser.Parse.Deserialize(System.IO.File.ReadAllLines(configFile));
+            Assert.IsNotNull(ecf.FindAttribute(2248, "Mass"));
+            Assert.IsNotNull(ecf.FindAttribute(2248, "StackSize"));
+        }
     }
 }

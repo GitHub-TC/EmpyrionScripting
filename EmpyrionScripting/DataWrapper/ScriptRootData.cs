@@ -1,4 +1,5 @@
-﻿using Eleon.Modding;
+﻿using EcfParser;
+using Eleon.Modding;
 using EmpyrionNetAPIAccess;
 using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.Interface;
@@ -107,6 +108,8 @@ namespace EmpyrionScripting.DataWrapper
 
         public int CycleCounter => ((PlayfieldScriptData)GetPlayfieldScriptData()).CycleCounter(ScriptId);
         public virtual bool DeviceLockAllowed => ((PlayfieldScriptData)GetPlayfieldScriptData()).DeviceLockAllowed(ScriptId);
+
+        public EcfFile Configuration_Ecf => EmpyrionScripting.Configuration_Ecf;
 
         private static bool SafeIsNoProxyCheck(IEntity entity)
         {

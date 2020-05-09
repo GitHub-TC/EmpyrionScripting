@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmpyrionScripting.Interface
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmpyrionScripting.Examples", "EmpyrionScripting.Examples\EmpyrionScripting.Examples.csproj", "{28D9AD16-EDED-420D-BDCD-9F823327177D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcfParser", "EcfParser\EcfParser.csproj", "{6EB355C6-6A17-41D8-8821-70754904F57A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcfParser.UnitTests", "EcfParser.UnitTests\EcfParser.UnitTests.csproj", "{634C1CC3-EDFA-4ADD-9544-4738A4BAEF1E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{28D9AD16-EDED-420D-BDCD-9F823327177D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28D9AD16-EDED-420D-BDCD-9F823327177D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28D9AD16-EDED-420D-BDCD-9F823327177D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EB355C6-6A17-41D8-8821-70754904F57A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EB355C6-6A17-41D8-8821-70754904F57A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EB355C6-6A17-41D8-8821-70754904F57A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EB355C6-6A17-41D8-8821-70754904F57A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{634C1CC3-EDFA-4ADD-9544-4738A4BAEF1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{634C1CC3-EDFA-4ADD-9544-4738A4BAEF1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{634C1CC3-EDFA-4ADD-9544-4738A4BAEF1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{634C1CC3-EDFA-4ADD-9544-4738A4BAEF1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

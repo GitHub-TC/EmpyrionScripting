@@ -105,6 +105,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EcfParser\EcfParser.csproj">
+      <Project>{6eb355c6-6a17-41d8-8821-70754904f57a}</Project>
+      <Name>EcfParser</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EmpyrionScripting.Interface\EmpyrionScripting.Interface.csproj">
       <Project>{dd121666-d54d-47e7-ab4d-b7f79bf1278d}</Project>
       <Name>EmpyrionScripting.Interface</Name>

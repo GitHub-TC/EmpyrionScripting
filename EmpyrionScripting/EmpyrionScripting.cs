@@ -1,4 +1,5 @@
-﻿using Eleon.Modding;
+﻿using EcfParser;
+using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
 using EmpyrionNetAPITools;
 using EmpyrionNetAPITools.Extensions;
@@ -30,6 +31,8 @@ namespace EmpyrionScripting
         ModGameAPI legacyApi;
 
         public static EmpyrionScripting EmpyrionScriptingInstance { get; set; }
+        public static EcfFile Configuration_Ecf { get; set; }
+        public static EcfFile Config_Ecf { get; set; }
         public static ItemInfos ItemInfos { get; set; }
         public string SaveGameModPath { get; set; }
         public static ConfigurationManager<Configuration> Configuration { get; set; } = new ConfigurationManager<Configuration>() { Current = new Configuration() };
@@ -65,6 +68,7 @@ namespace EmpyrionScripting
                 SetupHandlebarsComponent();
 
                 Localization    = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content));
+                ReadConfigEcf();
                 ItemInfos       = new ItemInfos(ModApi.Application?.GetPathFor(AppFolder.Content), Localization);
                 SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);
 
@@ -100,6 +104,40 @@ namespace EmpyrionScripting
 
             ModApi.Log("EmpyrionScripting Mod init finish");
 
+        }
+
+        private void ReadConfigEcf()
+        {
+            try
+            {
+                Configuration_Ecf = EcfParser.Parse.Deserialize(
+                    File.ReadAllLines(Path.Combine(ModApi.Application?.GetPathFor(AppFolder.Content),
+                    "Configuration", "Config_Example.ecf"
+                    )));
+
+                ModApi.Log($"EmpyrionScripting Config_Example.ecf: #{Configuration_Ecf.Blocks.Count}");
+            }
+            catch (Exception error)
+            {
+                ModApi.LogError($"EmpyrionScripting Config_Example.ecf: {error}");
+            }
+
+            try
+            {
+                Config_Ecf = EcfParser.Parse.Deserialize(
+                    File.ReadAllLines(Path.Combine(ModApi.Application?.GetPathFor(AppFolder.Content),
+                    "Configuration", "Config.ecf"
+                    )));
+
+                ModApi.Log($"EmpyrionScripting Config.ecf: #{Config_Ecf.Blocks.Count}");
+            }
+            catch (Exception error)
+            {
+                ModApi.LogError($"EmpyrionScripting Config.ecf: {error}");
+            }
+
+            Configuration_Ecf.MergeWith(Config_Ecf);
+            ModApi.Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf.Blocks.Count}");
         }
 
         private void CsCompiler_ConfigurationChanged(object sender, EventArgs e)

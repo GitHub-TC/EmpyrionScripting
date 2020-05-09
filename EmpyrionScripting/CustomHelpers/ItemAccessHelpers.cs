@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.DataWrapper;
+﻿using EcfParser;
+using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
 using System;
@@ -11,6 +12,55 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class ItemAccessHelpers
     {
+        [HandlebarTag("itemconfig")]
+        public static void ItemsConfigHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{itemconfig id attrname}} helper must have exactly two argument: (id) (attrname)");
+
+            var root    = rootObject as IScriptModData;
+            int.TryParse(arguments[0]?.ToString(), out var id);
+            var name    = arguments[1]?.ToString();
+
+            try
+            {
+                output.Write(root.Configuration_Ecf.FindAttribute(id, name));
+            }
+            catch (Exception error)
+            {
+                output.Write("{{itemconfig}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        public static object FindAttribute(this EcfFile ecf, int id, string name)
+        {
+            var found = ecf.FindBlockById(id);
+
+            while (found != null)
+            {
+                var foundAttr = found.Attributes.FirstOrDefault(A => A.Name == name);
+                if (foundAttr == null)
+                {
+                    var refAttr = found.Attributes.FirstOrDefault(A => A.Name == "Id")?.AdditionalPayload.FirstOrDefault(A => A.Key == "Ref");
+                    if (refAttr == null) return null;
+                    found = ecf.FindBlockByName(refAttr.Value.Value.ToString());
+                }
+                else return foundAttr.Value;
+            };
+
+            return null;
+        }
+
+        public static EcfBlock FindBlockById(this EcfFile ecf, int id) =>
+            ecf.Blocks.FirstOrDefault(B => B.Attributes.Any(A => A.Name == "Id" && (int)A.Value == id));
+
+        public static EcfBlock FindBlockByName(this EcfFile ecf, string name) =>
+            ecf.Blocks
+                .FirstOrDefault(B =>
+                {
+                    var idAttr = B.Attributes.FirstOrDefault(A => A.Name == "Id");
+                    return idAttr != null && idAttr.AdditionalPayload != null && idAttr.AdditionalPayload.Any(A => A.Key == "Name" && Equals(A.Value, name));
+                });
+
         [HandlebarTag("items")]
         public static void ItemsBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
