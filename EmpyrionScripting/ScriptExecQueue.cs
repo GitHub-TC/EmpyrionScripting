@@ -39,6 +39,8 @@ namespace EmpyrionScripting
         private BackgroundWorker Worker { get; }
         public ConcurrentQueue<IScriptRootData> BackgroundExecQueue { get; private set; } = new ConcurrentQueue<IScriptRootData>();
 
+        public ConcurrentDictionary<string, bool> ScriptNeedsMainThread { get; set; } = new ConcurrentDictionary<string, bool>();
+
 
         public ScriptExecQueue(PlayfieldScriptData playfieldScriptData, Action<IScriptRootData> processScript)
         {
@@ -48,12 +50,15 @@ namespace EmpyrionScripting
             Worker.DoWork           += (s, e) => {
                 var toDo = new List<IScriptRootData>();
                 while(BackgroundExecQueue.TryDequeue(out var data)) toDo.Add(data);
-                Parallel.ForEach(toDo, ExecScript);
+                Parallel.ForEach(toDo, ExecScriptWithMainThreadCheck);
             };
         }
 
         public void Add(IScriptRootData data)
         {
+            if (ScriptNeedsMainThread.TryGetValue(data.ScriptId, out var needMainThread)) data.ScriptNeedsMainThread = needMainThread;
+            else ScriptNeedsMainThread.TryAdd(data.ScriptId, false);
+
             lock (ExecQueue)
             {
                 if (WaitForExec.TryAdd(data.ScriptId, data)) ExecQueue.Enqueue(data);
@@ -90,8 +95,8 @@ namespace EmpyrionScripting
 
             switch (EmpyrionScripting.Configuration.Current.ExecMethod)
             {
-                case ExecMethod.ThreadPool:         return ThreadPoolExecNext(data);
-                case ExecMethod.BackgroundWorker:   return BackgroundWorkerExecNext(data);
+                case ExecMethod.ThreadPool:         return data.ScriptNeedsMainThread ? DirectExecNext(data) : ThreadPoolExecNext(data);
+                case ExecMethod.BackgroundWorker:   return data.ScriptNeedsMainThread ? DirectExecNext(data) : BackgroundWorkerExecNext(data);
                 case ExecMethod.Direct:             return DirectExecNext(data);
                 default:                            return false;  
             }
@@ -106,7 +111,7 @@ namespace EmpyrionScripting
 
         public bool ThreadPoolExecNext(IScriptRootData data)
         {
-            if (!ThreadPool.QueueUserWorkItem(ExecScript, data))
+            if (!ThreadPool.QueueUserWorkItem(ExecScriptWithMainThreadCheck, data))
             {
                 Log($"EmpyrionScripting Mod: ExecNext NorThreadPoolFree {data.ScriptId}", LogLevel.Debug);
                 return false;
@@ -116,10 +121,19 @@ namespace EmpyrionScripting
 
         public bool DirectExecNext(IScriptRootData data)
         {
+            data.ScriptWithinMainThread = true;
+
             try                     { ExecScript(data); }
             catch (Exception error) { Log($"EmpyrionScripting Mod: DirectExecNext {data.ScriptId}:{error}", LogLevel.Debug); }
 
             return true;
+        }
+
+        private void ExecScriptWithMainThreadCheck(object state)
+        {
+            if (!(state is IScriptRootData data)) return;
+            ExecScript(data);
+            if (data.ScriptNeedsMainThread) Add(data);
         }
 
         private void ExecScript(object state)
@@ -142,6 +156,8 @@ namespace EmpyrionScripting
                 Interlocked.Increment(ref info.RunningInstances);
                 processScript(data);
                 Interlocked.Decrement(ref info.RunningInstances);
+
+                ScriptNeedsMainThread.TryUpdate(data.ScriptId, data.ScriptNeedsMainThread, false);
 
                 lock (ExecQueue) WaitForExec.TryRemove(data.ScriptId, out _);
 

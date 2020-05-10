@@ -15,6 +15,12 @@ namespace EmpyrionScripting
             var witherror = false;
             try
             {
+                if (!root.ScriptWithinMainThread)
+                {
+                    root.ScriptNeedsMainThread = true;
+                    return;
+                }
+
                 if (!root.DeviceLockAllowed) return;
 
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;

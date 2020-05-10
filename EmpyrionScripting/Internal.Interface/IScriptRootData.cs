@@ -13,6 +13,8 @@ namespace EmpyrionScripting.Internal.Interface
         bool ColorChanged { get; set; }
         bool BackgroundColorChanged { get; set; }
         bool FontSizeChanged { get; set; }
+        bool ScriptNeedsMainThread { get; set; }
+        bool ScriptWithinMainThread { get; set; }
 
         IPlayfieldScriptData GetPlayfieldScriptData();
     }

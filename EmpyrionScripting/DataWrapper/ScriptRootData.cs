@@ -111,6 +111,9 @@ namespace EmpyrionScripting.DataWrapper
 
         public IConfigEcfAccess ConfigEcfAccess => EmpyrionScripting.ConfigEcfAccess;
 
+        public bool ScriptWithinMainThread { get; set; }
+        public bool ScriptNeedsMainThread { get; set; }
+
         private static bool SafeIsNoProxyCheck(IEntity entity)
         {
             try { return entity != null && entity.Type != EntityType.Proxy && entity.Type != EntityType.Unknown; }
