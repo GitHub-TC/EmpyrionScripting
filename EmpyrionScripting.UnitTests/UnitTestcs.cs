@@ -347,9 +347,9 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodCsConfigFindAttribute()
         {
-            var configFile = @"C:\SteamGames\steamapps\common\Empyrion - Galactic Survival\Content\Configuration\Config_Example.ecf";
+            var ecf = new ConfigEcfAccess();
+            ecf.ReadConfigEcf(@"C:\steamcmd\empyrion\Content");
 
-            var ecf = EcfParser.Parse.Deserialize(System.IO.File.ReadAllLines(configFile));
             Assert.IsNotNull(ecf.FindAttribute(2248, "Mass"));
             Assert.IsNotNull(ecf.FindAttribute(2248, "StackSize"));
         }

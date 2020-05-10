@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IBlockData.cs" />
+    <Compile Include="IConfigEcfAccess.cs" />
     <Compile Include="IConsoleMock.cs" />
     <Compile Include="IContainerSource.cs" />
     <Compile Include="ICsScriptFunctions.cs" />

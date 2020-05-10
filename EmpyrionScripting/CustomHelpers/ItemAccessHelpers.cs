@@ -23,7 +23,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                output.Write(root.Configuration_Ecf.FindAttribute(id, name));
+                output.Write(root.ConfigEcfAccess.FindAttribute(id, name));
             }
             catch (Exception error)
             {
@@ -31,35 +31,23 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        public static object FindAttribute(this EcfFile ecf, int id, string name)
+        public static object FindAttribute(this IConfigEcfAccess ecf, int id, string name)
         {
-            var found = ecf.FindBlockById(id);
+            if (!ecf.ConfigBlockById.TryGetValue(id, out var found)) return null;
 
-            while (found != null)
+            while (true)
             {
                 var foundAttr = found.Attributes.FirstOrDefault(A => A.Name == name);
                 if (foundAttr == null)
                 {
                     var refAttr = found.Attributes.FirstOrDefault(A => A.Name == "Id")?.AdditionalPayload.FirstOrDefault(A => A.Key == "Ref");
                     if (refAttr == null) return null;
-                    found = ecf.FindBlockByName(refAttr.Value.Value.ToString());
+
+                    if (!ecf.ConfigBlockByName.TryGetValue(refAttr.Value.Value.ToString(), out found)) return null;
                 }
                 else return foundAttr.Value;
             };
-
-            return null;
         }
-
-        public static EcfBlock FindBlockById(this EcfFile ecf, int id) =>
-            ecf.Blocks.FirstOrDefault(B => B.Attributes.Any(A => A.Name == "Id" && (int)A.Value == id));
-
-        public static EcfBlock FindBlockByName(this EcfFile ecf, string name) =>
-            ecf.Blocks
-                .FirstOrDefault(B =>
-                {
-                    var idAttr = B.Attributes.FirstOrDefault(A => A.Name == "Id");
-                    return idAttr != null && idAttr.AdditionalPayload != null && idAttr.AdditionalPayload.Any(A => A.Key == "Name" && Equals(A.Value, name));
-                });
 
         [HandlebarTag("items")]
         public static void ItemsBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)

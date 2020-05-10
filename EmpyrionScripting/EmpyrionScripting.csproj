@@ -138,6 +138,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigEcfAccess.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="CsCompiler\AnalysisExtensions.cs" />
     <Compile Include="CsCompiler\CsCompiler.cs" />

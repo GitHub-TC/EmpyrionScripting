@@ -109,7 +109,7 @@ namespace EmpyrionScripting.DataWrapper
         public int CycleCounter => ((PlayfieldScriptData)GetPlayfieldScriptData()).CycleCounter(ScriptId);
         public virtual bool DeviceLockAllowed => ((PlayfieldScriptData)GetPlayfieldScriptData()).DeviceLockAllowed(ScriptId);
 
-        public EcfFile Configuration_Ecf => EmpyrionScripting.Configuration_Ecf;
+        public IConfigEcfAccess ConfigEcfAccess => EmpyrionScripting.ConfigEcfAccess;
 
         private static bool SafeIsNoProxyCheck(IEntity entity)
         {

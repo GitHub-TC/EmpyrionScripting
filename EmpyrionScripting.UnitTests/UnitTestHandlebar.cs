@@ -284,8 +284,10 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodReadItemsInfo()
         {
+            var ecf = new ConfigEcfAccess();
+            ecf.ReadConfigEcf(@"C:\steamcmd\empyrion\Content");
             var localization = new Localization(@"C:\steamcmd\empyrion\Content");
-            var items        = new ItemInfos   (@"C:\steamcmd\empyrion\Content", localization).ItemInfo;
+            var items        = new ItemInfos   (ecf, localization).ItemInfo;
 
             Assert.IsTrue(items.Count() > 0);
         }

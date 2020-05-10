@@ -2,8 +2,11 @@
 using EmpyrionScripting.Internal.Interface;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace EmpyrionScripting
 {
@@ -29,10 +32,24 @@ namespace EmpyrionScripting
         public ConcurrentDictionary<string, IScriptRootData> WaitForExec { get; } = new ConcurrentDictionary<string, IScriptRootData>();
         public ConcurrentQueue<IScriptRootData>              ExecQueue { get; private set; } = new ConcurrentQueue<IScriptRootData>();
 
+        static public Action<string, LogLevel> Log { get; set; }
+        public int ScriptsCount { get; set; }
+        public int QueueCount => ExecQueue.Count;
+
+        private BackgroundWorker Worker { get; }
+        public ConcurrentQueue<IScriptRootData> BackgroundExecQueue { get; private set; } = new ConcurrentQueue<IScriptRootData>();
+
+
         public ScriptExecQueue(PlayfieldScriptData playfieldScriptData, Action<IScriptRootData> processScript)
         {
             this.playfieldScriptData = playfieldScriptData;
             this.processScript       = processScript;
+            Worker                   = new BackgroundWorker();
+            Worker.DoWork           += (s, e) => {
+                var toDo = new List<IScriptRootData>();
+                while(BackgroundExecQueue.TryDequeue(out var data)) toDo.Add(data);
+                Parallel.ForEach(toDo, ExecScript);
+            };
         }
 
         public void Add(IScriptRootData data)
@@ -62,38 +79,7 @@ namespace EmpyrionScripting
             }
         }
 
-        static public Action<string, LogLevel> Log { get; set; }
-        public int ScriptsCount { get; set; }
-        public int QueueCount => ExecQueue.Count;
-
         public bool ExecNext()
-        {
-            switch (EmpyrionScripting.Configuration.Current.ExecMethod)
-            {
-                case ExecMethod.ThreadPool: return ThreadPoolExecNext();
-                case ExecMethod.Direct:     return DirectExecNext();
-                default:                    return false;  
-            }
-        }
-
-        public bool ThreadPoolExecNext()
-        {
-            var              found = false;
-            IScriptRootData  data  = null;
-            lock (ExecQueue) found = ExecQueue.TryDequeue(out data);
-            if (!found) return false;
-
-            ((PlayfieldScriptData)data.GetPlayfieldScriptData()).IncrementCycleCounter(data.ScriptId);
-
-            if (!ThreadPool.QueueUserWorkItem(ExecScript, data))
-            {
-                Log($"EmpyrionScripting Mod: ExecNext NorThreadPoolFree {data.ScriptId}", LogLevel.Debug);
-                return false;
-            }
-            return true;
-        }
-
-        public bool DirectExecNext()
         {
             var found = false;
             IScriptRootData data = null;
@@ -102,14 +88,36 @@ namespace EmpyrionScripting
 
             ((PlayfieldScriptData)data.GetPlayfieldScriptData()).IncrementCycleCounter(data.ScriptId);
 
-            try
+            switch (EmpyrionScripting.Configuration.Current.ExecMethod)
             {
-                ExecScript(data);
+                case ExecMethod.ThreadPool:         return ThreadPoolExecNext(data);
+                case ExecMethod.BackgroundWorker:   return BackgroundWorkerExecNext(data);
+                case ExecMethod.Direct:             return DirectExecNext(data);
+                default:                            return false;  
             }
-            catch (Exception error)
+        }
+
+        public bool BackgroundWorkerExecNext(IScriptRootData data)
+        {
+            BackgroundExecQueue.Enqueue(data);
+            if (!Worker.IsBusy) Worker.RunWorkerAsync();
+            return true;
+        }
+
+        public bool ThreadPoolExecNext(IScriptRootData data)
+        {
+            if (!ThreadPool.QueueUserWorkItem(ExecScript, data))
             {
-                Log($"EmpyrionScripting Mod: DirectExecNext {data.ScriptId}:{error}", LogLevel.Debug);
+                Log($"EmpyrionScripting Mod: ExecNext NorThreadPoolFree {data.ScriptId}", LogLevel.Debug);
+                return false;
             }
+            return true;
+        }
+
+        public bool DirectExecNext(IScriptRootData data)
+        {
+            try                     { ExecScript(data); }
+            catch (Exception error) { Log($"EmpyrionScripting Mod: DirectExecNext {data.ScriptId}:{error}", LogLevel.Debug); }
 
             return true;
         }

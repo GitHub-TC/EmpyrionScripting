@@ -27,7 +27,7 @@ namespace EmpyrionScripting.Interface
         int CycleCounter { get; }
         bool IsElevatedScript { get; }
         string Version { get; }
-        EcfFile Configuration_Ecf { get; }
+        IConfigEcfAccess ConfigEcfAccess { get; }
 
         IEnumerable<IEntity> GetAllEntities();
         IPlayfield GetCurrentPlayfield();

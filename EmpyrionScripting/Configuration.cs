@@ -29,7 +29,8 @@ namespace EmpyrionScripting
     {
         None,
         ThreadPool,
-        Direct
+        Direct,
+        BackgroundWorker
     }
 
     public class Configuration
@@ -45,7 +46,7 @@ namespace EmpyrionScripting
         public float EntityAccessMaxDistance { get; set; } = 500;
         public int DelayStartForNSecondsOnPlayfieldLoad { get; set; } = 30;
         [JsonConverter(typeof(StringEnumConverter))]
-        public ExecMethod ExecMethod { get; set; } = ExecMethod.ThreadPool;
+        public ExecMethod ExecMethod { get; set; } = ExecMethod.BackgroundWorker;
         public int ScriptsParallelExecution { get; set; } = 2;
         public bool ScriptTrackingError { get; set; }
         public int MaxStoredEventsPerSignal { get; set; } = 10;

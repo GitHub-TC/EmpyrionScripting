@@ -8,8 +8,8 @@ namespace EmpyrionScripting.CsHelper
     {
         public IItemsData[] Items(IStructureData structure, string names) => ItemAccessHelpers.Items(structure, names);
 
-        public object ConfigFindAttribute(int id, string name) => EmpyrionScripting.Configuration_Ecf.FindAttribute(id, name);
-        public EcfBlock ConfigFindBlockById(int id) => EmpyrionScripting.Configuration_Ecf.FindBlockById(id);
-        public EcfBlock ConfigFindBlockByName(string name) => EmpyrionScripting.Configuration_Ecf.FindBlockByName(name);
+        public object ConfigFindAttribute(int id, string name) => EmpyrionScripting.ConfigEcfAccess.FindAttribute(id, name);
+        public EcfBlock ConfigFindBlockById(int id) => EmpyrionScripting.ConfigEcfAccess.ConfigBlockById.TryGetValue(id, out var block) ? block : null;
+        public EcfBlock ConfigFindBlockByName(string name) => EmpyrionScripting.ConfigEcfAccess.ConfigBlockByName.TryGetValue(name, out var block) ? block : null;
     }
 }
