@@ -25,7 +25,7 @@ namespace EcfParser.UnitTests
             Assert.AreEqual("Volume", result.Name);
             Assert.AreEqual(62.5, (double)result.Value);
 
-            var payload = result.AdditionalPayload;
+            var payload = result.AddOns;
             Assert.AreEqual("float", payload["type"]);
             Assert.AreEqual(true, (bool)payload["display"]);
             Assert.AreEqual("Liter", payload["formatter"]);
@@ -48,7 +48,7 @@ namespace EcfParser.UnitTests
             Assert.AreEqual("Volume", result.Name);
             Assert.AreEqual("110,110,110", result.Value);
 
-            var payload = result.AdditionalPayload;
+            var payload = result.AddOns;
             Assert.AreEqual(42, (int)payload["abc"]);
         }
 
@@ -68,9 +68,9 @@ namespace EcfParser.UnitTests
             var result = EcfParser.Parse.Deserialize(line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
             Assert.AreEqual("Item", result.Blocks[0].Name);
-            Assert.AreEqual("Id", result.Blocks[0].Attributes.First().Name);
-            Assert.AreEqual(2373, (int)result.Blocks[0].Attributes.First().Value);
-            Assert.AreEqual(7, result.Blocks[0].Attributes.Count);
+            Assert.AreEqual("Id", result.Blocks[0].Attr.First().Name);
+            Assert.AreEqual(2373, (int)result.Blocks[0].Attr.First().Value);
+            Assert.AreEqual(7, result.Blocks[0].Attr.Count);
         }
 
         [TestMethod()]
@@ -99,13 +99,13 @@ namespace EcfParser.UnitTests
             var block = result.Blocks[0];
 
             Assert.AreEqual("Item", block.Name);
-            Assert.AreEqual("Id", block.Attributes.First().Name);
-            Assert.AreEqual(2373, (int)block.Attributes.First().Value);
-            Assert.AreEqual(7, block.Attributes.Count);
+            Assert.AreEqual("Id", block.Attr.First().Name);
+            Assert.AreEqual(2373, (int)block.Attr.First().Value);
+            Assert.AreEqual(7, block.Attr.Count);
 
             Assert.AreEqual(1, block.Childs.Count);
             var child = block.Childs.Values.First();
-            Assert.AreEqual(5, child.Attributes.Count);
+            Assert.AreEqual(5, child.Attr.Count);
 
         }
 
@@ -144,13 +144,13 @@ namespace EcfParser.UnitTests
             var block = result.Blocks[0];
 
             Assert.AreEqual("Item", block.Name);
-            Assert.AreEqual("Id", block.Attributes.First().Name);
-            Assert.AreEqual(2373, (int)block.Attributes.First().Value);
-            Assert.AreEqual(7, block.Attributes.Count);
+            Assert.AreEqual("Id", block.Attr.First().Name);
+            Assert.AreEqual(2373, (int)block.Attr.First().Value);
+            Assert.AreEqual(7, block.Attr.Count);
 
             Assert.AreEqual(3, block.Childs.Count);
-            Assert.AreEqual(5, block.Childs.Values.First().Attributes.Count);
-            Assert.IsNull(block.Childs.Values.Last().Attributes);
+            Assert.AreEqual(5, block.Childs.Values.First().Attr.Count);
+            Assert.IsNull(block.Childs.Values.Last().Attr);
 
         }
 
@@ -179,14 +179,14 @@ namespace EcfParser.UnitTests
             var block = result.Blocks[0];
 
             Assert.AreEqual("Template", block.Name);
-            Assert.AreEqual("Name", block.Attributes.First().Name);
-            Assert.AreEqual("CPUExtenderCVT4", block.Attributes.First().Value);
-            Assert.AreEqual(3, block.Attributes.Count);
+            Assert.AreEqual("Name", block.Attr.First().Name);
+            Assert.AreEqual("CPUExtenderCVT4", block.Attr.First().Value);
+            Assert.AreEqual(3, block.Attr.Count);
 
             Assert.AreEqual(1, block.Childs.Count);
             var child = block.Childs.Values.First();
             Assert.AreEqual("Child Inputs", child.Name);
-            Assert.AreEqual(8, child.Attributes.Count);
+            Assert.AreEqual(8, child.Attr.Count);
         }
 
 
@@ -216,14 +216,14 @@ namespace EcfParser.UnitTests
             var block = result.Blocks[0];
 
             Assert.AreEqual("TabGroup", block.Name);
-            Assert.AreEqual("Id", block.Attributes.First().Name);
-            Assert.AreEqual(1, (int)block.Attributes.First().Value);
-            Assert.AreEqual(3, block.Attributes.Count);
+            Assert.AreEqual("Id", block.Attr.First().Name);
+            Assert.AreEqual(1, (int)block.Attr.First().Value);
+            Assert.AreEqual(3, block.Attr.Count);
 
             Assert.AreEqual(2, block.Childs.Count);
             var child = block.Childs.Values.First();
             Assert.AreEqual("Child 0", child.Name);
-            Assert.AreEqual(2, child.Attributes.Count);
+            Assert.AreEqual(2, child.Attr.Count);
         }
 
 

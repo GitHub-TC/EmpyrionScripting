@@ -28,7 +28,7 @@ namespace EmpyrionScripting.Interface
         bool IsLocked(IStructureData structure, IBlockData block);
         T[] GetDevices<T>(params IBlockData[] block) where T : class, IDevice;
         object ConfigFindAttribute(int id, string name);
-        EcfBlock ConfigFindBlockById(int id);
-        EcfBlock ConfigFindBlockByName(string name);
+        EcfBlock ConfigById(int id);
+        EcfBlock ConfigByName(string name);
     }
 }

@@ -4,25 +4,6 @@ using System.Globalization;
 
 namespace EcfParser
 {
-    public class EcfBlock
-    {
-        public string Name { get; set; }
-        public List<EcfAttribute> Attributes { get; set; }
-        public IDictionary<string, EcfBlock> Childs { get; set; }
-    }
-
-    public class EcfAttribute
-    {
-        public string Name { get; set; }
-        public object Value { get; set; }
-        public IDictionary<string, object> AdditionalPayload { get; set; }
-    }
-
-    public class EcfFile
-    {
-        public int Version { get; set; }
-        public List<EcfBlock> Blocks { get; set; }
-    }
 
     public static class Parse
     {
@@ -99,8 +80,8 @@ namespace EcfParser
                     var attr = ReadAttribute(currentLine);
                     if(attr != null)
                     {
-                        if (block.Attributes == null) block.Attributes = new List<EcfAttribute>();
-                        block.Attributes.Add(attr);
+                        if (block.Attr == null) block.Attr = new List<EcfAttribute>();
+                        block.Attr.Add(attr);
                     }
                 }
 
@@ -134,8 +115,8 @@ namespace EcfParser
                     };
                     else
                     {
-                        if (result.AdditionalPayload == null) result.AdditionalPayload = new Dictionary<string, object>();
-                        result.AdditionalPayload.Add(name, ParseValue(line.Trim()));
+                        if (result.AddOns == null) result.AddOns = new Dictionary<string, object>();
+                        result.AddOns.Add(name, ParseValue(line.Trim()));
                     }
                     line = null;
                 }
@@ -149,8 +130,8 @@ namespace EcfParser
                     };
                     else
                     {
-                        if (result.AdditionalPayload == null) result.AdditionalPayload = new Dictionary<string, object>();
-                        result.AdditionalPayload.Add(name, ParseValue(line.Substring(nextPayload + 1, payloadEnd - nextPayload - 1).Trim()));
+                        if (result.AddOns == null) result.AddOns = new Dictionary<string, object>();
+                        result.AddOns.Add(name, ParseValue(line.Substring(nextPayload + 1, payloadEnd - nextPayload - 1).Trim()));
                     }
 
                     if (payloadEnd + 1 >= line.Length) line = null;
@@ -168,8 +149,8 @@ namespace EcfParser
                     };
                     else
                     {
-                        if (result.AdditionalPayload == null) result.AdditionalPayload = new Dictionary<string, object>();
-                        result.AdditionalPayload.Add(name, ParseValue(line.Substring(0, nextPayload).Trim()));
+                        if (result.AddOns == null) result.AddOns = new Dictionary<string, object>();
+                        result.AddOns.Add(name, ParseValue(line.Substring(0, nextPayload).Trim()));
                     }
                     line = line.Substring(nextPayload + 1).Trim();
                 }

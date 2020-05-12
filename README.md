@@ -390,8 +390,14 @@ Syntaxdocu:
   * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
     Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
 
-+ {{itemconfig id attrname}}
-  + Liest aus Konfiguration des Items 'id' das Attribut 'attrname'
++ {{configattr id attrname}}
+  + Liest aus Konfiguration des Block/Items 'id' das Attribut 'attrname'
+
++ {{configbyid id}}
+  + Liest aus Konfiguration den Abschnitt für den Block/Item mit der 'id'
+
++ {{configbyname name}}
+  + Liest aus Konfiguration den Abschnitt für den Block/Item mit dem 'name'
 
 ## Verschieben/Auffüllen/Verarbeiten
 + {{move item structure names \[maxLimit\]}}
@@ -1035,8 +1041,14 @@ Syntaxdocu:
     * Value: 'A,xyz,mag'
 
 ## Items
-+ {{itemconfig id attrname}}
++ {{configattr id attrname}}
   + Reads the attribute 'attrname' from the configuration of the item 'id'
+
++ {{configbyid id}}
+  + Reads the config section block/item for 'id'
+
++ {{configbyname name}}
+  + Reads the config section block/item for 'name'
 
 ### (if)
 * {{#if data}}

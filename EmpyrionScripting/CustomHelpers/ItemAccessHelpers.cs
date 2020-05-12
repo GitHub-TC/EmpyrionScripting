@@ -12,42 +12,52 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class ItemAccessHelpers
     {
-        [HandlebarTag("itemconfig")]
-        public static void ItemsConfigHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        [HandlebarTag("configattr")]
+        public static void ConfigAttrHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{itemconfig id attrname}} helper must have exactly two argument: (id) (attrname)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{configattr id attrname}} helper must have exactly two argument: (id) (attrname)");
 
             var root    = rootObject as IScriptModData;
             int.TryParse(arguments[0]?.ToString(), out var id);
             var name    = arguments[1]?.ToString();
 
-            try
-            {
-                output.Write(root.ConfigEcfAccess.FindAttribute(id, name));
-            }
-            catch (Exception error)
-            {
-                output.Write("{{itemconfig}} error " + EmpyrionScripting.ErrorFilter(error));
-            }
+            try{ output.Write(root.ConfigEcfAccess.FindAttribute(id, name)); }
+            catch (Exception error) { output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); }
         }
 
-        public static object FindAttribute(this IConfigEcfAccess ecf, int id, string name)
+        [HandlebarTag("configbyid")]
+        public static void ConfigByIdHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (!ecf.ConfigBlockById.TryGetValue(id, out var found)) return null;
+            if (arguments.Length != 1) throw new HandlebarsException("{{configbyid id}} helper must have exactly one argument: (id)");
 
-            while (true)
-            {
-                var foundAttr = found.Attributes.FirstOrDefault(A => A.Name == name);
-                if (foundAttr == null)
-                {
-                    var refAttr = found.Attributes.FirstOrDefault(A => A.Name == "Id")?.AdditionalPayload.FirstOrDefault(A => A.Key == "Ref");
-                    if (refAttr == null) return null;
+            var root = rootObject as IScriptModData;
+            int.TryParse(arguments[0]?.ToString(), out var id);
 
-                    if (!ecf.ConfigBlockByName.TryGetValue(refAttr.Value.Value.ToString(), out found)) return null;
-                }
-                else return foundAttr.Value;
-            };
+            try {
+                if (root.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(id, out var config)) options.Template(output, config);
+                else                                                                          options.Inverse (output, (object)context);
+            }
+            catch (Exception error) { output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); }
         }
+
+        [HandlebarTag("configbyname")]
+        public static void ConfigByNameHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{configbyname name}} helper must have exactly one argument: (name)");
+
+            var root = rootObject as IScriptModData;
+
+            try {
+                if (root.ConfigEcfAccess.FlatConfigBlockByName.TryGetValue(arguments[0]?.ToString(), out var config)) options.Template(output, config);
+                else                                                                                                  options.Inverse (output, (object)context);
+            }
+            catch (Exception error) { output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); }
+        }
+
+        public static object FindAttribute(this IConfigEcfAccess ecf, int id, string name) =>
+            ecf.FlatConfigBlockById.TryGetValue(id, out var found)
+                ? found.Attr.FirstOrDefault(A => A.Name == name)?.Value
+                : null;
 
         [HandlebarTag("items")]
         public static void ItemsBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)

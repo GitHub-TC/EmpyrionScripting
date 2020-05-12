@@ -36,9 +36,9 @@ namespace EcfParser.Tests
             Assert.AreEqual(1, ecf1.Blocks.Count);
             var block = ecf1.Blocks.First();
 
-            Assert.AreEqual(284,   (int) block.Attributes.FirstOrDefault(a => a.Name == "Mass").Value);
-            Assert.AreEqual(20,    (int) block.Attributes.FirstOrDefault(a => a.Name == "BlastRadius").Value);
-            Assert.AreEqual(false, (bool)block.Attributes.FirstOrDefault(a => a.Name == "IsLockable").Value);
+            Assert.AreEqual(284,   (int) block.Attr.FirstOrDefault(a => a.Name == "Mass").Value);
+            Assert.AreEqual(20,    (int) block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").Value);
+            Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "IsLockable").Value);
         }
 
         [TestMethod()]
@@ -78,9 +78,9 @@ namespace EcfParser.Tests
             Assert.AreEqual(1, ecf1.Blocks.Count);
             var block = ecf1.Blocks.First();
 
-            Assert.AreEqual(284,   (int) block.Attributes.FirstOrDefault(a => a.Name == "Mass").Value);
-            Assert.AreEqual(20,    (int) block.Attributes.FirstOrDefault(a => a.Name == "BlastRadius").Value);
-            Assert.AreEqual(false, (bool)block.Attributes.FirstOrDefault(a => a.Name == "IsLockable").Value);
+            Assert.AreEqual(284,   (int) block.Attr.FirstOrDefault(a => a.Name == "Mass").Value);
+            Assert.AreEqual(20,    (int) block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").Value);
+            Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "IsLockable").Value);
         }
 
         [TestMethod()]
@@ -109,10 +109,10 @@ namespace EcfParser.Tests
             Assert.AreEqual(1, ecf1.Blocks.Count);
             var block = ecf1.Blocks.First();
 
-            Assert.AreEqual(284,   (int) block.Attributes.FirstOrDefault(a => a.Name == "Mass").Value);
-            Assert.AreEqual(false, (bool)block.Attributes.FirstOrDefault(a => a.Name == "Mass").AdditionalPayload.First(p => p.Key == "display").Value);
-            Assert.AreEqual(20,    (int) block.Attributes.FirstOrDefault(a => a.Name == "BlastRadius").Value);
-            Assert.AreEqual(false, (bool)block.Attributes.FirstOrDefault(a => a.Name == "IsLockable").Value);
+            Assert.AreEqual(284,   (int) block.Attr.FirstOrDefault(a => a.Name == "Mass").Value);
+            Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "Mass").AddOns.First(p => p.Key == "display").Value);
+            Assert.AreEqual(20,    (int) block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").Value);
+            Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "IsLockable").Value);
         }
 
 
@@ -141,10 +141,10 @@ namespace EcfParser.Tests
             Assert.AreEqual(1, ecf1.Blocks.Count);
             var block = ecf1.Blocks.First();
 
-            Assert.AreEqual(284,   (int) block.Attributes.FirstOrDefault(a => a.Name == "Mass").Value);
-            Assert.AreEqual(20,    (int) block.Attributes.FirstOrDefault(a => a.Name == "BlastRadius").Value);
-            Assert.AreEqual(false, (bool) block.Attributes.FirstOrDefault(a => a.Name == "BlastRadius").AdditionalPayload.First(p => p.Key == "display").Value);
-            Assert.AreEqual(false, (bool)block.Attributes.FirstOrDefault(a => a.Name == "IsLockable").Value);
+            Assert.AreEqual(284,   (int) block.Attr.FirstOrDefault(a => a.Name == "Mass").Value);
+            Assert.AreEqual(20,    (int) block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").Value);
+            Assert.AreEqual(false, (bool) block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").AddOns.First(p => p.Key == "display").Value);
+            Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "IsLockable").Value);
         }
     }
 }

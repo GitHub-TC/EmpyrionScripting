@@ -6,6 +6,7 @@
     "EmpyrionScripting.DataWrapper",
     "EmpyrionScripting.Interface",
     "EcfParser",
+    "Newtonsoft.Json",
     "System",
     "System.Collections.Concurrent",
     "System.Collections.Generic",
@@ -23,6 +24,8 @@
   ],
   "SymbolPermissions": {
     "Player": [
+      "Newtonsoft.*",
+      "System",
       "EcfFile.*",
       "EcfAttribute.*",
       "EcfBlock.*",

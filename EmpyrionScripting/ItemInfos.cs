@@ -35,7 +35,7 @@ namespace EmpyrionScripting
                     new ItemInfo()
                       {
                           Id   = I.Key,
-                          Key  = I.Value.Attributes.FirstOrDefault(A => A.Name == "Id")?.AdditionalPayload?.FirstOrDefault(A => A.Key == "Name").Value?.ToString(),
+                          Key  = I.Value.Attr.FirstOrDefault(A => A.Name == "Id")?.AddOns?.FirstOrDefault(A => A.Key == "Name").Value?.ToString(),
                       }
                 )
                 .Select(I =>

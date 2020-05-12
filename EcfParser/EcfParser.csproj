@@ -41,6 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EcfAttribute.cs" />
+    <Compile Include="EcfBlock.cs" />
+    <Compile Include="EcfFile.cs" />
     <Compile Include="Merge.cs" />
     <Compile Include="Parse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

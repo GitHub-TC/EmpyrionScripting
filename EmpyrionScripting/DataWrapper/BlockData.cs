@@ -1,6 +1,5 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.Interface;
-using System;
 
 namespace EmpyrionScripting.DataWrapper
 {
@@ -79,48 +78,58 @@ namespace EmpyrionScripting.DataWrapper
 
         public void SetTextureForWholeBlock(int texIdx)
         {
+            if (Top == texIdx && Bottom == texIdx && North == texIdx && South == texIdx && West == texIdx && East == texIdx) return;
+
             textureTop = textureBottom = textureNorth = textureSouth = textureWest = textureEast = texIdx;
             _block?.SetTextureForWholeBlock(texIdx);
         }
 
-        public int Top      { get => GetTexture().textureTop;       set => _block?.SetTextures(textureTop = value, null, null, null, null, null); }
-        public int Bottom   { get => GetTexture().textureBottom;    set => _block?.SetTextures(null, textureBottom = value, null, null, null, null); }
-        public int North    { get => GetTexture().textureNorth;     set => _block?.SetTextures(null, null, textureNorth = value, null, null, null); }
-        public int South    { get => GetTexture().textureSouth;     set => _block?.SetTextures(null, null, null, textureSouth = value, null, null); }
-        public int West     { get => GetTexture().textureWest;      set => _block?.SetTextures(null, null, null, null, textureWest = value, null); }
-        public int East     { get => GetTexture().textureEast;      set => _block?.SetTextures(null, null, null, null, null, textureEast = value); }
+        public int Top      { get => GetTexture().textureTop;       set { if (Top       != value) _block?.SetTextures(textureTop = value, null, null, null, null, null);    } }
+        public int Bottom   { get => GetTexture().textureBottom;    set { if (Bottom    != value) _block?.SetTextures(null, textureBottom = value, null, null, null, null); } }
+        public int North    { get => GetTexture().textureNorth;     set { if (North     != value) _block?.SetTextures(null, null, textureNorth = value, null, null, null);  } }
+        public int South    { get => GetTexture().textureSouth;     set { if (South     != value) _block?.SetTextures(null, null, null, textureSouth = value, null, null);  } }
+        public int West     { get => GetTexture().textureWest;      set { if (West      != value) _block?.SetTextures(null, null, null, null, textureWest = value, null);   } }
+        public int East     { get => GetTexture().textureEast;      set { if (East      != value) _block?.SetTextures(null, null, null, null, null, textureEast = value);   } }
         public void SetTextures(int? top, int? bottom, int? north, int? south, int? west, int? east)
         {
-            if (top     .HasValue) textureTop       = top.Value;
-            if (bottom  .HasValue) textureBottom    = bottom.Value;
-            if (north   .HasValue) textureNorth     = north.Value;
-            if (south   .HasValue) textureSouth     = south.Value;
-            if (west    .HasValue) textureWest      = west.Value;
-            if (east    .HasValue) textureEast      = east.Value;
-            _block?.SetTextures(textureTop, textureBottom, textureNorth, textureSouth, textureWest, textureEast);
+            bool changed = false;
+
+            if (top     .HasValue && Top     != top      .Value) { changed = true; textureTop       = top.Value;    }
+            if (bottom  .HasValue && Bottom  != bottom   .Value) { changed = true; textureBottom    = bottom.Value; }
+            if (north   .HasValue && North   != north    .Value) { changed = true; textureNorth     = north.Value;  }
+            if (south   .HasValue && South   != south    .Value) { changed = true; textureSouth     = south.Value;  }
+            if (west    .HasValue && West    != west     .Value) { changed = true; textureWest      = west.Value;   }
+            if (east    .HasValue && East    != east     .Value) { changed = true; textureEast      = east.Value;   }
+
+            if(changed) _block?.SetTextures(textureTop, textureBottom, textureNorth, textureSouth, textureWest, textureEast);
         }
 
         public void SetColorForWholeBlock(int texIdx)
         {
+            if (TopColor == texIdx && BottomColor == texIdx && NorthColor == texIdx && SouthColor == texIdx && WestColor == texIdx && EastColor == texIdx) return;
+
             colorTop = colorBottom = colorNorth = colorSouth = colorWest = colorEast = texIdx;
             _block?.SetColorForWholeBlock(texIdx);
         }
 
-        public int TopColor     { get => GetColor().colorTop;       set => _block?.SetColors(colorTop = value, null, null, null, null, null); }
-        public int BottomColor  { get => GetColor().colorBottom;    set => _block?.SetColors(null, colorBottom = value, null, null, null, null); }
-        public int NorthColor   { get => GetColor().colorNorth;     set => _block?.SetColors(null, null, colorNorth = value, null, null, null); }
-        public int SouthColor   { get => GetColor().colorSouth;     set => _block?.SetColors(null, null, null, colorSouth = value, null, null); }
-        public int WestColor    { get => GetColor().colorWest;      set => _block?.SetColors(null, null, null, null, colorWest = value, null); }
-        public int EastColor    { get => GetColor().colorEast;      set => _block?.SetColors(null, null, null, null, null, colorEast = value); }
+        public int TopColor     { get => GetColor().colorTop;       set { if (TopColor      != value) _block?.SetColors(colorTop = value, null, null, null, null, null);    } }
+        public int BottomColor  { get => GetColor().colorBottom;    set { if (BottomColor   != value) _block?.SetColors(null, colorBottom = value, null, null, null, null); } }
+        public int NorthColor   { get => GetColor().colorNorth;     set { if (NorthColor    != value) _block?.SetColors(null, null, colorNorth = value, null, null, null);  } }
+        public int SouthColor   { get => GetColor().colorSouth;     set { if (SouthColor    != value) _block?.SetColors(null, null, null, colorSouth = value, null, null);  } }
+        public int WestColor    { get => GetColor().colorWest;      set { if (WestColor     != value) _block?.SetColors(null, null, null, null, colorWest = value, null);   } }
+        public int EastColor    { get => GetColor().colorEast;      set { if (EastColor     != value) _block?.SetColors(null, null, null, null, null, colorEast = value);   } }
         public void SetColors(int? top, int? bottom, int? north, int? south, int? west, int? east)
         {
-            if (top     .HasValue) colorTop     = top.Value;
-            if (bottom  .HasValue) colorBottom  = bottom.Value;
-            if (north   .HasValue) colorNorth   = north.Value;
-            if (south   .HasValue) colorSouth   = south.Value;
-            if (west    .HasValue) colorWest    = west.Value;
-            if (east    .HasValue) colorEast    = east.Value;
-            _block?.SetColors(colorTop, colorBottom, colorNorth, colorSouth, colorWest, colorEast);
+            bool changed = false;
+
+            if (top     .HasValue && TopColor     != top      .Value) { changed = true; colorTop     = top.Value;   }
+            if (bottom  .HasValue && BottomColor  != bottom   .Value) { changed = true; colorBottom  = bottom.Value;}
+            if (north   .HasValue && NorthColor   != north    .Value) { changed = true; colorNorth   = north.Value; }
+            if (south   .HasValue && SouthColor   != south    .Value) { changed = true; colorSouth   = south.Value; }
+            if (west    .HasValue && WestColor    != west     .Value) { changed = true; colorWest    = west.Value;  }
+            if (east    .HasValue && EastColor    != east     .Value) { changed = true; colorEast    = east.Value;  }
+
+            if(changed) _block?.SetColors(colorTop, colorBottom, colorNorth, colorSouth, colorWest, colorEast);
         }
 
         public bool SwitchState { get { var s = GetData()._block?.GetSwitchState(); return s == null ? false : s.Value; }  set { var s = GetData()._block?.GetSwitchState(); if(s != value) GetData()._block?.SetSwitchState(value); } }
