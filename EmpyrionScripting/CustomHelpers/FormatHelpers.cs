@@ -1,4 +1,5 @@
-﻿using HandlebarsDotNet;
+﻿using EmpyrionScripting.CsHelper;
+using HandlebarsDotNet;
 using System;
 using System.Globalization;
 using System.IO;
@@ -40,7 +41,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{i18n}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{i18n}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -55,7 +56,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{format}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{format}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -78,7 +79,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{bar}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{bar}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

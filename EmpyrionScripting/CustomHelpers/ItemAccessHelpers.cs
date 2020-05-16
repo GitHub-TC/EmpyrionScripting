@@ -1,4 +1,4 @@
-﻿using EcfParser;
+﻿using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
@@ -22,7 +22,9 @@ namespace EmpyrionScripting.CustomHelpers
             var name    = arguments[1]?.ToString();
 
             try{ output.Write(root.ConfigEcfAccess.FindAttribute(id, name)); }
-            catch (Exception error) { output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); }
+            catch (Exception error) {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); 
+            }
         }
 
         [HandlebarTag("configbyid")]
@@ -37,7 +39,9 @@ namespace EmpyrionScripting.CustomHelpers
                 if (root.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(id, out var config)) options.Template(output, config);
                 else                                                                          options.Inverse (output, (object)context);
             }
-            catch (Exception error) { output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); }
+            catch (Exception error) {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); 
+            }
         }
 
         [HandlebarTag("configbyname")]
@@ -51,7 +55,9 @@ namespace EmpyrionScripting.CustomHelpers
                 if (root.ConfigEcfAccess.FlatConfigBlockByName.TryGetValue(arguments[0]?.ToString(), out var config)) options.Template(output, config);
                 else                                                                                                  options.Inverse (output, (object)context);
             }
-            catch (Exception error) { output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); }
+            catch (Exception error) {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); 
+            }
         }
 
         public static object FindAttribute(this IConfigEcfAccess ecf, int id, string name) =>
@@ -76,7 +82,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{items}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{items}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -97,7 +103,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{getitems}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{getitems}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -161,7 +167,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{itemlist}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{itemlist}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

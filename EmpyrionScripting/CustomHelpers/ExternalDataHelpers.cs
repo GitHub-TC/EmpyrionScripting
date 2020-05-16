@@ -1,4 +1,6 @@
-﻿using EmpyrionScripting.Internal.Interface;
+﻿using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections;
@@ -29,7 +31,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{datetime}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{datetime}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -50,7 +52,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{random}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{random}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -66,7 +68,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{use}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{use}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -75,14 +77,14 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{set key data}} helper must have two argument: (key) (data)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
-                var root = rootObject as IScriptRootData;
                 root.Data.AddOrUpdate(arguments[0]?.ToString(), arguments[1], (S, O) => arguments[1]);
             }
             catch (Exception error)
             {
-                output.Write("{{set}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{set}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -91,6 +93,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{lookup array index}} helper must have two argument: (array) (index)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
                 int.TryParse(arguments[1]?.ToString(), out var index);
@@ -99,7 +102,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lookup}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lookup}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -108,6 +111,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{lookupblock array index}} helper must have two argument: (array) (index)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
                 int.TryParse(arguments[1]?.ToString(), out var index);
@@ -117,7 +121,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lookupblock}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lookupblock}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -126,10 +130,9 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{setblock key}} helper must have one argument: (key)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
-                var root = rootObject as IScriptRootData;
-
                 var data = new StringWriter();
                 options.Template(data, context as object);
 
@@ -137,7 +140,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setblock}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setblock}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -158,7 +161,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{split}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{split}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -181,7 +184,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{concat}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{concat}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -206,8 +209,9 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                if (arguments.Length == 2) output.Write("{{substring}} error (startindex=" + startIndex + ") text='" + text + "' " + EmpyrionScripting.ErrorFilter(error));
-                else                       output.Write("{{substring}} error (startindex=" + startIndex + ", length=" + length + ") text='" + text + "' " + EmpyrionScripting.ErrorFilter(error));
+                if (CsScriptFunctions.FunctionNeedsMainThread(error, root)) { /* no error */ }
+                else if (arguments.Length == 2) output.Write("{{substring}} error (startindex=" + startIndex + ") text='" + text + "' " + EmpyrionScripting.ErrorFilter(error));
+                else                            output.Write("{{substring}} error (startindex=" + startIndex + ", length=" + length + ") text='" + text + "' " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -222,7 +226,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{chararray}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{chararray}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

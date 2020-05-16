@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.DataWrapper;
+﻿using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
@@ -33,7 +34,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{entitybyname}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{entitybyname}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -70,7 +71,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{entitiesbyname}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{entitiesbyname}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -92,7 +93,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{entitiesbyid}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{entitiesbyid}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -114,7 +115,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{entitybyid}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{entitybyid}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.DataWrapper;
+﻿using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
 using System;
@@ -12,10 +13,11 @@ namespace EmpyrionScripting.CustomHelpers
     {
 
         [HandlebarTag("devices")]
-        public static void DevicesBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        public static void DevicesBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{devices structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
+            var root        = rootObject as IScriptModData;
             var structure   = arguments[0] as IStructureData;
             var namesSearch = arguments[1].ToString();
 
@@ -28,7 +30,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{devices}} error " + EmpyrionScripting.ErrorFilter(error));
+                if(!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{devices}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -64,7 +66,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{devicesoftype}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{devicesoftype}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -96,7 +98,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -114,7 +116,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setactive}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setactive}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -144,7 +146,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -187,7 +189,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -217,7 +219,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -260,7 +262,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

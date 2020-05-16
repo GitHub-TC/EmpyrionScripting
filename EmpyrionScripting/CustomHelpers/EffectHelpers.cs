@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.Internal.Interface;
+﻿using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{intervall}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{intervall}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -50,7 +51,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{scroll}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{scroll}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -97,7 +98,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{selectlines}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{selectlines}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -106,15 +107,15 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{color}} helper must have exactly one argument: '(rgb hex)'");
 
+            var root = rootObject as IScriptRootData;
             try
             {
-                var root = rootObject as IScriptRootData;
                 int.TryParse(arguments[0]?.ToString(), NumberStyles.HexNumber, null, out int color);
                 root.Color = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
             }
             catch (Exception error)
             {
-                output.Write("{{color}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{color}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -123,15 +124,15 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{bgcolor}} helper must have exactly one argument: '(rgb hex)'");
 
+            var root = rootObject as IScriptRootData;
             try
             {
-                var root = rootObject as IScriptRootData;
                 int.TryParse(arguments[0]?.ToString(), NumberStyles.HexNumber, null, out int color);
                 root.BackgroundColor = new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff);
             }
             catch (Exception error)
             {
-                output.Write("{{bgcolor}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{bgcolor}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -140,16 +141,16 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{fontsize}} helper must have exactly one argument: (number)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
-                var root = rootObject as IScriptRootData;
                 int.TryParse(arguments[0]?.ToString(), out int fontSize);
                 root.FontSize        = fontSize;
                 root.FontSizeChanged = true;
             }
             catch (Exception error)
             {
-                output.Write("{{fontsize}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{fontsize}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

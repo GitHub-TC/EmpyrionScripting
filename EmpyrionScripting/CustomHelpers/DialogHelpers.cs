@@ -1,4 +1,4 @@
-﻿using EmpyrionNetAPITools.Extensions;
+﻿using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
@@ -65,7 +65,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{devices}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{devices}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
     }

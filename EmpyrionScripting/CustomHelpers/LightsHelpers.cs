@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
 using System;
@@ -30,7 +31,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lights}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lights}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -48,7 +49,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightcolor}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lightcolor}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -65,7 +66,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightblink}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lightblink}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -82,7 +83,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightintensity}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lightintensity}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -99,7 +100,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightrange}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lightrange}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -116,7 +117,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lightspotangle}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lightspotangle}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -134,7 +135,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lighttype}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lighttype}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
@@ -64,7 +65,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{islocked}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{islocked}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -109,7 +110,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{lockdevice}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{lockdevice}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -132,7 +133,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{additems}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{additems}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -155,7 +156,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{removeitems}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{removeitems}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -164,9 +165,9 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length < 3 || arguments.Length > 4) throw new HandlebarsException("{{move item structure names [max]}} helper must have at least three argument: (item) (structure) (name;name*;*;name) [max count targets]");
 
+            var root = rootObject as IScriptRootData;
             try
             {
-                var root        = rootObject as IScriptRootData;
                 var item        = arguments[0] as ItemsData;
                 var structure   = arguments[1] as IStructureData;
                 var namesSearch = arguments[2] as string;
@@ -184,7 +185,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{move}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{move}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -288,9 +289,9 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length < 3 || arguments.Length > 4) throw new HandlebarsException("{{fill item structure tank [max]}} helper must have at least three argument: (item) (structure) (tank) [max count/percentage targets]");
 
+            var root = rootObject as IScriptRootData;
             try
             {
-                var root = rootObject as IScriptRootData;
                 if (!(arguments[1] is IStructureData structure) || !(arguments[0] is ItemsData item)) return;
 
                 if (!Enum.TryParse<StructureTankType>(arguments[2]?.ToString(), true, out var type))
@@ -312,7 +313,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{fill}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{fill}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -483,7 +484,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{deconstruct}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{deconstruct}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -538,7 +539,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{replaceblocks}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{replaceblocks}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

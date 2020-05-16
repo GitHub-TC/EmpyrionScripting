@@ -30,5 +30,6 @@ namespace EmpyrionScripting.Interface
         object ConfigFindAttribute(int id, string name);
         EcfBlock ConfigById(int id);
         EcfBlock ConfigByName(string name);
+        bool FunctionNeedsMainThread(Exception error);
     }
 }

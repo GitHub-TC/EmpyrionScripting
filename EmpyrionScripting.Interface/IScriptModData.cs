@@ -1,5 +1,4 @@
-﻿using EcfParser;
-using Eleon.Modding;
+﻿using Eleon.Modding;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,6 +27,8 @@ namespace EmpyrionScripting.Interface
         bool IsElevatedScript { get; }
         string Version { get; }
         IConfigEcfAccess ConfigEcfAccess { get; }
+        bool ScriptWithinMainThread { get; set; }
+        bool ScriptNeedsMainThread { get; set; }
 
         IEnumerable<IEntity> GetAllEntities();
         IPlayfield GetCurrentPlayfield();

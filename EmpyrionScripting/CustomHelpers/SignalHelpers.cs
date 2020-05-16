@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.DataWrapper;
+﻿using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
@@ -31,7 +32,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{signalevents}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{signalevents}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -81,7 +82,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{triggerifsignalgoes}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{triggerifsignalgoes}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -107,7 +108,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{signals}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{signals}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -126,7 +127,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{getsignal}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{getsignal}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -159,7 +160,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setswitch}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setswitch}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -191,7 +192,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{getswitch}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{getswitch}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -223,7 +224,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{getswitches}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{getswitches}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -331,7 +332,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{stopwatch}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{stopwatch}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

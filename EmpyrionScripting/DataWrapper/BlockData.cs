@@ -72,9 +72,9 @@ namespace EmpyrionScripting.DataWrapper
         }
 
         public int Id => GetData().blockType;
-        public bool Active { get => GetData().blockActive.Value; set => _block?.Set(null, null, null, value); }
-        public int Shape { get => GetData().blockShape;         set => _block?.Set(null, value, null, null); }
-        public int Rotation { get => GetData().blockRotation;   set => _block?.Set(null, null, value, null); }
+        public bool Active  { get => GetData().blockActive.Value;   set { if(Active     != value) _block?.Set(null, null, null, value); } }
+        public int Shape    { get => GetData().blockShape;          set { if(Shape      != value) _block?.Set(null, value, null, null); } }
+        public int Rotation { get => GetData().blockRotation;       set { if(Rotation   != value) _block?.Set(null, null, value, null); } }
 
         public void SetTextureForWholeBlock(int texIdx)
         {

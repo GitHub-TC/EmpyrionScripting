@@ -1,5 +1,4 @@
-﻿using EcfParser;
-using Eleon.Modding;
+﻿using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
 using EmpyrionNetAPITools;
 using EmpyrionNetAPITools.Extensions;

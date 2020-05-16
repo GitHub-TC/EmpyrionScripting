@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.DataWrapper;
+﻿using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
@@ -35,7 +36,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{teleporters}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{teleporters}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -44,6 +45,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{setteleporter structure name destination}} helper must have exactly three argument: (structure) (name) (destination)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
                 var destination = arguments[2].ToString();
@@ -51,7 +53,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setteleporter}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setteleporter}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -60,6 +62,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{setteleporterdevicename structure name devicename}} helper must have exactly three argument: (structure) (name) (devicename)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
                 var deviceName = arguments[2].ToString();
@@ -67,7 +70,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setteleporterdevicename}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setteleporterdevicename}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -76,6 +79,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{setteleportertarget structure name devicename}} helper must have exactly three argument: (structure) (name) (target)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
                 var target = arguments[2].ToString();
@@ -83,7 +87,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setteleportertarget}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setteleportertarget}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -92,6 +96,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{setteleporterplayfield structure name playfield}} helper must have exactly three argument: (structure) (name) (playfield)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
                 var playfield = arguments[2].ToString();
@@ -99,7 +104,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setteleporterplayfield}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setteleporterplayfield}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -108,6 +113,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 3) throw new HandlebarsException("{{setteleporterorigin structure name origin}} helper must have exactly three argument: (structure) (name) (origin)");
 
+            var root = rootObject as IScriptRootData;
             try
             {
                 byte.TryParse(arguments[2].ToString(), out var origin);
@@ -115,7 +121,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setteleporterorigin}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setteleporterorigin}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

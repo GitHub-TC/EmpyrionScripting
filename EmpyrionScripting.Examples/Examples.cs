@@ -1,14 +1,7 @@
-﻿using Eleon.Modding;
-using EmpyrionScripting.CustomHelpers;
-using EmpyrionScripting.DataWrapper;
-using EmpyrionScripting.Interface;
-using Newtonsoft.Json;
+﻿using EmpyrionScripting.Interface;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmpyrionScripting.Examples
 {

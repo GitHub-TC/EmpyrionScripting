@@ -1,5 +1,4 @@
-﻿using EcfParser;
-using Eleon.Modding;
+﻿using Eleon.Modding;
 using EmpyrionNetAPIAccess;
 using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.Interface;
@@ -20,11 +19,11 @@ namespace EmpyrionScripting.DataWrapper
         private static readonly Assembly CurrentAssembly = Assembly.GetAssembly(typeof(ScriptRootData));
         private readonly PlayfieldScriptData _PlayfieldScriptData;
 
-        private ConcurrentDictionary<string, object> _PersistendData;
-        private IEntity[] currentEntities;
-        private IEntity[] allEntities;
-        private IPlayfield playfield;
-        private IEntity entity;
+        private readonly ConcurrentDictionary<string, object> _PersistendData;
+        private readonly IEntity[] currentEntities;
+        private readonly IEntity[] allEntities;
+        private readonly IPlayfield playfield;
+        private readonly IEntity entity;
 
         public IEventStore SignalEventStore { get; }
 

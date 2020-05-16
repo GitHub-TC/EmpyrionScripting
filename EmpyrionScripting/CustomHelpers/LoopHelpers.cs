@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.Internal.Interface;
+﻿using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections;
@@ -31,7 +32,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{steps}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{steps}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -63,7 +64,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{sortedeach}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{sortedeach}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -96,7 +97,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{sort}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{sort}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

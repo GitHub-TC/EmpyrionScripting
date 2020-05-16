@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using HandlebarsDotNet;
 using System;
@@ -26,7 +27,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{settext}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{settext}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -48,7 +49,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{settextblock}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{settextblock}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -67,7 +68,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{settext}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{settext}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -86,7 +87,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setfontsize}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setfontsize}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -105,7 +106,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setcolor}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setcolor}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -124,7 +125,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                output.Write("{{setbgcolor}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setbgcolor}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
