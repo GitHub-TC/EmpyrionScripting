@@ -232,10 +232,10 @@ namespace EmpyrionScripting
         private void DisplayScriptInfos()
         {
             PlayfieldData.Values.ForEach(PF => { 
-                if (Configuration.Current.LogLevel != LogLevel.Debug) Log($"ScriptInfos: {PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count}", LogLevel.Message);
+                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
                 PF.ScriptExecQueue.ScriptRunInfo
                     .OrderBy(I => I.Key)
-                    .ForEach(I => Log($"Script: {I.Key,-50} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime} {(I.Value.RunningInstances > 0 ? $" !!!running!!! {I.Value.RunningInstances} times" : "")}", I.Value.RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug));
+                    .ForEach(I => Log($"Script: {I.Key,-50} {(PF.ScriptExecQueue.ScriptNeedsMainThread.TryGetValue(I.Key, out var sync) && sync ? ">SYNC<" : "")} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime} {(I.Value.RunningInstances > 0 ? $" !!!running!!! {I.Value.RunningInstances} times" : "")}", I.Value.RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug));
             });
         }
 
@@ -597,22 +597,10 @@ namespace EmpyrionScripting
             {
                 if (PlayfieldData.Count > 0 && !PlayfieldData.Values.Any(PF => PF.PauseScripts) && (DateTime.Now - LastAlive).TotalSeconds > 120) RestartAllScriptsForPlayfieldServer();
             }
-            catch (Exception error)
-            {
-                Log($"Game_Update: RestartAllScriptsForPlayfieldServer: {error}", LogLevel.Error);
-            }
+            catch (Exception error){ Log($"Game_Update: RestartAllScriptsForPlayfieldServer: {error}", LogLevel.Error); }
 
-            try
-            {
-                PlayfieldData.Values.ForEach(PF => {
-                    //Log($"QueueScriptExecuting: QueueCount:{PF.ScriptExecQueue.QueueCount} ScriptsCount:{PF.ScriptExecQueue.ScriptsCount}", LogLevel.Debug);
-                    for (int i = Configuration.Current.ScriptsParallelExecution - 1; i >= 0 && PF.ScriptExecQueue.ExecNext(); i--) ;
-                });
-            }
-            catch (Exception error)
-            {
-                Log($"Game_Update: ScriptExecQueue.ExecNext: {error}", LogLevel.Error);
-            }
+            try{ PlayfieldData.Values.ForEach(PF => PF.ScriptExecQueue.ExecNext(Configuration.Current.ScriptsParallelExecution, Configuration.Current.ScriptsSyncExecution)); }
+            catch (Exception error) { Log($"Game_Update: ScriptExecQueue.ExecNext: {error}", LogLevel.Error); }
         }
 
         public static void RestartAllScriptsForPlayfieldServer()

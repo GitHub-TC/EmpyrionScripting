@@ -84,7 +84,26 @@ namespace EmpyrionScripting
             }
         }
 
-        public bool ExecNext()
+        public void ExecNext(int maxCount, int scriptsSyncExecution)
+        {
+            var syncExecCount = 0;
+
+            for (int i = maxCount - 1; i >= 0; i--)
+            {
+                if (ExecQueue.TryPeek(out var data))
+                {
+                    if (data.ScriptNeedsMainThread)
+                    {
+                        if (++syncExecCount > scriptsSyncExecution) lock (ExecQueue) { if (ExecQueue.TryDequeue(out var reinsert)) ExecQueue.Enqueue(reinsert); }
+                        else ExecNext();
+                    }
+                    else ExecNext();
+                }
+                else break;
+            }
+        }
+
+        private bool ExecNext()
         {
             var found = false;
             IScriptRootData data = null;

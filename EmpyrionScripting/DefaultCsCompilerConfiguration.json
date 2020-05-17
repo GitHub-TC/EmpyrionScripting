@@ -24,7 +24,10 @@
   ],
   "SymbolPermissions": {
     "Player": [
+      "EmpyrionScripting.Interface.IScriptModData.ScriptNeedsMainThread",
+      "EmpyrionScripting.Interface.IScriptModData.ScriptWithinMainThread",
       "Newtonsoft.*",
+      "System.Random.*",
       "System",
       "EcfFile.*",
       "EcfAttribute.*",
@@ -37,6 +40,8 @@
       "Eleon.Modding.IPlayer.*",
       "Eleon.Modding.IPlayfield.Name",
       "Eleon.Modding.VectorInt3.*",
+      "Eleon.Modding.ILcd.GetText",
+      "Eleon.Modding.ItemStack.*",
       "EmpyrionScripting.CustomHelpers.HelpersTools.GetUniqueNames",
       "EmpyrionScripting.EnumerableExtensions.ForEach",
       "EmpyrionScripting.Interface.IBlockData.*",
@@ -159,6 +164,7 @@
       "Eleon.Modding.IContainer.*",
       "Eleon.Modding.IPlayfield.Players",
       "EmpyrionScripting.Interface.IBlockData.Device",
+      "EmpyrionScripting.Interface.IBlockData.BlockType",
       "EmpyrionScripting.Interface.IEntityData.GetCurrent",
       "EmpyrionScripting.Interface.IEntityData.GetCurrentPlayfield",
       "EmpyrionScripting.Interface.IScriptModData.GetAllEntities",

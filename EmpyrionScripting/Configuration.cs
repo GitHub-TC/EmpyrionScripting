@@ -47,7 +47,8 @@ namespace EmpyrionScripting
         public int DelayStartForNSecondsOnPlayfieldLoad { get; set; } = 30;
         [JsonConverter(typeof(StringEnumConverter))]
         public ExecMethod ExecMethod { get; set; } = ExecMethod.BackgroundWorker;
-        public int ScriptsParallelExecution { get; set; } = 2;
+        public int ScriptsSyncExecution { get; set; } = 2;
+        public int ScriptsParallelExecution { get; set; } = 10;
         public bool ScriptTrackingError { get; set; }
         public int MaxStoredEventsPerSignal { get; set; } = 10;
         public Dictionary<int, int> DeconstructBlockSubstitution { get; set; } = new Dictionary<int, int>() { [331] = 0, [541] = 0, [542] = 0, [543] = 0, [544] = 0 };       
@@ -55,7 +56,7 @@ namespace EmpyrionScripting
         {
             [StructureTankType.Oxygen  ] = new[] { new AllowedItem(2128, 250) },
             [StructureTankType.Fuel    ] = new[] { new AllowedItem(2373, 300), new AllowedItem(2287, 150), new AllowedItem(2266, 30) },
-            [StructureTankType.Pentaxid] = new[] { new AllowedItem(2294, 1), new AllowedItem(2293, 2) }
+            [StructureTankType.Pentaxid] = new[] { new AllowedItem(2294, 1) }
         };
     }
 
