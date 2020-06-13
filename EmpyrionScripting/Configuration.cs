@@ -58,6 +58,9 @@ namespace EmpyrionScripting
             [StructureTankType.Fuel    ] = new[] { new AllowedItem(2373, 300), new AllowedItem(2287, 150), new AllowedItem(2266, 30) },
             [StructureTankType.Pentaxid] = new[] { new AllowedItem(2294, 1) }
         };
+        public string NumberSpaceReplace { get; set; } = " "; // eigentlich :-( funktioniert aber leider nicht mehr "\u2007\u2009";
+        public string BarStandardValueSign { get; set; } = "\u2588";
+        public string BarStandardSpaceSign { get; set; } = "\u2591";
     }
 
 }

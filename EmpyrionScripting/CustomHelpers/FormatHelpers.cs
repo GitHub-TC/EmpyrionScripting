@@ -52,7 +52,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                output.Write(string.Format(FormatCulture, arguments[1]?.ToString(), arguments[0]).Replace(" ", "\u2007\u2009"));
+                output.Write(string.Format(FormatCulture, arguments[1]?.ToString(), arguments[0]).Replace(" ", EmpyrionScripting.Configuration.Current.NumberSpaceReplace));
             }
             catch (Exception error)
             {
@@ -74,8 +74,8 @@ namespace EmpyrionScripting.CustomHelpers
 
                 var len = (int)((barLength / (max - min)) * value);
 
-                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 4 ? arguments[4].ToString() : "\u2588", Math.Max(0, Math.Min(barLength, len)))));
-                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 5 ? arguments[5].ToString() : "\u2591", Math.Max(0, Math.Min(barLength, barLength - len)))));
+                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 4 ? arguments[4].ToString() : EmpyrionScripting.Configuration.Current.BarStandardValueSign, Math.Max(0, Math.Min(barLength, len)))));
+                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 5 ? arguments[5].ToString() : EmpyrionScripting.Configuration.Current.BarStandardSpaceSign, Math.Max(0, Math.Min(barLength, barLength - len)))));
             }
             catch (Exception error)
             {

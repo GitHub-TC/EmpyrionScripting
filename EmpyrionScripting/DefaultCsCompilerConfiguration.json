@@ -14,7 +14,8 @@
     "System.Numerics",
     "System.Text",
     "System.Threading.Tasks",
-    "Eleon.Modding"
+    "Eleon.Modding",
+    "UnityEngine"
   ],
   "AssemblyReferences": [
     "ModApi",
@@ -24,6 +25,7 @@
   ],
   "SymbolPermissions": {
     "Player": [
+      "UnityEngine.Color.*",
       "EmpyrionScripting.Interface.IScriptModData.ScriptNeedsMainThread",
       "EmpyrionScripting.Interface.IScriptModData.ScriptWithinMainThread",
       "Newtonsoft.*",
