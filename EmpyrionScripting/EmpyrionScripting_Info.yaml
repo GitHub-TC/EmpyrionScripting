@@ -3,7 +3,7 @@
 Name: EmpyrionScripting
 Description: Displays dynamic/real LCD stuff and allows scripted automatisation
 Author: ASTIC/TC
-Version: 5.5.3
+Version: 5.5.4
 Website: https://github.com/GitHub-TC/EmpyrionScripting
 
 # Possible targets: None, Dedi, PfServer, Client (the latter three can be combined)

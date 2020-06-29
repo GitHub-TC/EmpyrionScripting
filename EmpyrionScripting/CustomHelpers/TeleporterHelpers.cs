@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.CsHelper;
+﻿using Eleon.Modding;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
@@ -23,13 +24,18 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch).ToDictionary(N => N);
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
 
-                var blocks = structure.GetCurrent()
-                    .GetDevices(DeviceTypeName.Teleporter).Values()
-                    .Select(V => new TeleporterData(structure.GetCurrent(), V))
-                    .Where(T => uniqueNames.ContainsKey(T.CustomName))
+                var blocks = uniqueNames.Select(N => {
+                        var teleporter = structure.GetCurrent().GetDevice<ITeleporter>(N);
+                        if (teleporter == null) return null;
+
+                        var block = BlockHelpers.Devices(structure, N).FirstOrDefault();
+                        return block != null ? new DataWrapper.TeleporterData(structure.GetCurrent(), block.Position) : null;
+                    })
+                    .Where(T => T != null)
                     .ToArray();
+
 
                 if (blocks != null && blocks.Length > 0) options.Template(output, blocks);
                 else                                     options.Inverse(output, context as object);
@@ -125,7 +131,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        private static void ChangeTeleporterData(object rootObject, object[] arguments, Action<TeleporterData> change)
+        private static void ChangeTeleporterData(object rootObject, object[] arguments, Action<DataWrapper.TeleporterData> change)
         {
             var root                = rootObject as IScriptRootData;
             var structure           = arguments[0] as IStructureData;
@@ -133,13 +139,15 @@ namespace EmpyrionScripting.CustomHelpers
 
             if (!root.IsElevatedScript) throw new HandlebarsException("only allowed in elevated scripts");
 
-            var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch).ToDictionary(N => N);
+            var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
 
-            var blocks = structure.GetCurrent()
-                .GetDevices(DeviceTypeName.Teleporter).Values()
-                .Select(V => new TeleporterData(structure.GetCurrent(), V))
-                .Where(T => uniqueNames.ContainsKey(T.CustomName))
-                .ForEach(change);
+            uniqueNames.ForEach(N => {
+                var teleporter = structure.GetCurrent().GetDevice<ITeleporter>(N);
+                if (teleporter == null) return;
+
+                var block = BlockHelpers.Devices(structure, N).FirstOrDefault();
+                if(block != null) change(new DataWrapper.TeleporterData(structure.GetCurrent(), block.Position));
+            });
         }
     }
 }
