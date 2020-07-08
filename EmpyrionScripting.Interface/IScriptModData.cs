@@ -18,6 +18,7 @@ namespace EmpyrionScripting.Interface
         IEntityData E { get; }
         string Error { get; set; }
         int FontSize { get; set; }
+        Dictionary<string, string> Ids { get; }
         string IngotIds { get; }
         string OreIds { get; }
         List<string> LcdTargets { get; set; }
