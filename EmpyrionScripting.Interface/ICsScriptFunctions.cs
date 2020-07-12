@@ -31,5 +31,6 @@ namespace EmpyrionScripting.Interface
         EcfBlock ConfigById(int id);
         EcfBlock ConfigByName(string name);
         bool FunctionNeedsMainThread(Exception error);
+        T[] GetDevices<T>(IStructureData structure, string names) where T : class, IDevice;
     }
 }
