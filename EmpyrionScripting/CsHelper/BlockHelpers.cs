@@ -17,10 +17,22 @@ namespace EmpyrionScripting.CsHelper
             .Select(B => B?.GetStructure()?.GetDevice<T>(B.Position))
             .Where(B => B != null)
             .ToArray();
-        public T[] GetDevices<T>(params IBlockData[] block) where T : class, IDevice 
+        public T[] GetDevices<T>(params IBlockData[] block) where T : class, IDevice
             => block.OfType<BlockData>()
             .Select(B => B?.GetStructure()?.GetDevice<T>(B.Position))
             .Where(B => B != null)
+            .ToArray();
+
+        public (IBlockData B, T D)[] GetBlockDevices<T>(IStructureData structure, string names) where T : class, IDevice
+            => BlockHelpers.Devices(structure, names)
+            .OfType<BlockData>()
+            .Select(B => (B: (IBlockData)B, D: B?.GetStructure()?.GetDevice<T>(B.Position)))
+            .Where(B => B.D != null)
+            .ToArray();
+        public (IBlockData B, T D)[] GetBlockDevices<T>(params IBlockData[] block) where T : class, IDevice 
+            => block.OfType<BlockData>()
+            .Select(B => (B: (IBlockData)B, D: B?.GetStructure()?.GetDevice<T>(B.Position)))
+            .Where(B => B.D != null)
             .ToArray();
     }
 }

@@ -157,7 +157,9 @@
       "System.int.*",
       "System.Int32.*",
       "System.String.*",
-      "Newtonsoft.Json"
+      "Newtonsoft.Json",
+      "System.object.GetType",
+      "EmpyrionScripting.Interface.IScriptModData.Ids.*"
     ],
     "Admin": [
       "Eleon.Modding.IContainer.*",
@@ -172,7 +174,8 @@
       "EmpyrionScripting.Interface.IScriptModData.GetEntities",
       "EmpyrionScripting.Interface.IScriptModData.GetPersistendData",
       "EmpyrionScripting.Interface.IStructureData.GetCurrent",
-      "EmpyrionScripting.CsHelper.GetDevices"
+      "EmpyrionScripting.CsHelper.GetDevices",
+      "EmpyrionScripting.CsHelper.GetBlockDevices"
     ],
     "SaveGame": [
       "EmpyrionScripting.Interface.IScriptSaveGameRootData.*",

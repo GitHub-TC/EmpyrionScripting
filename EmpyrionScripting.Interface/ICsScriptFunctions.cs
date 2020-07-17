@@ -26,11 +26,13 @@ namespace EmpyrionScripting.Interface
         IList<IItemMoveInfo> Move(IItemsData item, IStructureData structure, string names, int? maxLimit = null);
         void WithLockedDevice(IStructureData structure, IBlockData block, Action action, Action lockFailed = null);
         bool IsLocked(IStructureData structure, IBlockData block);
-        T[] GetDevices<T>(params IBlockData[] block) where T : class, IDevice;
         object ConfigFindAttribute(int id, string name);
         EcfBlock ConfigById(int id);
         EcfBlock ConfigByName(string name);
         bool FunctionNeedsMainThread(Exception error);
+        T[] GetDevices<T>(params IBlockData[] block) where T : class, IDevice;
         T[] GetDevices<T>(IStructureData structure, string names) where T : class, IDevice;
+        (IBlockData B, T D)[] GetBlockDevices<T>(IStructureData structure, string names) where T : class, IDevice;
+        (IBlockData B, T D)[] GetBlockDevices<T>(params IBlockData[] block) where T : class, IDevice;
     }
 }

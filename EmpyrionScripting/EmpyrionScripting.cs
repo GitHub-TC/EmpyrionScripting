@@ -88,7 +88,7 @@ namespace EmpyrionScripting
 
                 StopScriptsEvent += (S, E) =>
                 {
-                    PlayfieldData.Values.ForEach(P => { 
+                    PlayfieldData?.Values.ForEach(P => { 
                         ModApi.Log($"StopScriptsEvent: ({P.PlayfieldName}) {(P.PauseScripts ? "always stopped" : "scripts running")}");
                         P.PauseScripts = true;
                     });
@@ -588,11 +588,14 @@ namespace EmpyrionScripting
         public void Game_Exit()
         {
             ModApi.Log("Mod exited:Game_Exit");
-            StopScriptsEvent?.Invoke(this, EventArgs.Empty);
+            try { StopScriptsEvent?.Invoke(this, EventArgs.Empty); }
+            catch (Exception error) { Log($"Game_Exit: StopScriptsEvent: {error}", LogLevel.Error); }
         }
 
         public void Game_Update()
         {
+            if (PlayfieldData == null) return;
+
             try
             {
                 if (PlayfieldData.Count > 0 && !PlayfieldData.Values.Any(PF => PF.PauseScripts) && (DateTime.Now - LastAlive).TotalSeconds > 120) RestartAllScriptsForPlayfieldServer();
