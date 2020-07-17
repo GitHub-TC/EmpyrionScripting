@@ -76,7 +76,7 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (left == null || right == null) return false;
 
-            var list = right.ToString().Split(new []{ ',', ';', '#', '+' }).Select(T => T.Trim());
+            var list = right.ToString().Split(new []{ ',', ';', '#', '+' }, StringSplitOptions.RemoveEmptyEntries).Select(T => T.Trim());
             var Converter = TypeDescriptor.GetConverter(left.GetType());
 
             return list.Any(I =>

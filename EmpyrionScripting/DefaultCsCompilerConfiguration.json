@@ -138,6 +138,8 @@
       "EmpyrionScripting.Interface.IStructureTankWrapper.Content",
       "EmpyrionScripting.Interface.IStructureTankWrapper.ItemsNeededForFill",
       "EmpyrionScripting.Interface.StructureTankType.*",
+      "EmpyrionScripting.DataWrapper.ContainerData",
+      "EcfParser.*",
       "FactionData.Group",
       "FactionData.Id",
       "System.Action",
@@ -160,6 +162,7 @@
     "Admin": [
       "Eleon.Modding.IContainer.*",
       "Eleon.Modding.IPlayfield.Players",
+      "EmpyrionScripting.DataWrapper.ContainerData.GetContainer",
       "EmpyrionScripting.Interface.IBlockData.Device",
       "EmpyrionScripting.Interface.IBlockData.BlockType",
       "EmpyrionScripting.Interface.IEntityData.GetCurrent",

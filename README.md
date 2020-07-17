@@ -182,6 +182,48 @@ Hier werden alle Erze angezeigt wo nur 1-1000 auf der Basis vorhanden ist.
 {{/test}}
 {{/itemlist}}
 ```
+
+## Vordefinierte ID Listen
+
+Diese Listen können geändert werden oder durch neue Einträge erweitert werden.
+Dazu kann einfach der Abschnitt "Ids" in der Datei \[EGS\]\Saves\Games\\[SaveGameName\]\Mods\EmpyrionScripting\Configuration.json
+geändert werden.
+
+Hinweis: Um den Originalzustand wieder herzustellen kann der Abschnitt "Ids" aus der Datei geöscht werden. Die Mod trägt dann hier die im Programm hinterlegte Standardkonfiguration wieder ein.
+
+Folgende Listen können über "Ids.\[NameDerListe\] im Standard abgerufen werden.
+
+- Ore        
+- Ingot      
+- BlockL     
+- BlockS     
+- Medic      
+- Food       
+- Ingredient 
+- Sprout     
+- Tools      
+- ArmorMod   
+- DeviceL    
+- DeviceS   
+- WeaponPlayer
+- WeaponHV   
+- WeaponSV   
+- WeaponCV   
+- WeaponBA   
+- AmmoPlayer 
+- AmmoHV     
+- AmmoSV     
+- AmmoCV     
+- AmmoBA    
+
+Die Listen beginnen und enden mit einem Komma so das sie einfach mit dem Befehl `concat` kombiniert werden können.
+```
+(concat Ids.WeaponHV Ids.WeaponSV Ids.WeaponCV)
+oder
+(concat '1234,5568' Ids.ArmorMod)
+```
+
+
 -----------------------------------------------------
 ## Welcher Spieler ist auf der Basis/Schiff gerade aktiv
 
@@ -189,7 +231,7 @@ Eingabe im LCD (alles ohne "")
 ```
 Targets:"NAME DES ANZUZEIGENDEN LCD"Eingabe im LCD (alles ohne "")
 "TEXT optional"
-{{#each P.Player}}
+{{#each P.Players}}
  "-" {{Name}}
 {{/each}}
 ```
@@ -197,7 +239,7 @@ Bsp.
 ```
 Targets:LCD Info W1
 Player:
-{{#each P.Player}}
+{{#each P.Players}}
  - {{Name}}
 {{/each}}
 ```
@@ -844,6 +886,47 @@ Here all ores are displayed where only 1-1000 exists on the basis.
 {{/test}}
 {{/itemlist}}
 ```
+
+## Predefined ID lists
+
+These lists can be changed or expanded with new entries.
+To do this, simply use the section "Ids" in the file \[EGS\]\Saves\Games\\[SaveGameName\]\Mods\EmpyrionScripting\Configuration.json
+be changed.
+
+Note: To restore the original state, the section "Ids" can be deleted from the file. The mod then enters the standard configuration stored in the program again.
+
+The following lists can be called up via "Ids.\[NameDerListe\] in the standard system.
+
+- Ore
+- Ingot
+- BlockL
+- BlockS
+- Medic
+- food
+- Ingredient
+- Sprout
+- tools
+- ArmorMod
+- DeviceL
+- DeviceS
+- WeaponPlayer
+- WeaponHV
+- WeaponSV
+- WeaponCV
+- WeaponBA
+- AmmoPlayer
+- AmmoHV
+- AmmoSV
+- AmmoCV
+- AmmoBA
+
+The lists begin and end with a comma so that they can be easily combined with the command `concat`.
+```
+(concat Ids.WeaponHV Ids.WeaponSV Ids.WeaponCV)
+or
+(concat '1234.5568' Ids.ArmorMod)
+```
+
 -----------------------------------------------------
 ## Which player is currently active on the base / ship
 
@@ -851,7 +934,7 @@ Input on the LCD (everything without "")
 ```
 Targets:"NAME DES ANZUZEIGENDEN LCD"Input on the LCD (everything without "")
 "TEXT optional"
-{{#each P.Player}}
+{{#each P.Players}}
  "-" {{Name}}
 {{/each}}
 ```
@@ -859,7 +942,7 @@ Bsp.
 ```
 Targets:LCD Info W1
 Player:
-{{#each P.Player}}
+{{#each P.Players}}
  - {{Name}}
 {{/each}}
 ```

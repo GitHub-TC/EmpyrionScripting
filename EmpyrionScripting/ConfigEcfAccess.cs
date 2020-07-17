@@ -10,9 +10,9 @@ namespace EmpyrionScripting
 {
     public class ConfigEcfAccess : IConfigEcfAccess
     {
-        public EcfFile Configuration_Ecf { get; set; }
-        public EcfFile Config_Ecf { get; set; }
-        public EcfFile Flat_Config_Ecf { get; set; }
+        public EcfFile Configuration_Ecf { get; set; } = new EcfFile();
+        public EcfFile Config_Ecf { get; set; } = new EcfFile();
+        public EcfFile Flat_Config_Ecf { get; set; } = new EcfFile();
         public Dictionary<int, EcfBlock> ConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public Dictionary<string, EcfBlock> ConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
         public Dictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
@@ -45,7 +45,8 @@ namespace EmpyrionScripting
             catch (Exception error) { Log($"EmpyrionScripting ConfigBlockByName: {error}", LogLevel.Error); }
 
             Flat_Config_Ecf = new EcfFile() { Version = Configuration_Ecf.Version, Blocks = new List<EcfBlock>() };
-            Configuration_Ecf.Blocks.ForEach(B => Flat_Config_Ecf.Blocks.Add(MergeRefBlocks(new EcfBlock(), B)));
+            try { Configuration_Ecf.Blocks?.ForEach(B => Flat_Config_Ecf.Blocks.Add(MergeRefBlocks(new EcfBlock(), B))); }
+            catch (Exception error) { Log($"EmpyrionScripting Configuration_Ecf.Blocks MergeRefBlocks: {error}", LogLevel.Error); }
 
             try { FlatConfigBlockById = BlocksById(Flat_Config_Ecf.Blocks); }
             catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockById: {error}", LogLevel.Error); }

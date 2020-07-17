@@ -140,7 +140,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             var items = arguments[0] as ItemsData[];
             var ids   = (arguments[1] as string)
-                            .Split(';', ',')
+                            .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                             .Select(N => int.TryParse(N, out int i) ? i : 0)
                             .Where(i => i != 0)
                             .ToArray();
