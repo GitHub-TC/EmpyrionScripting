@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
 {
@@ -42,6 +43,9 @@ namespace EmpyrionScripting.DataWrapper
         public float DamageLevel => GetCurrent().DamageLevel;
         public bool IsOfflineProtectable => GetCurrent().IsOfflineProtectable;
         public bool IsReady => GetCurrent().IsReady;
+
+        public VectorInt3 MinPos => GetCurrent().MinPos;
+        public VectorInt3 MaxPos => GetCurrent().MaxPos;
 
         public string[] AllCustomDeviceNames => _n.Value;
         readonly Lazy<string[]> _n;

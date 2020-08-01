@@ -22,6 +22,8 @@ namespace EmpyrionScripting.Interface
         IStructureTankWrapper PentaxidTank { get; }
         IPlayerData[] Passengers { get; }
         IPlayerData Pilot { get; }
+        VectorInt3 MinPos { get; }
+        VectorInt3 MaxPos { get; }
 
         IStructure GetCurrent();
     }

@@ -30,6 +30,7 @@ namespace EmpyrionScripting.Interface
         IConfigEcfAccess ConfigEcfAccess { get; }
         bool ScriptWithinMainThread { get; set; }
         bool ScriptNeedsMainThread { get; set; }
+        ConcurrentDictionary<string, object> CacheData { get; }
 
         IEnumerable<IEntity> GetAllEntities();
         IPlayfield GetCurrentPlayfield();

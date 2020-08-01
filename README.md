@@ -547,6 +547,14 @@ Syntaxdocu:
 + {{setblock key}}
   + Die Daten des Blockes hinterlegen so dass sie per @root.Data.(key) jederzeit wieder abgerufen werden können
 
++ {{setcache key data}}
+  + Die Daten (data) hinterlegen so dass sie per @root.CacheData.(key) jederzeit wieder abgerufen werden können. 
+  + Diese werden für die Entität gespeichert und stehen beim nächsten Scriptaufruf wieder zur Verfügung können jedoch durch Playfieldwechel oder ähnliches verworfen werden.
+
++ {{setcacheblock key}}
+  + Die Daten des Blockes hinterlegen so dass sie per @root.CacheData.(key) jederzeit wieder abgerufen werden können
+  + Diese werden für die Entität gespeichert und stehen beim nächsten Scriptaufruf wieder zur Verfügung können jedoch durch Playfieldwechel oder ähnliches verworfen werden.
+
 + {{concat a1 a2 a3 ...}}
   + Fügt die Werte a1 .. aN zusammen
   + Wenn ein Wert ein Array von Texten (string\[\]) ist wird der nächste Parameter als Trennzeichen für diese Einträge gewertet
@@ -1262,11 +1270,18 @@ DateTime format:
 
 ### (set)
 + {{set key data}}
-   + The data (data) are stored so that they can be recalled at any time via @ root.Data. (Key)
+   + The data (data) are stored so that they can be recalled at any time via @root.Data.(Key)
 
-### (setblock)
 + {{setblock key}}
-   + The data of the block are stored so that they can be recalled at any time via @ root.Data. (Key)
+   + The data of the block are stored so that they can be recalled at any time via @root.Data.(Key)
+
++ {{setcache key data}}
+   + Store the data (data) so that they can be called up again at any time via @root.CacheData.(Key).
+   + These are saved for the entity and are available again the next time the script is called, but can be discarded by changing the playfield or similar.
+
++ {{setcacheblock key}}
+   + Store the data of the block so that it can be called up at any time via @root.CacheData.(Key)
+   + These are saved for the entity and are available again the next time the script is called, but can be discarded by changing the playfield or similar.
 
 ### (math)
 + {{math (lvalue) op (rvalue)}}

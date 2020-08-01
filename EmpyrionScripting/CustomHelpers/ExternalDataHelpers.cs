@@ -88,6 +88,22 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("setcache")]
+        public static void SetCacheHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{setcache key data}} helper must have two argument: (key) (data)");
+
+            var root = rootObject as IScriptRootData;
+            try
+            {
+                root.CacheData.AddOrUpdate(arguments[0]?.ToString(), arguments[1], (S, O) => arguments[1]);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setcache}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("lookup")]
         public static void LookUpHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
@@ -141,6 +157,25 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setblock}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("setcacheblock")]
+        public static void SetCacheBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{setcacheblock key}} helper must have one argument: (key)");
+
+            var root = rootObject as IScriptRootData;
+            try
+            {
+                var data = new StringWriter();
+                options.Template(data, context as object);
+
+                root.CacheData.AddOrUpdate(arguments[0]?.ToString(), data.ToString(), (S, O) => data.ToString());
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setcacheblock}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

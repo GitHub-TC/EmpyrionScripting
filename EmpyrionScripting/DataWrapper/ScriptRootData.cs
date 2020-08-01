@@ -69,6 +69,12 @@ namespace EmpyrionScripting.DataWrapper
 
         public IPlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
         public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;
+        public ConcurrentDictionary<string, object> CacheData =>
+            (ConcurrentDictionary<string, object>)
+            (_PersistendData.TryGetValue(E?.Id.ToString() ?? string.Empty, out var cache) 
+                ? cache
+                : _PersistendData.GetOrAdd(E?.Id.ToString() ?? string.Empty, new ConcurrentDictionary<string, object>())
+            );
 
         public IEnumerable<IEntity> GetAllEntities() => IsElevatedScript ? allEntities : Enumerable.Empty<IEntity>();
         public IEnumerable<IEntity> GetEntities() => currentEntities

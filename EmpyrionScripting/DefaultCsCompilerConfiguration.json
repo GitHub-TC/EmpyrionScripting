@@ -19,7 +19,7 @@
   ],
   "AssemblyReferences": [
     "ModApi",
-    "Syste.Core",
+    "System.Core",
     "System.Numerics",
     "UnityEngine.CoreModule"
   ],
@@ -100,6 +100,7 @@
       "EmpyrionScripting.Interface.IScriptModData.CsRoot",
       "EmpyrionScripting.Interface.IScriptModData.CycleCounter",
       "EmpyrionScripting.Interface.IScriptModData.Data",
+      "EmpyrionScripting.Interface.IScriptModData.CacheData",
       "EmpyrionScripting.Interface.IScriptModData.DisplayType",
       "EmpyrionScripting.Interface.IScriptModData.E",
       "EmpyrionScripting.Interface.IScriptModData.Error",
@@ -122,6 +123,8 @@
       "EmpyrionScripting.Interface.IStructureData.DamageLevel",
       "EmpyrionScripting.Interface.IStructureData.DockedE",
       "EmpyrionScripting.Interface.IStructureData.E",
+      "EmpyrionScripting.Interface.IStructureData.MinPos",
+      "EmpyrionScripting.Interface.IStructureData.MaxPos",
       "EmpyrionScripting.Interface.IStructureData.FuelTank",
       "EmpyrionScripting.Interface.IStructureData.GetDeviceTypeNames",
       "EmpyrionScripting.Interface.IStructureData.IsOfflineProtectable",
@@ -154,6 +157,7 @@
       "System.Threading.Tasks.Task.*",
       "System.string.*",
       "UnityEngine.Vector3.*",
+      "UnityEngine.VectorInt3.*",
       "System.int.*",
       "System.Int32.*",
       "System.String.*",
