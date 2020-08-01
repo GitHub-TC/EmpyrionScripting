@@ -31,6 +31,7 @@
       "Newtonsoft.*",
       "System.Random.*",
       "System",
+      "System.Array.*",
       "EcfFile.*",
       "EcfAttribute.*",
       "EcfBlock.*",
