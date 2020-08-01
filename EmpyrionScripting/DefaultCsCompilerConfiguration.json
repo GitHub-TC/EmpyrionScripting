@@ -163,6 +163,7 @@
       "System.Int32.*",
       "System.String.*",
       "Newtonsoft.Json",
+      "System.Object",
       "System.object.GetType",
       "EmpyrionScripting.Interface.IScriptModData.Ids.*"
     ],
