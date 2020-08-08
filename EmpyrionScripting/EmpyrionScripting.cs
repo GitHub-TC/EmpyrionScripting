@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionNetAPIAccess;
 using EmpyrionNetAPIDefinitions;
 using EmpyrionNetAPITools;
 using EmpyrionNetAPITools.Extensions;
@@ -14,6 +15,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,9 +27,9 @@ namespace EmpyrionScripting
     {
         public static event EventHandler StopScriptsEvent;
 
-        private const string TargetsKeyword  = "Targets:";
-        private const string ScriptKeyword   = "Script:";
-        private const string CsKeyword       = "C#:";
+        private const string TargetsKeyword = "Targets:";
+        private const string ScriptKeyword = "Script:";
+        private const string CsKeyword = "C#:";
         ModGameAPI legacyApi;
 
         public static EmpyrionScripting EmpyrionScriptingInstance { get; set; }
@@ -45,6 +48,11 @@ namespace EmpyrionScripting
         public CsCompiler.CsCompiler CsCompiler { get; set; }
 
         public ConcurrentDictionary<string, PlayfieldScriptData> PlayfieldData { get; set; } = new ConcurrentDictionary<string, PlayfieldScriptData>();
+        public static string ScriptingModInfoData { get; private set; } = string.Empty;
+        public static ConcurrentDictionary<string, string> ScriptingModScriptsInfoData { get; } = new ConcurrentDictionary<string, string>();
+
+        private static readonly Assembly CurrentAssembly = Assembly.GetAssembly(typeof(EmpyrionScripting));
+        public static string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
 
         public EmpyrionScripting()
         {
@@ -149,6 +157,8 @@ namespace EmpyrionScripting
                 Playfield     = playfield, 
             });
 
+            UpdateScriptingModInfoData();
+
             ModApi.Log($"StartScripts for {playfield.Name} pending");
             TaskTools.Delay(Configuration.Current.DelayStartForNSecondsOnPlayfieldLoad, () => {
                 ModApi.Log($"StartScripts for {playfield.Name}");
@@ -159,8 +169,29 @@ namespace EmpyrionScripting
             data.Playfield.OnEntityUnloaded += data.Playfield_OnEntityUnloaded;
         }
 
+        private void UpdateScriptingModInfoData()
+        {
+            var output = new StringBuilder();
+
+            output.AppendLine($"Version: {Version}");
+            output.AppendLine($"Configuration.json: {(Configuration.LoadException == null ? "OK" : Configuration.LoadException.Message)}");
+            output.AppendLine($"DefaultCsCompilerConfiguration.json: {(CsCompiler.DefaultConfiguration.LoadException == null ? "OK" : CsCompiler.DefaultConfiguration.LoadException.Message)}");
+            output.AppendLine($"CsCompilerConfiguration.json: {(CsCompiler.Configuration.LoadException == null ? "OK" : CsCompiler.Configuration.LoadException.Message)}");
+            output.AppendLine($"CsCompilerLearnMode:{CsCompiler.Configuration.Current.WithinLearnMode}");
+            output.AppendLine($"CsScriptsAllowedFor:{Configuration.Current.CsScriptsAllowedFor}");
+            output.AppendLine($"DetailedScriptsInfoData:{Configuration.Current.DetailedScriptsInfoData}");
+            output.AppendLine($"InGameScriptsIntervallMS:{Configuration.Current.InGameScriptsIntervallMS}");
+            output.AppendLine($"SaveGameScriptsIntervallMS:{Configuration.Current.SaveGameScriptsIntervallMS}");
+            output.AppendLine();
+            output.AppendLine(DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
+
+            ScriptingModInfoData = output.ToString();
+        }
+
         private void Application_OnPlayfieldUnloading(IPlayfield playfield)
         {
+            ScriptingModScriptsInfoData.TryRemove(playfield.Name, out _);
+
             if(!PlayfieldData.TryRemove(playfield.Name, out var data)) return;
 
             data.Playfield.OnEntityLoaded   -= data.Playfield_OnEntityLoaded;
@@ -231,11 +262,25 @@ namespace EmpyrionScripting
 
         private void DisplayScriptInfos()
         {
-            PlayfieldData.Values.ForEach(PF => { 
+            UpdateScriptingModInfoData();
+
+            PlayfieldData.Values.ForEach(PF => {
+                var output = new StringBuilder();
+                var totalExecTime = new TimeSpan();
                 Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
                 PF.ScriptExecQueue.ScriptRunInfo
                     .OrderBy(I => I.Key)
-                    .ForEach(I => Log($"Script: {I.Key,-50} {(PF.ScriptExecQueue.ScriptNeedsMainThread.TryGetValue(I.Key, out var sync) && sync ? ">SYNC<" : "")} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime} {(I.Value.RunningInstances > 0 ? $" !!!running!!! {I.Value.RunningInstances} times" : "")}", I.Value.RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug));
+                    .ForEach(I =>
+                    {
+                        var line = $"Script: {I.Key,-50} {(PF.ScriptExecQueue.ScriptNeedsMainThread.TryGetValue(I.Key, out var sync) && sync ? ">SYNC<" : "")} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime} {(I.Value.RunningInstances > 0 ? $" !!!running!!! {I.Value.RunningInstances} times" : "")}";
+                        totalExecTime += I.Value.ExecTime;
+                        if(Configuration.Current.DetailedScriptsInfoData) output.AppendLine(line);
+                        Log(line, I.Value.RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug);
+                    });
+
+                output.Insert(0, $"RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()} TotalExecTime:{totalExecTime}\n");
+                var result = output.ToString();
+                ScriptingModScriptsInfoData.AddOrUpdate(PF.PlayfieldName, result, (k, o) => result);
             });
         }
 

@@ -31,6 +31,8 @@ namespace EmpyrionScripting.Interface
         bool ScriptWithinMainThread { get; set; }
         bool ScriptNeedsMainThread { get; set; }
         ConcurrentDictionary<string, object> CacheData { get; }
+        string ScriptingModInfoData { get; }
+        ConcurrentDictionary<string, string> ScriptingModScriptsInfoData { get; }
 
         IEnumerable<IEntity> GetAllEntities();
         IPlayfield GetCurrentPlayfield();

@@ -50,13 +50,14 @@ namespace EmpyrionScripting
         public int ScriptsSyncExecution { get; set; } = 2;
         public int ScriptsParallelExecution { get; set; } = 10;
         public bool ScriptTrackingError { get; set; }
+        public bool DetailedScriptsInfoData { get; set; }
         public int MaxStoredEventsPerSignal { get; set; } = 10;
         public Dictionary<int, int> DeconstructBlockSubstitution { get; set; } = new Dictionary<int, int>() { [331] = 0, [541] = 0, [542] = 0, [543] = 0, [544] = 0 };
         public Dictionary<string, string> Ids { get; set; } = new Dictionary<string, string>()
         {
             ["Ore"          ] = ",2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297,2311,2314,",
             ["Ingot"        ] = ",2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298,2318,",
-            ["BlockL"       ] = ",343,396,399,402,405,408,411,412,462,545,839,1075,1128,1129,1238,1239,1322,1386,1392,1395,1440,1443,1481,1549,",
+            ["BlockL"       ] = ",343,396,399,402,403,404,405,408,411,412,462,545,839,1075,1128,1129,1238,1239,1322,1386,1392,1395,1440,1443,1481,1549,",
             ["BlockS"       ] = ",380,393,493,836,837,974,976,1135,1389,1478,1626,1960,",
             ["Medic"        ] = ",2355,2356,2375,2377,2382,2385,2359,2393,2416,2426-2428,2430,2435-2441,",
             ["Food"         ] = ",2325,2349,2354,2361,2362,2372,2374,2376,2378,2394,2409,2410-2412,2415,2417,2419-2421,2423-2425,2429,2431,2433,2434,2442,",

@@ -1,5 +1,4 @@
 ﻿using Eleon.Modding;
-using EmpyrionNetAPIAccess;
 using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
@@ -8,7 +7,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
@@ -16,7 +14,6 @@ namespace EmpyrionScripting.DataWrapper
 
     public class ScriptRootData : IScriptRootData
     {
-        private static readonly Assembly CurrentAssembly = Assembly.GetAssembly(typeof(ScriptRootData));
         private readonly PlayfieldScriptData _PlayfieldScriptData;
 
         private readonly ConcurrentDictionary<string, object> _PersistendData;
@@ -61,7 +58,9 @@ namespace EmpyrionScripting.DataWrapper
             DisplayType = data.DisplayType;
         }
 
-        public string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
+        public string Version { get; } = EmpyrionScripting.Version;
+        public string ScriptingModInfoData { get; } = EmpyrionScripting.ScriptingModInfoData;
+        public ConcurrentDictionary<string, string> ScriptingModScriptsInfoData { get; } = EmpyrionScripting.ScriptingModScriptsInfoData;
 
         public bool IsElevatedScript { get; }
         public ICsScriptFunctions CsRoot { get; }
