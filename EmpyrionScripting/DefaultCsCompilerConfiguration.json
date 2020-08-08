@@ -112,6 +112,8 @@
       "EmpyrionScripting.Interface.IScriptModData.ScriptWithinMainThread",
       "EmpyrionScripting.Interface.IScriptModData.SignalEventStore",
       "EmpyrionScripting.Interface.IScriptModData.Version",
+      "EmpyrionScripting.Interface.IScriptModData.ScriptingModInfoData",
+      "EmpyrionScripting.Interface.IScriptModData.ScriptingModScriptsInfoData",
       "EmpyrionScripting.Interface.ISignalData.*",
       "EmpyrionScripting.Interface.ISignalEventBase.*",
       "EmpyrionScripting.Interface.IStructureData",
