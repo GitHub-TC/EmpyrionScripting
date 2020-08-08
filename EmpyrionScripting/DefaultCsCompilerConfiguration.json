@@ -8,6 +8,7 @@
     "EcfParser",
     "Newtonsoft.Json",
     "System",
+    "System.Globalization",
     "System.Collections.Concurrent",
     "System.Collections.Generic",
     "System.Linq",
@@ -168,10 +169,13 @@
       "System.Random.*",
       "System.String.*",
       "System.string.*",
+      "System.StringSplitOptions.*",
       "System.Text.*",
       "System.Threading.Tasks.Task.*",
       "UnityEngine.Color.*",
       "UnityEngine.Vector3.*",
+      "System.Globalization.*",
+      "System.TimeSpan.*",
       "UnityEngine.VectorInt3.*"
     ],
     "Admin": [
