@@ -475,7 +475,82 @@ namespace EmpyrionScripting.CustomHelpers
                 }) as ProcessBlockData;
 
                 if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list);
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (C, I) => C.AddItems(I, 1) > 0);
+                    if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
+                }
+                else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
+
+                options.Template(output, processBlockData);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{deconstruct}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("recycle")]
+        public static void RecycleHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 2 || arguments.Length > 3) throw new HandlebarsException("{{recycle entity container [CorePrefix]}} helper must have two to four argument: entity container [CorePrefix] [RemoveItemsIds]");
+
+            var root = rootObject as IScriptRootData;
+            var E    = arguments[0] as IEntityData;
+            var N    = arguments[1]?.ToString();
+
+            try
+            {
+                var minPos      = E.S.GetCurrent().MinPos;
+                var maxPos      = E.S.GetCurrent().MaxPos;
+                var S           = E.S.GetCurrent();
+                var coreName    = (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}";
+                var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
+
+                var target      = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
+                if (target == null)
+                {
+                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                    options.Inverse(output, context as object);
+                    output.WriteLine($"No target container '{N}' found");
+                    return;
+                }
+                var targetPos = root.E.S.GetCurrent().GetDevicePositions(N).First();
+
+                if(corePosList.Count == 0)
+                {
+                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                    options.Inverse(output, context as object);
+                    output.WriteLine($"No core '{coreName}' found on {E.Id}");
+                    return;
+                }
+
+                var corePos = corePosList.First();
+                var core = E.S.GetCurrent().GetBlock(corePos);
+                core.Get(out var coreBlockType, out _ , out _, out _);
+
+                if (coreBlockType != PlayerCoreType)
+                {
+                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                    options.Inverse(output, context as object);
+                    output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
+                    return;
+                }
+
+                var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
+                    Started     = DateTime.Now,
+                    Name        = E.Name,
+                    Id          = E.Id,
+                    MinPos      = minPos,
+                    MaxPos      = maxPos,
+                    X           = minPos.x,
+                    Y           = maxPos.y,
+                    Z           = minPos.z,
+                    TotalBlocks =   (Math.Abs(minPos.x) + Math.Abs(maxPos.x) + 1) *
+                                    (Math.Abs(minPos.y) + Math.Abs(maxPos.y) + 1) *
+                                    (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
+                }) as ProcessBlockData;
+
+                if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, null, ExtractBlockToContainer);
                     if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
@@ -530,7 +605,7 @@ namespace EmpyrionScripting.CustomHelpers
                 }) as ProcessBlockData;
 
                 if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list);
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list, (C, I) => C.AddItems(I, 1) > 0);
                     if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
@@ -544,7 +619,9 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
 
-        static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData, IContainer target, VectorInt3 targetPos, string N, int replaceId, Tuple<int,int>[] list)
+        static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData, 
+            IContainer target, VectorInt3 targetPos, string N, int replaceId, Tuple<int,int>[] list,
+            Func<IContainer, int, bool> processBlock)
         {
             IDeviceLock locked = null;
 
@@ -585,7 +662,7 @@ namespace EmpyrionScripting.CustomHelpers
                                             return;
                                         }
 
-                                        if (target.AddItems(blockType, 1) > 0)
+                                        if (processBlock(target, blockType))
                                         {
                                             processBlockData.CheckedBlocks--;
                                             output.WriteLine($"Container '{N}' is full");
@@ -611,5 +688,25 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        private static bool ExtractBlockToContainer(IContainer target, int blockType)
+        {
+            if (!EmpyrionScripting.ConfigEcfAccess.RecipeForBlockById.TryGetValue(blockType, out var recipe)) return false;
+
+            var removeRessIfFailed = new List<KeyValuePair<int, int>>();
+
+            var targetContainerFull = recipe.Any(R =>
+            {
+                var over = target.AddItems(R.Key, R.Value);
+
+                if (over > 0) target.RemoveItems(R.Key, R.Value - over);
+                else          removeRessIfFailed.Add(new KeyValuePair<int, int>(R.Key, R.Value));
+
+                return over > 0;
+            });
+
+            if (targetContainerFull) removeRessIfFailed.ForEach(R => target.RemoveItems(R.Key, R.Value));
+
+            return targetContainerFull;
+        }
     }
 }

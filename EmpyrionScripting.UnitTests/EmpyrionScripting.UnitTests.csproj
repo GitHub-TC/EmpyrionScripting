@@ -96,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MockDeviceLock.cs" />
+    <Compile Include="UnitTestConfig.cs" />
     <Compile Include="UnitTestCs.cs" />
     <Compile Include="UnitTestHandlebar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

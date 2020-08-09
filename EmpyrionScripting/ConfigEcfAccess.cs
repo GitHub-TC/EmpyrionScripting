@@ -17,6 +17,8 @@ namespace EmpyrionScripting
         public Dictionary<string, EcfBlock> ConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
         public Dictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public Dictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public Dictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public Dictionary<int, Dictionary<int, int>> RecipeForBlockById { get; set; } = new Dictionary<int, Dictionary<int, int>>();
         public static Action<string, LogLevel> Log { get; set; } = (s, l) => Console.WriteLine(s);
 
         public void ReadConfigEcf(string contentPath)
@@ -54,7 +56,50 @@ namespace EmpyrionScripting
             try { FlatConfigBlockByName = BlocksByName(Flat_Config_Ecf.Blocks); }
             catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockByName: {error}", LogLevel.Error); }
 
+            try { FlatConfigTemplatesByName = TemplatesByName(Flat_Config_Ecf.Blocks); }
+            catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockByName: {error}", LogLevel.Error); }
+
+            try { RecipeForBlockById = RecipeForBlock(); }
+            catch (Exception error) { Log($"EmpyrionScripting RecipeForBlock: {error}", LogLevel.Error); }
+            
             Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count}", LogLevel.Message);
+        }
+
+        private Dictionary<int, Dictionary<int, int>> RecipeForBlock()
+        {
+            var templates = new Dictionary<int, Dictionary<int, int>>();
+
+            FlatConfigBlockById
+                .ForEach(B => {
+                    var idCfg = B.Value.Attr.FirstOrDefault(A => A.Name == "Id");
+                    if (!int.TryParse(idCfg?.Value?.ToString(), out var id)) return;
+
+                    var ressList = new Dictionary<int, int>();
+                    var templateRoot = B.Value.Attr.FirstOrDefault(A => A.Name == "TemplateRoot")?.Value?.ToString() ??
+                                       idCfg.AddOns?.FirstOrDefault(A => A.Key == "Name").Value?.ToString();
+                    if (string.IsNullOrEmpty(templateRoot)) return;
+                    if (!FlatConfigTemplatesByName.TryGetValue(templateRoot, out var templateRootBlock)) return;
+
+                    templateRootBlock.Childs?
+                        .FirstOrDefault(C => C.Key == "Child Inputs").Value?.Attr?
+                        .ForEach(C => {
+                            if (!FlatConfigTemplatesByName.TryGetValue(C.Name.ToString(), out var recipe)) return;
+
+                            recipe.Childs?
+                                .FirstOrDefault(R => R.Key == "Child Inputs").Value?.Attr?
+                                .ForEach(R => {
+                                    if (!FlatConfigBlockByName.TryGetValue(R.Name.ToString(), out var ressource)) return;
+                                    if (!int.TryParse(ressource.Attr.FirstOrDefault(A => A.Name == "Id")?.Value.ToString(), out var ressId)) return;
+
+                                    if (ressList.TryGetValue(ressId, out var count)) ressList[ressId] = count + (int)R.Value;
+                                    else ressList.Add(ressId, (int)R.Value);
+                                });
+                        });
+
+                    if (ressList.Count > 0) templates.Add(id, ressList);
+                });
+
+            return templates;
         }
 
         public EcfBlock MergeRefBlocks(EcfBlock target, EcfBlock source)
@@ -76,6 +121,11 @@ namespace EmpyrionScripting
             blocks
                 .Where(B => (B.Name == "Block" || B.Name == "Item") && B.Attr.Any(A => A.Name == "Id" && A.AddOns != null && A.AddOns.Any(a => a.Key == "Name")))
                 .ToDictionary(B => B.Attr.First(A => A.Name == "Id").AddOns.First(A => A.Key == "Name").Value.ToString(), B => B);
+
+        public Dictionary<string, EcfBlock> TemplatesByName(IEnumerable<EcfBlock> blocks) =>
+            blocks
+                .Where(B => B.Name == "Template" && B.Attr.Any(A => A.Name == "Name"))
+                .ToDictionary(B => B.Attr.First(A => A.Name == "Name").Value.ToString(), B => B);
 
     }
 }

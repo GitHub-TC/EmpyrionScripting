@@ -454,6 +454,11 @@ Syntaxdocu:
   + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
   + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
 
++ {{recycle entity container \[CorePrefix\]}}
+  + Baut die Struktur 'entity' ab und befördert die Rohstoffe (der bekannten Rezepten) in den Container mit dem Namen welcher mit 'container' angegben wird
+  + Hinweis: Der Kern der Struktur muss 'Core-Recycle-ID' (wobei ID für die Id der Struktur steht) heißen
+  + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
+
 ## Lichter
 + {{lights structure names}}
   + Lichter der Struktur (structure) mit den Namen (names) auswählen
@@ -1361,6 +1366,11 @@ DateTime format:
    + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
    + With the configuration setting DeconstructBlockSubstitution a replacement (by another block type) / deletion (by 0) of block types can be defined
 
++ {{recycle entity container \[CorePrefix\]}}
+   + Dismantles the 'entity' structure and transports the raw materials (of the known recipes) into the container with the name given by 'container'
+   + Note: The core of the structure must be called 'Core-Recycle-ID' (where ID stands for the ID of the structure)
+   + With the configuration setting DeconstructBlockSubstitution, a replacement (by another block type) / deletion (by 0) of block types can be defined
+    
 ## Elevated scripts (Savegame or Adm structures)
 + {{lockdevice structure device | x y z}}
   + Locks a device

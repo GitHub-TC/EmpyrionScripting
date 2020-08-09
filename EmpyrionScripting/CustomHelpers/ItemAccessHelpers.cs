@@ -60,6 +60,24 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("recipebyid")]
+        public static void RecipeForBlockByIdHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{recipebyid id}} helper must have exactly one argument: (id)");
+
+            var root = rootObject as IScriptModData;
+            int.TryParse(arguments[0]?.ToString(), out var id);
+
+            try {
+                if (root.ConfigEcfAccess.RecipeForBlockById.TryGetValue(id, out var recipe)) options.Template(output, recipe);
+                else                                                                         options.Inverse (output, (object)context);
+            }
+            catch (Exception error) {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{configattr}} error " + EmpyrionScripting.ErrorFilter(error)); 
+            }
+        }
+
+
         public static object FindAttribute(this IConfigEcfAccess ecf, int id, string name) =>
             ecf.FlatConfigBlockById.TryGetValue(id, out var found)
                 ? found.Attr.FirstOrDefault(A => A.Name == name)?.Value

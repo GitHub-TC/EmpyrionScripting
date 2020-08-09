@@ -34,5 +34,6 @@ namespace EmpyrionScripting.Interface
         T[] GetDevices<T>(IStructureData structure, string names) where T : class, IDevice;
         (IBlockData B, T D)[] GetBlockDevices<T>(IStructureData structure, string names) where T : class, IDevice;
         (IBlockData B, T D)[] GetBlockDevices<T>(params IBlockData[] block) where T : class, IDevice;
+        Dictionary<int, int> RecipeForBlockById(int id);
     }
 }
