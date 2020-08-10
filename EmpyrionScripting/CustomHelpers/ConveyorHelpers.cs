@@ -690,7 +690,7 @@ namespace EmpyrionScripting.CustomHelpers
 
         private static bool ExtractBlockToContainer(IContainer target, int blockType)
         {
-            if (!EmpyrionScripting.ConfigEcfAccess.RecipeForBlockById.TryGetValue(blockType, out var recipe)) return false;
+            if (!EmpyrionScripting.ConfigEcfAccess.ResourcesForBlockById.TryGetValue(blockType, out var recipe)) return false;
 
             var removeRessIfFailed = new List<KeyValuePair<int, int>>();
 

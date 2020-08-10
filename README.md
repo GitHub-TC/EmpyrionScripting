@@ -441,6 +441,9 @@ Syntaxdocu:
 + {{configbyname name}}
   + Liest aus Konfiguration den Abschnitt für den Block/Item mit dem 'name'
 
++ {{resourcesforid id}}
+  + Liste der benötigten Ressourcen für den Block/Item mit der 'id'
+
 ## Verschieben/Auffüllen/Verarbeiten
 + {{move item structure names \[maxLimit\]}}
   + Item (item) in die Struktur (structure) in die Container mit den Namen (names) verschieben
@@ -1145,6 +1148,9 @@ Syntaxdocu:
 
 + {{configbyname name}}
   + Reads the config section block/item for 'name'
+
++ {{resourcesforid id}}
+   + List of the required resources for the block / item with the 'id'
 
 ### (if)
 * {{#if data}}

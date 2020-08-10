@@ -12,6 +12,6 @@ namespace EmpyrionScripting.CsHelper
         public object ConfigFindAttribute(int id, string name) => EmpyrionScripting.ConfigEcfAccess.FindAttribute(id, name);
         public EcfBlock ConfigById(int id) => EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(id, out var block) ? block : null;
         public EcfBlock ConfigByName(string name) => EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockByName.TryGetValue(name, out var block) ? block : null;
-        public Dictionary<int, int> RecipeForBlockById(int id) => EmpyrionScripting.ConfigEcfAccess.RecipeForBlockById.TryGetValue(id, out var recipe) ? recipe : null;
+        public Dictionary<int, int> ResourcesForBlockById(int id) => EmpyrionScripting.ConfigEcfAccess.ResourcesForBlockById.TryGetValue(id, out var recipe) ? recipe : null;
     }
 }

@@ -18,7 +18,7 @@ namespace EmpyrionScripting
         public Dictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public Dictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
         public Dictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
-        public Dictionary<int, Dictionary<int, int>> RecipeForBlockById { get; set; } = new Dictionary<int, Dictionary<int, int>>();
+        public Dictionary<int, Dictionary<int, int>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, int>>();
         public static Action<string, LogLevel> Log { get; set; } = (s, l) => Console.WriteLine(s);
 
         public void ReadConfigEcf(string contentPath)
@@ -59,13 +59,13 @@ namespace EmpyrionScripting
             try { FlatConfigTemplatesByName = TemplatesByName(Flat_Config_Ecf.Blocks); }
             catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockByName: {error}", LogLevel.Error); }
 
-            try { RecipeForBlockById = RecipeForBlock(); }
+            try { ResourcesForBlockById = ResourcesForBlock(); }
             catch (Exception error) { Log($"EmpyrionScripting RecipeForBlock: {error}", LogLevel.Error); }
             
             Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count}", LogLevel.Message);
         }
 
-        private Dictionary<int, Dictionary<int, int>> RecipeForBlock()
+        private Dictionary<int, Dictionary<int, int>> ResourcesForBlock()
         {
             var templates = new Dictionary<int, Dictionary<int, int>>();
 
@@ -80,27 +80,42 @@ namespace EmpyrionScripting
                     if (string.IsNullOrEmpty(templateRoot)) return;
                     if (!FlatConfigTemplatesByName.TryGetValue(templateRoot, out var templateRootBlock)) return;
 
-                    templateRootBlock.Childs?
-                        .FirstOrDefault(C => C.Key == "Child Inputs").Value?.Attr?
-                        .ForEach(C => {
-                            if (!FlatConfigTemplatesByName.TryGetValue(C.Name.ToString(), out var recipe)) return;
-
-                            recipe.Childs?
-                                .FirstOrDefault(R => R.Key == "Child Inputs").Value?.Attr?
-                                .ForEach(R => {
-                                    if (!FlatConfigBlockByName.TryGetValue(R.Name.ToString(), out var ressource)) return;
-                                    if (!int.TryParse(ressource.Attr.FirstOrDefault(A => A.Name == "Id")?.Value.ToString(), out var ressId)) return;
-
-                                    if (ressList.TryGetValue(ressId, out var count)) ressList[ressId] = count + (int)R.Value;
-                                    else ressList.Add(ressId, (int)R.Value);
-                                });
-                        });
+                    ScanTemplates(templateRootBlock, ressList);
 
                     if (ressList.Count > 0) templates.Add(id, ressList);
                 });
 
             return templates;
         }
+
+        private void ScanTemplates(EcfBlock templateRootBlock, Dictionary<int, int> ressList)
+        {
+            var templateName = templateRootBlock.Attr.FirstOrDefault(A => A.Name == "Name")?.Value.ToString();
+            bool.TryParse(templateRootBlock.Attr.FirstOrDefault(A => A.Name == "BaseItem")?.Value.ToString(), out var isBaseItem);
+
+            templateRootBlock.Childs?
+                .FirstOrDefault(C => C.Key == "Child Inputs").Value?.Attr?
+                .ForEach(C => {
+                    if (C.Name.ToString() == templateName) return;
+
+                    if (!isBaseItem && FlatConfigTemplatesByName.TryGetValue(C.Name.ToString(), out var recipe))
+                    {
+                        bool.TryParse(recipe.Attr.FirstOrDefault(A => A.Name == "BaseItem")?.Value.ToString(), out var isSubBaseItem);
+                        if (!isSubBaseItem)
+                        {
+                            ScanTemplates(recipe, ressList);
+                            return;
+                        }
+                    }
+
+                    if (!FlatConfigBlockByName.TryGetValue(C.Name.ToString(), out var ressource)) return;
+                    if (!int.TryParse(ressource.Attr.FirstOrDefault(A => A.Name == "Id")?.Value.ToString(), out var ressId)) return;
+
+                    if (ressList.TryGetValue(ressId, out var count)) ressList[ressId] = count + (int)C.Value;
+                    else ressList.Add(ressId, (int)C.Value);
+                });
+        }
+
 
         public EcfBlock MergeRefBlocks(EcfBlock target, EcfBlock source)
         {
