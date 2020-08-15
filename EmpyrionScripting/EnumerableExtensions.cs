@@ -7,12 +7,16 @@ namespace EmpyrionScripting
     {
         public static IEnumerable<T> ForEach<T>(this T[] aArray, Action<T> aAction)
         {
+            if (aArray == null) return null;
+
             foreach (var item in aArray) aAction(item);
             return aArray;
         }
 
         public static IEnumerable<T> ForEach<T>(this IEnumerable<T> aArray, Action<T> aAction)
         {
+            if (aArray == null) return null;
+
             foreach (var item in aArray) aAction(item);
             return aArray;
         }

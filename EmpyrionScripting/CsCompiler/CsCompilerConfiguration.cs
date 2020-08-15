@@ -40,6 +40,7 @@ namespace EmpyrionScripting.CsCompiler
     public class CsCompilerConfiguration : CsSymbolsConfiguration
     {
         public bool WithinLearnMode { get; set; }
+        public string[] CustomAssemblies { get; set; } = new string[] { };
         public string[] Usings { get; set; } = new string[] { };
         public string[] AssemblyReferences { get; set; } = new string[] { };
         public void PrepareForSave()

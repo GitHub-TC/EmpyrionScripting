@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -27,6 +28,14 @@ namespace EmpyrionScripting.CsCompiler
         public string SaveGameModPath { get; }
         public event EventHandler ConfigurationChanged;
 
+        public ConcurrentDictionary<string, CustomAssembly> CustomAssemblies { get; set; } = new ConcurrentDictionary<string, CustomAssembly>();
+
+        public class CustomAssembly
+        {
+            public string FullAssemblyDllName { get; set; }
+            public Assembly LoadedAssembly { get; set; }
+        }
+
         public CsCompiler(string saveGameModPath)
         {
             SaveGameModPath = saveGameModPath;
@@ -34,7 +43,7 @@ namespace EmpyrionScripting.CsCompiler
             LoadConfiguration();
         }
 
-        public Action<string, LogLevel> Log { get; set; }
+        public static Action<string, LogLevel> Log { get; set; }
 
         private void LoadConfiguration()
         {
@@ -44,9 +53,21 @@ namespace EmpyrionScripting.CsCompiler
             {
                 ConfigFilename = Path.Combine(SaveGameModPath, "CsCompilerConfiguration.json")
             };
-            Configuration.ConfigFileLoaded += (o , a) => ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            Configuration.ConfigFileLoaded += (o, a) =>
+            {
+                try
+                {
+                    CheckCustomAssemblies();
+                    ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+                }
+                catch (Exception error)
+                {
+                    Log?.Invoke($"CsCompilerConfiguration.ConfigFileLoaded: {Configuration.ConfigFilename} -> {error}", LogLevel.Error);
+                }
+            };
+
             Configuration.Load();
-            Configuration.Save();
+            if(Configuration.LoadException != null) Configuration.Save();
 
             DefaultConfiguration = new ConfigurationManager<CsCompilerConfiguration>()
             {
@@ -54,6 +75,46 @@ namespace EmpyrionScripting.CsCompiler
             };
             DefaultConfiguration.ConfigFileLoaded += (o, a) => ConfigurationChanged?.Invoke(this, EventArgs.Empty); ;
             DefaultConfiguration.Load();
+        }
+
+        private void CheckCustomAssemblies()
+        {
+            var processed = CustomAssemblies.Select(dll => dll.Key).ToList();
+
+            Configuration?.Current?.CustomAssemblies?.ForEach(dll => {
+                string dllPath = dll;
+                try
+                {
+                    dllPath = Path.Combine(SaveGameModPath, dll).NormalizePath();
+                    if (!CustomAssemblies.ContainsKey(dllPath)) LoadCustomAssembly(dllPath);
+                    else                                        processed.Remove(dllPath);
+                }
+                catch (Exception error)
+                {
+                    Log?.Invoke($"CheckCustomAssemblies: {dll} ({dllPath}) -> {error}", LogLevel.Error);
+                }
+            });
+
+            processed.ForEach(dll => CustomAssemblies.TryRemove(dll, out var customAssembly));
+        }
+
+        private void LoadCustomAssembly(string dll)
+        {
+            string dllPath = dll;
+            try
+            {
+                dllPath = Path.Combine(SaveGameModPath, dll).NormalizePath();
+                Log?.Invoke($"CustomAssemblyLoad: {dll} ({dllPath})", LogLevel.Message);
+                var loadedAssembly = Assembly.LoadFile(dllPath);
+                CustomAssembly current = null;
+                CustomAssemblies.AddOrUpdate(dllPath,
+                    current = new CustomAssembly() { FullAssemblyDllName = dllPath, LoadedAssembly = loadedAssembly }, 
+                    (d, a) => { current = a;  a.LoadedAssembly = loadedAssembly; return a; });
+            }
+            catch (Exception error)
+            {
+                Log?.Invoke($"CustomAssemblyLoad: {dll} ({dllPath}) -> {error}", LogLevel.Error);
+            }
         }
 
         private void AnalyzeDiagnostics(ImmutableArray<Diagnostic> diagnostics, List<string> messages, ref bool success)
@@ -101,7 +162,8 @@ namespace EmpyrionScripting.CsCompiler
 
                         .WithReferences(DefaultConfiguration.Current.AssemblyReferences)
                         .AddReferences(Configuration.Current.AssemblyReferences)
-                        .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location);
+                        .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location)
+                        .AddReferences(CustomAssemblies.Values.Select(A => A.LoadedAssembly));
 
                 csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
                 var compilation = csScript.GetCompilation();
