@@ -223,7 +223,18 @@ namespace EmpyrionScripting.CsCompiler
                 }
             }
 
-            if(messages.Count > 0) Log?.Invoke($"C# Compile [{rootCompileTime.ScriptId}]:{string.Join("\n", messages)}", LogLevel.Error);
+            if (messages.Count > 0)
+            {
+                Log?.Invoke($"C# Compile [{rootCompileTime.ScriptId}]:{string.Join("\n", messages)}", LogLevel.Error);
+
+                if (EmpyrionScripting.Configuration.Current.ScriptTrackingError)
+                {
+                    File.WriteAllText(rootObjectCompileTime is ScriptSaveGameRootData root
+                        ? EmpyrionScripting.GetTrackingFileName(root)
+                        : EmpyrionScripting.GetTrackingFileName(rootObjectCompileTime.E.GetCurrent(), rootObjectCompileTime.Script.GetHashCode().ToString()) + ".error",
+                        string.Join("\n", messages));
+                }
+            }
 
             return rootObject =>
             {
@@ -275,7 +286,18 @@ namespace EmpyrionScripting.CsCompiler
                 }
                 finally
                 {
-                    if (!string.IsNullOrEmpty(exceptionMessage)) Log?.Invoke($"C# Run [{root.ScriptId}]:{exceptionMessage}", LogLevel.Error);
+                    if (!string.IsNullOrEmpty(exceptionMessage))
+                    {
+                        Log?.Invoke($"C# Run [{root.ScriptId}]:{exceptionMessage}", LogLevel.Error);
+
+                        if (EmpyrionScripting.Configuration.Current.ScriptTrackingError)
+                        {
+                            File.WriteAllText(root is ScriptSaveGameRootData saveGameRoot
+                                ? EmpyrionScripting.GetTrackingFileName(saveGameRoot)
+                                : EmpyrionScripting.GetTrackingFileName(root.E.GetCurrent(), root.Script.GetHashCode().ToString()) + ".error",
+                                exceptionMessage);
+                        }
+                    }
                 }
             };
         }

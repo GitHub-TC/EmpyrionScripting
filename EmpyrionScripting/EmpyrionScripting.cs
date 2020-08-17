@@ -36,7 +36,7 @@ namespace EmpyrionScripting
         public static EmpyrionScripting EmpyrionScriptingInstance { get; set; }
         public static ConfigEcfAccess ConfigEcfAccess { get; set; } = new ConfigEcfAccess();
         public static ItemInfos ItemInfos { get; set; }
-        public string SaveGameModPath { get; set; }
+        public static string SaveGameModPath { get; set; }
         public static ConfigurationManager<Configuration> Configuration { get; set; } = new ConfigurationManager<Configuration>() { Current = new Configuration() };
         public static Localization Localization { get; set; }
         public static IModApi ModApi { get; set; }
@@ -412,15 +412,23 @@ namespace EmpyrionScripting
             }
         }
 
-        private string GetTrackingFileName(IEntity entity, ScriptRootData root) 
+        public static string GetTrackingFileName(IEntity entity, ScriptRootData root) 
             => GetTrackingFileName(entity, $"{root.Script.GetHashCode().ToString()}{(root.ScriptLanguage == ScriptLanguage.Cs ? ".cs" : ".hbs")}");
 
-        private string GetTrackingFileName(IEntity entity, string scriptInfo)
+        public static string GetTrackingFileName(IEntity entity, string scriptInfo)
         {
             var trackfile = Path.Combine(SaveGameModPath, "ScriptTracking", entity == null ? "" : entity.Id.ToString(), $"{entity?.Id}-{entity?.Type}-{scriptInfo}");
             Directory.CreateDirectory(Path.GetDirectoryName(trackfile));
             return trackfile;
         }
+
+        public static string GetTrackingFileName(ScriptSaveGameRootData root)
+        {
+            var trackfile = Path.Combine(SaveGameModPath, "ScriptTracking", Path.GetFileName(root.ScriptId));
+            Directory.CreateDirectory(Path.GetDirectoryName(trackfile));
+            return trackfile;
+        }
+        
 
         private int ProcessAllSaveGameScripts(PlayfieldScriptData playfieldData, IEntity entity)
         {
@@ -600,7 +608,13 @@ namespace EmpyrionScripting
             }
             catch (Exception ctrlError)
             {
-                if (Configuration.Current.ScriptTrackingError) File.WriteAllText(GetTrackingFileName(data.E.GetCurrent(), data.Script.GetHashCode().ToString()) + ".error", ctrlError.ToString());
+                if (Configuration.Current.ScriptTrackingError)
+                {
+                    File.WriteAllText(data is ScriptSaveGameRootData root 
+                        ? GetTrackingFileName(root)
+                        : GetTrackingFileName(data.E.GetCurrent(), data.Script.GetHashCode().ToString()) + ".error", 
+                        ctrlError.ToString());
+                }
 
                 if (playfieldData.PauseScripts) return;
                 data.LcdTargets.ForEach(L => data.E.S.GetCurrent().GetDevice<ILcd>(L)?.SetText($"{ctrlError.Message} {DateTime.Now.ToLongTimeString()}"));

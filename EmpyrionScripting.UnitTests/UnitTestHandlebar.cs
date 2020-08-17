@@ -484,11 +484,9 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodSaveGamesScripts()
         {
-            var lcdMod = new EmpyrionScripting
-            {
-                SaveGameModPath = @"C:\steamcmd\empyrion\PlayfieldServer/../Saves/Games/Test\Mods\EmpyrionScripting"
-            };
-            lcdMod.SaveGamesScripts = new SaveGamesScripts(null) { SaveGameModPath = lcdMod.SaveGameModPath };
+            EmpyrionScripting.SaveGameModPath = @"C:\steamcmd\empyrion\PlayfieldServer/../Saves/Games/Test\Mods\EmpyrionScripting";
+            var lcdMod = new EmpyrionScripting();
+            lcdMod.SaveGamesScripts = new SaveGamesScripts(null) { SaveGameModPath = EmpyrionScripting.SaveGameModPath };
             lcdMod.SaveGamesScripts.ReadSaveGamesScripts();
 
             var pf = new PlayfieldScriptData(lcdMod);
