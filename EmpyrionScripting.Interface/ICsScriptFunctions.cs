@@ -8,6 +8,7 @@ namespace EmpyrionScripting.Interface
     public interface ICsScriptFunctions
     {
         string I18nDefaultLanguage { get; set; }
+        IScriptModData Root { get; }
 
         IList<string> Scroll(string content, int lines, int delay, int step = 1);
         string Bar(double data, double min, double max, int length, string barChar = null, string barBgChar = null);

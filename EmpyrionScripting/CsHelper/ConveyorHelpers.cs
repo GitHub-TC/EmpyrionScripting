@@ -7,12 +7,12 @@ namespace EmpyrionScripting.CsHelper
 {
     public partial class CsScriptFunctions : ICsScriptFunctions
     {
-        public IList<IItemMoveInfo> Move(IItemsData item, IStructureData structure, string names, int? maxLimit = null) => ConveyorHelpers.Move(Root, item, structure, names, maxLimit);
-        public IList<IItemMoveInfo> Fill(IItemsData item, IStructureData structure, StructureTankType type, int? maxLimit = null) => ConveyorHelpers.Fill(Root, item, structure, type, maxLimit ?? 100);
-        public bool IsLocked(IStructureData structure, IBlockData block) => Root.GetCurrentPlayfield().IsStructureDeviceLocked(structure.GetCurrent().Id, block.Position);
+        public IList<IItemMoveInfo> Move(IItemsData item, IStructureData structure, string names, int? maxLimit = null) => ConveyorHelpers.Move(ScriptRoot, item, structure, names, maxLimit);
+        public IList<IItemMoveInfo> Fill(IItemsData item, IStructureData structure, StructureTankType type, int? maxLimit = null) => ConveyorHelpers.Fill(ScriptRoot, item, structure, type, maxLimit ?? 100);
+        public bool IsLocked(IStructureData structure, IBlockData block) => ScriptRoot.GetCurrentPlayfield().IsStructureDeviceLocked(structure.GetCurrent().Id, block.Position);
         public void WithLockedDevice(IStructureData structure, IBlockData block, Action action, Action lockFailed = null)
         {
-            using (var locked = ConveyorHelpers.CreateDeviceLock(Root, Root.GetCurrentPlayfield(), structure.GetCurrent(), block.Position))
+            using (var locked = ConveyorHelpers.CreateDeviceLock(ScriptRoot, ScriptRoot.GetCurrentPlayfield(), structure.GetCurrent(), block.Position))
             {
                 if (locked.Success) action();
                 else                lockFailed?.Invoke();

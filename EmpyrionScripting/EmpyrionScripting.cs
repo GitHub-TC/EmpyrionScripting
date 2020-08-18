@@ -407,7 +407,7 @@ namespace EmpyrionScripting
             }
             catch (Exception error)
             {
-                if (Configuration.Current.ScriptTrackingError) File.WriteAllText(GetTrackingFileName(entity, "InGameScript") + ".error", error.ToString());
+                if (Configuration.Current.ScriptTrackingError) File.AppendAllText(GetTrackingFileName(entity, "InGameScript") + ".error", error.ToString());
                 return 0;
             }
         }
@@ -461,7 +461,7 @@ namespace EmpyrionScripting
             }
             catch (Exception error)
             {
-                if (Configuration.Current.ScriptTrackingError) File.WriteAllText(GetTrackingFileName(entity, "SaveGameScript") + ".error", error.ToString());
+                if (Configuration.Current.ScriptTrackingError) File.AppendAllText(GetTrackingFileName(entity, "SaveGameScript") + ".error", error.ToString());
                 return 0;
             }
         }
@@ -498,6 +498,7 @@ namespace EmpyrionScripting
                             ScriptId       = entityScriptData.E.Id + "/" + S,
                             ScriptPath     = Path.GetDirectoryName(path)
                         };
+                        AddTargetsAndDisplayType(data, Path.GetFileNameWithoutExtension(S) + "*");
                         playfieldData.ScriptExecQueue.Add(data);
 
                         Interlocked.Increment(ref count);
@@ -511,6 +512,7 @@ namespace EmpyrionScripting
                             ScriptId       = entityScriptData.E.Id + "/" + S,
                             ScriptPath     = Path.GetDirectoryName(path)
                         };
+                        AddTargetsAndDisplayType(data, Path.GetFileNameWithoutExtension(S) + "*");
                         playfieldData.ScriptExecQueue.Add(data);
 
                         Interlocked.Increment(ref count);
@@ -527,6 +529,7 @@ namespace EmpyrionScripting
                                     ScriptId        = entityScriptData.E.Id + "/" + F.Key,
                                     ScriptPath      = Path.GetDirectoryName(F.Key)
                                 };
+                                AddTargetsAndDisplayType(data, Path.GetFileNameWithoutExtension(F.Key) + "*");
                                 playfieldData.ScriptExecQueue.Add(data);
 
                                 Interlocked.Increment(ref count);

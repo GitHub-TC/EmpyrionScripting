@@ -229,7 +229,7 @@ namespace EmpyrionScripting.CsCompiler
 
                 if (EmpyrionScripting.Configuration.Current.ScriptTrackingError)
                 {
-                    File.WriteAllText(rootObjectCompileTime is ScriptSaveGameRootData root
+                    File.AppendAllText(rootObjectCompileTime is ScriptSaveGameRootData root
                         ? EmpyrionScripting.GetTrackingFileName(root)
                         : EmpyrionScripting.GetTrackingFileName(rootObjectCompileTime.E.GetCurrent(), rootObjectCompileTime.Script.GetHashCode().ToString()) + ".error",
                         string.Join("\n", messages));
@@ -248,16 +248,17 @@ namespace EmpyrionScripting.CsCompiler
                 if (permissionNeeded == CsModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "This script is only allowed on admin structures";
 
                 string exceptionMessage = null;
-                try
+                using (var output = new StringWriter())
                 {
-                    using (var output = new StringWriter())
+                    root.ScriptOutput = output;
+
+                    try
                     {
-                        root.ScriptOutput = output;
                         object result = null;
 
                         if (mainMethod != null)
                         {
-                            if(root.CsRoot is CsScriptFunctions csRoot) csRoot.Root = root;
+                            if(root.CsRoot is CsScriptFunctions csRoot) csRoot.ScriptRoot = root;
                             result = mainMethod.Invoke(null, new[] { root as IScriptModData });
                         }
                         else
@@ -276,26 +277,26 @@ namespace EmpyrionScripting.CsCompiler
                         else if (result is Task task)                           task.RunSynchronously();
                         else                                                    output.Write(result?.ToString());
 
-                        return exceptionMessage ?? output.ToString();
+                        return exceptionMessage == null ? output.ToString() : $"{exceptionMessage}\n\nScript output up to exception:\n{output}";
                     }
-                }
-                catch (Exception error)
-                {
-                    exceptionMessage = error.ToString();
-                    return root.IsElevatedScript ? error.ToString() : error.Message;
-                }
-                finally
-                {
-                    if (!string.IsNullOrEmpty(exceptionMessage))
+                    catch (Exception error)
                     {
-                        Log?.Invoke($"C# Run [{root.ScriptId}]:{exceptionMessage}", LogLevel.Error);
-
-                        if (EmpyrionScripting.Configuration.Current.ScriptTrackingError)
+                        exceptionMessage = error.ToString();
+                        return root.IsElevatedScript ? error.ToString() : error.Message;
+                    }
+                    finally
+                    {
+                        if (!string.IsNullOrEmpty(exceptionMessage))
                         {
-                            File.WriteAllText(root is ScriptSaveGameRootData saveGameRoot
-                                ? EmpyrionScripting.GetTrackingFileName(saveGameRoot)
-                                : EmpyrionScripting.GetTrackingFileName(root.E.GetCurrent(), root.Script.GetHashCode().ToString()) + ".error",
-                                exceptionMessage);
+                            Log?.Invoke($"C# Run [{root.ScriptId}]:{exceptionMessage}\n{output}", LogLevel.Error);
+
+                            if (EmpyrionScripting.Configuration.Current.ScriptTrackingError)
+                            {
+                                File.AppendAllText(root is ScriptSaveGameRootData saveGameRoot
+                                    ? EmpyrionScripting.GetTrackingFileName(saveGameRoot)
+                                    : EmpyrionScripting.GetTrackingFileName(root.E.GetCurrent(), root.Script.GetHashCode().ToString()) + ".error",
+                                    $"{exceptionMessage}\n\nScript output up to exception:\n{output}");
+                            }
                         }
                     }
                 }

@@ -6,11 +6,13 @@ namespace EmpyrionScripting.CsHelper
 {
     public partial class CsScriptFunctions
     {
-        public IScriptRootData Root { get; set; }
+        public IScriptRootData ScriptRoot { get; set; }
 
-        public CsScriptFunctions(IScriptRootData root){ Root = root; }
+        public IScriptModData Root => ScriptRoot;
 
-        public bool FunctionNeedsMainThread(Exception error) => FunctionNeedsMainThread(error, Root);
+        public CsScriptFunctions(IScriptRootData root){ ScriptRoot = root; }
+
+        public bool FunctionNeedsMainThread(Exception error) => FunctionNeedsMainThread(error, ScriptRoot);
 
         public static bool FunctionNeedsMainThread(Exception error, object rootObject)
         {

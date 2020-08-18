@@ -26,14 +26,14 @@ namespace EmpyrionScripting.CustomHelpers
                     else if (N.EndsWith("*"))
                     {
                         var startsWith = N.Substring(0, N.Length - 1);
-                        names.AddRange(sourceNames.Where(SN => SN.StartsWith(startsWith)));
+                        names.AddRange(sourceNames.Where(SN => SN.StartsWith(startsWith, StringComparison.InvariantCultureIgnoreCase)));
                     }
                     else if (N.StartsWith("*"))
                     {
                         var endsWith = N.Substring(1);
-                        names.AddRange(sourceNames.Where(SN => SN.EndsWith(endsWith)));
+                        names.AddRange(sourceNames.Where(SN => SN.EndsWith(endsWith, StringComparison.InvariantCultureIgnoreCase)));
                     }
-                    else names.AddRange(sourceNames.Where(SN => SN == N));
+                    else names.AddRange(sourceNames.Where(SN => SN.Equals(N, StringComparison.InvariantCultureIgnoreCase)));
                 });
 
             return names
