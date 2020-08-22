@@ -41,15 +41,23 @@ namespace EcfParser
 
             source.Attr?.ForEach(A =>
             {
-                if (destination.Attr == null) destination.Attr = new List<EcfAttribute>();
+                if (destination.Attr      == null) destination.Attr      = new List<EcfAttribute>();
+                if (destination.Values    == null) destination.Values    = new Dictionary<string, object>();
+                if (destination.EcfValues == null) destination.EcfValues = new Dictionary<string, EcfAttribute>();
 
                 var foundAttr = destination.Attr.FirstOrDefault(a => a.Name == A.Name);
-                if (foundAttr == null) destination.Attr.Add(new EcfAttribute()
+                if (foundAttr == null)
                 {
-                    Name                = A.Name,
-                    Value               = A.Value,
-                    AddOns   = A.AddOns == null ? null : new Dictionary<string, object>(A.AddOns)
-                });
+                    destination.Attr.Add(foundAttr = new EcfAttribute()
+                    {
+                        Name   = A.Name,
+                        Value  = A.Value,
+                        AddOns = A.AddOns == null ? null : new Dictionary<string, object>(A.AddOns)
+                    });
+
+                    if (A.Name != null && !destination.EcfValues.ContainsKey(A.Name)) destination.EcfValues.Add(A.Name, foundAttr);
+                    if (A.Name != null && !destination.Values   .ContainsKey(A.Name)) destination.Values   .Add(A.Name, foundAttr.Value);
+                }
                 else
                 {
                     foundAttr.Value = A.Value;
@@ -57,7 +65,7 @@ namespace EcfParser
                     else A.AddOns?.ToList().ForEach(P =>
                     {
                         if (foundAttr.AddOns.ContainsKey(P.Key)) foundAttr.AddOns[P.Key] = P.Value;
-                        else                                                foundAttr.AddOns.Add(P.Key, P.Value);
+                        else                                     foundAttr.AddOns.Add(P.Key, P.Value);
                     });
                 }
             });
@@ -75,6 +83,22 @@ namespace EcfParser
                             destination.Childs.Add(B.Key, newBlock);
                         }
                     });
+
+            destination.Childs?.Values
+                .ToList()
+                .ForEach(B => { 
+                    B.EcfValues?.Where(A => !destination.EcfValues.ContainsKey(A.Key))
+                    .ToList()
+                    .ForEach(A =>
+                    {
+                        if (destination.EcfValues == null) destination.EcfValues = new Dictionary<string, EcfAttribute>();
+                        if (destination.Values    == null) destination.Values    = new Dictionary<string, object>();
+
+                        destination.EcfValues.Add(A.Key, A.Value);
+                        destination.Values   .Add(A.Key, A.Value.Value);
+                    });
+                });
+
         }
     }
 }

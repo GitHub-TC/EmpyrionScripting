@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace EcfParser
 {
@@ -74,14 +75,29 @@ namespace EcfParser
                     var childBlock = ReadBlock(true, currentLine, nextLine);
                     if (block.Childs == null) block.Childs = new Dictionary<string, EcfBlock>();
                     block.Childs.Add(childBlock.Name ?? unnamedChild++.ToString(), childBlock);
+
+                    childBlock.EcfValues?.Values
+                        .Where(A => A.Name != null && !block.EcfValues.ContainsKey(A.Name))
+                        .ToList()
+                        .ForEach(A => {
+                            block.Values   .Add(A.Name, A.Value);
+                            block.EcfValues.Add(A.Name, A); 
+                        });
                 }
                 else
                 {
                     var attr = ReadAttribute(currentLine);
                     if(attr != null)
                     {
-                        if (block.Attr == null) block.Attr = new List<EcfAttribute>();
+                        if (block.Attr      == null) block.Attr      = new List<EcfAttribute>();
+                        if (block.Values    == null) block.Values    = new Dictionary<string, object>();
+                        if (block.EcfValues == null) block.EcfValues = new Dictionary<string, EcfAttribute>();
                         block.Attr.Add(attr);
+                        if (attr.Name != null && !block.EcfValues.ContainsKey(attr.Name))
+                        {
+                            block.Values   .Add(attr.Name, attr.Value);
+                            block.EcfValues.Add(attr.Name, attr);
+                        }
                     }
                 }
 
@@ -101,8 +117,8 @@ namespace EcfParser
 
             do{
                 delimiterPos = line.IndexOfAny(new[] { ':', ' ' });
-                var name = line.Substring(0, delimiterPos);
-                line = line.Substring(delimiterPos + 1).Trim();
+                var name = delimiterPos == -1 ? line : line.Substring(0, delimiterPos);
+                line = delimiterPos == -1 ? string.Empty : line.Substring(delimiterPos + 1).Trim();
 
                 var nextPayload = line.IndexOfAny(new[] { ',', '"' });
 

@@ -48,7 +48,7 @@ namespace EmpyrionScripting.UnitTests
             data.Data = dict;
 
             data.CycleCounter.Returns(0);
-            Assert.AreEqual("Exception: Test", lcdMod.ExecuteCsScript(pf, data, "throw new Exception(\"Test\");"));
+            Assert.AreEqual("Exception: Test\n\nScript output up to exception:\n", lcdMod.ExecuteCsScript(pf, data, "throw new Exception(\"Test\");"));
         }
 
         [TestMethod]
