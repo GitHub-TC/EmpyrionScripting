@@ -27,6 +27,43 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("configattrbyname")]
+        public static void ConfigAttrByNameHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{configattrbyname name attrname}} helper must have exactly two argument: (name) (attrname)");
+
+            var root = rootObject as IScriptModData;
+
+            try {
+                root.ConfigEcfAccess.FlatConfigBlockByName.TryGetValue(arguments[0]?.ToString(), out var config);
+                var id = (int)config.Attr.FirstOrDefault(A => A.Name == "Id").Value;
+
+                output.Write(root.ConfigEcfAccess.FindAttribute(id, arguments[1]?.ToString())); 
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{configattrbyname}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("configid")]
+        public static void ConfigIdHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{configid name}} helper must have exactly one argument: (name) ");
+
+            var root = rootObject as IScriptModData;
+
+            try
+            {
+                root.ConfigEcfAccess.FlatConfigBlockByName.TryGetValue(arguments[0]?.ToString(), out var config);
+                output.Write(config.Attr?.FirstOrDefault(A => A.Name == "Id")?.Value);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{configattrbyname}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("configbyid")]
         public static void ConfigByIdHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {

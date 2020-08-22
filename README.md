@@ -432,8 +432,14 @@ Syntaxdocu:
   * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
     Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
 
++ {{configid name}}
+  + Liest aus Konfiguration des Block/Items 'name' das Attribut 'id'
+
 + {{configattr id attrname}}
   + Liest aus Konfiguration des Block/Items 'id' das Attribut 'attrname'
+
++ {{configattrbyname name attrname}}
+  + Liest aus Konfiguration des Block/Items 'name' das Attribut 'attrname'
 
 + {{configbyid id}}
   + Liest aus Konfiguration den Abschnitt für den Block/Item mit der 'id'
@@ -1140,9 +1146,15 @@ Syntaxdocu:
     * Value: 'A,xyz,mag'
 
 ## Items
-+ {{configattr id attrname}}
-  + Reads the attribute 'attrname' from the configuration of the item 'id'
++ {{configid name}}
+   + Reads the attribute 'id' from the configuration of the block/item 'name'
 
++ {{configattr id attrname}}
+   + Reads the attribute 'attrname' from the configuration of the block/item 'id'
+
++ {{configattrbyname name attrname}}
+   + Reads the attribute 'attrname' from the configuration of the block/item 'name'
+   
 + {{configbyid id}}
   + Reads the config section block/item for 'id'
 
