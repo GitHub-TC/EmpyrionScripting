@@ -216,6 +216,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
                 signals.AddRange(uniqueNames
                     .SelectMany(N => structure.GetCurrent().GetDevicePositions(N))
+                    .Where(P => signals.All(S => S.Position != P))
                     .Select(P => new BlockData(structure.GetCurrent(), P))
                     );
 

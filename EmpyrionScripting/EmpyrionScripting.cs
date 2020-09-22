@@ -571,12 +571,13 @@ namespace EmpyrionScripting
                     (data.ScriptLanguage == ScriptLanguage.Handlebar
                         ? ExecuteHandlebarScript(playfieldData, data, data.Script)
                         : ExecuteCsScript       (playfieldData, data, data.Script)
-                    ).Split(new[] { '\n' }, stringBlankLines);
+                    ).Split(new[] { '\n' }, stringBlankLines)
+                    .ToList();
 
-                if (result.Length > 0 && result[0].StartsWith(TargetsKeyword))
+                if (result.Count > 0 && result[0].StartsWith(TargetsKeyword))
                 {
                     AddTargetsAndDisplayType(data, result[0].Substring(TargetsKeyword.Length));
-                    result = result.Skip(1).ToArray();
+                    result = result.Skip(1).ToList();
                 }
 
                 if (data.DisplayType != null) result = result
@@ -584,29 +585,45 @@ namespace EmpyrionScripting
                                                 .Reverse()
                                                 .SkipWhile(string.IsNullOrWhiteSpace)
                                                 .Reverse()
-                                                .ToArray();
+                                                .ToList();
 
                 data.LcdTargets
-                    .Select(L => data.E.S.GetCurrent().GetDevice<ILcd>(L))
-                    .Where(L => L != null)
+                    .Select(L => new { Lcd = data.E.S.GetCurrent().GetDevice<ILcd>(L), Name = L })
+                    .Where(L => L.Lcd != null)
                     .ForEach(L =>
-                    {
+                        {
                         if (playfieldData.PauseScripts) return;
 
-                        if (data.DisplayType == null) L.SetText(string.Join("\n", result));
+                        List<string> saveResult = null;
+
+                        var attrPos = L.Name.IndexOf('[');
+                        if (attrPos > 0 && L.Name.EndsWith("]") && result.Count > 0)
+                        {
+                            saveResult = new List<string>(result);
+
+                            var attrEndPos = L.Name.IndexOfAny(new[] { ']', ';' }, attrPos);
+                            if (attrEndPos > 0) { 
+                                result[0]                = $"<size={L.Name.Substring(attrPos + 1, attrEndPos - attrPos - 1)}>{result[0]}"; 
+                                result[result.Count - 1] = $"{result[result.Count - 1]}</size>"; 
+                            }
+                        }
+
+                        if (data.DisplayType == null) L.Lcd.SetText(string.Join("\n", result));
                         else
                         {
-                            var text = L.GetText().Split(new[] { '\n' }, stringBlankLines);
+                            var text = L.Lcd.GetText().Split(new[] { '\n' }, stringBlankLines);
 
-                            L.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
+                            L.Lcd.SetText(string.Join("\n", data.DisplayType.AppendAtEnd 
                                     ? text  .Concat(result).TakeLast(data.DisplayType.Lines)
                                     : result.Concat(text  ).Take    (data.DisplayType.Lines)
                                 ));
                         }
 
-                        if (data.ColorChanged          ) L.SetTextColor      (data.Color);
-                        if (data.BackgroundColorChanged) L.SetBackgroundColor(data.BackgroundColor);
-                        if (data.FontSizeChanged       ) L.SetFontSize       (data.FontSize);
+                        if (data.ColorChanged          ) L.Lcd.SetTextColor      (data.Color);
+                        if (data.BackgroundColorChanged) L.Lcd.SetBackgroundColor(data.BackgroundColor);
+                        if (data.FontSizeChanged       ) L.Lcd.SetFontSize       (data.FontSize);
+
+                        result = saveResult ?? result;
                     });
             }
             catch (Exception ctrlError)

@@ -5,11 +5,11 @@ namespace EmpyrionScripting.Interface
 {
     public interface IConfigEcfAccess
     {
-        Dictionary<int, EcfBlock> ConfigBlockById { get; set; }
-        Dictionary<string, EcfBlock> ConfigBlockByName { get; set; }
+        IDictionary<int, EcfBlock> ConfigBlockById { get; set; }
+        IDictionary<string, EcfBlock> ConfigBlockByName { get; set; }
         EcfFile Configuration_Ecf { get; set; }
-        Dictionary<int, EcfBlock> FlatConfigBlockById { get; set; }
-        Dictionary<string, EcfBlock> FlatConfigBlockByName { get; set; }
-        Dictionary<int, Dictionary<int, int>> ResourcesForBlockById { get; set; }
+        IDictionary<int, EcfBlock> FlatConfigBlockById { get; set; }
+        IDictionary<string, EcfBlock> FlatConfigBlockByName { get; set; }
+        IDictionary<int, Dictionary<int, int>> ResourcesForBlockById { get; set; }
     }
 }

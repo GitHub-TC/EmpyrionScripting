@@ -10,25 +10,36 @@ namespace EmpyrionScripting
 {
     public class ConfigEcfAccess : IConfigEcfAccess
     {
+        public EcfFile BlocksConfig_Ecf { get; set; } = new EcfFile();
         public EcfFile Configuration_Ecf { get; set; } = new EcfFile();
         public EcfFile Config_Ecf { get; set; } = new EcfFile();
         public EcfFile Flat_Config_Ecf { get; set; } = new EcfFile();
-        public Dictionary<int, EcfBlock> ConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
-        public Dictionary<string, EcfBlock> ConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
-        public Dictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
-        public Dictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
-        public Dictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
-        public Dictionary<int, Dictionary<int, int>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, int>>();
+        public IDictionary<int, EcfBlock> ConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
+        public IDictionary<string, EcfBlock> ConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public IDictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
+        public IDictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public IDictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public IDictionary<int, Dictionary<int, int>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, int>>();
         public static Action<string, LogLevel> Log { get; set; } = (s, l) => Console.WriteLine(s);
 
         public void ReadConfigEcf(string contentPath)
         {
             try
             {
+                BlocksConfig_Ecf = EcfParser.Parse.Deserialize(File.ReadAllLines(Path.Combine(contentPath, "Configuration", "BlocksConfig.ecf")));
+                Log($"EmpyrionScripting BlocksConfig.ecf: #{BlocksConfig_Ecf.Blocks.Count}", LogLevel.Message);
+            }
+            catch (Exception error) { Log($"EmpyrionScripting BlocksConfig.ecf: {error}", LogLevel.Error); }
+
+            try
+            {
                 Configuration_Ecf = EcfParser.Parse.Deserialize(File.ReadAllLines(Path.Combine(contentPath, "Configuration", "Config_Example.ecf")));
                 Log($"EmpyrionScripting Config_Example.ecf: #{Configuration_Ecf.Blocks.Count}", LogLevel.Message);
             }
             catch (Exception error){ Log($"EmpyrionScripting Config_Example.ecf: {error}", LogLevel.Error); }
+
+            try { Configuration_Ecf.MergeWith(BlocksConfig_Ecf); }
+            catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
 
             try
             {
@@ -127,20 +138,17 @@ namespace EmpyrionScripting
             return target;
         }
 
-        public Dictionary<int, EcfBlock> BlocksById(IEnumerable<EcfBlock> blocks) =>
-            blocks
-                .Where(B => (B.Name == "Block" || B.Name == "Item") && B.Attr.Any(A => A.Name == "Id"))
-                .ToDictionary(B => (int)B.Attr.First(A => A.Name == "Id").Value, B => B);
+        public IDictionary<int, EcfBlock> BlocksById(IEnumerable<EcfBlock> blocks) =>
+            blocks.EcfBlocksToDictionary(B => (B.Name == "Block" || B.Name == "Item") && B.Attr.Any(A => A.Name == "Id"),
+                                         B => (int)B.Attr.First(A => A.Name == "Id").Value);
 
-        public Dictionary<string, EcfBlock> BlocksByName(IEnumerable<EcfBlock> blocks) =>
-            blocks
-                .Where(B => (B.Name == "Block" || B.Name == "Item") && B.Attr.Any(A => A.Name == "Id" && A.AddOns != null && A.AddOns.Any(a => a.Key == "Name")))
-                .ToDictionary(B => B.Attr.First(A => A.Name == "Id").AddOns.First(A => A.Key == "Name").Value.ToString(), B => B);
+        public IDictionary<string, EcfBlock> BlocksByName(IEnumerable<EcfBlock> blocks) =>
+            blocks.EcfBlocksToDictionary(B => (B.Name == "Block" || B.Name == "Item") && B.Attr.Any(A => A.Name == "Id" && A.AddOns != null && A.AddOns.Any(a => a.Key == "Name")),
+                                         B => B.Attr.First(A => A.Name == "Id").AddOns.First(A => A.Key == "Name").Value.ToString());
 
-        public Dictionary<string, EcfBlock> TemplatesByName(IEnumerable<EcfBlock> blocks) =>
-            blocks
-                .Where(B => B.Name == "Template" && B.Attr.Any(A => A.Name == "Name"))
-                .ToDictionary(B => B.Attr.First(A => A.Name == "Name").Value.ToString(), B => B);
+        public IDictionary<string, EcfBlock> TemplatesByName(IEnumerable<EcfBlock> blocks) =>
+            blocks.EcfBlocksToDictionary(B => B.Name == "Template" && B.Attr.Any(A => A.Name == "Name"),
+                                         B => B.Attr.First(A => A.Name == "Name").Value.ToString());
 
     }
 }

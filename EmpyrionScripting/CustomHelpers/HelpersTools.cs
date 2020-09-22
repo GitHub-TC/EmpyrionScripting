@@ -23,6 +23,11 @@ namespace EmpyrionScripting.CustomHelpers
                 .ForEach(N =>
                 {
                     if (N == "*") names.AddRange(sourceNames);
+                    else if (N.EndsWith("*") && N.StartsWith("*"))
+                    {
+                        var contains = N.Substring(1, N.Length - 2).ToLower();
+                        names.AddRange(sourceNames.Where(SN => SN.ToLower().Contains(contains)));
+                    }
                     else if (N.EndsWith("*"))
                     {
                         var startsWith = N.Substring(0, N.Length - 1);

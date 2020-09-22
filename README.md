@@ -419,9 +419,16 @@ Syntaxdocu:
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
 
-* {{#if data}}
+* {{#ok data}}
   * Block ausführen wenn (data) einen Wert (ungleich 'null') hat oder (data) gleich 'true' oder ungleich 0 ist
   * anderfalls wird der {{else}} Teil ausgeführt
+
+* {{#if data}}
+  * Block ausführen wenn (data) einen Wert ungleich 'null' oder 0 hat
+  * anderfalls wird der {{else}} Teil ausgeführt
+
+* {{not data}}
+  * Negation von (data)
 
 ## Inhalte
 + {{#items structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln
@@ -575,6 +582,12 @@ Syntaxdocu:
 
 + {{substring text startindex \[length\]}}
   + Teiltext von dem Text (text) von Index (startindex) mit einer optionalen maximalen Länge von (length) Zeichen
+
++ {{startswith text starts \[ignoreCase\]}}
+  + Beginnt der Text (text) mit dem Text (starts) optional unabhängige Groß/Kleinschreibung
+
++ {{endswith text ends \[ignoreCase\]}}
+  + Endet der Text (text) mit dem Text (ends) optional unabhängige Groß/Kleinschreibung
 
 + {{chararray text}}
   + Text als Array von Zeichen liefern
@@ -1164,11 +1177,18 @@ Syntaxdocu:
 + {{resourcesforid id}}
    + List of the required resources for the block / item with the 'id'
 
-### (if)
-* {{#if data}}
-   * Execute block if (data) has a value (not equal to 'null') or (data) equals 'true' or not equal to 0
-   * otherwise the {{else}} part will be executed
+### Logiccheck
+* {{#ok data}}
+   * Execute block if (data) has a value (not equal to 'zero') or (data) is equal to 'true' or not equal to 0
+   * otherwise the {{else}} part is executed
 
+* {{#if data}}
+   * Execute block if (data) has a value not equal to 'zero' or 0
+   * otherwise the {{else}} part is executed
+
+* {{not data}}
+   * Negation of (data)
+   
 ### (intervall)
 * {{#intervall sec}}
   * intervall in seconds
@@ -1260,19 +1280,23 @@ DateTime format:
   + Sortiert das Array nach (sortedBy)
   + (reverse) = true um die Sortierung umzukehren
 
-### (random)
 + {{random start end}}
    + Deliver a random value between (start) and (end) and submit to the block as {{this}}
 
-### (split)
+### Stringfunctions
 + {{split string separator [removeemptyentries]}}
   + (string) split with the delimiter (separator).
   + \[removeemptyentries\] if empty entries should be removed 'true'
 
-### (substring)
 + {{substring text startindex [length]}}
   + Substring from the Text (text) from Index (startindex) with optional maximum (length) characters
 
++ {{startswith text starts \[ignoreCase\]}}
+   + If the text (text) begins with the text (starts), optionally independent upper / lower case
+
++ {{endswith text ends \[ignoreCase\]}}
+   + If the text (text) ends with the text (ends), optionally independent upper / lower case
+   
 ### (chararray)
 + {{chararray text}}
   + Split the Text into an array of characters

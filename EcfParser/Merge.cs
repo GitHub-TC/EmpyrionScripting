@@ -1,10 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace EcfParser
 {
     public static class Merge
     {
+        public static IDictionary<T, EcfBlock> EcfBlocksToDictionary<T>(this IEnumerable<EcfBlock> blocks, Func<EcfBlock, bool> blockSelector, Func<EcfBlock, T> keySelector)
+            => blocks
+                .Where(B => blockSelector(B))
+                .Aggregate(new Dictionary<T, EcfBlock>(), (result, b) => {
+                    var key = keySelector(b);
+                    if (!result.ContainsKey(key)) result.Add(key, b); return result; });
+
         public static EcfFile Ecf(params EcfFile[] files)
         {
             EcfFile result = null;
@@ -26,10 +34,8 @@ namespace EcfParser
                     .Where(b => Equals(b.Attr.FirstOrDefault(a => a.Name == "Name")?.Value, B.Attr.FirstOrDefault(a => a.Name == "Name")?.Value))
                     .FirstOrDefault();
 
-                if (found != null)
-                {
-                    found.MergeWith(B);
-                }
+                if (found != null) found.MergeWith(B);
+                else               ecf.Blocks.Add(B);
             });
         }
 

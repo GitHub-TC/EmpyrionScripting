@@ -22,7 +22,8 @@
     "ModApi",
     "System.Core",
     "System.Numerics",
-    "UnityEngine.CoreModule"
+    "UnityEngine.CoreModule",
+    "Newtonsoft.Json"
   ],
   "SymbolPermissions": {
     "Player": [
@@ -146,7 +147,6 @@
       "FactionData.Group",
       "FactionData.Id",
       "Newtonsoft.*",
-      "Newtonsoft.Json",
       "System",
       "System.Action",
       "System.Array.*",

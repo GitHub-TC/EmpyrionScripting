@@ -235,19 +235,32 @@ namespace EcfParser.UnitTests
 
             if (!Directory.Exists(configDir)) return;
 
+            EcfFile mergeAll = null;
+
             Directory.GetFiles(configDir, "*.ecf")
                 .ToList()
                 .ForEach(F =>
                 {
                     try
                     {
-                        EcfParser.Parse.Deserialize(File.ReadAllLines(F));
+                        var ecf = EcfParser.Parse.Deserialize(File.ReadAllLines(F));
+                        if (mergeAll == null) mergeAll = ecf;
+                        else                  mergeAll.MergeWith(ecf);
                     }
                     catch (Exception error)
                     {
                         throw new Exception(F, error);
                     }
                 });
+
+            var blockById = mergeAll.Blocks.
+                EcfBlocksToDictionary(
+                    B => (B.Name == "Block" || B.Name == "Item") && B.Attr.Any(A => A.Name == "Id"), 
+                    B => B.Attr.FirstOrDefault(a => a.Name == "Id")?.Value);
+
+            var b = blockById[1367];
         }
+
+
     }
 }

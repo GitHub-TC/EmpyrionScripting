@@ -9,10 +9,37 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class LogicHelpers
     {
+        [HandlebarTag("not")]
+        public static void NotBlockHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{not}} helper must have exactly one argument: (testvalue)");
+
+            try
+            {
+                var test = arguments[0]?.ToString();
+
+                if      (string.IsNullOrEmpty(test))                output.Write(bool.TrueString);
+                else if (bool.TryParse(test, out var boolresult))   output.Write(!boolresult);
+                else if (int.TryParse(test,  out var intresult))    output.Write(intresult == 0);
+            }
+            catch (Exception error)
+            {
+                throw new HandlebarsException($"{{not}} {EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
+        [HandlebarTag("ok")]
+        public static void OkBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+            => OkIfBlockHelper("ok", output, root, options, context as object, arguments);
+
         [HandlebarTag("if")]
         public static void IfBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+            => OkIfBlockHelper("if", output, root, options, context as object, arguments);
+
+
+        public static void OkIfBlockHelper(string name, TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 1) throw new HandlebarsException("{{if}} helper must have exactly one argument: (testvalue)");
+            if (arguments.Length != 1) throw new HandlebarsException("{{"+ name + "}} helper must have exactly one argument: (testvalue)");
 
             try
             {
@@ -34,7 +61,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                throw new HandlebarsException($"{{if}} {EmpyrionScripting.ErrorFilter(error)}");
+                throw new HandlebarsException($"{{" + name + "}} " +EmpyrionScripting.ErrorFilter(error));
             }
         }
 

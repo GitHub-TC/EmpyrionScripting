@@ -4,6 +4,8 @@ using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -107,14 +109,23 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("lookup")]
         public static void LookUpHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{lookup array index}} helper must have two argument: (array) (index)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{lookup array/dictionary index/key}} helper must have two argument: (array/dictionary) (index/key)");
 
             var root = rootObject as IScriptRootData;
             try
             {
-                int.TryParse(arguments[1]?.ToString(), out var index);
-                if      (arguments[0] is object[] arraydata) output.Write(arraydata.Skip(index).FirstOrDefault());
-                else if (arguments[0] is IList    listdata)  output.Write(listdata[index]);
+                if      (arguments[0] is object[] arraydata){ if (int.TryParse(arguments[1]?.ToString(), out var index)) output.Write(arraydata.Skip(index).FirstOrDefault()); }
+                else if (arguments[0] is IList listdata)    { if (int.TryParse(arguments[1]?.ToString(), out var index)) output.Write(listdata[index]); }
+
+                var dictionaryType = arguments[0]?.GetType();
+                if (dictionaryType != null && dictionaryType.IsGenericType)
+                {
+                    var tryGetValue = dictionaryType.GetMethod("TryGetValue");
+                    if (tryGetValue == null) return;
+
+                    object[] parameters = new object[] { arguments[1], null };
+                    if ((bool)tryGetValue.Invoke(arguments[0], parameters)) output.Write(parameters[1]);
+                }
             }
             catch (Exception error)
             {
@@ -247,6 +258,43 @@ namespace EmpyrionScripting.CustomHelpers
                 if (CsScriptFunctions.FunctionNeedsMainThread(error, root)) { /* no error */ }
                 else if (arguments.Length == 2) output.Write("{{substring}} error (startindex=" + startIndex + ") text='" + text + "' " + EmpyrionScripting.ErrorFilter(error));
                 else                            output.Write("{{substring}} error (startindex=" + startIndex + ", length=" + length + ") text='" + text + "' " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+
+        [HandlebarTag("startswith")]
+        public static void StartsWithHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 2) throw new HandlebarsException("{{startswith text starts [ignoreCase]}} helper must have at least two arguments: (text) (starts)");
+
+            try
+            {
+                output.Write(arguments[0]?.ToString()?.StartsWith(arguments[1]?.ToString(),
+                    !bool.TryParse(arguments[1]?.ToString(), out var ignoreCase) || ignoreCase,
+                    CultureInfo.InvariantCulture));
+            }
+            catch (Exception error)
+            {
+                if (CsScriptFunctions.FunctionNeedsMainThread(error, root)) { /* no error */ }
+                output.Write($"{{startswith}} error text='{arguments.Get(0)} starts='{arguments.Get(1)}' ignoreCase={arguments.Get(2) ?? false}' {EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
+        [HandlebarTag("endsswith")]
+        public static void EndsWithHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 2) throw new HandlebarsException("{{endsswith text ends [ignoreCase]}} helper must have at least two arguments: (text) (ends)");
+
+            try
+            {
+                output.Write(arguments[0]?.ToString()?.EndsWith(arguments[1]?.ToString(),
+                    !bool.TryParse(arguments[1]?.ToString(), out var ignoreCase) || ignoreCase,
+                    CultureInfo.InvariantCulture));
+            }
+            catch (Exception error)
+            {
+                if (CsScriptFunctions.FunctionNeedsMainThread(error, root)) { /* no error */ }
+                output.Write($"{{endsswith}} error text='{arguments.Get(0)} ends='{arguments.Get(1)}' ignoreCase={arguments.Get(2) ?? false}' {EmpyrionScripting.ErrorFilter(error)}");
             }
         }
 
