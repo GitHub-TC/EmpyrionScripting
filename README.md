@@ -612,17 +612,27 @@ Syntaxdocu:
   + Setzt die Farbe des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden, wenn keine Position angegeben wird wird der ganze Block gesetzt
 
 ## Rechnen
-+ {{math (lvalue) op (rvalue)}}
++ {{math (lvalue) op (rvalue) [digits]}}
   + op = +, -, *, /, %
+  + optional [digits] um das Ergebnis auf [digits] Stellen zu runden
 
-+ {{calc (lvalue) op (rvalue)}}
++ {{calc (lvalue) op (rvalue) [digits]}}
   + op = +, -, *, /, %
+  + optional [digits] um das Ergebnis auf [digits] Stellen zu runden
   + Kann mit () inline in anderen Kommandos benutzt werden
 
 + {{distance (lVector) (rVector) [format]}}
   + Abstand zwischen (lVector) und (rVector)
   + Optional ein format
 
++ {{min (lValue) (rValue)}}
+  + Liefert den kleineren Wert der beiden
+
++ {{max (lValue) (rValue)}}
+  + Liefert den größeren Wert der beiden
+
++ {{int (value)}}
+  + Liefert den ganzzahligen Anteil des Wertes
 
 ## LCD
 + {{gettext lcddevice}}
@@ -1331,15 +1341,24 @@ DateTime format:
    + These are saved for the entity and are available again the next time the script is called, but can be discarded by changing the playfield or similar.
 
 ### (math)
-+ {{math (lvalue) op (rvalue)}}
++ {{math (lvalue) op (rvalue) [digits]}}
   + op = +, -, *, /, %
+  + digits round number
 
-### (calc)
-+ {{calc (lvalue) op (rvalue)}}
++ {{calc (lvalue) op (rvalue) [digits]}}
   + op = +, -, *, /, %
+  + digits round number
   + Can be used with () inline in other commands
 
-### (distance)
++ {{min (lValue) (rValue)}}
+   + Returns the smaller of the two
+
++ {{max (lValue) (rValue)}}
+   + Returns the larger of the two
+
++ {{int (value)}}
+   + Returns the integer part of the value
+   
 + {{distance (lVector) (rVector) [format]}}
   + Distance between (lVector) and (rVector)
   + Optional a format

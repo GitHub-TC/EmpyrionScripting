@@ -12,7 +12,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("math")]
         public static void MathBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 3) throw new HandlebarsException("{{math}} helper must have exactly three argument: (lvalue) op (rvalue)");
+            if (arguments.Length != 3 && arguments.Length != 4) throw new HandlebarsException("{{math}} helper must have exactly at least three arguments: (lvalue) op (rvalue) [digits]");
 
             try
             {
@@ -63,21 +63,22 @@ namespace EmpyrionScripting.CustomHelpers
         {
             double.TryParse(arguments[0]?.ToString(), out var left);
             double.TryParse(arguments[2]?.ToString(), out var right);
+            var withRound = int.TryParse(arguments.Get(3)?.ToString(), out var digits);
 
             switch (op)
             {
-                case "+": options.Template(output, left + right); break;
-                case "-": options.Template(output, left - right); break;
-                case "*": options.Template(output, left * right); break;
-                case "/": options.Template(output, left / right); break;
-                case "%": options.Template(output, left % right); break;
+                case "+": options.Template(output, withRound ? Math.Round(left + right, digits) : left + right); break;
+                case "-": options.Template(output, withRound ? Math.Round(left - right, digits) : left - right); break;
+                case "*": options.Template(output, withRound ? Math.Round(left * right, digits) : left * right); break;
+                case "/": options.Template(output, withRound ? Math.Round(left / right, digits) : left / right); break;
+                case "%": options.Template(output, withRound ? Math.Round(left % right, digits) : left % right); break;
             }
         }
 
         [HandlebarTag("calc")]
         public static void CalcHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 3) throw new HandlebarsException("{{calc}} helper must have exactly three argument: (lvalue) op (rvalue)");
+            if (arguments.Length != 3 && arguments.Length != 4) throw new HandlebarsException("{{calc}} helper must have at least three arguments: (lvalue) op (rvalue) [digits]");
 
             try
             {
@@ -86,19 +87,72 @@ namespace EmpyrionScripting.CustomHelpers
                                 ? arguments[1].GetType().GetField("Value").GetValue(arguments[1])
                                 : arguments[1]?.ToString();
                 double.TryParse(arguments[2]?.ToString(), out var right);
+                var withRound = int.TryParse(arguments.Get(3)?.ToString(), out var digits);
 
                 switch (op)
                 {
-                    case "+": output.Write(left + right); break;
-                    case "-": output.Write(left - right); break;
-                    case "*": output.Write(left * right); break;
-                    case "/": output.Write(left / right); break;
-                    case "%": output.Write(left % right); break;
+                    case "+": output.Write(withRound ? Math.Round(left + right, digits) : left + right); break;
+                    case "-": output.Write(withRound ? Math.Round(left - right, digits) : left - right); break;
+                    case "*": output.Write(withRound ? Math.Round(left * right, digits) : left * right); break;
+                    case "/": output.Write(withRound ? Math.Round(left / right, digits) : left / right); break;
+                    case "%": output.Write(withRound ? Math.Round(left % right, digits) : left % right); break;
                 }
             }
             catch (Exception error)
             {
                 throw new HandlebarsException($"{{calc}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a}")}]:{EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
+        [HandlebarTag("min")]
+        public static void MinHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{min}} helper must have two arguments: (lvalue) (rvalue)");
+
+            try
+            {
+                double.TryParse(arguments[0]?.ToString(), out var left);
+                double.TryParse(arguments[1]?.ToString(), out var right);
+
+                output.Write(Math.Min(left, right));
+            }
+            catch (Exception error)
+            {
+                throw new HandlebarsException($"{{min}} [l:{arguments[0]} r:{arguments[1]} error: {EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
+        [HandlebarTag("max")]
+        public static void MaxHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{max}} helper must have two arguments: (lvalue) (rvalue)");
+
+            try
+            {
+                double.TryParse(arguments[0]?.ToString(), out var left);
+                double.TryParse(arguments[1]?.ToString(), out var right);
+
+                output.Write(Math.Min(left, right));
+            }
+            catch (Exception error)
+            {
+                throw new HandlebarsException($"{{max}} [l:{arguments[0]} r:{arguments[1]} error: {EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
+        [HandlebarTag("int")]
+        public static void IntHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{int}} helper must have one argument: (value)");
+
+            try
+            {
+                double.TryParse(arguments[0]?.ToString(), out var left);
+                output.Write((int)left);
+            }
+            catch (Exception error)
+            {
+                throw new HandlebarsException($"{{int}} {arguments[0]} error: {EmpyrionScripting.ErrorFilter(error)}");
             }
         }
 
