@@ -29,6 +29,7 @@ namespace EmpyrionScripting.Interface
         int SouthColor { get; set; }
         int WestColor { get; set; }
         int EastColor { get; set; }
+        bool IsDamaged { get; }
 
         void SetColorForWholeBlock(int texIdx);
         void SetColors(int? top, int? bottom, int? north, int? south, int? west, int? east);

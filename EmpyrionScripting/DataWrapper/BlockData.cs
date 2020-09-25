@@ -74,8 +74,8 @@ namespace EmpyrionScripting.DataWrapper
         public int Id => GetData().blockType;
         public int BlockType{ get => GetData().blockType;           set { if(BlockType  != value) _block?.Set(value, null, null, null); } }
         public bool Active  { get => GetData().blockActive.Value;   set { if(Active     != value) _block?.Set(null, null, null, value); } }
-        public int Shape    { get => GetData().blockShape;          set { if(Shape      != value) _block?.Set(null, value, null, null); } }
-        public int Rotation { get => GetData().blockRotation;       set { if(Rotation   != value) _block?.Set(null, null, value, null); } }
+        public int Shape    { get => GetData().blockShape;          set { if(!IsDamaged && Shape      != value) _block?.Set(null, value, null, null); } }
+        public int Rotation { get => GetData().blockRotation;       set { if(!IsDamaged && Rotation   != value) _block?.Set(null, null, value, null); } }
 
         public void SetTextureForWholeBlock(int texIdx)
         {
@@ -150,6 +150,7 @@ namespace EmpyrionScripting.DataWrapper
         public bool SwitchState { get { var s = GetData()._block?.GetSwitchState(); return s == null ? false : s.Value; }  set { var s = GetData()._block?.GetSwitchState(); if(s != value) GetData()._block?.SetSwitchState(value); } }
         public int Damage => _block.GetDamage();
         public int HitPoints => _block.GetHitPoints();
+        public bool IsDamaged => Damage != 0;
         public string CustomName => _block.CustomName;
         public int? LockCode => _block.LockCode;
     }
