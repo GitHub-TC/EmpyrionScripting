@@ -132,7 +132,7 @@ namespace EmpyrionScripting.CustomHelpers
                 double.TryParse(arguments[0]?.ToString(), out var left);
                 double.TryParse(arguments[1]?.ToString(), out var right);
 
-                output.Write(Math.Min(left, right));
+                output.Write(Math.Max(left, right));
             }
             catch (Exception error)
             {
