@@ -583,6 +583,9 @@ Syntaxdocu:
 + {{substring text startindex \[length\]}}
   + Teiltext von dem Text (text) von Index (startindex) mit einer optionalen maximalen Länge von (length) Zeichen
 
++ {{replace text find replaceto}}
+  + Ersetzt die (find) durch (replaceto) in dem Text (text)
+  
 + {{startswith text starts \[ignoreCase\]}}
   + Beginnt der Text (text) mit dem Text (starts) optional unabhängige Groß/Kleinschreibung
 
@@ -1306,6 +1309,9 @@ DateTime format:
 
 + {{endswith text ends \[ignoreCase\]}}
    + If the text (text) ends with the text (ends), optionally independent upper / lower case
+ 
++ {{replace text find replaceto}}
+  + replace the (find) into the (replaceto) in the (text)
    
 ### (chararray)
 + {{chararray text}}

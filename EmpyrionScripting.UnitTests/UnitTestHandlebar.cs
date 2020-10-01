@@ -285,7 +285,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodReadItemsInfo()
         {
             var ecf = new ConfigEcfAccess();
-            ecf.ReadConfigEcf(@"C:\steamcmd\empyrion\Content");
+            ecf.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null);
             var localization = new Localization(@"C:\steamcmd\empyrion\Content");
             var items        = new ItemInfos   (ecf, localization).ItemInfo;
 

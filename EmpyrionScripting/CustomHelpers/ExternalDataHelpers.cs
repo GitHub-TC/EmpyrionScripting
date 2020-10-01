@@ -261,6 +261,22 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("replace")]
+        public static void ReplaceHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 3) throw new HandlebarsException("{{replace text find replaceto}} helper must have at least three arguments: (text) (find) (replaceto)");
+
+            try
+            {
+                output.Write(arguments[0]?.ToString().Replace(arguments[1]?.ToString(), arguments[2]?.ToString()));
+            }
+            catch (Exception error)
+            {
+                if (CsScriptFunctions.FunctionNeedsMainThread(error, root)) { /* no error */ }
+                else output.Write("{{replace}} error (find=" + arguments[1] + ", replaceto=" + arguments[2] + ") text='" + arguments[0] + "' " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
 
         [HandlebarTag("startswith")]
         public static void StartsWithHelper(TextWriter output, object root, dynamic context, object[] arguments)

@@ -21,40 +21,30 @@ namespace EmpyrionScripting
         public IDictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
         public IDictionary<int, Dictionary<int, int>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, int>>();
         public static Action<string, LogLevel> Log { get; set; } = (s, l) => Console.WriteLine(s);
+        public string ContentPath { get; private set; }
+        public string ScenarioContentPath { get; private set; }
 
-        public void ReadConfigEcf(string contentPath)
+        public void ReadConfigEcf(string contentPath, string activeScenario)
         {
-            try
-            {
-                BlocksConfig_Ecf = EcfParser.Parse.Deserialize(File.ReadAllLines(Path.Combine(contentPath, "Configuration", "BlocksConfig.ecf")));
-                Log($"EmpyrionScripting BlocksConfig.ecf: #{BlocksConfig_Ecf.Blocks.Count}", LogLevel.Message);
-            }
-            catch (Exception error) { Log($"EmpyrionScripting BlocksConfig.ecf: {error}", LogLevel.Error); }
+            ContentPath         = contentPath;
+            ScenarioContentPath = string.IsNullOrEmpty(activeScenario) ? null : Path.Combine(contentPath, "Scenarios", activeScenario, "Content");
 
-            try
-            {
-                Configuration_Ecf = EcfParser.Parse.Deserialize(File.ReadAllLines(Path.Combine(contentPath, "Configuration", "Config_Example.ecf")));
-                Log($"EmpyrionScripting Config_Example.ecf: #{Configuration_Ecf.Blocks.Count}", LogLevel.Message);
-            }
-            catch (Exception error){ Log($"EmpyrionScripting Config_Example.ecf: {error}", LogLevel.Error); }
+            Log($"EmpyrionScripting ReadConfigEcf: ContentPath:{contentPath} Scenario:{activeScenario} -> {ScenarioContentPath}", LogLevel.Message);
+
+            Configuration_Ecf   = ReadEcf("Config_Example.ecf");
+            Config_Ecf          = ReadEcf("Config.ecf");
+            BlocksConfig_Ecf    = ReadEcf("BlocksConfig.ecf");
 
             try { Configuration_Ecf.MergeWith(BlocksConfig_Ecf); }
             catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
 
-            try
-            {
-                Config_Ecf = EcfParser.Parse.Deserialize(File.ReadAllLines(Path.Combine(contentPath, "Configuration", "Config.ecf")));
-                Log($"EmpyrionScripting Config.ecf: #{Config_Ecf.Blocks.Count}", LogLevel.Message);
-            }
-            catch (Exception error){ Log($"EmpyrionScripting Config.ecf: {error}", LogLevel.Error); }
-
             try { Configuration_Ecf.MergeWith(Config_Ecf); }
             catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
 
-            try{ ConfigBlockById = BlocksById(Configuration_Ecf.Blocks);  }
-            catch (Exception error){ Log($"EmpyrionScripting ConfigBlockById: {error}", LogLevel.Error); }
+            try { ConfigBlockById = BlocksById(Configuration_Ecf.Blocks); }
+            catch (Exception error) { Log($"EmpyrionScripting ConfigBlockById: {error}", LogLevel.Error); }
 
-            try{ ConfigBlockByName = BlocksByName(Configuration_Ecf.Blocks); }
+            try { ConfigBlockByName = BlocksByName(Configuration_Ecf.Blocks); }
             catch (Exception error) { Log($"EmpyrionScripting ConfigBlockByName: {error}", LogLevel.Error); }
 
             Flat_Config_Ecf = new EcfFile() { Version = Configuration_Ecf.Version, Blocks = new List<EcfBlock>() };
@@ -72,9 +62,29 @@ namespace EmpyrionScripting
 
             try { ResourcesForBlockById = ResourcesForBlock(); }
             catch (Exception error) { Log($"EmpyrionScripting RecipeForBlock: {error}", LogLevel.Error); }
-            
+
             Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count}", LogLevel.Message);
         }
+
+        private EcfFile ReadEcf(string filename)
+        {
+            var result = new EcfFile();
+            try
+            {
+                var fullFilename = GetConfigurationFile(filename);
+                Log($"EmpyrionScripting {fullFilename}: start", LogLevel.Message);
+                result = EcfParser.Parse.Deserialize(File.ReadAllLines(fullFilename));
+                Log($"EmpyrionScripting {fullFilename}: #{result.Blocks.Count}", LogLevel.Message);
+            }
+            catch (Exception error) { Log($"EmpyrionScripting {filename}: {error}", LogLevel.Error); }
+
+            return result;
+        }
+
+        private string GetConfigurationFile(string fileName)
+            => !string.IsNullOrEmpty(ScenarioContentPath) && File.Exists(Path.Combine(ScenarioContentPath, "Configuration", fileName))
+                ? Path.Combine(ScenarioContentPath, "Configuration", fileName)
+                : Path.Combine(ContentPath,         "Configuration", fileName);
 
         private Dictionary<int, Dictionary<int, int>> ResourcesForBlock()
         {

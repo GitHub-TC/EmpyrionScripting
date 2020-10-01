@@ -347,7 +347,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsConfigFindAttribute()
         {
             var ecf = new ConfigEcfAccess();
-            ecf.ReadConfigEcf(@"C:\steamcmd\empyrion\Content");
+            ecf.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null);
 
             Assert.IsNotNull(ecf.FindAttribute(2248, "Mass"));
             Assert.IsNotNull(ecf.FindAttribute(2248, "StackSize"));
