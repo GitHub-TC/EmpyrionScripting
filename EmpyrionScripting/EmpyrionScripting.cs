@@ -63,6 +63,7 @@ namespace EmpyrionScripting
             ConveyorHelpers.Log           = Log;
             ScriptExecQueue.Log           = Log;
             ConfigEcfAccess.Log           = Log;
+            Localization   .Log           = Log;
             SetupHandlebarsComponent();
         }
 
@@ -75,7 +76,7 @@ namespace EmpyrionScripting
             {
                 SetupHandlebarsComponent();
 
-                Localization    = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content));
+                Localization    = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content), EmpyrionConfiguration.DedicatedYaml.CustomScenarioName);
                 ConfigEcfAccess.ReadConfigEcf(ModApi.Application?.GetPathFor(AppFolder.Content), EmpyrionConfiguration.DedicatedYaml.CustomScenarioName);
                 ItemInfos       = new ItemInfos(ConfigEcfAccess, Localization);
                 SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);

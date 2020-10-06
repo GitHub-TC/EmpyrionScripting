@@ -286,7 +286,7 @@ namespace EmpyrionScripting.UnitTests
         {
             var ecf = new ConfigEcfAccess();
             ecf.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null);
-            var localization = new Localization(@"C:\steamcmd\empyrion\Content");
+            var localization = new Localization(null, @"C:\steamcmd\empyrion\Content");
             var items        = new ItemInfos   (ecf, localization).ItemInfo;
 
             Assert.IsTrue(items.Count() > 0);
