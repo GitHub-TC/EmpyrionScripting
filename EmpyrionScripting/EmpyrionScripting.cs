@@ -133,7 +133,7 @@ namespace EmpyrionScripting
                 ConfigFilename = Path.Combine(SaveGameModPath, "Configuration.json")
             };
             Configuration.Load();
-            if (Configuration.LoadException != null) Configuration.Save();
+            if (Configuration.LoadException != null || !File.Exists(Configuration.ConfigFilename)) Configuration.Save();
         }
 
         public void Shutdown()
