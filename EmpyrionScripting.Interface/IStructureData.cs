@@ -24,6 +24,12 @@ namespace EmpyrionScripting.Interface
         IPlayerData Pilot { get; }
         VectorInt3 MinPos { get; }
         VectorInt3 MaxPos { get; }
+        int BlockCount { get; }
+        int TriangleCount { get; }
+        int LightCount { get; }
+        float Fuel { get; }
+        int PowerConsumption { get; }
+        int PowerOutCapacity { get; }
 
         IStructure GetCurrent();
     }

@@ -44,6 +44,14 @@ namespace EmpyrionScripting.DataWrapper
         public bool IsOfflineProtectable => GetCurrent().IsOfflineProtectable;
         public bool IsReady => GetCurrent().IsReady;
 
+        public int BlockCount => GetCurrent().BlockCount;
+        public int TriangleCount => GetCurrent().TriangleCount;
+        public int LightCount => GetCurrent().LightCount;
+
+        public float Fuel => GetCurrent().Fuel;
+        public int PowerConsumption => GetCurrent().PowerConsumption;
+        public int PowerOutCapacity => GetCurrent().PowerOutCapacity;
+
         public VectorInt3 MinPos => GetCurrent().MinPos;
         public VectorInt3 MaxPos => GetCurrent().MaxPos;
 

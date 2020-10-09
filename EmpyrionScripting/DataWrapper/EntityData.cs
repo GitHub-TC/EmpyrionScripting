@@ -17,10 +17,10 @@ namespace EmpyrionScripting.DataWrapper
         }
         public EntityData(IPlayfield playfield, IEntity entity) : this(playfield, entity, false) { }
 
-        public EntityData(IPlayfield playfield, IEntity entity, bool isPublic): this(isPublic)
+        public EntityData(IPlayfield playfield, IEntity entity, bool isPublic) : this(isPublic)
         {
             this.playfield = new WeakReference<IPlayfield>(playfield);
-            this.entity    = new WeakReference<IEntity>(entity);
+            this.entity = new WeakReference<IEntity>(entity);
         }
 
         public IStructureData S => _s?.Value;
@@ -44,11 +44,17 @@ namespace EmpyrionScripting.DataWrapper
                 }
             }
         }
+        public bool IsLocal => GetCurrent().IsLocal;
+        public bool IsPoi => GetCurrent().IsPoi;
+        public bool IsProxy => GetCurrent().IsProxy;
 
         public Vector3 Pos => GetCurrent().Position;
+        public Vector3 Forward => GetCurrent().Forward;
         public float Distance { get; set; }
         public FactionData Faction => GetCurrent().Faction;
 
+        public int BelongsTo => GetCurrent().BelongsTo;
+        public int DockedTo { get { try { return GetCurrent().DockedTo; } catch { return 0; } } }
 
         public virtual IEntity GetCurrent() => entity.TryGetTarget(out var e) ? e : null;
         public virtual IPlayfield GetCurrentPlayfield() => playfield.TryGetTarget(out var p) ? p : null;

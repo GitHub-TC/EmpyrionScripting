@@ -49,7 +49,7 @@ namespace EmpyrionScripting
         }
 
         private Dictionary<string, List<string>> ReadLocalisation(string contentPath)
-            => ReadLocalisatioonFile(contentPath)
+            => ReadLocalisationFile(contentPath)
                 .Where(L => char.IsLetter(L[0]))
                 .Select(L =>
                 {
@@ -58,11 +58,11 @@ namespace EmpyrionScripting
                 })
                 .SafeToDictionary(L => L.ID, L => L.Names.ToList(), StringComparer.CurrentCultureIgnoreCase);
 
-        private static string[] ReadLocalisatioonFile(string contentPath)
+        private static string[] ReadLocalisationFile(string contentPath)
         {
             var filename = Path.Combine(contentPath, @"Extras\Localization.csv");
             Log($"LocalisationData from '{filename}'", LogLevel.Message);
-            return File.ReadAllLines(filename);
+            return File.Exists(filename) ? File.ReadAllLines(filename) : new string[] { };
         }
 
         public string GetName(string name, string language)
