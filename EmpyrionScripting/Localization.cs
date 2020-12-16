@@ -50,7 +50,7 @@ namespace EmpyrionScripting
 
         private Dictionary<string, List<string>> ReadLocalisation(string contentPath)
             => ReadLocalisationFile(contentPath)
-                .Where(L => char.IsLetter(L[0]))
+                .Where(L => !string.IsNullOrEmpty(L) && char.IsLetter(L[0]))
                 .Select(L =>
                 {
                     var line = L.Split(',');
