@@ -35,6 +35,8 @@ namespace EmpyrionScripting
             Config_Ecf          = ReadEcf("Config.ecf");
             BlocksConfig_Ecf    = ReadEcf("BlocksConfig.ecf");
 
+            CorrectIdsTo14Version(Configuration_Ecf);
+
             try { Configuration_Ecf.MergeWith(BlocksConfig_Ecf); }
             catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
 
@@ -64,6 +66,19 @@ namespace EmpyrionScripting
             catch (Exception error) { Log($"EmpyrionScripting RecipeForBlock: {error}", LogLevel.Error); }
 
             Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count}", LogLevel.Message);
+        }
+
+        private void CorrectIdsTo14Version(EcfFile ecf)
+        {
+            // Workaround für die "kaputte" IDs :-((
+            if (ecf.Blocks.Any(b => b.Attr.FirstOrDefault(a => a.Name == "Id")?.Value as int? < 4096))
+            {
+                ecf.Blocks
+                    .ForEach(b => {
+                        var idAttr = b.Attr.FirstOrDefault(a => a.Name == "Id");
+                        if (int.TryParse(idAttr?.Value.ToString(), out var id) && id > 2048) idAttr.Value = id + 2048;
+                    });
+            }
         }
 
         private EcfFile ReadEcf(string filename)
