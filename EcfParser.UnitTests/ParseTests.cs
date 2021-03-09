@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -12,10 +13,19 @@ namespace EcfParser.UnitTests
         public void ReadVersionTest()
         {
             var line = @"VERSION: 9";
-            var result = EcfParser.Parse.Deserialize(line);
+            var result = EcfParser.Parse.Deserialize(null, line);
             Assert.AreEqual(9, result.Version);
         }
 
+        [TestMethod()]
+        public void ReadBlockMapping()
+        {
+            var result = EcfParser.Parse.ReadBlockMapping(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\Data\blocksmap.dat"));
+            Assert.AreEqual(161, result.Count);
+            Assert.AreEqual(2048, result["ThrusterGVSuperRound2x4x2"]);
+            Assert.AreEqual(2052, result["WarpDriveT2"]);
+            Assert.AreEqual(2208, result["Eden_TestModelBlock2"]);
+        }
 
         [TestMethod()]
         public void ReadAttributeStdLineTest()
@@ -53,6 +63,32 @@ namespace EcfParser.UnitTests
         }
 
         [TestMethod()]
+        public void ReadAttributeBlockWithAliasAttr()
+        {
+            var line = @"
+{ Item Name: FusionCell, Ref: ComponentsTemplate
+  Mass: 75, type: float, display: true, formatter: Kilogram
+  Volume: 10.5, type: float, display: true, formatter: Liter
+  UnlockCost: 25, display: true
+  UnlockLevel: 20, display: true
+  TechTreeParent: EnergyCellLarge
+  TechTreeNames: Misc
+}
+";
+
+            var alias = new Dictionary<string, int> { { "FusionCell", 2373 } };
+
+            var result = EcfParser.Parse.Deserialize(alias, line.Split('\n'));
+            Assert.AreEqual(1, result.Blocks.Count);
+            Assert.AreEqual("Item", result.Blocks[0].Name);
+            Assert.AreEqual("Id", result.Blocks[0].Attr.First().Name);
+            Assert.AreEqual("FusionCell", result.Blocks[0].Attr.First().AddOns.FirstOrDefault(a => a.Key == "Name").Value);
+            Assert.AreEqual(2373, (int)result.Blocks[0].Attr.First().Value);
+            Assert.AreEqual(7, result.Blocks[0].Attr.Count);
+        }
+
+
+        [TestMethod()]
         public void ReadAttributeBlockAttr()
         {
             var line = @"
@@ -65,7 +101,7 @@ namespace EcfParser.UnitTests
   TechTreeNames: Misc
 }
 ";
-            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
             Assert.AreEqual("Item", result.Blocks[0].Name);
             Assert.AreEqual("Id", result.Blocks[0].Attr.First().Name);
@@ -93,7 +129,7 @@ namespace EcfParser.UnitTests
   TechTreeNames: Misc
 }
 ";
-            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
 
             var block = result.Blocks[0];
@@ -138,7 +174,7 @@ namespace EcfParser.UnitTests
   TechTreeNames: Misc
 }
 ";
-            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
 
             var block = result.Blocks[0];
@@ -173,7 +209,7 @@ namespace EcfParser.UnitTests
   }
 }
 ";
-            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
 
             var block = result.Blocks[0];
@@ -210,7 +246,7 @@ namespace EcfParser.UnitTests
     }
 }
 ";
-            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
 
             var block = result.Blocks[0];
@@ -243,7 +279,7 @@ namespace EcfParser.UnitTests
                 {
                     try
                     {
-                        var ecf = EcfParser.Parse.Deserialize(File.ReadAllLines(F));
+                        var ecf = EcfParser.Parse.Deserialize(null, File.ReadAllLines(F));
                         if (mergeAll == null) mergeAll = ecf;
                         else                  mergeAll.MergeWith(ecf);
                     }

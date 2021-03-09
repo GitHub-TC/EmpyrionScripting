@@ -24,8 +24,8 @@ namespace EcfParser.Tests
 }
 ";
 
-            var ecf1 = EcfParser.Parse.Deserialize(ecf1Lines.Split('\n'));
-            var ecf2 = EcfParser.Parse.Deserialize(ecf2Lines.Split('\n'));
+            var ecf1 = EcfParser.Parse.Deserialize(null, ecf1Lines.Split('\n'));
+            var ecf2 = EcfParser.Parse.Deserialize(null, ecf2Lines.Split('\n'));
             ecf1.MergeWith(ecf2);
 
             Assert.AreEqual(1, ecf1.Blocks.Count);
@@ -66,8 +66,8 @@ namespace EcfParser.Tests
 }
 ";
 
-            var ecf1 = EcfParser.Parse.Deserialize(ecf1Lines.Split('\n'));
-            var ecf2 = EcfParser.Parse.Deserialize(ecf2Lines.Split('\n'));
+            var ecf1 = EcfParser.Parse.Deserialize(null, ecf1Lines.Split('\n'));
+            var ecf2 = EcfParser.Parse.Deserialize(null, ecf2Lines.Split('\n'));
             ecf1.MergeWith(ecf2);
 
             Assert.AreEqual(1, ecf1.Blocks.Count);
@@ -97,8 +97,8 @@ namespace EcfParser.Tests
 }
 ";
 
-            var ecf1 = EcfParser.Parse.Deserialize(ecf1Lines.Split('\n'));
-            var ecf2 = EcfParser.Parse.Deserialize(ecf2Lines.Split('\n'));
+            var ecf1 = EcfParser.Parse.Deserialize(null, ecf1Lines.Split('\n'));
+            var ecf2 = EcfParser.Parse.Deserialize(null, ecf2Lines.Split('\n'));
             ecf1.MergeWith(ecf2);
 
             Assert.AreEqual(1, ecf1.Blocks.Count);
@@ -129,8 +129,8 @@ namespace EcfParser.Tests
 }
 ";
 
-            var ecf1 = EcfParser.Parse.Deserialize(ecf1Lines.Split('\n'));
-            var ecf2 = EcfParser.Parse.Deserialize(ecf2Lines.Split('\n'));
+            var ecf1 = EcfParser.Parse.Deserialize(null, ecf1Lines.Split('\n'));
+            var ecf2 = EcfParser.Parse.Deserialize(null, ecf2Lines.Split('\n'));
             ecf1.MergeWith(ecf2);
 
             Assert.AreEqual(1, ecf1.Blocks.Count);

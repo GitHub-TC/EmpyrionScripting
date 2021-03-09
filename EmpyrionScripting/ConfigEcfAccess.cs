@@ -11,6 +11,9 @@ namespace EmpyrionScripting
     public class ConfigEcfAccess : IConfigEcfAccess
     {
         public EcfFile BlocksConfig_Ecf { get; set; } = new EcfFile();
+
+        private IDictionary<string, int> BlockIdMapping;
+
         public EcfFile Configuration_Ecf { get; set; } = new EcfFile();
         public EcfFile Config_Ecf { get; set; } = new EcfFile();
         public EcfFile Flat_Config_Ecf { get; set; } = new EcfFile();
@@ -24,12 +27,14 @@ namespace EmpyrionScripting
         public string ContentPath { get; private set; }
         public string ScenarioContentPath { get; private set; }
 
-        public void ReadConfigEcf(string contentPath, string activeScenario)
+        public void ReadConfigEcf(string contentPath, string activeScenario, string blockMappingFile)
         {
             ContentPath         = contentPath;
             ScenarioContentPath = string.IsNullOrEmpty(activeScenario) ? null : Path.Combine(contentPath, "Scenarios", activeScenario, "Content");
 
-            Log($"EmpyrionScripting ReadConfigEcf: ContentPath:{contentPath} Scenario:{activeScenario} -> {ScenarioContentPath}", LogLevel.Message);
+            BlockIdMapping = Parse.ReadBlockMapping(blockMappingFile);
+
+            Log($"EmpyrionScripting ReadConfigEcf: ContentPath:{contentPath} Scenario:{activeScenario} -> {ScenarioContentPath} BlockIdMapping:[{BlockIdMapping?.Count}] {blockMappingFile}", LogLevel.Message);
 
             Configuration_Ecf   = ReadEcf("Config_Example.ecf");
             Config_Ecf          = ReadEcf("Config.ecf");
@@ -73,7 +78,7 @@ namespace EmpyrionScripting
             {
                 var fullFilename = GetConfigurationFile(filename);
                 Log($"EmpyrionScripting {fullFilename}: start", LogLevel.Message);
-                result = EcfParser.Parse.Deserialize(File.ReadAllLines(fullFilename));
+                result = EcfParser.Parse.Deserialize(BlockIdMapping, File.ReadAllLines(fullFilename));
                 Log($"EmpyrionScripting {fullFilename}: #{result.Blocks.Count}", LogLevel.Message);
             }
             catch (Exception error) { Log($"EmpyrionScripting {filename}: {error}", LogLevel.Error); }

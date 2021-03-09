@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 
 namespace EcfParser
@@ -8,7 +10,7 @@ namespace EcfParser
 
     public static class Parse
     {
-        public static EcfFile Deserialize(params string[] lines)
+        public static EcfFile Deserialize(IDictionary<string, int> blockIdMapping, params string[] lines)
         {
             var result = new EcfFile();
             var i = -1;
@@ -34,6 +36,8 @@ namespace EcfParser
                 }
             } while (i < lines.Length - 1);
 
+            if(blockIdMapping != null) FillWithMappedIds(result, blockIdMapping);
+
             return result;
 
             string ReadNextLine()
@@ -54,6 +58,43 @@ namespace EcfParser
                 }
                 return line;
             }
+        }
+
+        public static IDictionary<string, int> ReadBlockMapping(string filename)
+        {
+            if (!File.Exists(filename)) return null;
+
+            var result = new ConcurrentDictionary<string, int>();
+
+            var fileContent = File.ReadAllBytes(filename);
+            for (var currentOffset = 9; currentOffset < fileContent.Length;)
+            {
+                var len = fileContent[currentOffset++];
+                var name = System.Text.Encoding.ASCII.GetString(fileContent, currentOffset, len);
+                currentOffset += len;
+
+                var id = fileContent[currentOffset++] | fileContent[currentOffset++] << 8;
+
+                result.AddOrUpdate(name, id, (s, i) => id);
+            }
+
+            return result;
+        }
+
+        private static void FillWithMappedIds(EcfFile result, IDictionary<string, int> blockIdMapping)
+        {
+            result.Blocks.ForEach(B => {
+                var blockNameAttr   = B.Attr.FirstOrDefault(a => a.Name == "Name");
+                var blockName       = blockNameAttr?.Value;
+                var blockId         = B.Attr.FirstOrDefault(a => a.Name == "Id")?.Value;
+
+                if (blockName != null && blockId == null && blockIdMapping.TryGetValue(blockName.ToString(), out var id)) {
+                    var idAttr = new EcfAttribute { Name = "Id", Value = id, AddOns = blockNameAttr.AddOns ?? new Dictionary<string, object>() };
+                    idAttr.AddOns.Add("Name", blockName.ToString());
+                    B.Attr.Remove(blockNameAttr);
+                    B.Attr.Insert(0, idAttr);
+                }
+            });
         }
 
         private static EcfBlock ReadBlock(bool isChild, string line, Func<string> nextLine)
