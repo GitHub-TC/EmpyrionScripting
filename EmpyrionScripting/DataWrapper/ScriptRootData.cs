@@ -48,7 +48,7 @@ namespace EmpyrionScripting.DataWrapper
             this.playfield              = playfield;
             this.entity                 = entity;
             SignalEventStore            = eventStore;
-            IsElevatedScript = this is ScriptSaveGameRootData || entity?.Faction.Group == FactionGroup.Admin;
+            IsElevatedScript = this is ScriptSaveGameRootData || EmpyrionScripting.Configuration.Current.ElevatedGroups.Any(f => f == entity?.Faction.Group);
         }
 
         public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.allEntities, data.currentEntities, data.playfield, data.entity, data._PersistendData, (EventStore)data.SignalEventStore)
