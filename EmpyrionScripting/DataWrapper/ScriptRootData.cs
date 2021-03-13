@@ -48,7 +48,8 @@ namespace EmpyrionScripting.DataWrapper
             this.playfield              = playfield;
             this.entity                 = entity;
             SignalEventStore            = eventStore;
-            IsElevatedScript = this is ScriptSaveGameRootData || EmpyrionScripting.Configuration.Current.ElevatedGroups.Any(f => f == entity?.Faction.Group);
+            var testGroup = entity?.Faction.Group == FactionGroup.Faction || entity?.Faction.Group == FactionGroup.Player ? entity?.Faction.Id.ToString() : entity?.Faction.Group.ToString();
+            IsElevatedScript = this is ScriptSaveGameRootData || EmpyrionScripting.Configuration.Current.ElevatedGroups.Any(f => f == testGroup);
         }
 
         public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.allEntities, data.currentEntities, data.playfield, data.entity, data._PersistendData, (EventStore)data.SignalEventStore)
@@ -78,7 +79,7 @@ namespace EmpyrionScripting.DataWrapper
         public IEnumerable<IEntity> GetAllEntities() => IsElevatedScript ? allEntities : Enumerable.Empty<IEntity>();
         public IEnumerable<IEntity> GetEntities() => currentEntities
                 .Where(SafeIsNoProxyCheck)
-                .Where(e => e.Faction.Id == E.GetCurrent().Faction.Id)
+                .Where(e => IsElevatedScript || e.Faction.Id == E.GetCurrent().Faction.Id)
                 .Where(e => IsElevatedScript || Vector3.Distance(e.Position, E.Pos) <= EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance);
 
         public IPlayfield GetCurrentPlayfield() => playfield;

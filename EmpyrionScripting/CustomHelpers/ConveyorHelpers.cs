@@ -419,6 +419,8 @@ namespace EmpyrionScripting.CustomHelpers
                 var S           = E.S.GetCurrent();
                 var coreName    = (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}";
                 var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
+                var directId    = root.IsElevatedScript ? (int.TryParse(arguments.Get(2)?.ToString(), out var manualId) ? manualId : 0) : 0;
+
                 var list        = arguments.Get(3)?.ToString()
                                     .Split(new []{ ',', ';' })
                                     .Select(T => T.Trim())
@@ -440,24 +442,27 @@ namespace EmpyrionScripting.CustomHelpers
                 }
                 var targetPos = root.E.S.GetCurrent().GetDevicePositions(N).First();
 
-                if(corePosList.Count == 0)
+                if (directId != E.Id)
                 {
-                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                    options.Inverse(output, context as object);
-                    output.WriteLine($"No core '{coreName}' found on {E.Id}");
-                    return;
-                }
+                    if (corePosList.Count == 0)
+                    {
+                        root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                        options.Inverse(output, context as object);
+                        output.WriteLine($"No core '{coreName}' found on {E.Id}");
+                        return;
+                    }
 
-                var corePos = corePosList.First();
-                var core = E.S.GetCurrent().GetBlock(corePos);
-                core.Get(out var coreBlockType, out _ , out _, out _);
+                    var corePos = corePosList.First();
+                    var core = E.S.GetCurrent().GetBlock(corePos);
+                    core.Get(out var coreBlockType, out _, out _, out _);
 
-                if (coreBlockType != PlayerCoreType)
-                {
-                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                    options.Inverse(output, context as object);
-                    output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
-                    return;
+                    if (coreBlockType != PlayerCoreType)
+                    {
+                        root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                        options.Inverse(output, context as object);
+                        output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
+                        return;
+                    }
                 }
 
                 var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
@@ -504,6 +509,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var S           = E.S.GetCurrent();
                 var coreName    = (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}";
                 var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
+                var directId    = root.IsElevatedScript ? (int.TryParse(arguments.Get(2)?.ToString(), out var manualId) ? manualId : 0) : 0;
 
                 var target      = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
                 if (target == null)
@@ -515,24 +521,27 @@ namespace EmpyrionScripting.CustomHelpers
                 }
                 var targetPos = root.E.S.GetCurrent().GetDevicePositions(N).First();
 
-                if(corePosList.Count == 0)
+                if (directId != E.Id)
                 {
-                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                    options.Inverse(output, context as object);
-                    output.WriteLine($"No core '{coreName}' found on {E.Id}");
-                    return;
-                }
+                    if (corePosList.Count == 0)
+                    {
+                        root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                        options.Inverse(output, context as object);
+                        output.WriteLine($"No core '{coreName}' found on {E.Id}");
+                        return;
+                    }
 
-                var corePos = corePosList.First();
-                var core = E.S.GetCurrent().GetBlock(corePos);
-                core.Get(out var coreBlockType, out _ , out _, out _);
+                    var corePos = corePosList.First();
+                    var core = E.S.GetCurrent().GetBlock(corePos);
+                    core.Get(out var coreBlockType, out _, out _, out _);
 
-                if (coreBlockType != PlayerCoreType)
-                {
-                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                    options.Inverse(output, context as object);
-                    output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
-                    return;
+                    if (coreBlockType != PlayerCoreType)
+                    {
+                        root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                        options.Inverse(output, context as object);
+                        output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
+                        return;
+                    }
                 }
 
                 var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {

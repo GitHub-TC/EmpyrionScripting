@@ -87,20 +87,19 @@ namespace EmpyrionScripting
         public string NumberSpaceReplace { get; set; } = " "; // eigentlich :-( funktioniert aber leider nicht mehr "\u2007\u2009";
         public string BarStandardValueSign { get; set; } = "\u2588";
         public string BarStandardSpaceSign { get; set; } = "\u2591";
-        [JsonProperty("ElevatedGroups", ItemConverterType = typeof(StringEnumConverter))]
-        public FactionGroup[] ElevatedGroups { get; set; } = new[] {
-                FactionGroup.Admin,
-                FactionGroup.Zirax,
-                FactionGroup.Predator,
-                FactionGroup.Prey,
-                FactionGroup.Talon,
-                FactionGroup.Polaris,
-                FactionGroup.Alien,
-                FactionGroup.Pirates,
-                FactionGroup.Kriel,
-                FactionGroup.UCH,
-                FactionGroup.Trader,
-                FactionGroup.Civilian,
+        public string[] ElevatedGroups { get; set; } = new[] {
+                "Admin",
+                "Zirax",
+                "Predator",
+                "Prey",
+                "Talon",
+                "Polaris",
+                "Alien",
+                "Pirates",
+                "Kriel",
+                "UCH",
+                "Trader",
+                "Civilian",
         };
     }
 
