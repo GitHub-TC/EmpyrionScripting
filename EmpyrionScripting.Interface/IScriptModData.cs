@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
@@ -33,6 +34,7 @@ namespace EmpyrionScripting.Interface
         ConcurrentDictionary<string, object> CacheData { get; }
         string ScriptingModInfoData { get; }
         ConcurrentDictionary<string, string> ScriptingModScriptsInfoData { get; }
+        DateTime DateTimeNow { get; }
 
         IEnumerable<IEntity> GetAllEntities();
         IPlayfield GetCurrentPlayfield();

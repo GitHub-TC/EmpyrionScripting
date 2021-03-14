@@ -81,11 +81,19 @@ namespace EmpyrionScripting.CustomHelpers
 
                 switch (op)
                 {
+                    case "=":
+                    case "==":
                     case "eq" : renderTemplate = Compare(left, right) == 0; break;
+                    case "<>":
+                    case "!=":
                     case "neq": renderTemplate = Compare(left, right) != 0; break;
+                    case "<":
                     case "le" : renderTemplate = Compare(left, right) <  0; break;
+                    case "<=":
                     case "leq": renderTemplate = Compare(left, right) <= 0; break;
+                    case ">":
                     case "ge" : renderTemplate = Compare(left, right) >  0; break;
+                    case ">=":
                     case "geq": renderTemplate = Compare(left, right) >= 0; break;
                     case "in" : renderTemplate = In(left, right); break;
                 }

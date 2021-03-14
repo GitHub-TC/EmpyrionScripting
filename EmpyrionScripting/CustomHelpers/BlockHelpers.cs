@@ -120,6 +120,24 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("setlockcode")]
+        public static void SetLockCodeHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{setlockcode block|device code}} helper must have exactly two argument: (block|device) (code)");
+
+            var block = arguments[0] as BlockData;
+            int.TryParse(arguments[1]?.ToString(), out var code);
+
+            try
+            {
+                block.LockCode = code;
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setlockcode}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("gettexture")]
         public static void GetTextureBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {

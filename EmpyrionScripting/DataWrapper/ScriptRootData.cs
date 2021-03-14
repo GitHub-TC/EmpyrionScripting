@@ -66,6 +66,8 @@ namespace EmpyrionScripting.DataWrapper
         public bool IsElevatedScript { get; }
         public ICsScriptFunctions CsRoot { get; }
         public IConsoleMock Console { get; }
+        public DateTime DateTimeNow => DateTime.Now;
+
 
         public IPlayfieldScriptData GetPlayfieldScriptData() => _PlayfieldScriptData;
         public ConcurrentDictionary<string, object> GetPersistendData() => _PersistendData;

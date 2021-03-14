@@ -152,6 +152,6 @@ namespace EmpyrionScripting.DataWrapper
         public int HitPoints => _block.GetHitPoints();
         public bool IsDamaged => Damage != 0;
         public string CustomName => _block.CustomName;
-        public int? LockCode => _block.LockCode;
+        public int? LockCode { get => _block?.LockCode ?? 0; set { if (_block != null) _block.LockCode = value; }}
     }
 }
