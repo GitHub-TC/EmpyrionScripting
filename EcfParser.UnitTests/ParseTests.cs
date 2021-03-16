@@ -225,6 +225,38 @@ namespace EcfParser.UnitTests
             Assert.AreEqual(8, child.Attr.Count);
         }
 
+        [TestMethod()]
+        public void ReadAttributeBlockShapesAttr()
+        {
+            var line = @"
+/* Two shape families for Plastic Large Block */
+{ +Block Id: 1482, Name: PlasticFullLarge
+  DropMeshfile: Entities/Misc/BagSmallPrefab
+  Material: plastic
+  Texture: 77
+  BlockColor: ""10,10,10""
+  Shape: New
+  Place: Free
+  Model: Cube
+  TemplateRoot: PlasticLargeBlocks
+  AllowPlacingAt: ""Base,MS"", display: true
+  HitPoints: 200, type: int, display: true
+  Mass: 100, type: float, display: true, formatter: Kilogram
+  BlockSizeScale: 8  
+  ChildShapes: ""Cube, CutCornerE, CutCornerB, SlicedCornerA1, CornerHalfB, CornerSmallC, CornerC, CornerHalfA3, RampCMedium, RampA, RampC, CornerRoundB, CornerRoundADouble, RoundCornerA, CubeRoundConnectorA, EdgeRound, Cylinder, RampRoundFTriple, RampRoundF, SmallCornerRoundB, SmallCornerRoundA, SphereHalf, Cone, ConeB, CutCornerC, Cylinder6Way, CornerRoundATriple, CornerA, CornerHalfA1, CornerDoubleA3, CornerSmallB, PyramidA""
+  UpgradeTo: HullFullLarge, display: true
+}
+";
+            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
+            Assert.AreEqual(1, result.Blocks.Count);
+
+            var block = result.Blocks[0];
+
+            Assert.AreEqual("Block", block.Name);
+            Assert.AreEqual("Id", block.Attr.First().Name);
+            Assert.AreEqual(413, block.Attr.First(n => n.Name == "ChildShapes").Value.ToString().Length);
+            Assert.AreEqual(15, block.Attr.Count);
+        }
 
 
         [TestMethod()]

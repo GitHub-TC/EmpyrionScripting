@@ -547,9 +547,14 @@ Syntaxdocu:
   + Sortiert das Array nach (sortedBy)
   + (reverse) = true um die Sortierung umzukehren
   
-+ {{split string separator \[removeemptyentries\]}}
++ {{split string separator \[removeemptyentries\] \[trimchars\]}}
   + (string) mit dem Trennzeichen (separator) zerteilen.
   + \[removeemptyentries\] falls leere Einträge entfernt werden sollen 'true'
+  + \[trimchars\] Zeichen die vorne und hinten entfernt werden sollen
+
++ {{trim string \[trimchars\]}}
+  + (string) Text
+  + \[trimchars\] Zeichen die vorne und hinten entfernt werden sollen
 
 + {{random start end}}
   + Zufallswert zwischen (start) und (end) liefern und in den Block als {{this}} hereinreichen

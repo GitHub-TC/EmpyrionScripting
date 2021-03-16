@@ -105,6 +105,8 @@ namespace EcfParser
             {
                 Name = nameDelimiterPos > 0 ? currentLine.Substring(0, nameDelimiterPos).Trim() : null
             };
+            if(block.Name != null && block.Name.StartsWith("+")) block.Name = block.Name.Substring(1);
+
             if (nameDelimiterPos == currentLine.Length) currentLine = string.Empty;
             else if (nameDelimiterPos > 0) currentLine = currentLine.Substring(nameDelimiterPos).Trim();
 

@@ -193,21 +193,43 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("split")]
         public static void SplitHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length < 2) throw new HandlebarsException("{{split string separator [removeemptyentries]}} helper must have at least two argument: (string) (separator) [true|false]");
+            if (arguments.Length < 2) throw new HandlebarsException("{{split string separator [removeemptyentries] [trimchars]}} helper must have at least two argument: (string) (separator) [true|false] [trimchars]");
 
             var data      =                arguments[0].ToString();
             var separator = Regex.Unescape(arguments[1].ToString());
+            var trimchars = arguments.Get(3)?.ToString().ToCharArray();
 
             try
             {
                 bool.TryParse(arguments.Length > 2 ? arguments[2]?.ToString() : null, out var removeemptyentries);
 
-                options.Template(output, data.Split(new[] { separator },
-                    removeemptyentries ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None));
+                options.Template(output, 
+                    data.Split(new[] { separator },
+                                removeemptyentries ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None)
+                    .Select(item => trimchars == null ? item : item.Trim(trimchars))
+                    .ToArray());
             }
             catch (Exception error)
             {
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{split}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("trim")]
+        public static void TrimHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length < 1) throw new HandlebarsException("{{trim string [trimchars]}} helper must have at least two argument: (string) [trimchars}");
+
+            var data      = arguments[0].ToString();
+            var trimchars = arguments.Get(1)?.ToString().ToCharArray() ?? new[] { ' ' };
+
+            try
+            {
+                output.Write(data.Trim(trimchars));
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{trim}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
