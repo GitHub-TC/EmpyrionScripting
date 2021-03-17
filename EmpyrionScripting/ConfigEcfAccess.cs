@@ -1,4 +1,5 @@
 ﻿using EcfParser;
+using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.Interface;
 using System;
@@ -27,12 +28,20 @@ namespace EmpyrionScripting
         public string ContentPath { get; private set; }
         public string ScenarioContentPath { get; private set; }
 
-        public void ReadConfigEcf(string contentPath, string activeScenario, string blockMappingFile)
+        public void ReadConfigEcf(string contentPath, string activeScenario, string blockMappingFile, IModApi modApi)
         {
             ContentPath         = contentPath;
             ScenarioContentPath = string.IsNullOrEmpty(activeScenario) ? null : Path.Combine(contentPath, "Scenarios", activeScenario, "Content");
 
-            BlockIdMapping = Parse.ReadBlockMapping(blockMappingFile);
+            try
+            {
+                BlockIdMapping = modApi.Application.GetBlockAndItemMapping();
+            }
+            catch (Exception error)
+            {
+                Log($"GetBlockAndItemMapping: {error}", LogLevel.Error);
+                BlockIdMapping = Parse.ReadBlockMapping(blockMappingFile);
+            }
 
             Log($"EmpyrionScripting ReadConfigEcf: ContentPath:{contentPath} Scenario:{activeScenario} -> {ScenarioContentPath} BlockIdMapping:[{BlockIdMapping?.Count}] {blockMappingFile}", LogLevel.Message);
 

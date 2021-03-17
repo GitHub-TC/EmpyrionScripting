@@ -78,9 +78,9 @@ namespace EmpyrionScripting
 
                 Localization    = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content), EmpyrionConfiguration.DedicatedYaml.CustomScenarioName);
                 ConfigEcfAccess.ReadConfigEcf(
-                    ModApi.Application?.GetPathFor(AppFolder.Content), 
-                    EmpyrionConfiguration.DedicatedYaml.CustomScenarioName, 
-                    Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "blocksmap.dat"));
+                    ModApi.Application?.GetPathFor(AppFolder.Content),
+                    EmpyrionConfiguration.DedicatedYaml.CustomScenarioName,
+                    Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "blocksmap.dat"), ModApi);
                 ItemInfos       = new ItemInfos(ConfigEcfAccess, Localization);
                 SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);
 

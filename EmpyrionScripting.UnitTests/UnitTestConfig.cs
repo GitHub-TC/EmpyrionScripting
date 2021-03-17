@@ -14,7 +14,7 @@ namespace EmpyrionLCDInfo.UnitTests
         public void TestMethodConfigTemplates()
         {
             var config = new ConfigEcfAccess();
-            config.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null, null);
+            config.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null, null, null);
             var templates = new Dictionary<int, Dictionary<int, int>>();
 
             config.FlatConfigBlockById
