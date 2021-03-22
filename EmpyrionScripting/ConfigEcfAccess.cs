@@ -11,10 +11,10 @@ namespace EmpyrionScripting
 {
     public class ConfigEcfAccess : IConfigEcfAccess
     {
-        public EcfFile BlocksConfig_Ecf { get; set; } = new EcfFile();
-
         private IDictionary<string, int> BlockIdMapping;
 
+        public EcfFile BlocksConfig_Ecf { get; set; } = new EcfFile();
+        public EcfFile ItemsConfig_Ecf { get; set; } = new EcfFile();
         public EcfFile Configuration_Ecf { get; set; } = new EcfFile();
         public EcfFile Config_Ecf { get; set; } = new EcfFile();
         public EcfFile Flat_Config_Ecf { get; set; } = new EcfFile();
@@ -25,42 +25,34 @@ namespace EmpyrionScripting
         public IDictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
         public IDictionary<int, Dictionary<int, int>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, int>>();
         public static Action<string, LogLevel> Log { get; set; } = (s, l) => Console.WriteLine(s);
-        public string ContentPath { get; private set; }
-        public string ScenarioContentPath { get; private set; }
+        public string ContentPath { get; set; }
+        public string ScenarioContentPath { get; set; }
 
         public void ReadConfigEcf(string contentPath, string activeScenario, string blockMappingFile, IModApi modApi)
         {
-            ContentPath         = contentPath;
+            ContentPath = contentPath;
             ScenarioContentPath = string.IsNullOrEmpty(activeScenario) ? null : Path.Combine(contentPath, "Scenarios", activeScenario, "Content");
-
-            try
-            {
-                BlockIdMapping = modApi.Application.GetBlockAndItemMapping();
-            }
-            catch (Exception error)
-            {
-                Log($"GetBlockAndItemMapping: {error}", LogLevel.Error);
-                BlockIdMapping = Parse.ReadBlockMapping(blockMappingFile);
-            }
 
             Log($"EmpyrionScripting ReadConfigEcf: ContentPath:{contentPath} Scenario:{activeScenario} -> {ScenarioContentPath} BlockIdMapping:[{BlockIdMapping?.Count}] {blockMappingFile}", LogLevel.Message);
 
-            Configuration_Ecf   = ReadEcf("Config_Example.ecf");
-            Config_Ecf          = ReadEcf("Config.ecf");
-            BlocksConfig_Ecf    = ReadEcf("BlocksConfig.ecf");
+            ReadBlockMappingFile(blockMappingFile, modApi);
+            ReadEcfFiles();
+            MergeEcfFiles();
+            BuildIdAndNameAccess();
+            FlatEcfConfigData();
+            CalcBlockRessources();
 
-            try { Configuration_Ecf.MergeWith(BlocksConfig_Ecf); }
-            catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
+            Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count}", LogLevel.Message);
+        }
 
-            try { Configuration_Ecf.MergeWith(Config_Ecf); }
-            catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
+        public void CalcBlockRessources()
+        {
+            try { ResourcesForBlockById = ResourcesForBlock(); }
+            catch (Exception error) { Log($"EmpyrionScripting RecipeForBlock: {error}", LogLevel.Error); }
+        }
 
-            try { ConfigBlockById = BlocksById(Configuration_Ecf.Blocks); }
-            catch (Exception error) { Log($"EmpyrionScripting ConfigBlockById: {error}", LogLevel.Error); }
-
-            try { ConfigBlockByName = BlocksByName(Configuration_Ecf.Blocks); }
-            catch (Exception error) { Log($"EmpyrionScripting ConfigBlockByName: {error}", LogLevel.Error); }
-
+        public void FlatEcfConfigData()
+        {
             Flat_Config_Ecf = new EcfFile() { Version = Configuration_Ecf.Version, Blocks = new List<EcfBlock>() };
             try { Configuration_Ecf.Blocks?.ForEach(B => Flat_Config_Ecf.Blocks.Add(MergeRefBlocks(new EcfBlock(), B))); }
             catch (Exception error) { Log($"EmpyrionScripting Configuration_Ecf.Blocks MergeRefBlocks: {error}", LogLevel.Error); }
@@ -73,21 +65,84 @@ namespace EmpyrionScripting
 
             try { FlatConfigTemplatesByName = TemplatesByName(Flat_Config_Ecf.Blocks); }
             catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockByName: {error}", LogLevel.Error); }
-
-            try { ResourcesForBlockById = ResourcesForBlock(); }
-            catch (Exception error) { Log($"EmpyrionScripting RecipeForBlock: {error}", LogLevel.Error); }
-
-            Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count}", LogLevel.Message);
         }
 
-        private EcfFile ReadEcf(string filename)
+        public void BuildIdAndNameAccess()
+        {
+            try { ConfigBlockById = BlocksById(Configuration_Ecf.Blocks); }
+            catch (Exception error) { Log($"EmpyrionScripting ConfigBlockById: {error}", LogLevel.Error); }
+
+            try { ConfigBlockByName = BlocksByName(Configuration_Ecf.Blocks); }
+            catch (Exception error) { Log($"EmpyrionScripting ConfigBlockByName: {error}", LogLevel.Error); }
+        }
+
+        public void MergeEcfFiles()
+        {
+            try { Configuration_Ecf.MergeWith(BlocksConfig_Ecf); }
+            catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
+
+            try { Configuration_Ecf.MergeWith(ItemsConfig_Ecf); }
+            catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
+
+            try { Configuration_Ecf.MergeWith(Config_Ecf); }
+            catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
+        }
+
+        public void ReadEcfFiles()
+        {
+            Configuration_Ecf   = ReadEcf("Config_Example.ecf", B => { });
+            Config_Ecf          = ReadEcf("Config.ecf",         B => {
+                if(B.Attr.Any(A => A.Name == "Id")) // Id forbidden in Config.ecf
+                {
+                    B.Attr?.Clear();
+                    B.Childs?.Clear();
+                    B.EcfValues?.Clear();
+                }
+            });
+            BlocksConfig_Ecf    = ReadEcf("BlocksConfig.ecf", B => {
+                var idAttr = B.Attr.FirstOrDefault(A => A.Name == "Id");
+                if (idAttr != null && int.TryParse(idAttr.Value?.ToString(), out var id))
+                {
+                    if (id < 2048) idAttr.Value = id + 4096;
+                }
+            });
+            ItemsConfig_Ecf     = ReadEcf("ItemsConfig.ecf", B => {
+                var idAttr = B.Attr.FirstOrDefault(A => A.Name == "Id");
+                if (idAttr != null && int.TryParse(idAttr.Value?.ToString(), out var id))
+                {
+                    if (id < 2048) idAttr.Value = id + 4096;
+                }
+            });
+        }
+
+        public void ReadBlockMappingFile(string blockMappingFile, IModApi modApi)
+        {
+            try
+            {
+                BlockIdMapping = modApi?.Application.GetBlockAndItemMapping();
+                if (BlockIdMapping?.Count == 0)
+                {
+                    Log($"GetBlockAndItemMapping empty try self", LogLevel.Message);
+                    BlockIdMapping = Parse.ReadBlockMapping(blockMappingFile);
+                }
+            }
+            catch (Exception error)
+            {
+                Log($"GetBlockAndItemMapping: {error}", LogLevel.Error);
+                BlockIdMapping = Parse.ReadBlockMapping(blockMappingFile);
+            }
+        }
+
+        private EcfFile ReadEcf(string filename, Action<EcfBlock> mapId)
         {
             var result = new EcfFile();
             try
             {
                 var fullFilename = GetConfigurationFile(filename);
                 Log($"EmpyrionScripting {fullFilename}: start", LogLevel.Message);
-                result = EcfParser.Parse.Deserialize(BlockIdMapping, File.ReadAllLines(fullFilename));
+                result = Parse.Deserialize(File.ReadAllLines(fullFilename));
+                result.Blocks.ForEach(mapId);
+                if (BlockIdMapping != null) Parse.ReplaceWithMappedIds(result, BlockIdMapping);
                 Log($"EmpyrionScripting {fullFilename}: #{result.Blocks.Count}", LogLevel.Message);
             }
             catch (Exception error) { Log($"EmpyrionScripting {filename}: {error}", LogLevel.Error); }

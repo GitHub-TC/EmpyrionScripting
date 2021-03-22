@@ -6,7 +6,7 @@ namespace EcfParser.Tests
     [TestClass()]
     public class MergeTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void MergeExistingAttribute()
         {
             var ecf1Lines = @"
@@ -24,8 +24,8 @@ namespace EcfParser.Tests
 }
 ";
 
-            var ecf1 = EcfParser.Parse.Deserialize(null, ecf1Lines.Split('\n'));
-            var ecf2 = EcfParser.Parse.Deserialize(null, ecf2Lines.Split('\n'));
+            var ecf1 = EcfParser.Parse.Deserialize(ecf1Lines.Split('\n'));
+            var ecf2 = EcfParser.Parse.Deserialize(ecf2Lines.Split('\n'));
             ecf1.MergeWith(ecf2);
 
             Assert.AreEqual(1, ecf1.Blocks.Count);
@@ -36,7 +36,7 @@ namespace EcfParser.Tests
             Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "IsLockable").Value);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void MergeNewAttribute()
         {
             var ecf1Lines = @"
@@ -66,8 +66,8 @@ namespace EcfParser.Tests
 }
 ";
 
-            var ecf1 = EcfParser.Parse.Deserialize(null, ecf1Lines.Split('\n'));
-            var ecf2 = EcfParser.Parse.Deserialize(null, ecf2Lines.Split('\n'));
+            var ecf1 = EcfParser.Parse.Deserialize(ecf1Lines.Split('\n'));
+            var ecf2 = EcfParser.Parse.Deserialize(ecf2Lines.Split('\n'));
             ecf1.MergeWith(ecf2);
 
             Assert.AreEqual(1, ecf1.Blocks.Count);
@@ -78,7 +78,7 @@ namespace EcfParser.Tests
             Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "IsLockable").Value);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void MergePayloadAttribute()
         {
             var ecf1Lines = @"
@@ -97,8 +97,8 @@ namespace EcfParser.Tests
 }
 ";
 
-            var ecf1 = EcfParser.Parse.Deserialize(null, ecf1Lines.Split('\n'));
-            var ecf2 = EcfParser.Parse.Deserialize(null, ecf2Lines.Split('\n'));
+            var ecf1 = EcfParser.Parse.Deserialize(ecf1Lines.Split('\n'));
+            var ecf2 = EcfParser.Parse.Deserialize(ecf2Lines.Split('\n'));
             ecf1.MergeWith(ecf2);
 
             Assert.AreEqual(1, ecf1.Blocks.Count);
@@ -111,7 +111,7 @@ namespace EcfParser.Tests
         }
 
 
-        [TestMethod()]
+        [TestMethod]
         public void MergeAddPayloadAttribute()
         {
             var ecf1Lines = @"
@@ -129,8 +129,8 @@ namespace EcfParser.Tests
 }
 ";
 
-            var ecf1 = EcfParser.Parse.Deserialize(null, ecf1Lines.Split('\n'));
-            var ecf2 = EcfParser.Parse.Deserialize(null, ecf2Lines.Split('\n'));
+            var ecf1 = EcfParser.Parse.Deserialize(ecf1Lines.Split('\n'));
+            var ecf2 = EcfParser.Parse.Deserialize(ecf2Lines.Split('\n'));
             ecf1.MergeWith(ecf2);
 
             Assert.AreEqual(1, ecf1.Blocks.Count);
@@ -139,6 +139,44 @@ namespace EcfParser.Tests
             Assert.AreEqual(284,   (int) block.Attr.FirstOrDefault(a => a.Name == "Mass").Value);
             Assert.AreEqual(20,    (int) block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").Value);
             Assert.AreEqual(false, (bool) block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").AddOns.First(p => p.Key == "display").Value);
+            Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "IsLockable").Value);
+        }
+
+
+        [TestMethod]
+        public void MergeItemPayloadAttribute()
+        {
+            var ecf1Lines = @"
+{ +Item Id: 221, Name: ErestrumOre, Ref: OreTemplate
+  Meshfile: Entities/Items/Ores/ErestrumOrePrefab
+  Mass: 14.36, type: float, display: true, formatter: Kilogram
+  Volume: 7.1, type: float, display: true, formatter: Liter
+}
+";
+
+            var ecf2Lines = @"
+{ +Item Id: 221, Name: ErestrumOre, Ref: OreTemplate
+  Meshfile: Entities/Items/Ores/ErestrumOrePrefab
+  Mass: 14.36, type: float, display: true, formatter: Kilogram
+  MarketPrice: 140, display: true
+  Volume: 1, type: float, display: true, formatter: Liter
+  Info: itmErestrumOre, display: true
+  #Info: A radioactive mineral comprised primarily of Erestrum. An element unique to the Andromeda Galaxy., display: true
+  XpFactor: 45
+  ShowUser: Yes
+}
+";
+
+            var ecf1 = EcfParser.Parse.Deserialize(ecf1Lines.Split('\n'));
+            var ecf2 = EcfParser.Parse.Deserialize(ecf2Lines.Split('\n'));
+            ecf1.MergeWith(ecf2);
+
+            Assert.AreEqual(1, ecf1.Blocks.Count);
+            var block = ecf1.Blocks.First();
+
+            Assert.AreEqual(284, (int)block.Attr.FirstOrDefault(a => a.Name == "Mass").Value);
+            Assert.AreEqual(20, (int)block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").Value);
+            Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").AddOns.First(p => p.Key == "display").Value);
             Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "IsLockable").Value);
         }
     }

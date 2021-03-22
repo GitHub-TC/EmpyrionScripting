@@ -13,7 +13,7 @@ namespace EcfParser.UnitTests
         public void ReadVersionTest()
         {
             var line = @"VERSION: 9";
-            var result = EcfParser.Parse.Deserialize(null, line);
+            var result = EcfParser.Parse.Deserialize(line);
             Assert.AreEqual(9, result.Version);
         }
 
@@ -78,7 +78,7 @@ namespace EcfParser.UnitTests
 
             var alias = new Dictionary<string, int> { { "FusionCell", 2373 } };
 
-            var result = EcfParser.Parse.Deserialize(alias, line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
             Assert.AreEqual("Item", result.Blocks[0].Name);
             Assert.AreEqual("Id", result.Blocks[0].Attr.First().Name);
@@ -101,7 +101,7 @@ namespace EcfParser.UnitTests
   TechTreeNames: Misc
 }
 ";
-            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
             Assert.AreEqual("Item", result.Blocks[0].Name);
             Assert.AreEqual("Id", result.Blocks[0].Attr.First().Name);
@@ -129,7 +129,7 @@ namespace EcfParser.UnitTests
   TechTreeNames: Misc
 }
 ";
-            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
 
             var block = result.Blocks[0];
@@ -174,7 +174,7 @@ namespace EcfParser.UnitTests
   TechTreeNames: Misc
 }
 ";
-            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
 
             var block = result.Blocks[0];
@@ -209,7 +209,7 @@ namespace EcfParser.UnitTests
   }
 }
 ";
-            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
 
             var block = result.Blocks[0];
@@ -247,7 +247,7 @@ namespace EcfParser.UnitTests
   UpgradeTo: HullFullLarge, display: true
 }
 ";
-            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
 
             var block = result.Blocks[0];
@@ -278,7 +278,7 @@ namespace EcfParser.UnitTests
     }
 }
 ";
-            var result = EcfParser.Parse.Deserialize(null, line.Split('\n'));
+            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
 
             var block = result.Blocks[0];
@@ -311,7 +311,7 @@ namespace EcfParser.UnitTests
                 {
                     try
                     {
-                        var ecf = EcfParser.Parse.Deserialize(null, File.ReadAllLines(F));
+                        var ecf = EcfParser.Parse.Deserialize(File.ReadAllLines(F));
                         if (mergeAll == null) mergeAll = ecf;
                         else                  mergeAll.MergeWith(ecf);
                     }

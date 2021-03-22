@@ -34,8 +34,18 @@ namespace EcfParser
                     .Where(b => Equals(b.Attr.FirstOrDefault(a => a.Name == "Name")?.Value, B.Attr.FirstOrDefault(a => a.Name == "Name")?.Value))
                     .FirstOrDefault();
 
-                if (found != null) found.MergeWith(B);
-                else               ecf.Blocks.Add(B);
+                var foundById = ecf.Blocks
+                    .Where(b => b.Name == B.Name)
+                    .Where(b => Equals(b.Attr.FirstOrDefault(a => a.Name == "Id")?.Value, B.Attr.FirstOrDefault(a => a.Name == "Id")?.Value))
+                    .FirstOrDefault();
+
+                var foundByName = ecf.Blocks
+                    .Where(b => b.Name == B.Name)
+                    .Where(b => Equals(b.Attr.FirstOrDefault(a => a.Name == "Name")?.Value, B.Attr.FirstOrDefault(a => a.Name == "Name")?.Value))
+                    .FirstOrDefault();
+
+                if      (found != null)                                             found.MergeWith(B);
+                else if (found == null && foundById == null && foundByName == null) ecf.Blocks.Add(B); // keine eindeutige Zuordnung gefunden -> lieber ignorieren
             });
         }
 

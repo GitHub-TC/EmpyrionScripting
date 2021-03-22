@@ -19,7 +19,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using StaticCsComiler = EmpyrionScripting.CsCompiler;
+using StaticCsCompiler = EmpyrionScripting.CsCompiler;
 
 namespace EmpyrionScripting
 {
@@ -89,7 +89,7 @@ namespace EmpyrionScripting
                 SaveGamesScripts.ReadSaveGamesScripts();
 
                 TaskTools.Log = ModApi.LogError;
-                StaticCsComiler.CsCompiler.Log = Log;
+                StaticCsCompiler.CsCompiler.Log = Log;
 
                 CsCompiler = new CsCompiler.CsCompiler(SaveGameModPath);
                 CsCompiler.ConfigurationChanged += CsCompiler_ConfigurationChanged;

@@ -10,7 +10,7 @@ namespace EcfParser
 
     public static class Parse
     {
-        public static EcfFile Deserialize(IDictionary<string, int> blockIdMapping, params string[] lines)
+        public static EcfFile Deserialize(params string[] lines)
         {
             var result = new EcfFile();
             var i = -1;
@@ -35,8 +35,6 @@ namespace EcfParser
                     }
                 }
             } while (i < lines.Length - 1);
-
-            if(blockIdMapping != null) FillWithMappedIds(result, blockIdMapping);
 
             return result;
 
@@ -81,7 +79,7 @@ namespace EcfParser
             return result;
         }
 
-        private static void FillWithMappedIds(EcfFile result, IDictionary<string, int> blockIdMapping)
+        public static void ReplaceWithMappedIds(EcfFile result, IDictionary<string, int> blockIdMapping)
         {
             result.Blocks.ForEach(B => {
                 var blockNameAttr   = B.Attr.FirstOrDefault(a => a.Name == "Name");
