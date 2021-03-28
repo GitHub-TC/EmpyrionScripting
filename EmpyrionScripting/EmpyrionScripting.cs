@@ -78,6 +78,7 @@ namespace EmpyrionScripting
 
                 Localization = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content), EmpyrionConfiguration.DedicatedYaml.CustomScenarioName);
                 SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);
+                ModApi.Application.GameEntered += Application_GameEntered;
 
                 LoadConfiguration();
                 SaveGamesScripts = new SaveGamesScripts(modAPI) { SaveGameModPath = SaveGameModPath };
@@ -110,6 +111,13 @@ namespace EmpyrionScripting
 
             ModApi.Log("EmpyrionScripting Mod init finish");
 
+        }
+
+        private void Application_GameEntered(bool hasEntered)
+        {
+            ModApi.Log($"Application_GameEntered {hasEntered}");
+            if (hasEntered) InitEcfConfigData();
+            ModApi.Log("Application_GameEntered init finish");
         }
 
         private static void InitEcfConfigData()
