@@ -9,7 +9,7 @@ namespace EcfParser.UnitTests
     [TestClass()]
     public class ParseTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void ReadVersionTest()
         {
             var line = @"VERSION: 9";
@@ -17,7 +17,7 @@ namespace EcfParser.UnitTests
             Assert.AreEqual(9, result.Version);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadBlockMapping()
         {
             var result = EcfParser.Parse.ReadBlockMapping(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\Data\blocksmap.dat"));
@@ -27,7 +27,7 @@ namespace EcfParser.UnitTests
             Assert.AreEqual(2208, result["Eden_TestModelBlock2"]);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadAttributeStdLineTest()
         {
             var line = @"Volume: 62.5, type: float, display: true, formatter: Liter";
@@ -41,7 +41,7 @@ namespace EcfParser.UnitTests
             Assert.AreEqual("Liter", payload["formatter"]);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadAttributeTextTest()
         {
             var line = @"Volume: ""110,110,110""";
@@ -50,7 +50,7 @@ namespace EcfParser.UnitTests
             Assert.AreEqual("110,110,110", result.Value);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadAttributeTextAttrTest()
         {
             var line = @"Volume: ""110,110,110"", abc: 42";
@@ -62,7 +62,7 @@ namespace EcfParser.UnitTests
             Assert.AreEqual(42, (int)payload["abc"]);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadAttributeBlockWithAliasAttr()
         {
             var line = @"
@@ -88,7 +88,7 @@ namespace EcfParser.UnitTests
         }
 
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadAttributeBlockAttr()
         {
             var line = @"
@@ -109,7 +109,7 @@ namespace EcfParser.UnitTests
             Assert.AreEqual(7, result.Blocks[0].Attr.Count);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadAttributeBlockUnnamedChildAttr()
         {
             var line = @"
@@ -145,7 +145,7 @@ namespace EcfParser.UnitTests
 
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadAttributeBlock3UnnamedChildAttr()
         {
             var line = @"
@@ -190,7 +190,7 @@ namespace EcfParser.UnitTests
 
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadAttributeBlockNamedChildAttr()
         {
             var line = @"
@@ -225,7 +225,7 @@ namespace EcfParser.UnitTests
             Assert.AreEqual(8, child.Attr.Count);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ReadAttributeBlockShapesAttr()
         {
             var line = @"
@@ -258,8 +258,56 @@ namespace EcfParser.UnitTests
             Assert.AreEqual(15, block.Attr.Count);
         }
 
+        [TestMethod]
+        public void ReadAttributeBlockSprout()
+        {
+            var line = @"
+# Sprout
+{ Block Id: 591, Name: WheatStage1
+  Class: PlantGrowing
+  MarketPrice: 78, display: true
+  AllowedInBlueprint: false, display: true 
+  IndexName: Plant
+  Material: plants
+  Shape: ModelEntity
+  Model: @models2/Entities/Farming/SpeedTrees/WheatStage1Prefab
+  DropMeshfile: Entities/Misc/BagSmallPrefab
+  { Child PlantGrowing
+    Next: WheatStage2
+    GrowthRate: 20
+    FertileLevel: 3
+    OnDeath: PlantDead
+  }
+  IsAccessible: false, type: bool
+  Collide: ""bullet,rocket,melee,sight""
+  Place: Free
+# ModelOffset: ""0,0.5,0""
+  AllowPlacingAt: ""Base,MS"", display: true
+  SizeInBlocks: ""1,1,1"", display: true
+  SizeInBlocksLocked: ""Base,MS""
+  ShowBlockName: true
+  CropType: Grain, display: true
+  CropYield: 6, display: true
+  GrowthTimeInfo: 40, type: int, display: true, formatter: Minutes
+  Mass: 1, type: float, display: true, formatter: Kilogram
+  Info: bkiPlantSprout, display: true
+  Category: Farming
+  XpFactor: 1
+  PickupTarget: WheatStage1  # disassemble 
+  TemplateRoot: WheatStage2  # deconstruct - to avoid exploit 
+}
+";
+            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
+            Assert.AreEqual(1, result.Blocks.Count);
 
-        [TestMethod()]
+            var block = result.Blocks[0];
+
+            Assert.AreEqual("Block", block.Name);
+            Assert.AreEqual("Id", block.Attr.First().Name);
+            Assert.AreEqual(25, block.Attr.Count);
+        }
+
+        [TestMethod]
         public void ReadAttributeBlockChildNumAttr()
         {
             var line = @"
@@ -296,7 +344,7 @@ namespace EcfParser.UnitTests
 
 
 
-        [TestMethod()]
+        [TestMethod]
         public void TestReadAllEcfFiles()
         {
             var configDir = @"C:\SteamGames\steamapps\common\Empyrion - Galactic Survival\Content\Configuration";

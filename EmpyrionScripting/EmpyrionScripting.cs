@@ -34,7 +34,7 @@ namespace EmpyrionScripting
         ModGameAPI legacyApi;
 
         public static EmpyrionScripting EmpyrionScriptingInstance { get; set; }
-        public static ConfigEcfAccess ConfigEcfAccess { get; set; } = new ConfigEcfAccess();
+        public static ConfigEcfAccess ConfigEcfAccess { get; set; }
         public static ItemInfos ItemInfos { get; set; }
         public static string SaveGameModPath { get; set; }
         public static ConfigurationManager<Configuration> Configuration { get; set; } = new ConfigurationManager<Configuration>() { Current = new Configuration() };
@@ -76,12 +76,7 @@ namespace EmpyrionScripting
             {
                 SetupHandlebarsComponent();
 
-                Localization    = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content), EmpyrionConfiguration.DedicatedYaml.CustomScenarioName);
-                ConfigEcfAccess.ReadConfigEcf(
-                    ModApi.Application?.GetPathFor(AppFolder.Content),
-                    EmpyrionConfiguration.DedicatedYaml.CustomScenarioName,
-                    Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "blocksmap.dat"), ModApi);
-                ItemInfos       = new ItemInfos(ConfigEcfAccess, Localization);
+                Localization = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content), EmpyrionConfiguration.DedicatedYaml.CustomScenarioName);
                 SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);
 
                 LoadConfiguration();
@@ -99,7 +94,8 @@ namespace EmpyrionScripting
 
                 StopScriptsEvent += (S, E) =>
                 {
-                    PlayfieldData?.Values.ForEach(P => { 
+                    PlayfieldData?.Values.ForEach(P =>
+                    {
                         ModApi.Log($"StopScriptsEvent: ({P.PlayfieldName}) {(P.PauseScripts ? "always stopped" : "scripts running")}");
                         P.PauseScripts = true;
                     });
@@ -114,6 +110,18 @@ namespace EmpyrionScripting
 
             ModApi.Log("EmpyrionScripting Mod init finish");
 
+        }
+
+        private static void InitEcfConfigData()
+        {
+            if (ConfigEcfAccess != null) return;
+
+            ConfigEcfAccess = new ConfigEcfAccess();
+            ConfigEcfAccess.ReadConfigEcf(
+                ModApi.Application?.GetPathFor(AppFolder.Content),
+                EmpyrionConfiguration.DedicatedYaml.CustomScenarioName,
+                Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "blocksmap.dat"), ModApi);
+            ItemInfos = new ItemInfos(ConfigEcfAccess, Localization);
         }
 
         private void CsCompiler_ConfigurationChanged(object sender, EventArgs e)
@@ -154,6 +162,8 @@ namespace EmpyrionScripting
         private void Application_OnPlayfieldLoaded(IPlayfield playfield)
         {
             PlayfieldScriptData data = null;
+
+            InitEcfConfigData();
 
             PlayfieldData.TryAdd(playfield.Name, data = new PlayfieldScriptData(this){
                 PlayfieldName = playfield.Name,

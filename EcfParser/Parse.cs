@@ -82,15 +82,28 @@ namespace EcfParser
         public static void ReplaceWithMappedIds(EcfFile result, IDictionary<string, int> blockIdMapping)
         {
             result.Blocks.ForEach(B => {
+                if (B.Name != "Block" && B.Name != "Item") return;
+
+                var blockIdAttr     = B.Attr.FirstOrDefault(a => a.Name == "Id");
+                var blockId         = blockIdAttr?.Value;
                 var blockNameAttr   = B.Attr.FirstOrDefault(a => a.Name == "Name");
                 var blockName       = blockNameAttr?.Value;
-                var blockId         = B.Attr.FirstOrDefault(a => a.Name == "Id")?.Value;
 
-                if (blockName != null && blockId == null && blockIdMapping.TryGetValue(blockName.ToString(), out var id)) {
-                    var idAttr = new EcfAttribute { Name = "Id", Value = id, AddOns = blockNameAttr.AddOns ?? new Dictionary<string, object>() };
-                    idAttr.AddOns.Add("Name", blockName.ToString());
-                    B.Attr.Remove(blockNameAttr);
-                    B.Attr.Insert(0, idAttr);
+                if (string.IsNullOrEmpty(blockName?.ToString()) && blockIdAttr != null) blockIdAttr.AddOns?.TryGetValue("Name", out blockName);
+
+                if (blockIdMapping.TryGetValue(blockName.ToString(), out var id))
+                {
+                    if (blockIdAttr != null) blockIdAttr.Value = id;
+                    else if (blockName != null && blockId == null)
+                    {
+                        var idAttr = new EcfAttribute { Name = "Id", Value = id, AddOns = blockNameAttr.AddOns ?? new Dictionary<string, object>() };
+                        idAttr.AddOns.Add("Name", blockName.ToString());
+                        B.Attr.Remove(blockNameAttr);
+                        B.Attr.Insert(0, idAttr);
+
+                        B.EcfValues.Add("Id", idAttr);
+                        B.Values   .Add("Id", id);
+                    }
                 }
             });
         }
@@ -109,6 +122,7 @@ namespace EcfParser
             else if (nameDelimiterPos > 0) currentLine = currentLine.Substring(nameDelimiterPos).Trim();
 
             int unnamedChild = 0;
+            bool firstLine = true;
 
             do{
                 if (currentLine.StartsWith("{"))
@@ -139,6 +153,16 @@ namespace EcfParser
                             block.Values   .Add(attr.Name, attr.Value);
                             block.EcfValues.Add(attr.Name, attr);
                         }
+
+                        if (firstLine)
+                        {
+                            attr.AddOns?.ToList().ForEach(A => {
+                                block.Values.Add(A.Key, A.Value);
+                                block.EcfValues.Add(A.Key, new EcfAttribute() { Name = A.Key, Value = A.Value });
+                            });
+                        }
+
+                        firstLine = false;
                     }
                 }
 

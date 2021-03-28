@@ -30,22 +30,12 @@ namespace EcfParser
             add.Blocks.ForEach(B => {
                 var found = ecf.Blocks
                     .Where(b => b.Name == B.Name)
-                    .Where(b => Equals(b.Attr.FirstOrDefault(a => a.Name == "Id")?.Value  , B.Attr.FirstOrDefault(a => a.Name == "Id")?.Value))
-                    .Where(b => Equals(b.Attr.FirstOrDefault(a => a.Name == "Name")?.Value, B.Attr.FirstOrDefault(a => a.Name == "Name")?.Value))
+                    .Where(b => Equals(b.Values?.FirstOrDefault(a => a.Key == "Id").Value  , B.Values?.FirstOrDefault(a => a.Key == "Id").Value))
+                    .Where(b => Equals(b.Values?.FirstOrDefault(a => a.Key == "Name").Value, B.Values?.FirstOrDefault(a => a.Key == "Name").Value))
                     .FirstOrDefault();
 
-                var foundById = ecf.Blocks
-                    .Where(b => b.Name == B.Name)
-                    .Where(b => Equals(b.Attr.FirstOrDefault(a => a.Name == "Id")?.Value, B.Attr.FirstOrDefault(a => a.Name == "Id")?.Value))
-                    .FirstOrDefault();
-
-                var foundByName = ecf.Blocks
-                    .Where(b => b.Name == B.Name)
-                    .Where(b => Equals(b.Attr.FirstOrDefault(a => a.Name == "Name")?.Value, B.Attr.FirstOrDefault(a => a.Name == "Name")?.Value))
-                    .FirstOrDefault();
-
-                if      (found != null)                                             found.MergeWith(B);
-                else if (found == null && foundById == null && foundByName == null) ecf.Blocks.Add(B); // keine eindeutige Zuordnung gefunden -> lieber ignorieren
+                if (found == null) ecf.Blocks.Add(B); 
+                else               found.MergeWith(B);
             });
         }
 
@@ -76,13 +66,10 @@ namespace EcfParser
                 }
                 else
                 {
-                    foundAttr.Value = A.Value;
-                    if (foundAttr.AddOns == null && A.AddOns != null) foundAttr.AddOns = new Dictionary<string, object>(A.AddOns);
-                    else A.AddOns?.ToList().ForEach(P =>
-                    {
-                        if (foundAttr.AddOns.ContainsKey(P.Key)) foundAttr.AddOns[P.Key] = P.Value;
-                        else                                     foundAttr.AddOns.Add(P.Key, P.Value);
-                    });
+                    MergeEcfAttribute(foundAttr, A);
+
+                    if (A.Name != null && !destination.EcfValues.ContainsKey(A.Name)) destination.EcfValues.Add(A.Name, foundAttr);
+                    if (A.Name != null && !destination.Values.ContainsKey(A.Name)) destination.Values.Add(A.Name, foundAttr.Value);
                 }
             });
 
@@ -115,6 +102,31 @@ namespace EcfParser
                     });
                 });
 
+            if (source.EcfValues != null && destination.EcfValues == null) destination.EcfValues = new Dictionary<string, EcfAttribute>(source.EcfValues);
+            else if (source.EcfValues != null) foreach (var item in source.EcfValues)
+                {
+                    if (destination.EcfValues.TryGetValue(item.Key, out var attr)) MergeEcfAttribute(attr, item.Value);
+                    else                                                           destination.EcfValues.Add(item.Key, item.Value);
+                }
+
+            if (source.Values != null && destination.Values == null) destination.Values = new Dictionary<string, object>(source.Values);
+            else if (source.Values != null) foreach (var item in source.Values)
+                {
+                    if (destination.Values.ContainsKey(item.Key)) destination.Values[item.Key] = item.Value;
+                    else                                          destination.Values.Add(item.Key, item.Value);
+                }
+
+        }
+
+        private static void MergeEcfAttribute(EcfAttribute dest, EcfAttribute source)
+        {
+            dest.Value = source.Value;
+            if (dest.AddOns == null && source.AddOns != null) dest.AddOns = new Dictionary<string, object>(source.AddOns);
+            else source.AddOns?.ToList().ForEach(P =>
+            {
+                if (dest.AddOns.ContainsKey(P.Key)) dest.AddOns[P.Key] = P.Value;
+                else dest.AddOns.Add(P.Key, P.Value);
+            });
         }
     }
 }
