@@ -117,7 +117,7 @@ namespace EmpyrionScripting.CustomHelpers
 
         public static object FindAttribute(this IConfigEcfAccess ecf, int id, string name) =>
             ecf.FlatConfigBlockById.TryGetValue(id, out var found)
-                ? found.Attr.FirstOrDefault(A => A.Name == name)?.Value
+                ? (found.Values.TryGetValue(name, out var data) ? data : null)
                 : null;
 
         [HandlebarTag("items")]
