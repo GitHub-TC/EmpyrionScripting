@@ -221,8 +221,6 @@ namespace EmpyrionScripting.CustomHelpers
                                 if (count > 0) uniqueNames
                                                 .Where(N => N != S.CustomName)
                                                 .ForEach(N => {
-                                                    if (root.ScriptLoopTimeLimitReached()) return;
-
                                                     var startCount = count;
                                                     count = MoveItem(root, S, N, structure, count, maxLimit);
                                                     if(startCount != count) moveInfos.Add(currentMoveInfo = new ItemMoveInfo() {
@@ -233,6 +231,8 @@ namespace EmpyrionScripting.CustomHelpers
                                                         DestinationE    = structure.E,
                                                         Destination     = N,
                                                     });
+
+                                                    if (root.ScriptLoopTimeLimitReached()) return;
                                                 });
 
                                 if (count > 0) count = S.Container.AddItems(S.Id, count);
