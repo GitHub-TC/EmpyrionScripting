@@ -221,6 +221,8 @@ namespace EmpyrionScripting.CustomHelpers
                                 if (count > 0) uniqueNames
                                                 .Where(N => N != S.CustomName)
                                                 .ForEach(N => {
+                                                    if (root.ScriptLoopTimeLimitReached()) return;
+
                                                     var startCount = count;
                                                     count = MoveItem(root, S, N, structure, count, maxLimit);
                                                     if(startCount != count) moveInfos.Add(currentMoveInfo = new ItemMoveInfo() {
@@ -634,9 +636,6 @@ namespace EmpyrionScripting.CustomHelpers
         {
             IDeviceLock locked = null;
 
-            var startTime = DateTime.Now;
-            var maxMilliSeconds = EmpyrionScripting.Configuration.Current.InGameScriptsIntervallMS;
-
             try
             {
                 for (; processBlockData.Y >= processBlockData.MinPos.y; processBlockData.Y--)
@@ -682,7 +681,7 @@ namespace EmpyrionScripting.CustomHelpers
                                     block.Set(replaceId);
                                     processBlockData.RemovedBlocks++;
 
-                                    if (processBlockData.RemovedBlocks > 100 && processBlockData.RemovedBlocks % 100 == 0 && (DateTime.Now - startTime).TotalMilliseconds > maxMilliSeconds) return;
+                                    if (processBlockData.RemovedBlocks > 100 && processBlockData.RemovedBlocks % 100 == 0 && root.ScriptLoopTimeLimitReached()) return;
                                 }
                             }
                         }

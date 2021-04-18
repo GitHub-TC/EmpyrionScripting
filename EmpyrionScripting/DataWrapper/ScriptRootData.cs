@@ -122,6 +122,7 @@ namespace EmpyrionScripting.DataWrapper
 
         public bool ScriptWithinMainThread { get; set; }
         public bool ScriptNeedsMainThread { get; set; }
+        public Func<bool> ScriptLoopTimeLimitReached { get; set; } = () => false;
 
         private static bool SafeIsNoProxyCheck(IEntity entity)
         {

@@ -49,6 +49,7 @@ namespace EmpyrionScripting
         public ExecMethod ExecMethod { get; set; } = ExecMethod.BackgroundWorker;
         public int ScriptsSyncExecution { get; set; } = 2;
         public int ScriptsParallelExecution { get; set; } = 10;
+        public long ScriptLoopTimeLimiterMS { get; set; } = 200;
         public bool ScriptTrackingError { get; set; }
         public bool DetailedScriptsInfoData { get; set; }
         public int MaxStoredEventsPerSignal { get; set; } = 10;

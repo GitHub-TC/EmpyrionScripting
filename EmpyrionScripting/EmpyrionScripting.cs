@@ -288,7 +288,7 @@ namespace EmpyrionScripting
             PlayfieldData.Values.ForEach(PF => {
                 var output = new StringBuilder();
                 var totalExecTime = new TimeSpan();
-                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
+                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} TimeLimitReached:{PF.ScriptExecQueue.ScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
                 PF.ScriptExecQueue.ScriptRunInfo
                     .OrderBy(I => I.Key)
                     .ForEach(I =>
@@ -299,7 +299,7 @@ namespace EmpyrionScripting
                         Log(line, I.Value.RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug);
                     });
 
-                output.Insert(0, $"RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()} TotalExecTime:{totalExecTime}\n");
+                output.Insert(0, $"RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} TimeLimitReached:{PF.ScriptExecQueue.ScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()} TotalExecTime:{totalExecTime}\n");
                 var result = output.ToString();
                 ScriptingModScriptsInfoData.AddOrUpdate(PF.PlayfieldName, result, (k, o) => result);
             });

@@ -1,9 +1,11 @@
 ﻿using EmpyrionNetAPIDefinitions;
+using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Internal.Interface;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,7 +42,7 @@ namespace EmpyrionScripting
         public ConcurrentQueue<IScriptRootData> BackgroundExecQueue { get; private set; } = new ConcurrentQueue<IScriptRootData>();
 
         public ConcurrentDictionary<string, bool> ScriptNeedsMainThread { get; set; } = new ConcurrentDictionary<string, bool>();
-
+        public int ScriptLoopTimeLimitReached { get; private set; }
 
         public ScriptExecQueue(PlayfieldScriptData playfieldScriptData, Action<IScriptRootData> processScript)
         {
@@ -87,11 +89,14 @@ namespace EmpyrionScripting
         public void ExecNext(int maxCount, int scriptsSyncExecution)
         {
             var syncExecCount = 0;
+            var scriptLoopTimeLimiter = Stopwatch.StartNew();
+            Func<bool> timeLimitReached = () => scriptLoopTimeLimiter.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopTimeLimiterMS;
 
             for (int i = maxCount - 1; i >= 0; i--)
             {
                 if (ExecQueue.TryPeek(out var data))
                 {
+                    data.ScriptLoopTimeLimitReached = timeLimitReached;
                     if (data.ScriptNeedsMainThread)
                     {
                         if (++syncExecCount > scriptsSyncExecution) lock (ExecQueue) { if (ExecQueue.TryDequeue(out var reinsert)) ExecQueue.Enqueue(reinsert); }
@@ -100,6 +105,12 @@ namespace EmpyrionScripting
                     else ExecNext();
                 }
                 else break;
+
+                if (timeLimitReached())
+                {
+                    ScriptLoopTimeLimitReached++;
+                    break;
+                }
             }
         }
 

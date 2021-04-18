@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting.Internal.Interface
@@ -12,6 +13,7 @@ namespace EmpyrionScripting.Internal.Interface
         bool ColorChanged { get; set; }
         bool BackgroundColorChanged { get; set; }
         bool FontSizeChanged { get; set; }
+        Func<bool> ScriptLoopTimeLimitReached { get; set; }
 
         IPlayfieldScriptData GetPlayfieldScriptData();
     }
