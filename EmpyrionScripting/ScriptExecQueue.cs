@@ -91,15 +91,16 @@ namespace EmpyrionScripting
         {
             var syncExecCount = 0;
             var scriptLoopTimeLimiter = Stopwatch.StartNew();
-            Func<bool> timeLimitReached = () => scriptLoopTimeLimiter.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopTimeLimiterMS;
+            bool timeLimitReached() => scriptLoopTimeLimiter.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopTimeLimiterMS;
 
             for (int i = maxCount - 1; i >= 0; i--)
             {
                 if (ExecQueue.TryPeek(out var data))
                 {
-                    data.ScriptLoopTimeLimitReached = timeLimitReached;
                     if (data.ScriptNeedsMainThread)
                     {
+                        data.ScriptLoopTimeLimitReached = timeLimitReached;
+
                         if (++syncExecCount > scriptsSyncExecution) lock (ExecQueue) { if (ExecQueue.TryDequeue(out var reinsert)) ExecQueue.Enqueue(reinsert); }
                         else ExecNext();
 
