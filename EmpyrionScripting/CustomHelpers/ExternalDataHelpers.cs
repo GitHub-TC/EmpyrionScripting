@@ -144,7 +144,19 @@ namespace EmpyrionScripting.CustomHelpers
                 int.TryParse(arguments[1]?.ToString(), out var index);
                 if      (arguments[0] is object[] arraydata)    options.Template(output, arraydata.Skip(index).FirstOrDefault());
                 else if (arguments[0] is IList    listdata)     options.Template(output, listdata[index]);
-                else                                            options.Inverse (output, (object)context);
+                else{
+                    var dictionaryType = arguments[0]?.GetType();
+                    if (dictionaryType != null && dictionaryType.IsGenericType)
+                    {
+                        var tryGetValue = dictionaryType.GetMethod("TryGetValue");
+                        if (tryGetValue == null) return;
+
+                        object[] parameters = new object[] { arguments[1], null };
+                        if ((bool)tryGetValue.Invoke(arguments[0], parameters)) options.Template(output, parameters[1]);
+                        else                                                    options.Inverse(output, (object)context);
+                    }
+                    else options.Inverse (output, (object)context);
+                }
             }
             catch (Exception error)
             {

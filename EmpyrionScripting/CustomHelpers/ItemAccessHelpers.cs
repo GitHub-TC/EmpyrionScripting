@@ -1,6 +1,7 @@
 ﻿using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
@@ -121,10 +122,11 @@ namespace EmpyrionScripting.CustomHelpers
                 : null;
 
         [HandlebarTag("items")]
-        public static void ItemsBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        public static void ItemsBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{items structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
+            var root        = rootObject as IScriptRootData;
             var structure   = arguments[0] as IStructureData;
             var namesSearch = arguments[1]?.ToString();
 
@@ -132,8 +134,15 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var allItems = Items(structure, namesSearch);
 
-                if (allItems.Length > 0) allItems.ForEach(I => options.Template(output, I));
-                else                     options.Inverse(output, context as object);
+                if (allItems.Length > 0)
+                {
+                    foreach (var item in allItems)
+                    {
+                        options.Template(output, item);
+                        if (root.ScriptLoopTimeLimitReached()) return;
+                    }
+                }
+                else options.Inverse(output, context as object);
             }
             catch (Exception error)
             {

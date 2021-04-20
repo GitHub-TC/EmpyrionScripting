@@ -293,7 +293,7 @@ namespace EmpyrionScripting
                     .OrderBy(I => I.Key)
                     .ForEach(I =>
                     {
-                        var line = $"Script: {I.Key,-50} {(PF.ScriptExecQueue.ScriptNeedsMainThread.TryGetValue(I.Key, out var sync) && sync ? ">SYNC<" : "")} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime} {(I.Value.RunningInstances > 0 ? $" !!!running!!! {I.Value.RunningInstances} times" : "")}";
+                        var line = $"Script: {I.Key,-50} {(PF.ScriptExecQueue.ScriptNeedsMainThread.TryGetValue(I.Key, out var sync) && sync ? ">SYNC<" : "")} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime} TimeLimitReached:{I.Value.TimeLimitReached} {(I.Value.RunningInstances > 0 ? $" !!!running!!! {I.Value.RunningInstances} times" : "")}";
                         totalExecTime += I.Value.ExecTime;
                         if(Configuration.Current.DetailedScriptsInfoData) output.AppendLine(line);
                         Log(line, I.Value.RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug);

@@ -1,7 +1,7 @@
 Name: EmpyrionScripting
 Description: Displays dynamic/real LCD stuff and allows scripted automatisation
 Author: ASTIC/TC
-Version: 6.7.0
+Version: 6.7.1
 Website: https://github.com/GitHub-TC/EmpyrionScripting
 
 ModTargets: PfServer,Client

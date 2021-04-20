@@ -197,6 +197,8 @@ namespace EmpyrionScripting.CustomHelpers
                 return ItemMoveInfo.Empty;
             }
 
+            if(root.ScriptLoopTimeLimitReached()) return ItemMoveInfo.Empty;
+
             var moveInfos = new List<IItemMoveInfo>();
 
             var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
@@ -237,6 +239,8 @@ namespace EmpyrionScripting.CustomHelpers
 
                                 if (count > 0) count = S.Container.AddItems(S.Id, count);
                                 if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}";
+
+                                if (root.ScriptLoopTimeLimitReached()) return;
                             }
                         });
 
@@ -268,22 +272,20 @@ namespace EmpyrionScripting.CustomHelpers
                 return count;
             }
 
-            using (var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), targetStructure.GetCurrent(), targetData.Position))
-            {
-                if (!locked.Success)
-                {
-                    Log($"DeviceIsLocked (Target): {S.Id} #{S.Count} => {targetData.CustomName}", LogLevel.Debug);
-                    return count;
-                }
+            var tryMoveCount = maxLimit.HasValue
+                ? Math.Max(0, Math.Min(count, maxLimit.Value - target.GetTotalItems(S.Id)))
+                : count;
 
-                if (maxLimit.HasValue)
-                {
-                    var stock = target.GetTotalItems(S.Id);
-                    var transfer = Math.Max(0, Math.Min(count, maxLimit.Value - stock));
-                    return target.AddItems(S.Id, transfer) + (count - transfer);
-                }
-                else return target.AddItems(S.Id, count);
+            using var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), targetStructure.GetCurrent(), targetData.Position);
+            if (!locked.Success)
+            {
+                Log($"DeviceIsLocked (Target): {S.Id} #{S.Count} => {targetData.CustomName}", LogLevel.Debug);
+                return count;
             }
+
+            return maxLimit.HasValue
+                ? target.AddItems(S.Id, tryMoveCount) + (count - tryMoveCount)
+                : target.AddItems(S.Id, tryMoveCount);
         }
 
         [HandlebarTag("fill")]
@@ -346,41 +348,41 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 item.Source
                     .ForEach(S => {
-                        using (var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position))
+                        using var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
+                        if (!locked.Success)
                         {
-                            if (!locked.Success)
-                            {
-                                Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
-                                return;
-                            }
-
-                            var count = specialTransfer.ItemsNeededForFill(S.Id, maxLimit);
-                            if (count > 0)
-                            {
-                                count -= S.Container.RemoveItems(S.Id, count);
-                                Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
-                            }
-
-                            ItemMoveInfo currentMoveInfo = null;
-
-                            if (count > 0)
-                            {
-                                var startCount = count;
-                                count = specialTransfer.AddItems(S.Id, count);
-                                if (startCount != count) moveInfos.Add(currentMoveInfo = new ItemMoveInfo()
-                                {
-                                    Id              = S.Id,
-                                    Count           = startCount - count,
-                                    SourceE         = S.E,
-                                    Source          = S.CustomName,
-                                    DestinationE    = structure.E,
-                                    Destination     = type.ToString(),
-                                });
-                            };
-
-                            if (count > 0) count = S.Container.AddItems(S.Id, count);
-                            if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{fill}} error lost #{count} of item {S.Id} in container {S.CustomName}";
+                            Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
+                            return;
                         }
+
+                        var count = specialTransfer.ItemsNeededForFill(S.Id, maxLimit);
+                        if (count > 0)
+                        {
+                            count -= S.Container.RemoveItems(S.Id, count);
+                            Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
+                        }
+
+                        ItemMoveInfo currentMoveInfo = null;
+
+                        if (count > 0)
+                        {
+                            var startCount = count;
+                            count = specialTransfer.AddItems(S.Id, count);
+                            if (startCount != count) moveInfos.Add(currentMoveInfo = new ItemMoveInfo()
+                            {
+                                Id = S.Id,
+                                Count = startCount - count,
+                                SourceE = S.E,
+                                Source = S.CustomName,
+                                DestinationE = structure.E,
+                                Destination = type.ToString(),
+                            });
+                        };
+
+                        if (count > 0) count = S.Container.AddItems(S.Id, count);
+                        if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{fill}} error lost #{count} of item {S.Id} in container {S.CustomName}";
+
+                        if (root.ScriptLoopTimeLimitReached()) return;
                     });
 
                 Log($"Fill Total: #{item.Source.Count}", LogLevel.Debug);

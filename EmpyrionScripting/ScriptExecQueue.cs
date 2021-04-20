@@ -20,6 +20,7 @@ namespace EmpyrionScripting
             public DateTime LastStart { get; set; }
             public TimeSpan ExecTime { get; set; }
             public int RunningInstances;
+            internal int TimeLimitReached;
         }
         public ConcurrentDictionary<string, ScriptInfo> ScriptRunInfo { get; set; } = new ConcurrentDictionary<string, ScriptInfo>();
 
@@ -101,6 +102,8 @@ namespace EmpyrionScripting
                     {
                         if (++syncExecCount > scriptsSyncExecution) lock (ExecQueue) { if (ExecQueue.TryDequeue(out var reinsert)) ExecQueue.Enqueue(reinsert); }
                         else ExecNext();
+
+                        if (ScriptRunInfo.TryGetValue(data.ScriptId, out var info)) Interlocked.Increment(ref info.TimeLimitReached);
                     }
                     else ExecNext();
                 }
