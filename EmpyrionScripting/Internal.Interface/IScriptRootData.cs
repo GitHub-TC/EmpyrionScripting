@@ -13,7 +13,6 @@ namespace EmpyrionScripting.Internal.Interface
         bool ColorChanged { get; set; }
         bool BackgroundColorChanged { get; set; }
         bool FontSizeChanged { get; set; }
-        Func<bool> ScriptLoopTimeLimitReached { get; set; }
 
         IPlayfieldScriptData GetPlayfieldScriptData();
     }

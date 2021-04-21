@@ -1,6 +1,7 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Globalization;
@@ -13,9 +14,12 @@ namespace EmpyrionScripting.CustomHelpers
     public static class LcdHelpers
     {
         [HandlebarTag("settext")]
-        public static void SetTextHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        public static void SetTextHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{settext lcddevice text}} helper must have exactly two argument: (structure) (text)");
+
+            var root = rootObject as IScriptModData;
+            if (root.ScriptLoopTimeLimitReached()) return; // avoid flicker displays with part of informations
 
             var block = arguments[0] as BlockData;
             var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
@@ -32,9 +36,12 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("settextblock")]
-        public static void SetTextBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        public static void SetTextBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{settextblock lcddevice}} helper must have exactly one argument: (structure)");
+
+            var root = rootObject as IScriptModData;
+            if (root.ScriptLoopTimeLimitReached()) return; // avoid flicker displays with part of informations
 
             var block = arguments[0] as BlockData;
             var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);

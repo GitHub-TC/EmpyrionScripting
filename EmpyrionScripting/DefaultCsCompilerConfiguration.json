@@ -112,6 +112,7 @@
       "EmpyrionScripting.Interface.IScriptModData.FontSize",
       "EmpyrionScripting.Interface.IScriptModData.Ids.*",
       "EmpyrionScripting.Interface.IScriptModData.IngotIds",
+      "EmpyrionScripting.Interface.IScriptModData.ScriptLoopTimeLimitReached",
       "EmpyrionScripting.Interface.IScriptModData.IsElevatedScript",
       "EmpyrionScripting.Interface.IScriptModData.LcdTargets",
       "EmpyrionScripting.Interface.IScriptModData.OreIds",

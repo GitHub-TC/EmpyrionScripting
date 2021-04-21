@@ -613,8 +613,9 @@ namespace EmpyrionScripting
                     .Select(L => new { Lcd = data.E.S.GetCurrent().GetDevice<ILcd>(L), Name = L })
                     .Where(L => L.Lcd != null)
                     .ForEach(L =>
-                        {
+                    {
                         if (playfieldData.PauseScripts) return;
+                        if (data.DisplayType == null && data.ScriptLoopTimeLimitReached()) return; // avoid flicker displays with part of informations
 
                         List<string> saveResult = null;
 
