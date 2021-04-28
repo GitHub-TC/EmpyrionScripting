@@ -1,6 +1,7 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.Interface;
 using System;
+using System.Linq;
 using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
@@ -58,5 +59,25 @@ namespace EmpyrionScripting.DataWrapper
 
         public virtual IEntity GetCurrent() => entity.TryGetTarget(out var e) ? e : null;
         public virtual IPlayfield GetCurrentPlayfield() => playfield.TryGetTarget(out var p) ? p : null;
+
+        public IScriptInfo[] ScriptInfos
+        {
+            get {
+                PlayfieldScriptData pfScriptData = null;
+                var pfName = GetCurrentPlayfield()?.Name;
+                if (string.IsNullOrEmpty(pfName) || EmpyrionScripting.EmpyrionScriptingInstance?.PlayfieldData.TryGetValue(pfName, out pfScriptData) == false) return Array.Empty<IScriptInfo>();
+
+                var entityId = GetCurrent()?.Id;
+                if (entityId == 0) return Array.Empty<IScriptInfo>();
+
+                var testGroup = Faction.Group == FactionGroup.Faction || Faction.Group == FactionGroup.Player ? Faction.Id.ToString() : Faction.Group.ToString();
+                var isElevatedScript = EmpyrionScripting.Configuration.Current.ElevatedGroups.Any(f => f == testGroup);
+
+                return pfScriptData.ScriptExecQueue.ScriptRunInfo.Values
+                    .Where(i => i.EntityId == entityId && (isElevatedScript || !i.IsElevatedScript))
+                    .OrderBy(i => i.ScriptId)
+                    .ToArray();
+            }
+        }
     }
 }

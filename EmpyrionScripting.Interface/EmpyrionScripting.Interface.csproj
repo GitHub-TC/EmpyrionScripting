@@ -16,7 +16,7 @@
     </NuGetPackageImportStamp>
     <NuspecFile>EmpyrionScripting.Interface.nuspec</NuspecFile>
     <NuspecBasePath>$(ProjectPath)</NuspecBasePath>
-	<LangVersion>8.0</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -72,6 +72,7 @@
     <Compile Include="ILimitedPlayerData.cs" />
     <Compile Include="IPlayerData.cs" />
     <Compile Include="IPlayfieldData.cs" />
+    <Compile Include="IScriptInfo.cs" />
     <Compile Include="IScriptModData.cs" />
     <Compile Include="IScriptSaveGameRootData.cs" />
     <Compile Include="ISignalData.cs" />

@@ -134,15 +134,8 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 var allItems = Items(structure, namesSearch);
 
-                if (allItems.Length > 0)
-                {
-                    foreach (var item in allItems)
-                    {
-                        options.Template(output, item);
-                        if (root.ScriptLoopTimeLimitReached()) return;
-                    }
-                }
-                else options.Inverse(output, context as object);
+                if (allItems.Length > 0) allItems.ForEach(item => options.Template(output, item), () => root.TimeLimitReached);
+                else                     options.Inverse(output, context as object);
             }
             catch (Exception error)
             {

@@ -288,18 +288,18 @@ namespace EmpyrionScripting
             PlayfieldData.Values.ForEach(PF => {
                 var output = new StringBuilder();
                 var totalExecTime = new TimeSpan();
-                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} TimeLimitReached:{PF.ScriptExecQueue.ScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
+                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
                 PF.ScriptExecQueue.ScriptRunInfo
                     .OrderBy(I => I.Key)
                     .ForEach(I =>
                     {
-                        var line = $"Script: {I.Key,-50} {(PF.ScriptExecQueue.ScriptNeedsMainThread.TryGetValue(I.Key, out var sync) && sync ? ">SYNC<" : "")} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime} TimeLimitReached:{I.Value.TimeLimitReached} {(I.Value.RunningInstances > 0 ? $" !!!running!!! {I.Value.RunningInstances} times" : "")}";
+                        var line = $"Script: {I.Key,-50} {(PF.ScriptExecQueue.ScriptNeedsMainThread.TryGetValue(I.Key, out var sync) && sync ? ">SYNC<" : "")} #{I.Value.Count,5} LastStart:{I.Value.LastStart} ExecTime:{I.Value.ExecTime} TimeLimitReached:{I.Value._TimeLimitReached} {(I.Value._RunningInstances > 0 ? $" !!!running!!! {I.Value._RunningInstances} times" : "")}";
                         totalExecTime += I.Value.ExecTime;
                         if(Configuration.Current.DetailedScriptsInfoData) output.AppendLine(line);
-                        Log(line, I.Value.RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug);
+                        Log(line, I.Value._RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug);
                     });
 
-                output.Insert(0, $"RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} TimeLimitReached:{PF.ScriptExecQueue.ScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()} TotalExecTime:{totalExecTime}\n");
+                output.Insert(0, $"RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()} TotalExecTime:{totalExecTime}\n");
                 var result = output.ToString();
                 ScriptingModScriptsInfoData.AddOrUpdate(PF.PlayfieldName, result, (k, o) => result);
             });
@@ -380,10 +380,12 @@ namespace EmpyrionScripting
 
             try
             {
+                if (!entity.Structure.IsPowered) return 0;
+
                 var entityScriptData = new ScriptRootData(playfieldData, playfieldData.AllEntities, playfieldData.CurrentEntities, playfieldData.Playfield, entity,
                     playfieldData.PersistendData, (EventStore)playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
 
-                var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => N.StartsWith(ScriptKeyword) || N.StartsWith(CsKeyword)).ToArray();
+                var deviceNames = entityScriptData.E.S.AllCustomDeviceNames.Where(N => IsScriptLCD(N)).ToArray();
                 Log($"ProcessAllInGameScripts: #{deviceNames.Length}", LogLevel.Debug);
 
                 int count = 0;
@@ -394,15 +396,29 @@ namespace EmpyrionScripting
                     var lcd = entity.Structure.GetDevice<ILcd>(N);
                     if (lcd == null) return;
 
+                    var scriptPriority = int.TryParse(N.Substring(0, 1), out var prio) ? prio : 0;
+
+                    if (scriptPriority == 0)
+                    {
+                        var lcdBlockPos = entity.Structure.GetDevicePositions(N);
+                        var lcdBlock = lcdBlockPos.Count > 0 ? entity.Structure.GetBlock(lcdBlockPos.First()) : null;
+                        if (lcdBlock != null)
+                        {
+                            lcdBlock.Get(out _, out _, out _, out var active);
+                            if (!active) return;
+                        }
+                    }
+
                     try
                     {
                         Log($"ProcessAllInGameScripts: {N}", LogLevel.Debug);
 
                         var data = new ScriptRootData(entityScriptData)
                         {
-                            ScriptLanguage  = N.StartsWith(ScriptKeyword) ? ScriptLanguage.Handlebar : ScriptLanguage.Cs,
-                            Script          = lcd.GetText(),
-                            Error           = L,
+                            ScriptPriority = scriptPriority,
+                            ScriptLanguage = (char.IsDigit(N[0]) ? N.Substring(1) : N).StartsWith(ScriptKeyword) ? ScriptLanguage.Handlebar : ScriptLanguage.Cs,
+                            Script         = lcd.GetText(),
+                            Error          = L,
                         };
 
                         AddTargetsAndDisplayType(data, N.Substring(N.IndexOf(':') + 1));
@@ -410,10 +426,10 @@ namespace EmpyrionScripting
                         if (Configuration.Current.ScriptTracking)
                         {
                             var trackfile = GetTrackingFileName(entity, data);
-                            if(!File.Exists(trackfile)) File.WriteAllText(trackfile, data.Script);
+                            if (!File.Exists(trackfile)) File.WriteAllText(trackfile, data.Script);
                         }
 
-                        
+
                         data.ScriptId = entity.Id + "/" + N;
                         playfieldData.ScriptExecQueue.Add(data);
 
@@ -432,6 +448,14 @@ namespace EmpyrionScripting
                 if (Configuration.Current.ScriptTrackingError) File.AppendAllText(GetTrackingFileName(entity, "InGameScript") + ".error", error.ToString());
                 return 0;
             }
+        }
+
+        private static bool IsScriptLCD(string name)
+        {
+            if (name.Length <= 1) return false;
+
+            var N = char.IsDigit(name[0]) ? name.Substring(1) : name;
+            return N.StartsWith(ScriptKeyword) || N.StartsWith(CsKeyword);
         }
 
         public static string GetTrackingFileName(IEntity entity, ScriptRootData root) 
@@ -578,7 +602,7 @@ namespace EmpyrionScripting
                 }
             }
 
-            data.LcdTargets.AddRange(data.E.S.AllCustomDeviceNames.GetUniqueNames(targets).Where(N => !N.StartsWith(ScriptKeyword) && !N.StartsWith(CsKeyword)));
+            data.LcdTargets.AddRange(data.E.S.AllCustomDeviceNames.GetUniqueNames(targets).Where(N => !IsScriptLCD(N)));
         }
 
         public void ProcessScript<T>(PlayfieldScriptData playfieldData, T data) where T : IScriptRootData
@@ -615,7 +639,7 @@ namespace EmpyrionScripting
                     .ForEach(L =>
                     {
                         if (playfieldData.PauseScripts) return;
-                        if (data.DisplayType == null && data.ScriptLoopTimeLimitReached()) return; // avoid flicker displays with part of informations
+                        if (data.DisplayType == null && !data.Running) return; // avoid flicker displays with part of informations
 
                         List<string> saveResult = null;
 
@@ -703,8 +727,8 @@ namespace EmpyrionScripting
             }
             catch (Exception error){ Log($"Game_Update: RestartAllScriptsForPlayfieldServer: {error}", LogLevel.Error); }
 
-            try{ PlayfieldData.Values.ForEach(PF => PF.ScriptExecQueue.ExecNext(Configuration.Current.ScriptsParallelExecution, Configuration.Current.ScriptsSyncExecution)); }
-            catch (Exception error) { Log($"Game_Update: ScriptExecQueue.ExecNext: {error}", LogLevel.Error); }
+            try{ ScriptExecQueue.Exec(PlayfieldData.Values, Configuration.Current.ScriptsParallelExecution, Configuration.Current.ScriptsSyncExecution); }
+            catch (Exception error) { Log($"Game_Update: ScriptExecQueue.Exec: {error}", LogLevel.Error); }
         }
 
         public static void RestartAllScriptsForPlayfieldServer()

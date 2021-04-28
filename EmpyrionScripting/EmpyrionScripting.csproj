@@ -15,7 +15,7 @@
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-	<LangVersion>8.0</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -212,6 +212,7 @@
     <Compile Include="DataWrapper\StructureTank.cs" />
     <Compile Include="SaveGamesScripts.cs" />
     <Compile Include="ScriptExecQueue.cs" />
+    <Compile Include="ScriptInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="EmpyrionScripting_Info.yaml">

@@ -21,5 +21,6 @@ namespace EmpyrionScripting.Interface
 
         IEntity GetCurrent();
         IPlayfield GetCurrentPlayfield();
+        IScriptInfo[] ScriptInfos { get; }
     }
 }

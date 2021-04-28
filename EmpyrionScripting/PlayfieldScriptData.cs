@@ -33,7 +33,7 @@ namespace EmpyrionScripting
             Playfield_OnEntityLoaded = (IEntity entity) => EventStore.AddOrUpdate(entity.Id, id => new EventStore(entity), (id, store) => store);
             Playfield_OnEntityUnloaded = (IEntity entity) => { if (EventStore.TryRemove(entity.Id, out var store)) ((EventStore)store).Dispose(); };
 
-            ScriptExecQueue = new ScriptExecQueue(this, D => parent.ProcessScript(this, D));
+            ScriptExecQueue = new ScriptExecQueue(D => parent.ProcessScript(this, D));
         }
     }
 

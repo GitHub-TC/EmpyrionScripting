@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
@@ -123,6 +124,24 @@ namespace EmpyrionScripting.DataWrapper
         public bool ScriptWithinMainThread { get; set; }
         public bool ScriptNeedsMainThread { get; set; }
         public Func<bool> ScriptLoopTimeLimitReached { get; set; } = () => false;
+        public int ScriptPriority { get; set; }
+        public ScriptInfo ScriptDiagnosticInfo { get; set; }
+        public bool Running { get; set; }
+
+        public bool TimeLimitReached
+        {
+            get {
+                if (!Running) return false;
+                
+                if(ScriptLoopTimeLimitReached())
+                {
+                    Running = false;
+                    if (ScriptDiagnosticInfo != null) Interlocked.Increment(ref ScriptDiagnosticInfo._TimeLimitReached);
+                }
+
+                return Running;
+            }
+        }
 
         private static bool SafeIsNoProxyCheck(IEntity entity)
         {

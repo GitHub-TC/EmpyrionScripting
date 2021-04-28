@@ -21,7 +21,7 @@ namespace EmpyrionScripting
                     return;
                 }
 
-                if (!root.DeviceLockAllowed || root.ScriptLoopTimeLimitReached()) return;
+                if (!root.DeviceLockAllowed || root.TimeLimitReached) return;
 
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;
 

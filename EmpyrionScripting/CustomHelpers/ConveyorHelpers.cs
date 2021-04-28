@@ -16,7 +16,6 @@ namespace EmpyrionScripting.CustomHelpers
     public static class ConveyorHelpers
     {
         private const int PlayerCoreType = 558;
-        private static readonly object movelock = new object();
 
         public static Action<string, LogLevel> Log { get; set; }
         public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateDeviceLock { get; set; } = (R, P, S, V) => new DeviceLock(R, P,S,V);
@@ -82,7 +81,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             if (!root.DeviceLockAllowed)
             {
-                Log($"NoLockAllowed: {root.CycleCounter} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                Log($"LockDevice: NoLockAllowed({root.ScriptId}): {root.CycleCounter} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                 return;
             }
 
@@ -193,68 +192,62 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (!root.DeviceLockAllowed)
             {
-                Log($"NoLockAllowed: {root.CycleCounter} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                Log($"Move: NoLockAllowed({root.ScriptId}): {root.CycleCounter} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                 return ItemMoveInfo.Empty;
             }
 
-            if(root.ScriptLoopTimeLimitReached()) return ItemMoveInfo.Empty;
+            if(root.TimeLimitReached) return ItemMoveInfo.Empty;
 
             var moveInfos = new List<IItemMoveInfo>();
 
             var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
-
-            lock (movelock) { 
-                if(uniqueNames.Any()){
-                    item.Source
-                        .ForEach(S => {
-                            using(var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position)) {
-                                if (!locked.Success)
-                                {
-                                    Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
-                                    return;
-                                }
-
-                                var count = S.Count;
-                                count -= S.Container.RemoveItems(S.Id, count);
-                                Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
-
-                                ItemMoveInfo currentMoveInfo = null;
-
-                                if (count > 0) uniqueNames
-                                                .Where(N => N != S.CustomName)
-                                                .ForEach(N => {
-                                                    var startCount = count;
-                                                    count = MoveItem(root, S, N, structure, count, maxLimit);
-                                                    if(startCount != count) moveInfos.Add(currentMoveInfo = new ItemMoveInfo() {
-                                                        Id              = S.Id,
-                                                        Count           = startCount - count,
-                                                        SourceE         = S.E,
-                                                        Source          = S.CustomName,
-                                                        DestinationE    = structure.E,
-                                                        Destination     = N,
-                                                    });
-
-                                                    if (root.ScriptLoopTimeLimitReached()) return;
-                                                });
-
-                                if (count > 0) count = S.Container.AddItems(S.Id, count);
-                                if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}";
-
-                                if (root.ScriptLoopTimeLimitReached()) return;
-                            }
-                        });
-
-                        Log($"Move Total: #{item.Source.Count}", LogLevel.Debug);
-                    }
-                else
-                {
-                    Log($"NoDevicesFound: {namesSearch}", LogLevel.Debug);
-                    return ItemMoveInfo.Empty;
-                }
-
+            if(!uniqueNames.Any())
+            {
+                Log($"NoDevicesFound: {namesSearch}", LogLevel.Debug);
+                return ItemMoveInfo.Empty;
             }
 
-            return moveInfos;
+            Log($"Move Total: #{item.Source.Count}", LogLevel.Debug);
+
+            return item.Source.Aggregate(new List<IItemMoveInfo>(),
+                (moveInfos, S) => {
+                    using var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
+                    if (!locked.Success)
+                    {
+                        Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
+                        return moveInfos;
+                    }
+
+                    var count = S.Count;
+                    count -= S.Container.RemoveItems(S.Id, count);
+                    Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
+
+                    ItemMoveInfo currentMoveInfo = null;
+
+                    if (count > 0) uniqueNames
+                                    .Where(N => N != S.CustomName)
+                                    .ForEach(N => {
+                                        var startCount = count;
+                                        count = MoveItem(root, S, N, structure, count, maxLimit);
+                                        if(startCount != count){
+                                            moveInfos.Add(currentMoveInfo = new ItemMoveInfo() {
+                                                Id              = S.Id,
+                                                Count           = startCount - count,
+                                                SourceE         = S.E,
+                                                Source          = S.CustomName,
+                                                DestinationE    = structure.E,
+                                                Destination     = N,
+                                            });
+
+                                            Log($"Move(AddItems): {S.CustomName} {S.Id} #{S.Count}->{startCount - count}", LogLevel.Debug);
+                                        };
+                                    }, () => root.TimeLimitReached);
+
+                    if (count > 0) count = S.Container.AddItems(S.Id, count);
+                    if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}";
+
+                    return moveInfos;
+                });
         }
 
         private static int MoveItem(IScriptRootData root, IItemsSource S, string N, IStructureData targetStructure, int count, int? maxLimit)
@@ -310,10 +303,10 @@ namespace EmpyrionScripting.CustomHelpers
 
                 moveInfos
                     .Where(M => M.Error != null)
-                    .ForEach(E => output.Write(E));
+                    .ForEach(E => output.Write(E), () => root.TimeLimitReached);
 
                 if (moveInfos.Count == 0) options.Inverse(output, context as object);
-                else                      moveInfos.ForEach(I => options.Template(output, I));
+                else                      moveInfos.ForEach(I => options.Template(output, I), () => root.TimeLimitReached);
             }
             catch (Exception error)
             {
@@ -325,70 +318,60 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (!root.DeviceLockAllowed)
             {
-                Log($"NoLockAllowed: {root.CycleCounter} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
+                Log($"Fill: NoLockAllowed({root.ScriptId}): {root.CycleCounter} % {EmpyrionScripting.Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}", LogLevel.Debug);
                 return ItemMoveInfo.Empty;
             }
 
-            IStructureTankWrapper specialTransfer = null;
-            switch (type)
+            var specialTransfer = type switch
             {
-                case StructureTankType.Oxygen    : specialTransfer = structure.OxygenTank    ; break;
-                case StructureTankType.Fuel      : specialTransfer = structure.FuelTank      ; break;
-                case StructureTankType.Pentaxid  : specialTransfer = structure.PentaxidTank  ; break;
-            }
+                StructureTankType.Oxygen    => structure.OxygenTank  ,
+                StructureTankType.Fuel      => structure.FuelTank    ,
+                StructureTankType.Pentaxid  => structure.PentaxidTank,
+                _                           => null,
+            };
 
-            if (specialTransfer == null || !specialTransfer.AllowedItem(item.Id))
-            {
-                return ItemMoveInfo.Empty;
-            }
+            if (specialTransfer == null || !specialTransfer.AllowedItem(item.Id)) return ItemMoveInfo.Empty;
 
-            var moveInfos = new List<IItemMoveInfo>();
+            Log($"Fill Total: #{item.Source.Count}", LogLevel.Debug);
 
-            lock (movelock)
-            {
-                item.Source
-                    .ForEach(S => {
-                        using var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
-                        if (!locked.Success)
+            return item.Source.Aggregate(new List<IItemMoveInfo>(),
+                (moveInfos, S) => {
+                    using var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
+                    if (!locked.Success)
+                    {
+                        Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
+                        return moveInfos;
+                    }
+
+                    var count = specialTransfer.ItemsNeededForFill(S.Id, maxLimit);
+                    if (count > 0)
+                    {
+                        count -= S.Container.RemoveItems(S.Id, count);
+                        Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
+                    }
+
+                    ItemMoveInfo currentMoveInfo = null;
+
+                    if (count > 0)
+                    {
+                        var startCount = count;
+                        count = specialTransfer.AddItems(S.Id, count);
+                        if (startCount != count) moveInfos.Add(currentMoveInfo = new ItemMoveInfo()
                         {
-                            Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
-                            return;
-                        }
+                            Id = S.Id,
+                            Count = startCount - count,
+                            SourceE = S.E,
+                            Source = S.CustomName,
+                            DestinationE = structure.E,
+                            Destination = type.ToString(),
+                        });
+                    };
 
-                        var count = specialTransfer.ItemsNeededForFill(S.Id, maxLimit);
-                        if (count > 0)
-                        {
-                            count -= S.Container.RemoveItems(S.Id, count);
-                            Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
-                        }
+                    if (count > 0) count = S.Container.AddItems(S.Id, count);
+                    if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{fill}} error lost #{count} of item {S.Id} in container {S.CustomName}";
 
-                        ItemMoveInfo currentMoveInfo = null;
-
-                        if (count > 0)
-                        {
-                            var startCount = count;
-                            count = specialTransfer.AddItems(S.Id, count);
-                            if (startCount != count) moveInfos.Add(currentMoveInfo = new ItemMoveInfo()
-                            {
-                                Id = S.Id,
-                                Count = startCount - count,
-                                SourceE = S.E,
-                                Source = S.CustomName,
-                                DestinationE = structure.E,
-                                Destination = type.ToString(),
-                            });
-                        };
-
-                        if (count > 0) count = S.Container.AddItems(S.Id, count);
-                        if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{fill}} error lost #{count} of item {S.Id} in container {S.CustomName}";
-
-                        if (root.ScriptLoopTimeLimitReached()) return;
-                    });
-
-                Log($"Fill Total: #{item.Source.Count}", LogLevel.Debug);
-            }
-
-            return moveInfos;
+                    return moveInfos;
+                });
         }
 
         public class ProcessBlockData
@@ -683,7 +666,7 @@ namespace EmpyrionScripting.CustomHelpers
                                     block.Set(replaceId);
                                     processBlockData.RemovedBlocks++;
 
-                                    if (processBlockData.RemovedBlocks > 100 && processBlockData.RemovedBlocks % 100 == 0 && root.ScriptLoopTimeLimitReached()) return;
+                                    if (processBlockData.RemovedBlocks > 100 && processBlockData.RemovedBlocks % 100 == 0 && root.TimeLimitReached) return;
                                 }
                             }
                         }
