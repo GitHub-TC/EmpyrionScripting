@@ -288,7 +288,7 @@ namespace EmpyrionScripting
             PlayfieldData.Values.ForEach(PF => {
                 var output = new StringBuilder();
                 var totalExecTime = new TimeSpan();
-                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} BackgroundWorkerToDoCount:{PF.ScriptExecQueue.BackgroundWorkerToDo.Count}  Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
+                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} BackgroundWorkerToDoCount:{PF.ScriptExecQueue.BackgroundWorkerToDo.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
                 PF.ScriptExecQueue.ScriptRunInfo
                     .OrderBy(I => I.Key)
                     .ForEach(I =>
@@ -299,7 +299,7 @@ namespace EmpyrionScripting
                         Log(line, I.Value._RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug);
                     });
 
-                output.Insert(0, $"RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()} TotalExecTime:{totalExecTime}\n");
+                output.Insert(0, $"RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} BackgroundWorkerToDoCount:{PF.ScriptExecQueue.BackgroundWorkerToDo.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()} TotalExecTime:{totalExecTime}\n");
                 var result = output.ToString();
                 ScriptingModScriptsInfoData.AddOrUpdate(PF.PlayfieldName, result, (k, o) => result);
             });
@@ -490,6 +490,14 @@ namespace EmpyrionScripting
                     MainScriptPath = SaveGamesScripts.MainScriptPath,
                     ModApi = ModApi
                 };
+
+                if (entity.IsPoi)
+                {
+                    var lastVisitedTicks = entity.Structure.LastVisitedTicks;
+                    if (playfieldData.LastPOIVisited.TryGetValue(entity.Id, out var ticks) && ticks == lastVisitedTicks) return 0;
+
+                    playfieldData.LastPOIVisited.AddOrUpdate(entity.Id, lastVisitedTicks, (i, l) => lastVisitedTicks);
+                }
 
                 var count = ExecFoundSaveGameScripts(playfieldData, entityScriptData,
                     GetPathTo(Enum.GetName(typeof(EntityType), entity.Type)),

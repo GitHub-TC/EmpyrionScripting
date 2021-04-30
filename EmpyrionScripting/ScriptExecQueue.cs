@@ -78,7 +78,7 @@ namespace EmpyrionScripting
 
         public void ExecNext(int maxCount, int scriptsSyncExecution, ref int syncExecCount, Stopwatch scriptLoopTimeLimiter)
         {
-            if (BackgroundWorkerToDo.Count > maxCount) return;
+            if (BackgroundWorkerToDo.Count > maxCount / 2) return;
 
             var scriptLoopTimeLimiterStopwatch = scriptLoopTimeLimiter;
             var timeLimitBackgroundReached = new Func<bool>(() => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopBackgroundTimeLimiterMS);

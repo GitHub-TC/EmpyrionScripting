@@ -10,6 +10,12 @@ namespace EmpyrionScripting
         {
             try
             {
+                if (!root.ScriptWithinMainThread)
+                {
+                    root.ScriptNeedsMainThread = true;
+                    return;
+                }
+
                 if (!root.DeviceLockAllowed || root.TimeLimitReached) return;
 
                 Success = !playfield.IsStructureDeviceLocked(structure.Id, position);

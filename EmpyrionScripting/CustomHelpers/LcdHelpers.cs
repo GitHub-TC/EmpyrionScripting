@@ -1,7 +1,6 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
-using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
@@ -22,12 +21,12 @@ namespace EmpyrionScripting.CustomHelpers
             var root = rootObject as IScriptRootData;
             if (!root.Running) return; // avoid flicker displays with part of informations
 
-            var block = arguments[0] as BlockData;
-            var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
-            var text  = arguments[1]?.ToString();
-
             try
             {
+                var block = arguments[0] as BlockData;
+                var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+                var text  = arguments[1]?.ToString();
+
                 lcd?.SetText(text);
             }
             catch (Exception error)
@@ -44,11 +43,11 @@ namespace EmpyrionScripting.CustomHelpers
             var root = rootObject as IScriptRootData;
             if (!root.Running) return; // avoid flicker displays with part of informations
 
-            var block = arguments[0] as BlockData;
-            var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
-
             try
             {
+                var block = arguments[0] as BlockData;
+                var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+
                 using var text = new StringWriter();
                 options.Template(text, context as object);
 
@@ -66,11 +65,11 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 1) throw new HandlebarsException("{{gettext lcddevice}} helper must have exactly one argument: (structure)");
 
-            var block = arguments[0] as BlockData;
-            var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
-
             try
             {
+                var block = arguments[0] as BlockData;
+                var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+
                 if (lcd == null) options.Inverse (output, context as object);
                 else             options.Template(output, lcd.GetText());
             }
@@ -85,12 +84,12 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{setfontsize lcddevice size}} helper must have exactly two argument: (structure) (size)");
 
-            var block = arguments[0] as BlockData;
-            var lcd = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
-            int.TryParse(arguments[1]?.ToString(), out var size);
-
             try
             {
+                var block = arguments[0] as BlockData;
+                var lcd = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+                int.TryParse(arguments[1]?.ToString(), out var size);
+
                 lcd?.SetFontSize(size);
             }
             catch (Exception error)
@@ -104,11 +103,11 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{setcolor lcddevice color}} helper must have exactly two argument: (structure) (rgb color)");
 
-            var block = arguments[0] as BlockData;
-            var lcd = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
-
             try
             {
+                var block = arguments[0] as BlockData;
+                var lcd = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+
                 int.TryParse(arguments[1]?.ToString(), NumberStyles.HexNumber, null, out int color);
                 lcd?.SetTextColor(new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff));
             }
@@ -123,11 +122,11 @@ namespace EmpyrionScripting.CustomHelpers
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{setbgcolor lcddevice color}} helper must have exactly two argument: (structure) (rgb color)");
 
-            var block = arguments[0] as BlockData;
-            var lcd = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
-
             try
             {
+                var block = arguments[0] as BlockData;
+                var lcd = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
+
                 int.TryParse(arguments[1]?.ToString(), NumberStyles.HexNumber, null, out int color);
                 lcd?.SetBackgroundColor(new Color((color & 0xff0000) >> 16, (color & 0x00ff00) >> 8, color & 0x0000ff));
             }

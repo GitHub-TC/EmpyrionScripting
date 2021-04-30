@@ -27,6 +27,7 @@ namespace EmpyrionScripting
 
         public EntityDelegate Playfield_OnEntityLoaded { get; }
         public EntityDelegate Playfield_OnEntityUnloaded { get; }
+        public ConcurrentDictionary<int, ulong> LastPOIVisited { get; } = new ConcurrentDictionary<int, ulong>();
 
         public PlayfieldScriptData(EmpyrionScripting parent)
         {
