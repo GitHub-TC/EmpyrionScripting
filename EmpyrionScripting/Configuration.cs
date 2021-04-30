@@ -46,9 +46,9 @@ namespace EmpyrionScripting
         public float EntityAccessMaxDistance { get; set; } = 500;
         public int DelayStartForNSecondsOnPlayfieldLoad { get; set; } = 30;
         [JsonConverter(typeof(StringEnumConverter))]
-        public ExecMethod ExecMethod { get; set; } = ExecMethod.BackgroundWorker;
+        public ExecMethod ExecMethod { get; set; } = ExecMethod.Direct;
         public int ScriptsSyncExecution { get; set; } = 2;
-        public int ScriptsParallelExecution { get; set; } = 10;
+        public int ScriptsParallelExecution { get; set; } = 4;
         public long ScriptLoopSyncTimeLimiterMS { get; set; } = 200;
         public long ScriptLoopBackgroundTimeLimiterMS { get; set; } = 2000;
         public bool ScriptTrackingError { get; set; }
