@@ -132,7 +132,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var allItems = Items(structure, namesSearch);
+                var allItems = Items(root, structure, namesSearch);
 
                 if (allItems.Length > 0) allItems.ForEach(item => options.Template(output, item), () => root.TimeLimitReached);
                 else                     options.Inverse(output, context as object);
@@ -144,16 +144,17 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("getitems")]
-        public static void GetItemsBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        public static void GetItemsBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{getitems structure names}} helper must have exactly two argument: (structure) (name;name*;*;name)");
 
-            var structure = arguments[0] as IStructureData;
+            var root        = rootObject as IScriptRootData;
+            var structure   = arguments[0] as IStructureData;
             var namesSearch = arguments[1]?.ToString();
 
             try
             {
-                var allItems = Items(structure, namesSearch);
+                var allItems = Items(root, structure, namesSearch);
 
                 if (allItems.Length > 0) options.Template(output, allItems);
                 else                     options.Inverse(output, context as object);
@@ -164,8 +165,10 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        public static ItemsData[] Items(IStructureData structure, string names)
+        public static ItemsData[] Items(IScriptRootData root, IStructureData structure, string names)
         {
+            if (root.TimeLimitReached) return Array.Empty<ItemsData>();
+
             var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(names);
 
             var allItems = new ConcurrentDictionary<int, ItemsData>();
@@ -191,10 +194,11 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("itemlist")]
-        public static void ItemListBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        public static void ItemListBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{itemlist list ids}} helper must have exactly two argument: (list) (id1;id2;id3)");
 
+            var root  = rootObject as IScriptRootData;
             var items = arguments[0] as ItemsData[];
             var ids   = (arguments[1] as string)
                             .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
@@ -204,6 +208,8 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
+                if (root.TimeLimitReached) return;
+
                 var list = items.ToDictionary(I => I.Id, I => I);
                 ids.Where(i => !list.ContainsKey(i)).ForEach(i => {
                     EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(i, out ItemInfo details);

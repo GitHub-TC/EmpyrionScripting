@@ -8,7 +8,7 @@ namespace EmpyrionScripting.CsHelper
 {
     public partial class CsScriptFunctions
     {
-        public IItemsData[] Items(IStructureData structure, string names) => ItemAccessHelpers.Items(structure, names);
+        public IItemsData[] Items(IStructureData structure, string names) => ItemAccessHelpers.Items(ScriptRoot, structure, names);
 
         public object ConfigFindAttribute(int id, string name) => EmpyrionScripting.ConfigEcfAccess.FindAttribute(id, name);
         public int ConfigId(string name) => EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockByName.TryGetValue(name, out var config) ? (int)config.Attr?.FirstOrDefault(A => A.Name == "Id")?.Value : 0;

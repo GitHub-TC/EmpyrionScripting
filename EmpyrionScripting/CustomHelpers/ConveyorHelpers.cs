@@ -17,8 +17,10 @@ namespace EmpyrionScripting.CustomHelpers
     {
         private const int PlayerCoreType = 558;
 
+        readonly static object moveLock = new object();
         public static Action<string, LogLevel> Log { get; set; }
-        public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateDeviceLock { get; set; } = (R, P, S, V) => new DeviceLock(R, P,S,V);
+        public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateDeviceLock { get; set; } = (R, P, S, V) => new DeviceLock(R, P, S, V);
+        public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> WeakCreateDeviceLock { get; set; } = (R, P, S, V) => new WeakDeviceLock(R, P, S, V);
 
         public class ItemMoveInfo : IItemMoveInfo
         {
@@ -177,7 +179,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 moveInfos
                     .Where(M => M.Error != null)
-                    .ForEach(E => output.Write(E));
+                    .ForEach(M => output.Write($"{M.Id}:{M.Source}->{M.Destination}:{M.Error}"));
 
                 if (moveInfos.Count == 0) options.Inverse (output, context as object);
                 else                      moveInfos.ForEach(I => options.Template(output, I));
@@ -196,9 +198,11 @@ namespace EmpyrionScripting.CustomHelpers
                 return ItemMoveInfo.Empty;
             }
 
-            if(root.TimeLimitReached) return ItemMoveInfo.Empty;
-
-            var moveInfos = new List<IItemMoveInfo>();
+            if (root.TimeLimitReached)
+            {
+                Log($"Move: TimeLimitReached({root.ScriptId})", LogLevel.Debug);
+                return ItemMoveInfo.Empty;
+            }
 
             var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
             if(!uniqueNames.Any())
@@ -207,15 +211,15 @@ namespace EmpyrionScripting.CustomHelpers
                 return ItemMoveInfo.Empty;
             }
 
-            Log($"Move Total: #{item.Source.Count}", LogLevel.Debug);
+            var moveInfos = new List<IItemMoveInfo>();
 
-            return item.Source.Aggregate(new List<IItemMoveInfo>(),
-                (moveInfos, S) => {
-                    using var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
+            lock (moveLock) item.Source
+                 .ForEach(S => {
+                    using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
                     if (!locked.Success)
                     {
                         Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
-                        return moveInfos;
+                        return;
                     }
 
                     var count = S.Count;
@@ -246,8 +250,9 @@ namespace EmpyrionScripting.CustomHelpers
                     if (count > 0) count = S.Container.AddItems(S.Id, count);
                     if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}";
 
-                    return moveInfos;
-                });
+                 }, () => root.TimeLimitReached);
+
+            return moveInfos;
         }
 
         private static int MoveItem(IScriptRootData root, IItemsSource S, string N, IStructureData targetStructure, int count, int? maxLimit)
@@ -269,7 +274,7 @@ namespace EmpyrionScripting.CustomHelpers
                 ? Math.Max(0, Math.Min(count, maxLimit.Value - target.GetTotalItems(S.Id)))
                 : count;
 
-            using var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), targetStructure.GetCurrent(), targetData.Position);
+            using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), targetStructure.GetCurrent(), targetData.Position);
             if (!locked.Success)
             {
                 Log($"DeviceIsLocked (Target): {S.Id} #{S.Count} => {targetData.CustomName}", LogLevel.Debug);
@@ -303,7 +308,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 moveInfos
                     .Where(M => M.Error != null)
-                    .ForEach(E => output.Write(E), () => root.TimeLimitReached);
+                    .ForEach(E => output.Write(E), () => !root.Running);
 
                 if (moveInfos.Count == 0) options.Inverse(output, context as object);
                 else                      moveInfos.ForEach(I => options.Template(output, I), () => root.TimeLimitReached);
@@ -334,13 +339,15 @@ namespace EmpyrionScripting.CustomHelpers
 
             Log($"Fill Total: #{item.Source.Count}", LogLevel.Debug);
 
-            return item.Source.Aggregate(new List<IItemMoveInfo>(),
-                (moveInfos, S) => {
-                    using var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
+            var moveInfos = new List<IItemMoveInfo>();
+
+            lock(moveLock) item.Source
+                .ForEach(S => {
+                    using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
                     if (!locked.Success)
                     {
                         Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
-                        return moveInfos;
+                        return;
                     }
 
                     var count = specialTransfer.ItemsNeededForFill(S.Id, maxLimit);
@@ -370,8 +377,9 @@ namespace EmpyrionScripting.CustomHelpers
                     if (count > 0) count = S.Container.AddItems(S.Id, count);
                     if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{fill}} error lost #{count} of item {S.Id} in container {S.CustomName}";
 
-                    return moveInfos;
-                });
+                }, () => root.TimeLimitReached);
+
+            return moveInfos;
         }
 
         public class ProcessBlockData
@@ -647,7 +655,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                                     if (blockType > 0 && N != null)
                                     {
-                                        locked = locked ?? CreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
+                                        locked = locked ?? WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
                                         if (!locked.Success)
                                         {
                                             processBlockData.CheckedBlocks--;

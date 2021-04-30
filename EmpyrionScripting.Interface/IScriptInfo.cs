@@ -14,5 +14,6 @@ namespace EmpyrionScripting.Interface
         int TimeLimitReached { get; }
         bool NeedsMainThread { get; }
         bool IsElevatedScript { get; }
+        ScriptLanguage ScriptLanguage { get; }
     }
 }

@@ -682,5 +682,18 @@ namespace EmpyrionScripting.UnitTests
             );
         }
 
+        [TestMethod]
+        public void OrderedArrayTest()
+        {
+            var l = new[] { 
+                new ScriptInfo() { ScriptId = "1", NeedsMainThread = true, ExecTime = new TimeSpan(), ScriptLanguage = ScriptLanguage.Handlebar },
+                new ScriptInfo() { ScriptId = "2", NeedsMainThread = false, ExecTime = new TimeSpan(), ScriptLanguage = ScriptLanguage.Handlebar },
+                new ScriptInfo() { ScriptId = "3", NeedsMainThread = false, ExecTime = new TimeSpan(), ScriptLanguage = ScriptLanguage.Cs },
+                new ScriptInfo() { ScriptId = "4", NeedsMainThread = true, ExecTime = new TimeSpan(), ScriptLanguage = ScriptLanguage.Cs},
+            };
+
+            Assert.AreEqual("2314", LoopHelpers.OrderedList(l, "+NeedsMainThread,-ExecTime,+ScriptLanguage").Aggregate("", (S,E) => S + ((ScriptInfo)E).ScriptId));
+        }
+
     }
 }

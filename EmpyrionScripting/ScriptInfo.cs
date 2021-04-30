@@ -20,6 +20,8 @@ namespace EmpyrionScripting
 
         public int TimeLimitReached => _TimeLimitReached;
 
+        public ScriptLanguage ScriptLanguage { get; set; }
+
         public int _TimeLimitReached;
     }
 }

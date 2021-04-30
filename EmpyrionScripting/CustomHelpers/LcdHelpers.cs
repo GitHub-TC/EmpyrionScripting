@@ -20,7 +20,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2) throw new HandlebarsException("{{settext lcddevice text}} helper must have exactly two argument: (structure) (text)");
 
             var root = rootObject as IScriptRootData;
-            if (root.TimeLimitReached) return; // avoid flicker displays with part of informations
+            if (!root.Running) return; // avoid flicker displays with part of informations
 
             var block = arguments[0] as BlockData;
             var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
@@ -42,7 +42,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 1) throw new HandlebarsException("{{settextblock lcddevice}} helper must have exactly one argument: (structure)");
 
             var root = rootObject as IScriptRootData;
-            if (root.TimeLimitReached) return; // avoid flicker displays with part of informations
+            if (!root.Running) return; // avoid flicker displays with part of informations
 
             var block = arguments[0] as BlockData;
             var lcd   = block?.GetStructure()?.GetDevice<ILcd>(block.Position);
@@ -52,7 +52,7 @@ namespace EmpyrionScripting.CustomHelpers
                 using var text = new StringWriter();
                 options.Template(text, context as object);
 
-                if (root.TimeLimitReached) return; // avoid flicker displays with part of informations
+                if (!root.Running) return; // avoid flicker displays with part of informations
                 lcd?.SetText(text.ToString());
             }
             catch (Exception error)

@@ -123,11 +123,11 @@ namespace EmpyrionScripting.DataWrapper
 
         public bool ScriptWithinMainThread { get; set; }
         public bool ScriptNeedsMainThread { get; set; }
-        public Func<bool> ScriptLoopTimeLimitReached { get; set; } = () => false;
         public int ScriptPriority { get; set; }
         public ScriptInfo ScriptDiagnosticInfo { get; set; }
         public bool Running { get; set; }
 
+        public Func<bool> ScriptLoopTimeLimitReached { get; set; } = () => false;
         public bool TimeLimitReached
         {
             get {
@@ -139,7 +139,7 @@ namespace EmpyrionScripting.DataWrapper
                     if (ScriptDiagnosticInfo != null) Interlocked.Increment(ref ScriptDiagnosticInfo._TimeLimitReached);
                 }
 
-                return Running;
+                return !Running;
             }
         }
 

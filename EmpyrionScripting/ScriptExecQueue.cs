@@ -24,54 +24,53 @@ namespace EmpyrionScripting
         public DateTime LastIterationUpdate { get; set; }
 
         public ConcurrentDictionary<string, IScriptRootData> WaitForExec { get; } = new ConcurrentDictionary<string, IScriptRootData>();
-        public ConcurrentQueue<IScriptRootData>              ExecQueue { get; private set; } = new ConcurrentQueue<IScriptRootData>();
+        public ConcurrentQueue<string>                       ExecQueue { get; private set; } = new ConcurrentQueue<string>();
 
         static public Action<string, LogLevel> Log { get; set; }
         public int ScriptsCount { get; set; }
         public int QueueCount => ExecQueue.Count;
 
         private BackgroundWorker Worker { get; }
-        public ConcurrentQueue<IScriptRootData> BackgroundExecQueue { get; private set; } = new ConcurrentQueue<IScriptRootData>();
+        public ConcurrentQueue<string> BackgroundExecQueue { get; private set; } = new ConcurrentQueue<string>();
 
         public ConcurrentDictionary<string, bool> ScriptNeedsMainThread { get; set; } = new ConcurrentDictionary<string, bool>();
         public int GameUpdateScriptLoopTimeLimitReached { get; private set; }
+        public static Stopwatch ScriptLoopTimeLimiter { get; } = new Stopwatch();
+        public ConcurrentBag<string> BackgroundWorkerToDo { get; set; } = new ConcurrentBag<string>();
 
         public ScriptExecQueue(Action<IScriptRootData> processScript)
         {
             ProcessScript           = processScript;
             Worker                  = new BackgroundWorker();
             Worker.DoWork           += (s, e) => {
-                var toDo = new List<IScriptRootData>();
-                while(BackgroundExecQueue.TryDequeue(out var data)) toDo.Add(data);
-                Parallel.ForEach(toDo, ExecScriptWithMainThreadCheck);
+                while (BackgroundExecQueue.TryDequeue(out var data)) BackgroundWorkerToDo.Add(data);
+                Parallel.ForEach(BackgroundWorkerToDo, ExecScriptWithMainThreadCheck);
+                BackgroundWorkerToDo = new ConcurrentBag<string>();
             };
         }
 
         public void Add(IScriptRootData data)
         {
             if (ScriptNeedsMainThread.TryGetValue(data.ScriptId, out var needMainThread)) data.ScriptNeedsMainThread = needMainThread;
-            else ScriptNeedsMainThread.TryAdd(data.ScriptId, false);
+            else                                                                          ScriptNeedsMainThread.TryAdd(data.ScriptId, false);
 
-            lock (ExecQueue)
-            {
-                if (WaitForExec.TryAdd(data.ScriptId, data)) ExecQueue.Enqueue(data);
-                else WaitForExec.AddOrUpdate(data.ScriptId, data, (scriptId, oldData) => data);
-            }
+            if (WaitForExec.TryAdd(data.ScriptId, data)) ExecQueue.Enqueue(data.ScriptId);
+            else                                         WaitForExec.AddOrUpdate(data.ScriptId, data, (scriptId, oldData) => data);
         }
 
-        public void CheckForEmergencyRestart()
+        public void CheckForEmergencyRestart(PlayfieldScriptData playfield)
         {
             lock (ExecQueue)
             {
-                if (ExecQueue.IsEmpty && WaitForExec.Count > 0)
+                if (ExecQueue.IsEmpty && WaitForExec.Count > 0 && BackgroundWorkerToDo.Count == 0)
                 {
-                    Log($"EmpyrionScripting Mod: ExecQueue restart... #{WaitForExec.Count}", LogLevel.Message);
+                    Log($"ExecQueue.IsEmpty restart [{playfield.PlayfieldName}]... #{WaitForExec.Count} => {WaitForExec.Aggregate("Pendingscripts:", (E, L) => E + "\n" + L.Key)}", LogLevel.Message);
                     ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out var availableCompletionPortThreads);
-                    Log($"EmpyrionScripting Mod: ThreadPool available: WorkerThreads:{availableWorkerThreads} CompletionPortThreads:{availableCompletionPortThreads}", LogLevel.Message);
+                    Log($"ThreadPool available: WorkerThreads:{availableWorkerThreads} CompletionPortThreads:{availableCompletionPortThreads}", LogLevel.Message);
                     ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);
-                    Log($"EmpyrionScripting Mod: ThreadPool max: WorkerThreads:{maxWorkerThreads} CompletionPortThreads:{maxCompletionPortThreads}", LogLevel.Message);
+                    Log($"ThreadPool max: WorkerThreads:{maxWorkerThreads} CompletionPortThreads:{maxCompletionPortThreads}", LogLevel.Message);
                     ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
-                    Log($"EmpyrionScripting Mod: ThreadPool min: WorkerThreads:{minWorkerThreads} CompletionPortThreads:{minCompletionPortThreads}", LogLevel.Message);
+                    Log($"ThreadPool min: WorkerThreads:{minWorkerThreads} CompletionPortThreads:{minCompletionPortThreads}", LogLevel.Message);
                     WaitForExec.Clear(); // robust error restart with fresh data
                 }
             }
@@ -79,71 +78,75 @@ namespace EmpyrionScripting
 
         public void ExecNext(int maxCount, int scriptsSyncExecution, ref int syncExecCount, Stopwatch scriptLoopTimeLimiter)
         {
+            if (BackgroundWorkerToDo.Count > maxCount) return;
+
             var scriptLoopTimeLimiterStopwatch = scriptLoopTimeLimiter;
-            Func<bool> timeLimitBackgroundReached = () => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopBackgroundTimeLimiterMS;
-            Func<bool> timeLimitSyncReached       = () => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopSyncTimeLimiterMS;
+            var timeLimitBackgroundReached = new Func<bool>(() => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopBackgroundTimeLimiterMS);
+            var timeLimitSyncReached       = new Func<bool>(() => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopSyncTimeLimiterMS);
+
+            Log($"ExecNext: {WaitForExec.Count} -> {ExecQueue.Count}", LogLevel.Debug);
 
             for (int i = maxCount - 1; i >= 0; i--)
             {
-                if (ExecQueue.TryPeek(out var data))
+                if (ExecQueue.TryDequeue(out var scriptId) && WaitForExec.TryGetValue(scriptId, out var data))
                 {
                     if (data.ScriptNeedsMainThread)
                     {
                         Interlocked.Increment(ref syncExecCount);
 
-                        if (syncExecCount > scriptsSyncExecution) lock (ExecQueue) { if (ExecQueue.TryDequeue(out var reinsert)) ExecQueue.Enqueue(reinsert); }
+                        if (syncExecCount > scriptsSyncExecution) ExecQueue.Enqueue(scriptId);
                         else
                         {
                             ((ScriptRootData)data).ScriptLoopTimeLimitReached = timeLimitSyncReached;
-                            ExecNext();
+                            ExecNext(data);
                         }
                     }
                     else
                     {
                         ((ScriptRootData)data).ScriptLoopTimeLimitReached = timeLimitBackgroundReached;
-                        ExecNext();
+                        ExecNext(data);
                     }
                 }
-                else return;
+                else
+                {
+                    Log($"ExecQueue.TryPeek: {WaitForExec.Count} -> {ExecQueue.Count} => {i}", LogLevel.Debug);
+                    return;
+                }
 
                 if (timeLimitSyncReached())
                 {
                     GameUpdateScriptLoopTimeLimitReached++;
+                    Log($"ScriptLoopTimeLimitReached: {scriptLoopTimeLimiter.ElapsedMilliseconds}", LogLevel.Debug);
                     return;
                 }
             }
         }
 
-        private bool ExecNext()
+        private void ExecNext(IScriptRootData data)
         {
-            var found = false;
-            IScriptRootData data = null;
-            lock (ExecQueue) found = ExecQueue.TryDequeue(out data);
-            if (!found) return false;
-
             ((PlayfieldScriptData)data.GetPlayfieldScriptData()).IncrementCycleCounter(data.ScriptId);
 
-            return EmpyrionScripting.Configuration.Current.ExecMethod switch
+            _ = EmpyrionScripting.Configuration.Current.ExecMethod switch
             {
-                ExecMethod.ThreadPool       => data.ScriptNeedsMainThread ? DirectExecNext(data) : ThreadPoolExecNext(data),
-                ExecMethod.BackgroundWorker => data.ScriptNeedsMainThread ? DirectExecNext(data) : BackgroundWorkerExecNext(data),
+                ExecMethod.ThreadPool       => data.ScriptNeedsMainThread ? DirectExecNext(data) : ThreadPoolExecNext      (data.ScriptId),
+                ExecMethod.BackgroundWorker => data.ScriptNeedsMainThread ? DirectExecNext(data) : BackgroundWorkerExecNext(data.ScriptId),
                 ExecMethod.Direct           => DirectExecNext(data),
                 _                           => false,
             };
         }
 
-        public bool BackgroundWorkerExecNext(IScriptRootData data)
+        public bool BackgroundWorkerExecNext(string scriptId)
         {
-            BackgroundExecQueue.Enqueue(data);
+            BackgroundExecQueue.Enqueue(scriptId);
             if (!Worker.IsBusy) Worker.RunWorkerAsync();
             return true;
         }
 
-        public bool ThreadPoolExecNext(IScriptRootData data)
+        public bool ThreadPoolExecNext(string scriptId)
         {
-            if (!ThreadPool.QueueUserWorkItem(ExecScriptWithMainThreadCheck, data))
+            if (!ThreadPool.QueueUserWorkItem(ExecScriptWithMainThreadCheck, scriptId))
             {
-                Log($"EmpyrionScripting Mod: ExecNext NorThreadPoolFree {data.ScriptId}", LogLevel.Debug);
+                Log($"EmpyrionScripting Mod: ExecNext NorThreadPoolFree {scriptId}", LogLevel.Debug);
                 return false;
             }
             return true;
@@ -152,72 +155,62 @@ namespace EmpyrionScripting
         public bool DirectExecNext(IScriptRootData data)
         {
             data.ScriptWithinMainThread = true;
-
-            try                     { ExecScript(data); }
-            catch (Exception error) { Log($"EmpyrionScripting Mod: DirectExecNext {data.ScriptId}:{error}", LogLevel.Debug); }
-
+            ExecScriptAndRemoveFromList(data);
             return true;
         }
 
         private void ExecScriptWithMainThreadCheck(object state)
         {
-            if (!(state is IScriptRootData data)) return;
-            ExecScript(data);
+            if (!WaitForExec.TryGetValue(state?.ToString(), out var data)) return;
+            ExecScriptAndRemoveFromList(data);
             if (data.ScriptNeedsMainThread) Add(data);
         }
 
-        private void ExecScript(object state)
+        private void ExecScriptAndRemoveFromList(IScriptRootData data)
         {
-            if (!(state is IScriptRootData data)) return;
+            try{ ExecScript(data); }
+            catch (Exception error) { Log($"ExecScriptAndRemoveFromList: {data.ScriptId}:{error}", LogLevel.Debug); }
+            finally { WaitForExec.TryRemove(data.ScriptId, out _); }
+        }
 
-            try
+        private void ExecScript(IScriptRootData data)
+        {
+            if (data.E.EntityType == EntityType.Proxy || data.E.EntityType == EntityType.Unknown) return;
+
+            if (!ScriptRunInfo.TryGetValue(data.ScriptId, out var info)) info = new ScriptInfo() {
+                ScriptLanguage = data.ScriptLanguage,
+                ScriptPriority = data.ScriptPriority,
+                ScriptId       = data.ScriptId, 
+                EntityId       = data.E.Id 
+            };
+
+            info.Count++;
+            if (data.ScriptPriority <= 1 || info.Count % data.ScriptPriority == 0)
             {
-                if (data.E.EntityType == EntityType.Proxy || data.E.EntityType == EntityType.Unknown)
-                {
-                    lock (ExecQueue) WaitForExec.TryRemove(data.ScriptId, out _);
-                    return;
-                }
+                info.IsElevatedScript       = data.IsElevatedScript;
+                info.LastStart              = DateTime.Now;
+                data.ScriptDiagnosticInfo   = info;
 
-                if (!ScriptRunInfo.TryGetValue(data.ScriptId, out var info)) info = new ScriptInfo() {
-                    ScriptPriority = data.ScriptPriority,
-                    ScriptId = data.ScriptId, 
-                    EntityId = data.E.Id 
-                };
+                Interlocked.Increment(ref info._RunningInstances);
+                data.Running = true;
+                ProcessScript(data);
+                Interlocked.Decrement(ref info._RunningInstances);
 
-                info.Count++;
-                if (data.ScriptPriority <= 1 || info.Count % data.ScriptPriority == 0)
-                {
-                    info.IsElevatedScript       = data.IsElevatedScript;
-                    info.LastStart              = DateTime.Now;
-                    data.ScriptDiagnosticInfo   = info;
+                info.NeedsMainThread = data.ScriptNeedsMainThread;
+                ScriptNeedsMainThread.TryUpdate(data.ScriptId, data.ScriptNeedsMainThread, false);
 
-                    Interlocked.Increment(ref info._RunningInstances);
-                    data.Running = true;
-                    ProcessScript(data);
-                    Interlocked.Decrement(ref info._RunningInstances);
-
-                    info.NeedsMainThread = data.ScriptNeedsMainThread;
-                    ScriptNeedsMainThread.TryUpdate(data.ScriptId, data.ScriptNeedsMainThread, false);
-
-                    info.ExecTime += DateTime.Now - info.LastStart;
-                }
-
-                lock (ExecQueue) WaitForExec.TryRemove(data.ScriptId, out _);
-
-                ScriptRunInfo.AddOrUpdate(data.ScriptId, info, (id, i) => info);
-
-                Interlocked.Increment(ref _MainCount);
-                if (MainCount > ScriptsCount)
-                {
-                    if (Interlocked.Exchange(ref _MainCount, 0) > 0 && (DateTime.Now - LastIterationUpdate).TotalSeconds >= 1)
-                    {
-                        LastIterationUpdate = DateTime.Now;
-                    }
-                }
+                info.ExecTime += DateTime.Now - info.LastStart;
             }
-            catch (Exception error)
+
+            ScriptRunInfo.AddOrUpdate(data.ScriptId, info, (id, i) => info);
+
+            Interlocked.Increment(ref _MainCount);
+            if (MainCount > ScriptsCount)
             {
-                Log($"EmpyrionScripting Mod: ExecNext {data.ScriptId} => {error}", LogLevel.Debug);
+                if (Interlocked.Exchange(ref _MainCount, 0) > 0 && (DateTime.Now - LastIterationUpdate).TotalSeconds >= 1)
+                {
+                    LastIterationUpdate = DateTime.Now;
+                }
             }
         }
 
@@ -233,12 +226,12 @@ namespace EmpyrionScripting
             }
         }
 
-        public static void Exec(ICollection<PlayfieldScriptData> values, int scriptsParallelExecution, int scriptsSyncExecution)
+        public static void Exec(IEnumerable<PlayfieldScriptData> values, int scriptsParallelExecution, int scriptsSyncExecution)
         {
             var syncExecCount         = 0;
-            var scriptLoopTimeLimiter = Stopwatch.StartNew();
+            ScriptLoopTimeLimiter.Restart();
 
-            try { values.ForEach(PF => PF.ScriptExecQueue.ExecNext(scriptsParallelExecution, scriptsSyncExecution, ref syncExecCount, scriptLoopTimeLimiter)); }
+            try { values.ForEach(PF => PF.ScriptExecQueue.ExecNext(scriptsParallelExecution, scriptsSyncExecution, ref syncExecCount, ScriptLoopTimeLimiter)); }
             catch (Exception error) { Log($"Game_Update: ScriptExecQueue.ExecNext: {error}", LogLevel.Error); }
         }
     }

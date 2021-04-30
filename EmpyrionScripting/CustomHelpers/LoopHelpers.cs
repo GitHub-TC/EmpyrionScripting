@@ -3,6 +3,7 @@ using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -36,6 +37,27 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        public static IOrderedEnumerable<object> OrderedList(IEnumerable<object> array, string orderedByFields)
+        {
+            var orderBy = orderedByFields
+                .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(O => O.Trim())
+                .Select(O => new { Ascending = O.StartsWith("+"), Property = array.First().GetType().GetProperty(O.Substring(1)) })
+                .Where(P => P.Property != null)
+                .ToArray();
+
+            return orderBy.Length == 0 || !array.Any()
+                ? null
+                : orderBy.Skip(1).Aggregate(
+                    orderBy[0].Ascending
+                        ? array.OrderBy          (V => orderBy[0].Property.GetValue(V))
+                        : array.OrderByDescending(V => orderBy[0].Property.GetValue(V)),
+                    (L, O) => O.Ascending
+                        ? L.ThenBy             (V => O.Property.GetValue(V))
+                        : L.ThenByDescending   (V => O.Property.GetValue(V)));
+        }
+
+
         [HandlebarTag("sortedeach")]
         public static void SortedEachHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
@@ -45,22 +67,16 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var array       = ((IEnumerable)arguments[0]).OfType<object>();
-                var sortedBy    = arguments[1]?.ToString();
+                var array   = ((IEnumerable)arguments[0]).OfType<object>();
+                var orderBy = arguments[1]?.ToString();
                 if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
 
-                if (array.Count() == 0) {
-                    options.Inverse(output, (object)context);
-                    return;
-                }
+                var orderedArray = array.Count() == 0 || string.IsNullOrEmpty(orderBy) 
+                    ? null 
+                    : OrderedList(array, (reverse ? '-' : '+') + orderBy);
 
-                var getProperty = string.IsNullOrEmpty(sortedBy) ? null : array.First().GetType().GetProperty(sortedBy);
-
-                var sortedArray = reverse
-                    ? array.OrderByDescending(V => getProperty == null ? V : getProperty.GetValue(V))
-                    : array.OrderBy(V => getProperty == null ? V : getProperty.GetValue(V));
-
-                sortedArray.ForEach(V => options.Template(output, V));
+                if (orderedArray == null) options.Inverse(output, (object)context);
+                else                      orderedArray.ForEach(V => options.Template(output, V), () => root.TimeLimitReached);
             }
             catch (Exception error)
             {
@@ -77,27 +93,72 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var array = ((IEnumerable)arguments[0]).OfType<object>();
-                var sortedBy = arguments[1]?.ToString();
+                var array   = ((IEnumerable)arguments[0]).OfType<object>();
+                var orderBy = arguments[1]?.ToString();
                 if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
 
-                if (array.Count() == 0)
-                {
-                    options.Inverse(output, (object)context);
-                    return;
-                }
+                var orderedArray = array.Count() == 0 || string.IsNullOrEmpty(orderBy) 
+                    ? null 
+                    : OrderedList(array, (reverse ? '-' : '+') + orderBy);
 
-                var getProperty = string.IsNullOrEmpty(sortedBy) ? null : array.First().GetType().GetProperty(sortedBy);
-
-                var sortedArray = reverse
-                    ? array.OrderByDescending(V => getProperty == null ? V : getProperty.GetValue(V))
-                    : array.OrderBy(V => getProperty == null ? V : getProperty.GetValue(V));
-
-                options.Template(output, sortedArray);
+                if (orderedArray == null) options.Inverse (output, (object)context);
+                else                      options.Template(output, orderedArray.ToArray());
             }
             catch (Exception error)
             {
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{sort}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("orderedeach")]
+        public static void OrderedEachHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{orderedeach array '+/-sortedBy1,+/-sortedBy2,...'}} helper must have two argument: (array) (+/-sortedBy)");
+
+            var root = rootObject as IScriptRootData;
+
+            try
+            {
+                var array   = ((IEnumerable)arguments[0]).OfType<object>();
+                var orderBy = arguments[1]?.ToString();
+                if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
+
+                var orderedArray = array.Count() == 0 || string.IsNullOrEmpty(orderBy) 
+                    ? null 
+                    : OrderedList(array, orderBy);
+
+                if (orderedArray == null) options.Inverse(output, (object)context);
+                else                      orderedArray.ForEach(V => options.Template(output, V), () => root.TimeLimitReached);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{orderedeach}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("order")]
+        public static void OrderHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{order array '+/-sortedBy1,+/-sortedBy2,...'}} helper must have two argument: (array) (+/-sortedBy)");
+
+            var root = rootObject as IScriptRootData;
+
+            try
+            {
+                var array   = ((IEnumerable)arguments[0]).OfType<object>();
+                var orderBy = arguments[1]?.ToString();
+                if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
+
+                var orderedArray = array.Count() == 0 || string.IsNullOrEmpty(orderBy) 
+                    ? null 
+                    : OrderedList(array, orderBy);
+
+                if (orderedArray == null) options.Inverse (output, (object)context);
+                else                      options.Template(output, orderedArray.ToArray());
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{order}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

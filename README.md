@@ -53,7 +53,7 @@ Unten stehen die ID Nummer für Erze und Barren.<br/>
 Einige Funktionen benötigen ein Komma"," andere benötigen Simikolon ";".<br/>
 Alles in "" sind Texte und nicht mit anzugeben.<br/>
 Einzelne ' sind mit anzugeben.<br/>
-Man kann eine Information auch auf 2 LCD's anzeigen lassen dann bei Targets:Name LCD;Name LCD2<br/>
+Man kann eine Information auch auf 2 LCD's anzeigen lassen dannsortedeach bei Targets:Name LCD;Name LCD2<br/>
 Man kann eine Information auch auf n LCD's anzeigen lassen dann bei Targets:LCDAusgabe*<br/>
 Man kann eine Information auch auf n LCD's anzeigen lassen welche schon im ScriptLCD Namen angegeben sind Script:LCDAusgabe*<br/>
 Man kann auf einem LCD auch den Inhalt verschiedner Kisten anzeigen lassen!<br/>
@@ -546,6 +546,13 @@ Syntaxdocu:
 + {{sort array sortedBy \[reverse\]}}
   + Sortiert das Array nach (sortedBy)
   + (reverse) = true um die Sortierung umzukehren
+  
++ {{orderedeach array '+/-sortedBy1,+/-sortedBy2,...'}}
+  + Sortiert das Array nach (sortedBy1) dann nach 'sortedBy2' usw. bei '+' aufsteigend, bei '-' absteigend nach dem jeweiligen Feld 
+  + iteriert danach über jedes Element
+  
++ {{order array sortedBy \[reverse\]}}
+  + Sortiert das Array nach (sortedBy1) dann nach 'sortedBy2' usw. bei '+' aufsteigend, bei '-' absteigend nach dem jeweiligen Feld 
   
 + {{split string separator \[removeemptyentries\] \[trimchars\]}}
   + (string) mit dem Trennzeichen (separator) zerteilen.
@@ -1288,15 +1295,20 @@ DateTime format:
 + {{steps start end \[step\] \[delay\]}}
   + From (start) to (end) with optional (step)-width and (delay) extends the 1 second per 1 counter add
 
-### sortedeach
 + {{sortedeach array sortedBy \[reverse\]}}
-  + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
-  + (reverse) = true um die Sortierung umzukehren
-
-### sort
+  + sorts the array by (sortedBy) and iterates over the individual elements
+  + (reverse) = true to reverse the sort order
+  
 + {{sort array sortedBy \[reverse\]}}
-  + Sortiert das Array nach (sortedBy)
-  + (reverse) = true um die Sortierung umzukehren
+  + sorts the array by (sortedBy)
+  + (reverse) = true to reverse the sort order
+
++ {{orderedeach array '+/-sortedBy1,+/-sortedBy2,...'}}
+  + sorts the array by (sortedBy1) then by 'sortedBy2' etc. with '+' ascending, with '-' descending by the respective field. 
+  + iterates over each element
+  
++ {{order array sortedBy \[reverse\]}}
+  + sorts the array by (sortedBy1) then by 'sortedBy2' etc. at '+' ascending, at '-' descending by the respective field 
 
 + {{random start end}}
    + Deliver a random value between (start) and (end) and submit to the block as {{this}}

@@ -152,7 +152,7 @@ namespace EmpyrionScripting
                 ConfigFilename = Path.Combine(SaveGameModPath, "Configuration.json")
             };
             Configuration.Load();
-            if (Configuration.LoadException != null || !File.Exists(Configuration.ConfigFilename)) Configuration.Save();
+            if (Configuration.LoadException == null || !File.Exists(Configuration.ConfigFilename)) Configuration.Save();
         }
 
         public void Shutdown()
@@ -275,7 +275,7 @@ namespace EmpyrionScripting
                     if (PF.PauseScripts || Configuration.Current.LogLevel > LogLevel.Message) return;
 
                     DisplayScriptInfos();
-                    PF.ScriptExecQueue.CheckForEmergencyRestart();
+                    PF.ScriptExecQueue.CheckForEmergencyRestart(PF);
                 });
             }, "ScriptInfos");
 
@@ -288,7 +288,7 @@ namespace EmpyrionScripting
             PlayfieldData.Values.ForEach(PF => {
                 var output = new StringBuilder();
                 var totalExecTime = new TimeSpan();
-                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
+                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} BackgroundWorkerToDoCount:{PF.ScriptExecQueue.BackgroundWorkerToDo.Count}  Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
                 PF.ScriptExecQueue.ScriptRunInfo
                     .OrderBy(I => I.Key)
                     .ForEach(I =>
