@@ -12,7 +12,8 @@ namespace EmpyrionScripting
 {
     public class ConfigEcfAccess : IConfigEcfAccess
     {
-        private IDictionary<string, int> BlockIdMapping;
+        public IDictionary<string, int> BlockIdMapping;
+        public IDictionary<int, string> IdBlockMapping;
 
         public EcfFile BlocksConfig_Ecf { get; set; } = new EcfFile();
         public EcfFile ItemsConfig_Ecf { get; set; } = new EcfFile();
@@ -133,6 +134,16 @@ namespace EmpyrionScripting
             {
                 Log($"GetBlockAndItemMapping: {error}", LogLevel.Error);
                 BlockIdMapping = Parse.ReadBlockMapping(blockMappingFile);
+            }
+
+            try
+            {
+                IdBlockMapping = BlockIdMapping.ToDictionary(I => I.Value, I => I.Key);
+            }
+            catch (Exception error)
+            {
+                IdBlockMapping = new Dictionary<int, string>();
+                Log($"IdBlockMapping: {error}", LogLevel.Error);
             }
         }
 

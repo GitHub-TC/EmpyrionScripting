@@ -234,9 +234,10 @@ namespace EmpyrionScripting.CustomHelpers
                                         var startCount = count;
                                         count = MoveItem(root, S, N, structure, count, maxLimit);
                                         if(startCount != count){
+                                            var movedCount = startCount - count;
                                             moveInfos.Add(currentMoveInfo = new ItemMoveInfo() {
                                                 Id              = S.Id,
-                                                Count           = startCount - count,
+                                                Count           = movedCount,
                                                 SourceE         = S.E,
                                                 Source          = S.CustomName,
                                                 DestinationE    = structure.E,
@@ -244,6 +245,9 @@ namespace EmpyrionScripting.CustomHelpers
                                             });
 
                                             Log($"Move(AddItems): {S.CustomName} {S.Id} #{S.Count}->{startCount - count}", LogLevel.Debug);
+
+                                            // Für diesen Scriptdurchlauf dieses Item aus der Verarbeitung nehmen
+                                            S.Count -= movedCount;
                                         };
                                     }, () => root.TimeLimitReached);
 

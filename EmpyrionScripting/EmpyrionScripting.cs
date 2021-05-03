@@ -200,9 +200,18 @@ namespace EmpyrionScripting
             output.AppendLine($"CsCompilerConfiguration.json: {(CsCompiler.Configuration.LoadException == null ? "OK" : CsCompiler.Configuration.LoadException.Message)}");
             output.AppendLine($"CsCompilerLearnMode:{CsCompiler.Configuration.Current.WithinLearnMode}");
             output.AppendLine($"CsScriptsAllowedFor:{Configuration.Current.CsScriptsAllowedFor}");
+            output.AppendLine($"LogLevel:{Configuration.Current.LogLevel}");
             output.AppendLine($"DetailedScriptsInfoData:{Configuration.Current.DetailedScriptsInfoData}");
+            output.AppendLine($"DelayStartForNSecondsOnPlayfieldLoad:{Configuration.Current.DelayStartForNSecondsOnPlayfieldLoad}");
+            output.AppendLine($"ExecMethod:{Configuration.Current.ExecMethod}");
             output.AppendLine($"InGameScriptsIntervallMS:{Configuration.Current.InGameScriptsIntervallMS}");
             output.AppendLine($"SaveGameScriptsIntervallMS:{Configuration.Current.SaveGameScriptsIntervallMS}");
+            output.AppendLine($"DeviceLockOnlyAllowedEveryXCycles:{Configuration.Current.DeviceLockOnlyAllowedEveryXCycles}");
+            output.AppendLine($"ScriptLoopBackgroundTimeLimiterMS:{Configuration.Current.ScriptLoopBackgroundTimeLimiterMS}");
+            output.AppendLine($"ScriptLoopSyncTimeLimiterMS:{Configuration.Current.ScriptLoopSyncTimeLimiterMS}");
+            output.AppendLine($"ScriptsParallelExecution:{Configuration.Current.ScriptsParallelExecution}");
+            output.AppendLine($"ScriptsSyncExecution:{Configuration.Current.ScriptsSyncExecution}");
+            output.AppendLine($"EntityAccessMaxDistance:{Configuration.Current.EntityAccessMaxDistance}");
             output.AppendLine();
             output.AppendLine(DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
 

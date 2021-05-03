@@ -30,6 +30,13 @@ namespace EmpyrionScripting.Interface
         float Fuel { get; }
         int PowerConsumption { get; }
         int PowerOutCapacity { get; }
+        int SizeClass { get; }
+        bool IsShieldActive { get; }
+        int ShieldLevel { get; }
+        float TotalMass { get; }
+        bool HasLandClaimDevice { get; }
+        ulong LastVisitedTicks { get; }
+        string PlayerCreatedSteamId { get; }
 
         IStructure GetCurrent();
     }

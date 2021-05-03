@@ -32,10 +32,15 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                if(arguments[0] is int &&
-                    EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue((int)arguments[0], out ItemInfo details1)) data = details1.Key;
-                else if (int.TryParse(data, out int itemId) &&
-                    EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(itemId, out ItemInfo details2)) data = details2.Key;
+                
+                if (arguments[0] is int id) {
+                    if (EmpyrionScripting.ConfigEcfAccess.IdBlockMapping.TryGetValue(id, out var name)) data = name;
+                    else if(EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(id, out ItemInfo details1)) data = details1.Key;
+                }
+                else if (int.TryParse(data, out int itemId)) {
+                    if (EmpyrionScripting.ConfigEcfAccess.IdBlockMapping.TryGetValue(itemId, out var name)) data = name;
+                    else if (EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(itemId, out ItemInfo details2)) data = details2.Key;
+                }
 
                 output.Write(EmpyrionScripting.Localization.GetName(data, language));
             }

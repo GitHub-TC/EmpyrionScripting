@@ -52,6 +52,16 @@ namespace EmpyrionScripting.DataWrapper
         public int PowerConsumption => GetCurrent().PowerConsumption;
         public int PowerOutCapacity => GetCurrent().PowerOutCapacity;
 
+        public int SizeClass => GetCurrent().SizeClass;
+
+        public bool IsShieldActive => GetCurrent().IsShieldActive;
+        public int ShieldLevel => GetCurrent().ShieldLevel;
+
+        public float TotalMass => GetCurrent().TotalMass;
+        public bool HasLandClaimDevice => GetCurrent().HasLandClaimDevice;
+        public ulong LastVisitedTicks => GetCurrent().LastVisitedTicks;
+        public string PlayerCreatedSteamId => GetCurrent().PlayerCreatedSteamId;
+
         public VectorInt3 MinPos => GetCurrent().MinPos;
         public VectorInt3 MaxPos => GetCurrent().MaxPos;
 

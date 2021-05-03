@@ -84,14 +84,14 @@ namespace EcfParser
             result.Blocks.ForEach(B => {
                 if (B.Name != "Block" && B.Name != "Item") return;
 
-                var blockIdAttr     = B.Attr.FirstOrDefault(a => a.Name == "Id");
+                var blockIdAttr     = B.Attr?.FirstOrDefault(a => a.Name == "Id");
                 var blockId         = blockIdAttr?.Value;
-                var blockNameAttr   = B.Attr.FirstOrDefault(a => a.Name == "Name");
+                var blockNameAttr   = B.Attr?.FirstOrDefault(a => a.Name == "Name");
                 var blockName       = blockNameAttr?.Value;
 
                 if (string.IsNullOrEmpty(blockName?.ToString()) && blockIdAttr != null) blockIdAttr.AddOns?.TryGetValue("Name", out blockName);
 
-                if (blockIdMapping.TryGetValue(blockName.ToString(), out var id))
+                if (!string.IsNullOrEmpty(blockName?.ToString()) && blockIdMapping.TryGetValue(blockName.ToString(), out var id))
                 {
                     if (blockIdAttr != null) blockIdAttr.Value = id;
                     else if (blockName != null && blockId == null)
@@ -102,8 +102,10 @@ namespace EcfParser
                         B.Attr.Insert(0, idAttr);
 
                         B.EcfValues.Add("Id", idAttr);
-                        B.Values   .Add("Id", id);
                     }
+
+                    if (B.Values.ContainsKey("Id")) B.Values["Id"] = id;
+                    else                            B.Values.Add("Id", id);
                 }
             });
         }

@@ -30,6 +30,8 @@ namespace EmpyrionScripting.Interface
         int WestColor { get; set; }
         int EastColor { get; set; }
         bool IsDamaged { get; }
+        string SendSignalName { get; }
+        bool SignalState { get; }
 
         void SetColorForWholeBlock(int texIdx);
         void SetColors(int? top, int? bottom, int? north, int? south, int? west, int? east);

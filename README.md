@@ -755,6 +755,35 @@ Hinweis: EntityType ist BA,CV,SV or HV
 + {{setdamage block damage}}
   + Schaden des Blockes setzen
 
+## Priorisierung von Scripten
+Wenn viele Scripte eingebaut sind macht es Sinn, die jenigen welche nicht so häufig ausgeführt werden brauchen, 
+herabzustufen damit die anderen Scripte häufiger ausgeführt werden.
+Dazu kann man VOR dem Namen eines Scripte eine Zahl von 0-9 schreiben so dass dieseses Script nur alle N Zyklen ausgeführt wird.
+z.B.
+1Script:abc
+3Script:uvw
+4Script:xyz
+
+1: abc
+2: abc
+3: abc, uvw
+4: abc, xyz
+5: abc
+6: abc, uvw
+7: abc
+8: abc, xyz
+...
+
+Der Unterschied zwischen einem Script OHNE Nummer oder 0 und einem Script mit einer '1' ist der das Scripte
+mit einer Priorität >= 1 unabhängig davon laufen ob das ScriptLCD ausgeschaltet ist.
+
+Scripte mit 0 oder ohne Nummer werden nur ausgeführt wenn das LCD eingeschaltet ist. 
+(Hinweis: man kann die Schriftfarbe (bei Projektoren) auf transparent setzen um es "unsichtbar" zu machen)
+
+## Allgemeines
+Wenn die Struktur ausgeschaltet ist oder keinen Strom hat werden keine InGameScripte von ihr ausgeführt.
+Somit verbrauchen "alte" oder nicht mehr benutze Strukturen auch keine Leistung der Scriptengine.
+
 ### Whats next?
 
 
@@ -1498,6 +1527,35 @@ Note: EntityType is BA,CV,SV or HV
 ### CustomHelpers-SaveGameScripts (fileexists)
 + {{fileexists dir filename}}
   + If exists then templane oterwirse exec else part
+
+## Prioritization of scripts
+If many scripts are built in it makes sense to downgrade the ones that don't need to be executed so often, 
+so that the other scripts are executed more often.
+To do this, you can write a number from 0-9 BEFORE the name of a script, so that this script is executed only every N cycles.
+e.g.
+1Script:abc
+3Script:uvw
+4Script:xyz
+
+1: abc
+2: abc
+3: abc, uvw
+4: abc, xyz
+5: abc
+6: abc, uvw
+7: abc
+8: abc, xyz
+...
+
+The difference between a script WITHOUT a number or 0 and a script with a '1' is that scripts with a priority
+with a priority >= 1 will run regardless if the ScriptLCD is switched off.
+
+Scripts with 0 or no number will only be executed if the LCD is on. 
+(Note: you can set the font color (for projectors) to transparent to make it "invisible")
+
+## General
+If the structure is turned off or has no power, no ingame scripts will be executed from it.
+So "old" or no longer used structures do not consume any power of the script engine.
 
 ### Whats next?
 

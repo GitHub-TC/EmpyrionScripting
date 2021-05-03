@@ -71,6 +71,9 @@ namespace EmpyrionScripting.DataWrapper
             return this;
         }
 
+        public string SendSignalName => GetStructure()?.GetSendSignalName(Position);
+        public bool SignalState => GetStructure()?.GetSignalState(SendSignalName) == true;
+
         public int Id => GetData().blockType;
         public int BlockType{ get => GetData().blockType;           set { if(BlockType  != value) _block?.Set(value, null, null, null); } }
         public bool Active  { get => GetData().blockActive.Value;   set { if(Active     != value) _block?.Set(null, null, null, value); } }
