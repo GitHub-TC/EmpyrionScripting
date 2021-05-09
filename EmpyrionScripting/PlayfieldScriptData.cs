@@ -31,11 +31,18 @@ namespace EmpyrionScripting
 
         public PlayfieldScriptData(EmpyrionScripting parent)
         {
-            Playfield_OnEntityLoaded = (IEntity entity) => EventStore.AddOrUpdate(entity.Id, id => new EventStore(entity), (id, store) => store);
-            Playfield_OnEntityUnloaded = (IEntity entity) => { if (EventStore.TryRemove(entity.Id, out var store)) ((EventStore)store).Dispose(); };
+            Playfield_OnEntityLoaded   = (IEntity entity) => AddEntity(entity);
+            Playfield_OnEntityUnloaded = (IEntity entity) => RemoveEntity(entity);
 
             ScriptExecQueue = new ScriptExecQueue(D => parent.ProcessScript(this, D));
         }
+
+        public void RemoveEntity(IEntity entity)
+        {
+            if (EventStore.TryRemove(entity.Id, out var store)) ((EventStore)store).Dispose();
+        }
+
+        public IEventStore AddEntity(IEntity entity) => entity == null ? null : EventStore.AddOrUpdate(entity.Id, id => new EventStore(entity), (id, store) => store);
     }
 
 }

@@ -71,7 +71,7 @@ namespace EmpyrionScripting
             if (!LocalisationData.TryGetValue(name, out List<string> i18nData)) return name;
 
             var languagePos = LocalisationData["KEY"].IndexOf(language);
-            return languagePos == -1 || languagePos > i18nData.Count
+            return languagePos == -1 || languagePos >= i18nData.Count
                 ? name
                 : i18nData[languagePos];
         }

@@ -45,6 +45,7 @@ namespace EmpyrionScripting
         public DateTime LastAlive { get; private set; }
         public int InGameScriptsCount { get; private set; }
         public int SaveGameScriptsCount { get; private set; }
+        public static bool AppFoldersLogged { get; private set; }
 
         public CsCompiler.CsCompiler CsCompiler { get; set; }
 
@@ -76,7 +77,6 @@ namespace EmpyrionScripting
             {
                 SetupHandlebarsComponent();
 
-                Localization = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content), EmpyrionConfiguration.DedicatedYaml.CustomScenarioName);
                 SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);
                 ModApi.Application.GameEntered += Application_GameEntered;
 
@@ -116,18 +116,40 @@ namespace EmpyrionScripting
         private void Application_GameEntered(bool hasEntered)
         {
             ModApi.Log($"Application_GameEntered {hasEntered}");
-            if (hasEntered) InitEcfConfigData();
+            if (hasEntered) InitGameDependedData(false);
             ModApi.Log("Application_GameEntered init finish");
         }
 
+        private static void InitGameDependedData(bool forceInit)
+        {
+            if (forceInit || !AppFoldersLogged)
+            {
+                AppFoldersLogged = true;
+                ModApi.Log($"InitGameDependedData [ForceInit:{forceInit}]:\n" +
+                    $"AppFolder.Content:{ModApi.Application?.GetPathFor(AppFolder.Content)}\n" +
+                    $"AppFolder.Mod:{ModApi.Application?.GetPathFor(AppFolder.Mod)}\n" +
+                    $"AppFolder.Root:{ModApi.Application?.GetPathFor(AppFolder.Root)}\n" +
+                    $"AppFolder.SaveGame:{ModApi.Application?.GetPathFor(AppFolder.SaveGame)}\n" +
+                    $"AppFolder.Dedicated:{ModApi.Application?.GetPathFor(AppFolder.Dedicated)}\n" +
+                    $"AppFolder.Cache:{ModApi.Application?.GetPathFor(AppFolder.Cache)}\n" +
+                    $"AppFolder.ActiveScenario:{ModApi.Application?.GetPathFor(AppFolder.ActiveScenario)} -> CurrentScenario:{CurrentScenario}");
+            }
+            
+            if(forceInit || Localization    == null) Localization = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content), CurrentScenario);
+            if(forceInit || ConfigEcfAccess == null) InitEcfConfigData();
+        }
+
+        private static string CurrentScenario
+            => string.IsNullOrEmpty(EmpyrionConfiguration.DedicatedYaml.CustomScenarioName)
+            ? ModApi.Application?.GetPathFor(AppFolder.ActiveScenario)
+            : EmpyrionConfiguration.DedicatedYaml.CustomScenarioName;
+
         private static void InitEcfConfigData()
         {
-            if (ConfigEcfAccess != null) return;
-
             ConfigEcfAccess = new ConfigEcfAccess();
             ConfigEcfAccess.ReadConfigEcf(
                 ModApi.Application?.GetPathFor(AppFolder.Content),
-                EmpyrionConfiguration.DedicatedYaml.CustomScenarioName,
+                CurrentScenario,
                 Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "blocksmap.dat"), ModApi);
             ItemInfos = new ItemInfos(ConfigEcfAccess, Localization);
         }
@@ -171,7 +193,7 @@ namespace EmpyrionScripting
         {
             PlayfieldScriptData data = null;
 
-            InitEcfConfigData();
+            InitGameDependedData(ModApi.Application.Mode == ApplicationMode.SinglePlayer);
 
             PlayfieldData.TryAdd(playfield.Name, data = new PlayfieldScriptData(this){
                 PlayfieldName = playfield.Name,
@@ -184,6 +206,14 @@ namespace EmpyrionScripting
             TaskTools.Delay(Configuration.Current.DelayStartForNSecondsOnPlayfieldLoad, () => {
                 ModApi.Log($"StartScripts for {playfield.Name}");
                 data.PauseScripts = false;
+
+                if (ModApi.Application.Mode == ApplicationMode.SinglePlayer)
+                {
+                    ModApi.Log(playfield.Entities?.Aggregate($"Player:{playfield.Players.FirstOrDefault().Value?.Name} PlayerDriving:{playfield.Players.FirstOrDefault().Value?.DrivingEntity?.Name}", (L, E) => L + $" {E.Key}:{E.Value.Name}"));
+                    
+                    data.AddEntity(playfield.Players.FirstOrDefault().Value?.DrivingEntity);
+                    playfield.Entities?.ForEach(E => data.AddEntity(E.Value));
+                }
             });
 
             data.Playfield.OnEntityLoaded   += data.Playfield_OnEntityLoaded;
@@ -244,14 +274,6 @@ namespace EmpyrionScripting
         {
             ModApi.Log($"StartAllScriptsForPlayfieldServer: InGame:{Configuration.Current.InGameScriptsIntervallMS}ms SaveGame:{Configuration.Current.SaveGameScriptsIntervallMS}ms ");
 
-            if(ModApi.Application.Mode == ApplicationMode.Client || ModApi.Application.Mode == ApplicationMode.SinglePlayer)
-            {
-                StartScriptIntervall(Configuration.Current.InGameScriptsIntervallMS, () =>
-                {
-                    if(PlayfieldData.Count == 0 && ModApi.ClientPlayfield != null) Application_OnPlayfieldLoaded(ModApi.ClientPlayfield); 
-                }, "CheckClientPlayfield");
-            }
-
             StartScriptIntervall(Configuration.Current.InGameScriptsIntervallMS, () =>
             {
                 PlayfieldData.Values.ForEach(PF => { 
@@ -287,7 +309,6 @@ namespace EmpyrionScripting
                     PF.ScriptExecQueue.CheckForEmergencyRestart(PF);
                 });
             }, "ScriptInfos");
-
         }
 
         private void DisplayScriptInfos()

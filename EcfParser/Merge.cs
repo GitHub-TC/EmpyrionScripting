@@ -27,7 +27,7 @@ namespace EcfParser
 
         public static void MergeWith(this EcfFile ecf, EcfFile add)
         {
-            add.Blocks.ForEach(B => {
+            add?.Blocks?.ForEach(B => {
                 var found = ecf.Blocks
                     .Where(b => b.Name == B.Name)
                     .Where(b => Equals(b.Values?.FirstOrDefault(a => a.Key == "Id").Value  , B.Values?.FirstOrDefault(a => a.Key == "Id").Value))
