@@ -64,6 +64,7 @@
     <Compile Include="IContainerSource.cs" />
     <Compile Include="ICsScriptFunctions.cs" />
     <Compile Include="IDisplayOutputConfiguration.cs" />
+    <Compile Include="IEntityCultureInfo.cs" />
     <Compile Include="IEntityData.cs" />
     <Compile Include="IEventStore.cs" />
     <Compile Include="IItemMoveInfo.cs" />

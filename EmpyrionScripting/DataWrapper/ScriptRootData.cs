@@ -5,6 +5,7 @@ using EmpyrionScripting.Internal.Interface;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -51,6 +52,9 @@ namespace EmpyrionScripting.DataWrapper
             SignalEventStore            = eventStore;
             var testGroup = entity?.Faction.Group == FactionGroup.Faction || entity?.Faction.Group == FactionGroup.Player ? entity?.Faction.Id.ToString() : entity?.Faction.Group.ToString();
             IsElevatedScript = this is ScriptSaveGameRootData || EmpyrionScripting.Configuration.Current.ElevatedGroups.Any(f => f == testGroup);
+
+            try  { CultureInfo = playfieldScriptData?.EntityCultureInfo?.GetOrAdd(entity.Id, e => GetCultureInfoForEntity(entity)); }
+            catch{ CultureInfo = new EntityCultureInfo();                                                                           }
         }
 
         public ScriptRootData(ScriptRootData data) : this(data._PlayfieldScriptData, data.allEntities, data.currentEntities, data.playfield, data.entity, data._PersistendData, (EventStore)data.SignalEventStore)
@@ -58,6 +62,37 @@ namespace EmpyrionScripting.DataWrapper
             _p = data._p;
             _e = data._e;
             DisplayType = data.DisplayType;
+        }
+
+        EntityCultureInfo GetCultureInfoForEntity(IEntity entity)
+        {
+            var lcd = entity.Structure.GetDevice<ILcd>("CultureInfo");
+            
+            if (lcd != null)
+            {
+                try
+                {
+                    var text = lcd.GetText();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        var newCultureInfo = new EntityCultureInfo();
+                        lcd.SetText(Newtonsoft.Json.JsonConvert.SerializeObject(newCultureInfo, Newtonsoft.Json.Formatting.Indented));
+                        return newCultureInfo;
+                    }
+
+                    var ci = Newtonsoft.Json.JsonConvert.DeserializeObject<EntityCultureInfo>(text);
+                    ci.CultureInfo = EntityCultureInfo.CreateFormatCulture(System.Globalization.CultureInfo.CreateSpecificCulture(ci.LanguageTag));
+
+                    return ci;
+                }
+                catch (Exception error)
+                {
+                    var debugLcd = entity.Structure.GetDevice<ILcd>("CultureInfoDebug");
+                    if (debugLcd != null) debugLcd.SetText(error.Message);
+                }
+            }
+
+            return new EntityCultureInfo();
         }
 
         public string Version { get; } = EmpyrionScripting.Version;
@@ -142,6 +177,8 @@ namespace EmpyrionScripting.DataWrapper
                 return !Running;
             }
         }
+
+        public IEntityCultureInfo CultureInfo { get; set; }
 
         private static bool SafeIsNoProxyCheck(IEntity entity)
         {

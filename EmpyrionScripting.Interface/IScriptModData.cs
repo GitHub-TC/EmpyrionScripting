@@ -41,5 +41,6 @@ namespace EmpyrionScripting.Interface
         IEnumerable<IEntity> GetEntities();
         ConcurrentDictionary<string, object> GetPersistendData();
         Func<bool> ScriptLoopTimeLimitReached { get; }
+        IEntityCultureInfo CultureInfo { get; }
     }
 }

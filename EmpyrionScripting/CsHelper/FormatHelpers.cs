@@ -13,7 +13,7 @@ namespace EmpyrionScripting.CsHelper
             ? EmpyrionScripting.Localization.GetName(data.Key,      language)
             : EmpyrionScripting.Localization.GetName(id.ToString(), language);
 
-        public string Format(object data, string format) => string.Format(FormatHelpers.FormatCulture, format, data).Replace(" ", EmpyrionScripting.Configuration.Current.NumberSpaceReplace);
+        public string Format(object data, string format) => string.Format(ScriptRoot.CultureInfo.CultureInfo, format, data).Replace(" ", EmpyrionScripting.Configuration.Current.NumberSpaceReplace);
 
         public string Bar(double data, double min, double max, int length, string barChar = null, string barBgChar = null)
         {

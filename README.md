@@ -58,9 +58,16 @@ Man kann eine Information auch auf n LCD's anzeigen lassen dann bei Targets:LCDA
 Man kann eine Information auch auf n LCD's anzeigen lassen welche schon im ScriptLCD Namen angegeben sind Script:LCDAusgabe*<br/>
 Man kann auf einem LCD auch den Inhalt verschiedner Kisten anzeigen lassen!<br/>
  
-Eine Debugausgabe erhält man mit einem LCD das den Namen "ScriptDebugInfo" hat.
-
  ---
+
+## Sprache und Format der Ausgaben
+Die Sprache, Uhrzeitoffset und Anzeigeformate kann man mit einem LCD einstellen welches man
+'CultureInfo' benennt. Etwaige Fehler bei der Angabe werden in einem LCD mit dem Namen 'CultureInfoDebug' angezeigt.
+
+Dabei kann man in der 'CultureInfo' folgendes angeben:
+```
+```
+
 ## Was ist in der Kiste/Container/ContainerController/MunitionsKiste/Kühlschrank
 
 Eingabe im LCD 1 (alles ohne "")
@@ -76,7 +83,7 @@ Bsp:
 Targets:LCD Alle Erze
 Meine Erze
 {{#items E.S 'Alle Erze'}}
-{{Count}}{{i18 Key 'Deutsch'}}
+{{Count}}{{i18 Key}}
 {{/items}}
 ```
 ---
@@ -87,7 +94,7 @@ Eingabe im LCD (alles ohne "")
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#test ID in '2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
 ```
@@ -97,7 +104,7 @@ Targets:LCD Alle Erze
 Meine Erze
 {{#each E.S.Items}}
 {{#test Id in '2248,2249,2250,2251,2252,2253,2269,2270,2284,2297,2280,2254'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
 ```
@@ -110,7 +117,7 @@ Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
 ```
@@ -120,7 +127,7 @@ Targets:LCD Barren
 Alle meine Barren in der Basis:
 {{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
 ```
@@ -131,7 +138,7 @@ Eingabe im LCD (alles ohne "")
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
 Bsp:
@@ -139,7 +146,7 @@ Bsp:
 Targets:LCD Alle Barren im Spiel
 Alle Barren im Spiel:
 {{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
 -----------------------------------------------------
@@ -149,7 +156,7 @@ Eingabe im LCD (alles ohne "")
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#itemlist E.S.Items '2249'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
 Bsp:
@@ -157,7 +164,7 @@ Bsp:
 Targets:LCD EISEN ERZ
 Meine EisenErz und Barren
 {{#itemlist E.S.Items '2249;2272'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
 ------------------------------------------------------------------
@@ -168,7 +175,7 @@ Hier werden alle Erze angezeigt wo nur 1-1000 auf der Basis vorhanden ist.
 {{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
 {{#test Count geq 1}}
 {{#test Count leq 1000}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/test}}
 {{/itemlist}}
@@ -178,7 +185,7 @@ Hier werden alle Erze angezeigt wo nur 1-1000 auf der Basis vorhanden ist.
 ```
 {#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
 {{#test Count leq 0}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/itemlist}}
 ```
@@ -273,14 +280,14 @@ Hier werden 5 Produkte angezeigt mit 2 Sekunden Scrollgeschwindigkeit, wenn mehr
 ```
 {{#scroll 5 2}}
 {{#items E.S '"Name der Kiste"'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 ```
 Bsp.
 ```
 {{#scroll 5 2}}
 {{#items E.S 'Kühlschrank 1'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 
 {{#scroll 10 1}}
@@ -305,12 +312,12 @@ oder hier sind sind 2 Kisten die abwechselnd angezeigt werden.
 {{#intervall 2}}
 "Text optional"
 {{#items E.S '"Name der Kiste"'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 {{else}}
 "Text optional"
 {{#items E.S '"Name der Kiste2"'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 {{/intervall}}
 ```
@@ -321,14 +328,14 @@ Bsp.
 Kühlschrank 1:
 
 {{#items E.S 'Kühlschrank 1'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 {{else}}
 
 Kühlschrank 2:
 
 {{#items E.S 'Kühlschrank 2'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 {{/intervall}}
 ```
@@ -523,9 +530,10 @@ Syntaxdocu:
   * Text scrollen mit (lines) Zeilen und einer Verzögerung von (delay) Sekunden
   * Optional mit (step) Zeilen Schritten
 
-* {{#i18n Select 'Language'}}
+* {{#i18n Select \['Language'\]}}
   * Language: English,Deutsch,Français,Italiano,Spanish,...
     das Sprachkürzel kann hier, aus der ersten Zeile, entnommen werden \[ESG\]\\Content\\Extras\\Localization.csv
+    wird sonst aus dem CultureInfo LCD genommen
 
 + {{datetime}} = Datum und Uhrzeit anzeigen
 + {{datetime 'format'}} = gemäß dem 'format' ausgeben
@@ -879,7 +887,7 @@ Input on the LCD (everything without "")
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#test ID in '2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
 ```
@@ -889,7 +897,7 @@ Targets:LCD Alle Erze
 Meine Erze
 {{#each E.S.Items}}
 {{#test Id in '2248,2249,2250,2251,2252,2253,2269,2270,2284,2297,2280,2254'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
 ```
@@ -902,7 +910,7 @@ Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
 ```
@@ -912,7 +920,7 @@ Targets:LCD Barren
 Alle meine Barren in der Basis:
 {{#each E.S.Items}}
 {{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
 ```
@@ -923,7 +931,7 @@ Input on the LCD (everything without "")
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
 Bsp:
@@ -931,7 +939,7 @@ Bsp:
 Targets:LCD Alle Barren im Spiel
 Alle Barren im Spiel:
 {{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
 -----------------------------------------------------
@@ -942,7 +950,7 @@ Input on the LCD (everything without "")
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#itemlist E.S.Items '2249'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
 Bsp:
@@ -950,7 +958,7 @@ Bsp:
 Targets:LCD EISEN ERZ
 Meine EisenErz und Barren
 {{#itemlist E.S.Items '2249;2272'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
 ------------------------------------------------------------------
@@ -961,7 +969,7 @@ Here all ores are displayed where only 1-1000 exists on the basis.
 {{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
 {{#test Count geq 1}}
 {{#test Count leq 1000}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/test}}
 {{/itemlist}}
@@ -971,7 +979,7 @@ Here all ores are displayed where only 1-1000 exists on the basis.
 ```
 {#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
 {{#test Count leq 0}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/test}}
 {{/itemlist}}
 ```
@@ -1065,14 +1073,14 @@ If too many products can not be displayed, then you can also scroll
 ```
 {{#scroll 5 2}}
 {{#items E.S '"Name der Kiste"'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 ```
 Bsp.
 ```
 {{#scroll 5 2}}
 {{#items E.S 'Kühlschrank 1'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 
 {{#scroll 10 1}}
@@ -1097,12 +1105,12 @@ or here are 2 boxes that are displayed alternately.
 {{#intervall 2}}
 "Text optional"
 {{#items E.S '"Name der Kiste"'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 {{else}}
 "Text optional"
 {{#items E.S '"Name der Kiste2"'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 {{/intervall}}
 ```
@@ -1113,14 +1121,14 @@ Bsp.
 Kühlschrank 1:
 
 {{#items E.S 'Kühlschrank 1'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 {{else}}
 
 Kühlschrank 2:
 
 {{#items E.S 'Kühlschrank 2'}}
-{{Count}} {{i18n Key 'Deutsch'}}
+{{Count}} {{i18n Key}}
 {{/items}}
 {{/intervall}}
 ```
@@ -1258,9 +1266,10 @@ Syntaxdocu:
   * Itemlist the the selected items (ids) even if they don't in the list (list)
 
 ### (i18n)
-* {{#i18n Select 'Language'}}
+* {{#i18n Select \['Language'\]}}
   * Language: English,Deutsch,Français,Italiano,Spanish,...
     look at \[ESG\]\\Content\\Extras\\Localization.csv at the first line
+    from default it's get from the CultureInfo lcd.
 
 ### (datetime)
 + {{datetime}} = Display the Datetime

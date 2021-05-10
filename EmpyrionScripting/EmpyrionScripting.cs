@@ -372,6 +372,7 @@ namespace EmpyrionScripting
                     .ToArray();
 
                 Log($"CurrentEntities: {playfieldData.CurrentEntities.Length}", LogLevel.Debug);
+                playfieldData.EntityCultureInfo.Clear();
 
                 int count = 0;
                 playfieldData.CurrentEntities.ForEach(E => count += process(playfieldData, E));

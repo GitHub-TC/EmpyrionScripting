@@ -191,11 +191,13 @@
     <Compile Include="DisplayOutputConfiguration.cs" />
     <Compile Include="EmpyrionScripting.cs" />
     <Compile Include="DataWrapper\EntityData.cs" />
+    <Compile Include="EntityCultureInfo.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="DataWrapper\EventStore.cs" />
     <Compile Include="ExtensionsToolbox.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HandlebarsHelpers.cs" />
+    <Compile Include="IEntityCultureInfo.cs" />
     <Compile Include="Internal.Interface\IDeviceLock.cs" />
     <Compile Include="Internal.Interface\IPlayfieldScriptData.cs" />
     <Compile Include="Internal.Interface\IScriptRootData.cs" />

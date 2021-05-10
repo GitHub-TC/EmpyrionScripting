@@ -17,19 +17,21 @@ namespace EmpyrionScripting.CustomHelpers
     public static class ExternalDataHelpers
     {
         [HandlebarTag("datetime")]
-        public static void DateTimeHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        public static void DateTimeHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
             var format = arguments.Length > 0 ? arguments[0]?.ToString() : null;
             var add    = arguments.Length > 1 ? arguments[1]?.ToString() : null;
 
+            var root = rootObject as IScriptRootData;
+
             try
             {
                 var current = string.IsNullOrEmpty(add)
-                        ? DateTime.Now
+                        ? DateTime.UtcNow.AddHours(root.CultureInfo.UTCplusTimezone)
                         : DateTime.UtcNow.AddHours(int.Parse(add));
 
-                if (string.IsNullOrEmpty(format)) output.Write(current);
-                else                              output.Write(current.ToString(format));
+                if (string.IsNullOrEmpty(format)) output.Write(current.ToString(        root.CultureInfo.CultureInfo));
+                else                              output.Write(current.ToString(format, root.CultureInfo.CultureInfo));
             }
             catch (Exception error)
             {

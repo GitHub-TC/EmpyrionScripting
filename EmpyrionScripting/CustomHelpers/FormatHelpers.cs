@@ -1,7 +1,7 @@
 ﻿using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -10,25 +10,14 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class FormatHelpers
     {
-        public static CultureInfo FormatCulture { get; } = CreateFormatCulture();
-
-        private static CultureInfo CreateFormatCulture()
-        {
-            var c = (CultureInfo)CultureInfo.CurrentUICulture.Clone();
-
-            c.NumberFormat.PercentNegativePattern = 1;
-            c.NumberFormat.PercentPositivePattern = 1;
-
-            return c;
-        }
-
         [HandlebarTag("i18n")]
-        public static void I18NHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        public static void I18NHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{i18n}} helper must have exactly two argument: (key|id) (language)");
+            if (arguments.Length != 1 && arguments.Length != 2) throw new HandlebarsException("{{i18n}} helper must have at least one argument: (key|id) [language]");
 
-            var data     = arguments[0]?.ToString();
-            var language = arguments[1] as string;
+            var root        = rootObject as IScriptRootData;
+            var data        = arguments[0]?.ToString();
+            var language    = arguments.Get(1) as string ?? root.CultureInfo.i18nDefault;
 
             try
             {
@@ -47,13 +36,15 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("format")]
-        public static void FormatHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        public static void FormatHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
             if (arguments.Length != 2) throw new HandlebarsException("{{format data format}} helper must have exactly two argument: (data) (format)");
 
+            var root = rootObject as IScriptRootData;
+
             try
             {
-                output.Write(string.Format(FormatCulture, arguments[1]?.ToString(), arguments[0]).Replace(" ", EmpyrionScripting.Configuration.Current.NumberSpaceReplace));
+                output.Write(string.Format(root.CultureInfo.CultureInfo, arguments[1]?.ToString(), arguments[0]).Replace(" ", EmpyrionScripting.Configuration.Current.NumberSpaceReplace));
             }
             catch (Exception error)
             {
