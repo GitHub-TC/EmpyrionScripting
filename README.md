@@ -47,8 +47,6 @@ Benötigt werden mindestens 2 LCD und mindestens 1 Container
 1. LCD 2 (Ausgabe) Muss eindeutigen Namen haben z.B. "LCD Alle Erze"
 1. Jeder Kontainer der eine Information ausgeben soll, muss einen eindeutigen Namen haben
 
-Wenn ihr die Produktename auf deutsch haben wollt, dann anstatt {{Name}} {{i18 Key 'Deutsch'}}
-
 Unten stehen die ID Nummer für Erze und Barren.<br/>
 Einige Funktionen benötigen ein Komma"," andere benötigen Simikolon ";".<br/>
 Alles in "" sind Texte und nicht mit anzugeben.<br/>
@@ -60,12 +58,17 @@ Man kann auf einem LCD auch den Inhalt verschiedner Kisten anzeigen lassen!<br/>
  
  ---
 
-## Sprache und Format der Ausgaben
+## Sprache, Format, Zeit der Ausgaben
 Die Sprache, Uhrzeitoffset und Anzeigeformate kann man mit einem LCD einstellen welches man
 'CultureInfo' benennt. Etwaige Fehler bei der Angabe werden in einem LCD mit dem Namen 'CultureInfoDebug' angezeigt.
 
 Dabei kann man in der 'CultureInfo' folgendes angeben:
 ```
+{
+  "LanguageTag": "de-EN",
+  "i18nDefault": "English",
+  "UTCplusTimezone": 2
+}
 ```
 
 ## Was ist in der Kiste/Container/ContainerController/MunitionsKiste/Kühlschrank
@@ -851,8 +854,6 @@ At least 2 LCDs and at least 1 container are required
 1. LCD 2 (output) Must have unique name, e.g. "LCD All ores"
 1. Each container that is to output information must have a unique name
 
-If you want the product name in German, then instead of {{Name}} {{i18 Key 'Deutsch'}}
-
 Below is the ID number for ores and ingots.<br/>
 Some functions require a comma "," others require a simcard ";".<br/>
 Everything in "" are texts and not to be specified.<br/>
@@ -861,6 +862,20 @@ One can also display an information on 2 LCD's then at Targets: "Name LCD"; "Nam
 You can also display the content of various boxes on an LCD!<br/>
 
 ---
+
+## Language, format, time of the outputs
+The language, time offset and display formats can be set with an LCD which is called
+named 'CultureInfo'. Any errors in the specification are displayed in an LCD named 'CultureInfoDebug'.
+
+You can specify the following in the 'CultureInfo':
+```
+{
+  "LanguageTag: "en-EN",
+  "i18nDefault": "English",
+  "UTCplusTimezone": 2
+}
+```
+
 ## What's in the box / container / container controller / ammo box / refrigerator
 
 Eingabe im LCD 1 (alles ohne "")
