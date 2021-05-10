@@ -70,6 +70,7 @@ Dabei kann man in der 'CultureInfo' folgendes angeben:
   "UTCplusTimezone": 2
 }
 ```
+LanguageTag: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c
 
 ## Was ist in der Kiste/Container/ContainerController/MunitionsKiste/Kühlschrank
 
@@ -875,6 +876,8 @@ You can specify the following in the 'CultureInfo':
   "UTCplusTimezone": 2
 }
 ```
+
+LanguageTag: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c
 
 ## What's in the box / container / container controller / ammo box / refrigerator
 
