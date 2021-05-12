@@ -97,7 +97,7 @@ Eingabe im LCD (alles ohne "")
 ```
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#test ID in '2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297'}}
+{{#test ID in '4296,4297,4298,4299,4300,4301,4302,4317,4318,4332,4341,4345'}}
 {{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
@@ -107,7 +107,7 @@ Bsp:
 Targets:LCD Alle Erze
 Meine Erze
 {{#each E.S.Items}}
-{{#test Id in '2248,2249,2250,2251,2252,2253,2269,2270,2284,2297,2280,2254'}}
+{{#test Id in '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
 {{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
@@ -120,7 +120,7 @@ Eingabe im LCD (alles ohne "")
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#each E.S.Items}}
-{{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
+{{#test Id in '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
 {{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
@@ -130,7 +130,7 @@ Bsp:
 Targets:LCD Barren
 Alle meine Barren in der Basis:
 {{#each E.S.Items}}
-{{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
+{{#test Id in '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
 {{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
@@ -141,7 +141,7 @@ Eingabe im LCD (alles ohne "")
 ```
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
+{{#itemlist E.S.Items '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
 {{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
@@ -149,7 +149,7 @@ Bsp:
 ```
 Targets:LCD Alle Barren im Spiel
 Alle Barren im Spiel:
-{{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
+{{#itemlist E.S.Items '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
 {{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
@@ -159,7 +159,7 @@ Alle Barren im Spiel:
 Eingabe im LCD (alles ohne "")
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#itemlist E.S.Items '2249'}}
+{{#itemlist E.S.Items '4297'}}
 {{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
@@ -167,7 +167,7 @@ Bsp:
 ```
 Targets:LCD EISEN ERZ
 Meine EisenErz und Barren
-{{#itemlist E.S.Items '2249;2272'}}
+{{#itemlist E.S.Items '4297,4320'}}
 {{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
@@ -176,7 +176,7 @@ Meine EisenErz und Barren
 
 Hier werden alle Erze angezeigt wo nur 1-1000 auf der Basis vorhanden ist.
 ```
-{{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
+{{#itemlist E.S.Items '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
 {{#test Count geq 1}}
 {{#test Count leq 1000}}
 {{Count}} {{i18n Key}}
@@ -187,7 +187,7 @@ Hier werden alle Erze angezeigt wo nur 1-1000 auf der Basis vorhanden ist.
 ---
 ## Hier werden alle Erze angezeigt die nicht mehr auf der Basis sind
 ```
-{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
+{#itemlist E.S.Items '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
 {{#test Count leq 0}}
 {{Count}} {{i18n Key}}
 {{/test}}
@@ -377,36 +377,36 @@ Welt
 ## ERZE und BARREN IDENTIFIKATIONS NUMMER:
 @root/OreIds
 
-+ Item Id: 2248, Name: Magnesium Erz
-+ Item Id: 2249, Name: Eisen Erz
-+ Item Id: 2250, Name: Kobalt Erz
-+ Item Id: 2251, Name: Silizium Erz
-+ Item Id: 2252, Name: Neodymium Erz
-+ Item Id: 2253, Name: Kupfer Erz
-+ Item Id: 2254, Name: Promethium
-+ Item Id: 2269, Name: Erestrum Erz
-+ Item Id: 2270, Name: Zascosium Erz
-+ Item Id: 2284, Name: Sathium Erz
-+ Item Id: 2293, Name: Pentaxid Erz
-+ Item Id: 2297, Name: Gold Erz
++ Item Id: 4296, Name: Magnesium Erz
++ Item Id: 4297, Name: Eisen Erz
++ Item Id: 4298, Name: Kobalt Erz
++ Item Id: 4299, Name: Silizium Erz
++ Item Id: 4300, Name: Neodymium Erz
++ Item Id: 4301, Name: Kupfer Erz
++ Item Id: 4302, Name: Promethium
++ Item Id: 4317, Name: Erestrum Erz
++ Item Id: 4318, Name: Zascosium Erz
++ Item Id: 4332, Name: Sathium Erz
++ Item Id: 4341, Name: Pentaxid Erz
++ Item Id: 4345, Name: Gold Erz
 
 ---
 @root/IngotIds
 
-+ Item Id: 2271, Name: Magnesiumpulver
-+ Item Id: 2272, Name: Eisen Barren
-+ Item Id: 2273, Name: Kobalt Barren
-+ Item Id: 2274, Name: Silizium Barren
-+ Item Id: 2275, Name: Neodymium Barren
-+ Item Id: 2276, Name: Kupfer Barren
-+ Item Id: 2277, Name: Promethium Pallets
-+ Item Id: 2278, Name: Erestrum Barren
-+ Item Id: 2279, Name: Zascosium Barren
-+ Item Id: 2280, Name: Stein
-+ Item Id: 2281, Name: Steinstaub
-+ Item Id: 2285, Name: Sathium Barren
-+ Item Id: 2294, Name: Pentaxid Kristalle
-+ Item Id: 2298, Name: Gold Barren
++ Item Id: 4319, Name: Magnesiumpulver
++ Item Id: 4320, Name: Eisen Barren
++ Item Id: 4321, Name: Kobalt Barren
++ Item Id: 4322, Name: Silizium Barren
++ Item Id: 4323, Name: Neodymium Barren
++ Item Id: 4324, Name: Kupfer Barren
++ Item Id: 4325, Name: Promethium Pallets
++ Item Id: 4326, Name: Erestrum Barren
++ Item Id: 4327, Name: Zascosium Barren
++ Item Id: 4328, Name: Stein
++ Item Id: 4329, Name: Steinstaub
++ Item Id: 4333, Name: Sathium Barren
++ Item Id: 4342, Name: Pentaxid Kristalle
++ Item Id: 4346, Name: Gold Barren
 
 ---
 # Technical
@@ -904,7 +904,7 @@ Input on the LCD (everything without "")
 ```
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#test ID in '2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297'}}
+{{#test ID in '4296,4297,4298,4299,4300,4301,4302,4317,4318,4332,4341,4345'}}
 {{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
@@ -914,7 +914,7 @@ Bsp:
 Targets:LCD Alle Erze
 Meine Erze
 {{#each E.S.Items}}
-{{#test Id in '2248,2249,2250,2251,2252,2253,2269,2270,2284,2297,2280,2254'}}
+{{#test Id in '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
 {{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
@@ -927,7 +927,7 @@ Input on the LCD (everything without "")
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
 {{#each E.S.Items}}
-{{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
+{{#test Id in '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
 {{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
@@ -937,7 +937,7 @@ Bsp:
 Targets:LCD Barren
 Alle meine Barren in der Basis:
 {{#each E.S.Items}}
-{{#test Id in '2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298'}}
+{{#test Id in '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
 {{Count}} {{i18n Key}}
 {{/test}}
 {{/each}}
@@ -948,7 +948,7 @@ Input on the LCD (everything without "")
 ```
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
+{{#itemlist E.S.Items '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
 {{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
@@ -956,7 +956,7 @@ Bsp:
 ```
 Targets:LCD Alle Barren im Spiel
 Alle Barren im Spiel:
-{{#itemlist E.S.Items '2271;2272;2273;2274;2275;2276;2277;2278;2279;2280;2281;2285;2294;2298'}}
+{{#itemlist E.S.Items '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
 {{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
@@ -967,7 +967,7 @@ Input on the LCD (everything without "")
 ```
 Targets:"NAME DES ANZUZEIGENDEN LCD"
 "TEXT optional"
-{{#itemlist E.S.Items '2249'}}
+{{#itemlist E.S.Items '4297'}}
 {{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
@@ -975,7 +975,7 @@ Bsp:
 ```
 Targets:LCD EISEN ERZ
 Meine EisenErz und Barren
-{{#itemlist E.S.Items '2249;2272'}}
+{{#itemlist E.S.Items '4297,4320'}}
 {{Count}} {{i18n Key}}
 {{/itemlist}}
 ```
@@ -984,7 +984,7 @@ Meine EisenErz und Barren
 
 Here all ores are displayed where only 1-1000 exists on the basis.
 ```
-{{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
+{{#itemlist E.S.Items '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
 {{#test Count geq 1}}
 {{#test Count leq 1000}}
 {{Count}} {{i18n Key}}
@@ -995,7 +995,7 @@ Here all ores are displayed where only 1-1000 exists on the basis.
 ---
 ## Here all ores are displayed that are no longer based
 ```
-{#itemlist E.S.Items '2248;2249;2250;2251;2252;2253;2269;2270;2284;2297;2280;2254'}}
+{#itemlist E.S.Items '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
 {{#test Count leq 0}}
 {{Count}} {{i18n Key}}
 {{/test}}
@@ -1185,36 +1185,36 @@ Welt
 
 @root/OreIds
 
-+ Item Id: 2248, Name: MagnesiumOre
-+ Item Id: 2249, Name: IronOre
-+ Item Id: 2250, Name: CobaltOre
-+ Item Id: 2251, Name: SiliconOre
-+ Item Id: 2252, Name: NeodymiumOre
-+ Item Id: 2253, Name: CopperOre
-+ Item Id: 2254, Name: PromethiumOre
-+ Item Id: 2269, Name: ErestrumOre
-+ Item Id: 2270, Name: ZascosiumOre
-+ Item Id: 2284, Name: SathiumOre
-+ Item Id: 2293, Name: PentaxidOre
-+ Item Id: 2297, Name: GoldOre
++ Item Id: 4296, Name: MagnesiumOre
++ Item Id: 4297, Name: IronOre
++ Item Id: 4298, Name: CobaltOre
++ Item Id: 4299, Name: SiliconOre
++ Item Id: 4300, Name: NeodymiumOre
++ Item Id: 4301, Name: CopperOre
++ Item Id: 4302, Name: PromethiumOre
++ Item Id: 4317, Name: ErestrumOre
++ Item Id: 4318, Name: ZascosiumOre
++ Item Id: 4332, Name: SathiumOre
++ Item Id: 4341, Name: PentaxidOre
++ Item Id: 4345, Name: GoldOre
 
 ---
 @root/IngotIds
 
-+ Item Id: 2271, Name: MagnesiumPowder
-+ Item Id: 2272, Name: IronIngot
-+ Item Id: 2273, Name: CobaltIngot
-+ Item Id: 2274, Name: SiliconIngot
-+ Item Id: 2275, Name: NeodymiumIngot
-+ Item Id: 2276, Name: CopperIngot
-+ Item Id: 2277, Name: PromethiumPellets
-+ Item Id: 2278, Name: ErestrumIngot
-+ Item Id: 2279, Name: ZascosiumIngot
-+ Item Id: 2280, Name: CrushedStone
-+ Item Id: 2281, Name: RockDust
-+ Item Id: 2285, Name: SathiumIngot
-+ Item Id: 2294, Name: PentaxidCrystal
-+ Item Id: 2298, Name: GoldIngot
++ Item Id: 4319, Name: MagnesiumPowder
++ Item Id: 4320, Name: IronIngot
++ Item Id: 4321, Name: CobaltIngot
++ Item Id: 4322, Name: SiliconIngot
++ Item Id: 4323, Name: NeodymiumIngot
++ Item Id: 4324, Name: CopperIngot
++ Item Id: 4325, Name: PromethiumPellets
++ Item Id: 4326, Name: ErestrumIngot
++ Item Id: 4327, Name: ZascosiumIngot
++ Item Id: 4328, Name: CrushedStone
++ Item Id: 4329, Name: RockDust
++ Item Id: 4333, Name: SathiumIngot
++ Item Id: 4342, Name: PentaxidCrystal
++ Item Id: 4346, Name: GoldIngot
 
 ---
 # Technical
