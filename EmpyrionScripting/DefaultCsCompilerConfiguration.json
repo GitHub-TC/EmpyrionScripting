@@ -200,6 +200,7 @@
       "System.Threading.Tasks.Task.*",
       "UnityEngine.Color.*",
       "UnityEngine.Vector3.*",
+      "UnityEngine.LightType.*",
       "System.Globalization.*",
       "System.TimeSpan.*",
       "UnityEngine.VectorInt3.*"
