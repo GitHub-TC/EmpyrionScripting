@@ -11,6 +11,7 @@ namespace EmpyrionScripting.Interface
         int East { get; set; }
         int HitPoints { get; }
         int Id { get; }
+        int BlockType { get; set; }
         int? LockCode { get; }
         VectorInt3 Position { get; }
         int Rotation { get; set; }
