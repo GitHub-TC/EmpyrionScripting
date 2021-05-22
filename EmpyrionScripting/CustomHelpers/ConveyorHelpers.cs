@@ -252,11 +252,51 @@ namespace EmpyrionScripting.CustomHelpers
                                     }, () => root.TimeLimitReached);
 
                     if (count > 0) count = S.Container.AddItems(S.Id, count);
-                    if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName}";
+                    if (count > 0 && currentMoveInfo != null)
+                    {
+                         root.GetPlayfieldScriptData().MoveLostItems.Enqueue(new ItemMoveInfo()
+                         {
+                             Id         = S.Id,
+                             Count      = count,
+                             SourceE    = S.E,
+                             Source     = S.CustomName,
+                         });
+                        currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName} -> add to retry list";
+                    }
 
                  }, () => root.TimeLimitReached);
 
             return moveInfos;
+        }
+
+        public static void HandleMoveLostItems(PlayfieldScriptData root)
+        {
+            while(root.MoveLostItems.TryDequeue(out var restore))
+            {
+                try
+                {
+                    var count = restore.SourceE.S.GetCurrent().GetDevice<IContainer>(restore.Source)?.AddItems(restore.Id, restore.Count);
+                    if (count > 0)
+                    {
+                        root.MoveLostItems.Enqueue(new ItemMoveInfo()
+                        {
+                            Id      = restore.Id,
+                            Count   = count.Value,
+                            SourceE = restore.SourceE,
+                            Source  = restore.Source,
+                        });
+                        Log($"HandleMoveLostItems(partial restored): {restore.Source} {restore.Id} #{restore.Count} -> {count}", LogLevel.Message);
+                    }
+                    else Log($"HandleMoveLostItems(restored): {restore.Source} {restore.Id} #{restore.Count}", LogLevel.Message);
+                }
+                catch (Exception error)
+                {
+                    Log($"HandleMoveLostItems(error): {restore.Source} {restore.Id} #{restore.Count} -> {EmpyrionScripting.ErrorFilter(error)}", LogLevel.Debug);
+                    root.MoveLostItems.Enqueue(restore);
+                }
+
+                if (root.ScriptExecQueue.TimeLimitSyncReached()) break;
+            }
         }
 
         private static int MoveItem(IScriptRootData root, IItemsSource S, string N, IStructureData targetStructure, int count, int? maxLimit)
@@ -379,7 +419,17 @@ namespace EmpyrionScripting.CustomHelpers
                     };
 
                     if (count > 0) count = S.Container.AddItems(S.Id, count);
-                    if (count > 0 && currentMoveInfo != null) currentMoveInfo.Error = $"{{fill}} error lost #{count} of item {S.Id} in container {S.CustomName}";
+                    if (count > 0 && currentMoveInfo != null)
+                    {
+                        root.GetPlayfieldScriptData().MoveLostItems.Enqueue(new ItemMoveInfo()
+                        {
+                            Id         = S.Id,
+                            Count      = count,
+                            SourceE    = S.E,
+                            Source     = S.CustomName,
+                        });
+                        currentMoveInfo.Error = $"{{fill}} error lost #{count} of item {S.Id} in container {S.CustomName} -> add to retry list";
+                    }
 
                 }, () => root.TimeLimitReached);
 

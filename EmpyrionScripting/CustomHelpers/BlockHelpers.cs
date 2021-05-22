@@ -224,16 +224,16 @@ namespace EmpyrionScripting.CustomHelpers
                 var colorId = -1;
                 switch (pos.ToUpper())
                 {
-                    case "T": colorId = block.Top;    break;
-                    case "B": colorId = block.Bottom; break;
-                    case "N": colorId = block.North;  break;
-                    case "S": colorId = block.South;  break;
-                    case "W": colorId = block.West;   break;
-                    case "E": colorId = block.East;   break;
+                    case "T": colorId = block.TopColor;    break;
+                    case "B": colorId = block.BottomColor; break;
+                    case "N": colorId = block.NorthColor;  break;
+                    case "S": colorId = block.SouthColor;  break;
+                    case "W": colorId = block.WestColor;   break;
+                    case "E": colorId = block.EastColor;   break;
                 }
 
                 if (colorId != -1) options.Template(output, colorId);
-                else                 options.Inverse(output, context as object);
+                else               options.Inverse(output, context as object);
             }
             catch (Exception error)
             {

@@ -37,6 +37,7 @@ namespace EmpyrionScripting
         public int GameUpdateScriptLoopTimeLimitReached { get; private set; }
         public static Stopwatch ScriptLoopTimeLimiter { get; } = new Stopwatch();
         public ConcurrentBag<string> BackgroundWorkerToDo { get; set; } = new ConcurrentBag<string>();
+        public Func<bool> TimeLimitSyncReached { get; private set; }
 
         public ScriptExecQueue(Action<IScriptRootData> processScript)
         {
@@ -82,7 +83,7 @@ namespace EmpyrionScripting
 
             var scriptLoopTimeLimiterStopwatch = scriptLoopTimeLimiter;
             var timeLimitBackgroundReached = new Func<bool>(() => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopBackgroundTimeLimiterMS);
-            var timeLimitSyncReached       = new Func<bool>(() => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopSyncTimeLimiterMS);
+            TimeLimitSyncReached           = new Func<bool>(() => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopSyncTimeLimiterMS);
 
             Log($"ExecNext: {WaitForExec.Count} -> {ExecQueue.Count}", LogLevel.Debug);
 
@@ -97,7 +98,7 @@ namespace EmpyrionScripting
                         if (syncExecCount > scriptsSyncExecution) ExecQueue.Enqueue(scriptId);
                         else
                         {
-                            ((ScriptRootData)data).ScriptLoopTimeLimitReached = timeLimitSyncReached;
+                            ((ScriptRootData)data).ScriptLoopTimeLimitReached = TimeLimitSyncReached;
                             ExecNext(data);
                         }
                     }
@@ -113,7 +114,7 @@ namespace EmpyrionScripting
                     return;
                 }
 
-                if (timeLimitSyncReached())
+                if (TimeLimitSyncReached())
                 {
                     GameUpdateScriptLoopTimeLimitReached++;
                     Log($"ScriptLoopTimeLimitReached: {scriptLoopTimeLimiter.ElapsedMilliseconds}", LogLevel.Debug);

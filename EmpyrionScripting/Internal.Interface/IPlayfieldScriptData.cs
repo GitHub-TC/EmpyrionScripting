@@ -12,5 +12,6 @@ namespace EmpyrionScripting.Internal.Interface
         ConcurrentDictionary<string, object> PersistendData { get; set; }
         IPlayfield Playfield { get; set; }
         string PlayfieldName { get; set; }
+        ConcurrentQueue<IItemMoveInfo> MoveLostItems { get; }
     }
 }

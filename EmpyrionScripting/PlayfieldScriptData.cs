@@ -17,6 +17,7 @@ namespace EmpyrionScripting
         public ConcurrentDictionary<int, EntityCultureInfo> EntityCultureInfo { get; set; } = new ConcurrentDictionary<int, EntityCultureInfo>();
         public ConcurrentDictionary<int, IEventStore> EventStore { get; set; } = new ConcurrentDictionary<int, IEventStore>();
         public ConcurrentDictionary<string, Func<object, string>> LcdCompileCache = new ConcurrentDictionary<string, Func<object, string>>();
+        public ConcurrentQueue<IItemMoveInfo> MoveLostItems { get; } = new ConcurrentQueue<IItemMoveInfo>();
 
         public ConcurrentDictionary<string, object> PersistendData { get; set; } = new ConcurrentDictionary<string, object>();
         public ScriptExecQueue ScriptExecQueue { get; set; }

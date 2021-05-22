@@ -768,6 +768,9 @@ namespace EmpyrionScripting
 
             try{ ScriptExecQueue.Exec(PlayfieldData.Values, Configuration.Current.ScriptsParallelExecution, Configuration.Current.ScriptsSyncExecution); }
             catch (Exception error) { Log($"Game_Update: ScriptExecQueue.Exec: {error}", LogLevel.Error); }
+
+            try { PlayfieldData.Values.ForEach(PF => ConveyorHelpers.HandleMoveLostItems(PF)); }
+            catch (Exception error) { Log($"Game_Update: HandleMoveLostItems: {error}", LogLevel.Error); }
         }
 
         public static void RestartAllScriptsForPlayfieldServer()
