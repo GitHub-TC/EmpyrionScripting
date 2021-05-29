@@ -193,6 +193,7 @@
       "System.object.GetType",
       "System.object.ToString",
       "System.Random.*",
+      "System.Math.*",
       "System.String.*",
       "System.string.*",
       "System.StringSplitOptions.*",
