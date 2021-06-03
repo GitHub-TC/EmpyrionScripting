@@ -15,7 +15,6 @@ namespace EmpyrionScripting.Internal.Interface
         int ScriptPriority { get; set; }
         ScriptInfo ScriptDiagnosticInfo { get; set; }
         bool Running { get; set; }
-        bool TimeLimitReached { get; }
 
         IPlayfieldScriptData GetPlayfieldScriptData();
     }

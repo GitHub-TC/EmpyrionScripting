@@ -126,6 +126,7 @@
       "EmpyrionScripting.Interface.IScriptModData.Version",
       "EmpyrionScripting.Interface.IScriptModData.ScriptingModInfoData",
       "EmpyrionScripting.Interface.IScriptModData.ScriptingModScriptsInfoData",
+      "EmpyrionScripting.Interface.IScriptModData.TimeLimitReached",
       "EmpyrionScripting.Interface.ISignalData.*",
       "EmpyrionScripting.Interface.ISignalEventBase.*",
       "EmpyrionScripting.Interface.IStructureData",
