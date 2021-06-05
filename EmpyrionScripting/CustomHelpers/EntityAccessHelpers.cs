@@ -1,8 +1,11 @@
-﻿using EmpyrionScripting.CsHelper;
+﻿using Eleon.Modding;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -116,6 +119,64 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{entitybyid}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("globaltostructpos")]
+        public static void GlobalToStructPosHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2 && arguments.Length != 4) throw new HandlebarsException("{{globaltostructpos structure (vector | x y z)}} helper must have two or four argument: (structure) (vector | (x) (y) (z))");
+            if (EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance == 0) return;
+
+            var root      = rootObject   as IScriptRootData;
+            var structure = arguments[0] as IStructureData;
+
+            try
+            {
+                if(arguments.Length == 2)
+                {
+                    if      (arguments[1] is Vector3    vector3)    options.Template(output, structure.GlobalToStructPos(vector3));
+                    else if (arguments[1] is VectorInt3 vectorint3) options.Template(output, structure.GlobalToStructPos(new Vector3(vectorint3.x, vectorint3.y, vectorint3.z)));
+                }
+                else {
+                    float.TryParse(arguments.Get(1)?.ToString(), out var x);
+                    float.TryParse(arguments.Get(2)?.ToString(), out var y);
+                    float.TryParse(arguments.Get(3)?.ToString(), out var z);
+                    options.Template(output, structure.GlobalToStructPos(new Vector3((int)x, (int)y, (int)z)));
+                }
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{globaltostructpos}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("structtoglobalpos")]
+        public static void StructToGlobalPosHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2 && arguments.Length != 4) throw new HandlebarsException("{{structtoglobalpos structure (vector | x y z)}} helper must have two or four argument: (structure) (vector | (x) (y) (z))");
+            if (EmpyrionScripting.Configuration.Current.EntityAccessMaxDistance == 0) return;
+
+            var root      = rootObject   as IScriptRootData;
+            var structure = arguments[0] as IStructureData;
+
+            try
+            {
+                if(arguments.Length == 2)
+                {
+                    if      (arguments[1] is Vector3    vector3)    options.Template(output, structure.StructToGlobalPos(new VectorInt3(vector3)));
+                    else if (arguments[1] is VectorInt3 vectorint3) options.Template(output, structure.StructToGlobalPos(vectorint3));
+                }
+                else { 
+                    float.TryParse(arguments.Get(1)?.ToString(), out var x);
+                    float.TryParse(arguments.Get(2)?.ToString(), out var y);
+                    float.TryParse(arguments.Get(3)?.ToString(), out var z);
+                    options.Template(output, structure.StructToGlobalPos(new VectorInt3((int)x, (int)y, (int)z)));
+                }
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{structtoglobalpos}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

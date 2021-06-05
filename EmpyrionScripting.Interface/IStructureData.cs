@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Eleon.Modding;
+using UnityEngine;
 
 namespace EmpyrionScripting.Interface
 {
@@ -37,6 +38,9 @@ namespace EmpyrionScripting.Interface
         bool HasLandClaimDevice { get; }
         ulong LastVisitedTicks { get; }
         string PlayerCreatedSteamId { get; }
+
+        VectorInt3 GlobalToStructPos(Vector3 globalPos);
+        Vector3 StructToGlobalPos(VectorInt3 structPos);
 
         IStructure GetCurrent();
     }

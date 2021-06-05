@@ -716,6 +716,13 @@ Syntaxdocu:
 + {{stopwatch startsignal stopsignal \[resetsignal\]}}
   + Eine einfache Stopuhr (für Rennstrecken) mit einem Startsignal, einem Stopsignal und für das Zurücksetzten der Ergebnisse optionalem Resetsignal
 
+## Positionen (Struktur und Welt)
++ {{structtoglobalpos structure (vector | x y z)}}
+  + Liefert die Weltkoorinaten der Strukturpostion (vector | x y z)
+
++ {{globaltostructpos structure (vector | x y z)}}
+  + Liefert die Position (vector | x y z) der Weltkoordinaten aus sicht der Struktur
+
 ## Elevated Scripte (Savegame oder Adm-Strukturen)
 + {{lockdevice structure device|x y z}}
   + Sperrt ein Device
@@ -1511,6 +1518,13 @@ DateTime format:
    + Note: The core of the structure must be called 'Core-Recycle-ID' (where ID stands for the ID of the structure)
    + With the configuration setting DeconstructBlockSubstitution, a replacement (by another block type) / deletion (by 0) of block types can be defined
     
+## Positions (structure and world)
++ {{structtoglobalpos structure (vector | x y z)}}
+  + Returns the world coorinates of structurepos structure (vector | x y z)
+
++ {{globaltostructpos structure (vector | x y z)}}
+  + Returns the position (vector | x y z) of the world coordinates from the point of view of the structure
+
 ## Elevated scripts (Savegame or Adm structures)
 + {{lockdevice structure device | x y z}}
   + Locks a device

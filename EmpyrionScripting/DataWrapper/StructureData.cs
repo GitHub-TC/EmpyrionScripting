@@ -122,6 +122,10 @@ namespace EmpyrionScripting.DataWrapper
         }
 
         virtual public IStructure GetCurrent() => _s.Value.TryGetTarget(out var s) ? s : null;
+
+        public VectorInt3 GlobalToStructPos(Vector3 globalPos) => GetCurrent()?.GlobalToStructPos(globalPos) ?? VectorInt3.Undef;
+        public Vector3 StructToGlobalPos(VectorInt3 structPos) => GetCurrent()?.StructToGlobalPos(structPos) ?? Vector3.zero;
+
         private readonly Lazy<WeakReference<IStructure>> _s;
 
         public IPlayerData Pilot => _pilot.Value;
@@ -141,5 +145,7 @@ namespace EmpyrionScripting.DataWrapper
         private readonly Lazy<ISignalData[]> _ControlPanelSignals;
         public ISignalData[] BlockSignals => _BlockSignals.Value;
         private readonly Lazy<ISignalData[]> _BlockSignals;
+
+        
     }
 }

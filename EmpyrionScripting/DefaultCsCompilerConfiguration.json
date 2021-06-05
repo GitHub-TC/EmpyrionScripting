@@ -162,6 +162,8 @@
       "EmpyrionScripting.Interface.IStructureData.HasLandClaimDevice",
       "EmpyrionScripting.Interface.IStructureData.LastVisitedTicks",
       "EmpyrionScripting.Interface.IStructureData.PlayerCreatedSteamId",
+      "EmpyrionScripting.Interface.IStructureData.GlobalToStructPos",
+      "EmpyrionScripting.Interface.IStructureData.StructToGlobalPos",
       "EmpyrionScripting.Interface.IStructureTankWrapper",
       "EmpyrionScripting.Interface.IStructureTankWrapper.AllowedItem",
       "EmpyrionScripting.Interface.IStructureTankWrapper.Capacity",
