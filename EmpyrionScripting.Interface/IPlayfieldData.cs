@@ -10,7 +10,7 @@ namespace EmpyrionScripting.Interface
         string PlanetClass { get; }
         string PlanetType { get; }
         string PlayfieldType { get; }
-        IEnumerable<ILimitedPlayerData> Players { get; }
+        ILimitedPlayerData[] Players { get; }
         VectorInt3 SolarSystemCoordinates { get; }
         string SolarSystemName { get; }
 

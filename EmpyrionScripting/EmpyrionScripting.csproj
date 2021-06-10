@@ -157,6 +157,7 @@
     <Compile Include="CsHelper\BlockHelpers.cs" />
     <Compile Include="CsHelper\ConveyorHelpers.cs" />
     <Compile Include="CsHelper\CsScriptFunctions.cs" />
+    <Compile Include="CsHelper\DialogHelpers.cs" />
     <Compile Include="CsHelper\EffectHelpers.cs" />
     <Compile Include="CsHelper\EntityAccessHelpers.cs" />
     <Compile Include="CsHelper\FormatHelpers.cs" />

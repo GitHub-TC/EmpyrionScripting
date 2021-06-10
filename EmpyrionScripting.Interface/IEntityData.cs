@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace EmpyrionScripting.Interface
@@ -22,5 +23,6 @@ namespace EmpyrionScripting.Interface
         IEntity GetCurrent();
         IPlayfield GetCurrentPlayfield();
         IScriptInfo[] ScriptInfos { get; }
+        bool IsElevated { get; }
     }
 }

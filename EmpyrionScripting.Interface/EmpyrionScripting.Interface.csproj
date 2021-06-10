@@ -58,6 +58,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DialogResult.cs" />
     <Compile Include="IBlockData.cs" />
     <Compile Include="IConfigEcfAccess.cs" />
     <Compile Include="IConsoleMock.cs" />

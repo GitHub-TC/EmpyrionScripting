@@ -1,6 +1,7 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.Interface;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -57,6 +58,18 @@ namespace EmpyrionScripting.DataWrapper
         public int BelongsTo => GetCurrent().BelongsTo;
         public int DockedTo { get { try { return GetCurrent().DockedTo; } catch { return 0; } } }
 
+        public bool IsElevated { 
+            get {
+                if (_IsElevated.HasValue) return _IsElevated.Value;
+
+                var testGroup = Faction.Group == FactionGroup.Faction || Faction.Group == FactionGroup.Player ? Faction.Id.ToString() : Faction.Group.ToString();
+                _IsElevated = EmpyrionScripting.Configuration.Current.ElevatedGroups.Any(f => f == testGroup);
+
+                return _IsElevated.Value;
+            }
+        }
+        bool? _IsElevated;
+
         public virtual IEntity GetCurrent() => entity.TryGetTarget(out var e) ? e : null;
         public virtual IPlayfield GetCurrentPlayfield() => playfield.TryGetTarget(out var p) ? p : null;
 
@@ -70,11 +83,8 @@ namespace EmpyrionScripting.DataWrapper
                 var entityId = GetCurrent()?.Id;
                 if (entityId == 0) return Array.Empty<IScriptInfo>();
 
-                var testGroup = Faction.Group == FactionGroup.Faction || Faction.Group == FactionGroup.Player ? Faction.Id.ToString() : Faction.Group.ToString();
-                var isElevatedScript = EmpyrionScripting.Configuration.Current.ElevatedGroups.Any(f => f == testGroup);
-
                 return pfScriptData.ScriptExecQueue.ScriptRunInfo.Values
-                    .Where(i => i.EntityId == entityId && (isElevatedScript || !i.IsElevatedScript))
+                    .Where(i => i.EntityId == entityId && (IsElevated || !i.IsElevatedScript))
                     .OrderBy(i => i.ScriptId)
                     .ToArray();
             }

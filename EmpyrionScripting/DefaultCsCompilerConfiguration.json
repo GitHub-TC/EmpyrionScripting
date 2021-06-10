@@ -42,6 +42,8 @@
       "Eleon.Modding.IPlayfield.Name",
       "Eleon.Modding.ItemStack.*",
       "Eleon.Modding.VectorInt3.*",
+      "Eleon.Modding.DialogConfig.*",
+      "Eleon.Modding.DialogActionHandler.*",
       "EmpyrionScripting.CustomHelpers.HelpersTools.GetUniqueNames",
       "EmpyrionScripting.DataWrapper.ContainerData",
       "EmpyrionScripting.EnumerableExtensions.ForEach",

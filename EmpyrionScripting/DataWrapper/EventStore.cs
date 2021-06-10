@@ -23,9 +23,9 @@ namespace EmpyrionScripting.DataWrapper
         {
             ISignalEventBase e = new SignalEventBase()
             {
-                Name = name,
-                TimeStamp = DateTime.Now,
-                State = newState,
+                Name                = name,
+                TimeStamp           = DateTime.UtcNow,
+                State               = newState,
                 TriggeredByEntityId = triggeringEntityId,
             };
 

@@ -30,7 +30,7 @@ namespace EmpyrionScripting.DataWrapper
 
         public float GetTerrainHeightAt(float x, float z) => playfield.GetTerrainHeightAt(x, z);
 
-        public IEnumerable<ILimitedPlayerData> Players => _p == null ? _p = playfield.Players.Values.Select(P => new LimitedPlayerData(P)) : _p;
-        IEnumerable<ILimitedPlayerData> _p;
+        public ILimitedPlayerData[] Players => _p == null ? _p = playfield.Players.Values.Select(P => new LimitedPlayerData(P)).ToArray() : _p;
+        ILimitedPlayerData[] _p;
     }
 }

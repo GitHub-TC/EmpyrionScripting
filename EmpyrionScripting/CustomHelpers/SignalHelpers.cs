@@ -54,7 +54,7 @@ namespace EmpyrionScripting.CustomHelpers
                     .Select(S => S.Value)
                     .ToArray();
 
-                if (signals != null && signals.Length > 1)
+                if (signals != null && signals.Length > 0)
                 {
                     ISignalEventBase found = signals
                         .Where(S => {
@@ -66,6 +66,7 @@ namespace EmpyrionScripting.CustomHelpers
                                     root.GetPersistendData().AddOrUpdate(root.ScriptId + currentSignal.Name, searchState, (k, v) => searchState);
                                     return true;
                             }
+                            root.GetPersistendData().AddOrUpdate(root.ScriptId + currentSignal.Name, currentSignal.State, (k, v) => currentSignal.State);
                             return false;
                             })
                         .Select(S => S[S.Count - 1])

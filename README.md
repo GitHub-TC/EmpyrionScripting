@@ -723,6 +723,10 @@ Syntaxdocu:
 + {{globaltostructpos structure (vector | x y z)}}
   + Liefert die Position (vector | x y z) der Weltkoordinaten aus sicht der Struktur
 
+## Dialogfenster
++ {{dialog player|Id|SignalName title body}} 
+  + Zeigt einen Dialog dem Spieler an (bei SignalName wenn eines dieser Signale ausgelöst wird): (player | playerId | SignalName) (title) (body) [ButtonTexts] [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
+
 ## Elevated Scripte (Savegame oder Adm-Strukturen)
 + {{lockdevice structure device|x y z}}
   + Sperrt ein Device
@@ -1524,6 +1528,10 @@ DateTime format:
 
 + {{globaltostructpos structure (vector | x y z)}}
   + Returns the position (vector | x y z) of the world coordinates from the point of view of the structure
+
+## Dialog windows
++ {{dialog player|Id|SignalName title body}} 
+  + Displays a dialog to the player (at SignalName when one of these signals is triggered): [player | playerId | SignalName] [title] [body] [ButtonTexts] [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
 
 ## Elevated scripts (Savegame or Adm structures)
 + {{lockdevice structure device | x y z}}

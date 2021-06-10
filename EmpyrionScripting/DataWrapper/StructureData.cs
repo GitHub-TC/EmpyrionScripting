@@ -73,11 +73,10 @@ namespace EmpyrionScripting.DataWrapper
         public IEntityData[] DockedE => _d.Value;
         private readonly Lazy<IEntityData[]> _d;
 
-        public IEnumerable<LimitedPlayerData> Players => _p == null ? _p =
-            E.GetCurrentPlayfield().Players.Values
-            .Where(P => P.CurrentStructure?.Id == GetCurrent()?.Id)
-            .Select(P => E != null && E.Faction.Group == FactionGroup.Admin ? new PlayerData(P) : new LimitedPlayerData(P)) : _p;
-        IEnumerable<LimitedPlayerData> _p;
+        public IPlayerData[] Players => _p == null ? _p = E.GetCurrentPlayfield().Players.Values
+            .Where(P => E.IsElevated || (E.Faction.Group == FactionGroup.Player && P.Id == E.Faction.Id) || P.Faction.Id == E.Faction.Id)
+            .Select(P => new PlayerData(P)).ToArray() : _p;
+        IPlayerData[] _p;
 
         public string[] GetDeviceTypeNames => Enum.GetNames(typeof(DeviceTypeName));
 

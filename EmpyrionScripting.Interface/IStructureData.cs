@@ -38,6 +38,7 @@ namespace EmpyrionScripting.Interface
         bool HasLandClaimDevice { get; }
         ulong LastVisitedTicks { get; }
         string PlayerCreatedSteamId { get; }
+        IPlayerData[] Players { get; }
 
         VectorInt3 GlobalToStructPos(Vector3 globalPos);
         Vector3 StructToGlobalPos(VectorInt3 structPos);

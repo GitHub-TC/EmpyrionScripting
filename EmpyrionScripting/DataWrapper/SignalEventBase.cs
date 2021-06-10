@@ -10,9 +10,9 @@ namespace EmpyrionScripting.DataWrapper
 
         public SignalEventBase(SignalEventBase signalBase)
         {
-            Name = signalBase.Name;
-            TimeStamp = signalBase.TimeStamp;
-            State = signalBase.State;
+            Name                = signalBase.Name;
+            TimeStamp           = signalBase.TimeStamp;
+            State               = signalBase.State;
             TriggeredByEntityId = signalBase.TriggeredByEntityId;
         }
 
