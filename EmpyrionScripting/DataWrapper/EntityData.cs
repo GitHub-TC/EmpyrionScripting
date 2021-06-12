@@ -51,6 +51,7 @@ namespace EmpyrionScripting.DataWrapper
         public bool IsProxy => GetCurrent().IsProxy;
 
         public Vector3 Pos => GetCurrent().Position;
+        public Vector3 Rot => GetCurrent().Rotation.eulerAngles;
         public Vector3 Forward => GetCurrent().Forward;
         public float Distance { get; set; }
         public FactionData Faction => GetCurrent().Faction;

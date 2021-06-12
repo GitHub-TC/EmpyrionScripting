@@ -55,7 +55,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("bar")]
         public static void ProcessBarHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
-            if (arguments.Length < 4) throw new HandlebarsException("{{bar data min max length [char] [bgchar]}} helper must have at least four argument: (data) (min) (max) (length)");
+            if (arguments.Length < 4) throw new HandlebarsException("{{bar data min max length [char] [bgchar] [l|r]}} helper must have at least four argument: (data) (min) (max) (length)");
 
             try
             {
@@ -64,10 +64,17 @@ namespace EmpyrionScripting.CustomHelpers
                 double.TryParse(arguments[2]?.ToString(), out var max);
                 int.TryParse(arguments[3]?.ToString(), out var barLength);
 
-                var len = (int)((barLength / (max - min)) * value);
+                var len = (int)(barLength / Math.Abs(max - min) * value);
 
-                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 4 ? arguments[4].ToString() : EmpyrionScripting.Configuration.Current.BarStandardValueSign, Math.Max(0, Math.Min(barLength, len)))));
-                output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 5 ? arguments[5].ToString() : EmpyrionScripting.Configuration.Current.BarStandardSpaceSign, Math.Max(0, Math.Min(barLength, barLength - len)))));
+                if (arguments.Get(6)?.ToString() == "r")
+                {
+                    output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 5 ? arguments[5].ToString() : EmpyrionScripting.Configuration.Current.BarStandardSpaceSign, Math.Max(0, Math.Min(barLength, barLength + len)))));
+                    output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 4 ? arguments[4].ToString() : EmpyrionScripting.Configuration.Current.BarStandardValueSign, Math.Max(0, Math.Min(barLength, -len)))));
+                }
+                else {
+                    output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 4 ? arguments[4].ToString() : EmpyrionScripting.Configuration.Current.BarStandardValueSign, Math.Max(0, Math.Min(barLength, len)))));
+                    output.Write(string.Concat(Enumerable.Repeat(arguments.Length > 5 ? arguments[5].ToString() : EmpyrionScripting.Configuration.Current.BarStandardSpaceSign, Math.Max(0, Math.Min(barLength, barLength - len)))));
+                }
             }
             catch (Exception error)
             {

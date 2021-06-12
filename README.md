@@ -578,7 +578,7 @@ Syntaxdocu:
 + {{random start end}}
   + Zufallswert zwischen (start) und (end) liefern und in den Block als {{this}} hereinreichen
 
-+ {{bar data min max length \[char\] \[bgchar\]}}
++ {{bar data min max length \[char\] \[bgchar\] \[l|r\]}}
   + Erzeugt eine Balkenanzeige für (data) in dem Bereich von (min) bis (max) mit der Länge (length)
   + Der Balkensymbole für "gefüllt" (char) und den Hintergrund (bgchar) sind optional 
 
@@ -661,6 +661,9 @@ Syntaxdocu:
 + {{int (value)}}
   + Liefert den ganzzahligen Anteil des Wertes
 
++ {{abs (value)}}
+  + Liefert den absoluten Wert
+  
 ## LCD
 + {{gettext lcddevice}}
   + Liefert den Text des LCD (lcddevice)
@@ -1407,7 +1410,7 @@ DateTime format:
 + {{lookup array index}} and {{lookupblock array index}}
   + Returns the element at the position (index) starting with 0
 
-+ {{bar data min max length \[char\] \[bgchar\]}}
++ {{bar data min max length \[char\] \[bgchar\] \[l|r\]}}
   + Displays a bar for (data) in the rage of (min) to (max) with the total bar length of (length)
   + The string for filled signs (char) and background signs (bgchar) are optional 
 
@@ -1448,6 +1451,9 @@ DateTime format:
 
 + {{int (value)}}
    + Returns the integer part of the value
+   
++ {{abs (value)}}
+   + Returns the absoulute value
    
 + {{distance (lVector) (rVector) [format]}}
   + Distance between (lVector) and (rVector)

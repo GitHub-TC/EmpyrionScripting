@@ -156,6 +156,22 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("abs")]
+        public static void AbsHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{abs}} helper must have one argument: (value)");
+
+            try
+            {
+                double.TryParse(arguments[0]?.ToString(), out var left);
+                output.Write(Math.Abs(left));
+            }
+            catch (Exception error)
+            {
+                throw new HandlebarsException($"{{abs}} {arguments[0]} error: {EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
         [HandlebarTag("distance")]
         public static void DistanceHelper(TextWriter output, object root, dynamic context, object[] arguments)
         {
