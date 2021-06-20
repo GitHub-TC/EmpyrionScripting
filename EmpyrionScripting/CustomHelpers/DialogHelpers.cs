@@ -48,7 +48,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var playerData = root.IsElevatedScript
-                    ? (root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new PlayerData(plainPlayer) : null)
+                    ? (root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new PlayerData(root.GetCurrentPlayfield(), plainPlayer) : null)
                     : root.E.S.Players.FirstOrDefault(P => P.Id == playerId);
 
                 if (playerData == null) return;
@@ -86,7 +86,7 @@ namespace EmpyrionScripting.CustomHelpers
                     (buttonIdx, linkId, content, playerId, customValue) =>
                     {
                         var playerData = root.IsElevatedScript 
-                            ? (root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new PlayerData(plainPlayer) : null)
+                            ? (root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new PlayerData(root.GetCurrentPlayfield(), plainPlayer) : null)
                             :  root.E.S.Players.FirstOrDefault(P => P.Id == playerId);
 
                         if (closeOnLinkClick || buttonIdx == -1)
@@ -159,7 +159,7 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var playerData = root.IsElevatedScript
-                    ? (root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new PlayerData(plainPlayer) : null)
+                    ? (root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new PlayerData(root.GetCurrentPlayfield(), plainPlayer) : null)
                     : root.E.S.Players.FirstOrDefault(P => P.Id == playerId);
 
                 if (playerData == null) return;
@@ -201,7 +201,7 @@ namespace EmpyrionScripting.CustomHelpers
                     (buttonIdx, linkId, content, playerId, customValue) =>
                     {
                         var playerData = root.IsElevatedScript 
-                            ? (root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new PlayerData(plainPlayer) : null)
+                            ? (root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new PlayerData(root.GetCurrentPlayfield(), plainPlayer) : null)
                             :  root.E.S.Players.FirstOrDefault(P => P.Id == playerId);
 
                         if (closeOnLinkClick || buttonIdx == -1)

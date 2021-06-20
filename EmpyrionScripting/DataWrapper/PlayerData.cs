@@ -34,8 +34,11 @@ namespace EmpyrionScripting.DataWrapper
 
     public class PlayerData : LimitedPlayerData, IPlayerData
     {
-        public PlayerData(IPlayer p) : base(p)
+        private readonly IPlayfield currentPlayfield;
+
+        public PlayerData(IPlayfield playfield, IPlayer p) : base(p)
         {
+            currentPlayfield = playfield;
         }
 
         public int Food => SafeGet("Food", p, () => (int)p.Food);
@@ -63,5 +66,15 @@ namespace EmpyrionScripting.DataWrapper
         public string StartPlayfield => SafeGet("StartPlayfield", p, () => p?.StartPlayfield);
         public string SteamId => SafeGet("SteamId", p, () => p?.SteamId);
         public float StaminaMax => SafeGet("StaminaMax", p, () => p.StaminaMax);
+
+        public bool IsPilot => SafeGet("IsPilot", p, () => p.IsPilot);
+
+        public IEntityData DrivingEntity => SafeGet("DrivingEntity", p, () => new EntityData(currentPlayfield, p.DrivingEntity));
+
+        public IEntityData CurrentStructure => SafeGet("CurrentStructure", p, () => new EntityData(currentPlayfield, p.CurrentStructure.Entity));
+
+        public string SteamOwnerId => SafeGet("SteamOwnerId", p, () => p.SteamOwnerId);
+
+        public int HomeBaseId => SafeGet("HomeBaseId", p, () => p.HomeBaseId);
     }
 }

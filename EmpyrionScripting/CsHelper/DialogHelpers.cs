@@ -13,7 +13,7 @@ namespace EmpyrionScripting.CsHelper
             try
             {
                 var playerData = Root.IsElevatedScript
-                    ? (Root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new DataWrapper.PlayerData(plainPlayer) : null)
+                    ? (Root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new DataWrapper.PlayerData(Root.GetCurrentPlayfield(), plainPlayer) : null)
                     : Root.E.S.Players.FirstOrDefault(P => P.Id == playerId);
 
                 if (playerData == null) return false;
@@ -48,7 +48,7 @@ namespace EmpyrionScripting.CsHelper
                 else playerId = signals.FirstOrDefault(S => S.State)?.TriggeredByEntityId ?? 0;
 
                 var playerData = Root.IsElevatedScript
-                    ? (Root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new DataWrapper.PlayerData(plainPlayer) : null)
+                    ? (Root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new DataWrapper.PlayerData(Root.GetCurrentPlayfield(), plainPlayer) : null)
                     : Root.E.S.Players.FirstOrDefault(P => P.Id == playerId);
 
                 if (playerData == null) return false;
@@ -90,7 +90,7 @@ namespace EmpyrionScripting.CsHelper
                 else playerId = signals.FirstOrDefault(S => S.State)?.TriggeredByEntityId ?? 0;
 
                 var playerData = Root.IsElevatedScript
-                    ? (Root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new DataWrapper.PlayerData(plainPlayer) : null)
+                    ? (Root.GetCurrentPlayfield().Players.TryGetValue(playerId, out var plainPlayer) ? new DataWrapper.PlayerData(Root.GetCurrentPlayfield(), plainPlayer) : null)
                     : Root.E.S.Players.FirstOrDefault(P => P.Id == playerId);
 
                 if (playerData == null) return false;

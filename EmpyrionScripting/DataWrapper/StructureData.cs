@@ -23,8 +23,8 @@ namespace EmpyrionScripting.DataWrapper
                 .Where(E => E.Value != null)
                 .Select(DockedE => new EntityData(E.GetCurrentPlayfield(), DockedE.Value)).ToArray());
             _s = new Lazy<WeakReference<IStructure>>(() => new WeakReference<IStructure>(E.GetCurrent().Structure));
-            _pilot = new Lazy<IPlayerData>(() => new PlayerData(GetCurrent().Pilot));
-            _passengers = new Lazy<IPlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(P)).ToArray());
+            _pilot = new Lazy<IPlayerData>(() => new PlayerData(E.GetCurrentPlayfield(), GetCurrent().Pilot));
+            _passengers = new Lazy<IPlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(E.GetCurrentPlayfield(), P)).ToArray());
             _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank, StructureTankType.Fuel));
             _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank, StructureTankType.Oxygen));
             _PentaxidTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().PentaxidTank, StructureTankType.Pentaxid));
@@ -75,7 +75,7 @@ namespace EmpyrionScripting.DataWrapper
 
         public IPlayerData[] Players => _p == null ? _p = E.GetCurrentPlayfield().Players.Values
             .Where(P => E.IsElevated || (E.Faction.Group == FactionGroup.Player && P.Id == E.Faction.Id) || P.Faction.Id == E.Faction.Id)
-            .Select(P => new PlayerData(P)).ToArray() : _p;
+            .Select(P => new PlayerData(E.GetCurrentPlayfield(), P)).ToArray() : _p;
         IPlayerData[] _p;
 
         public string[] GetDeviceTypeNames => Enum.GetNames(typeof(DeviceTypeName));

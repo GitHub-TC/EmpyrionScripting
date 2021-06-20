@@ -27,7 +27,12 @@ namespace EmpyrionScripting.Interface
         float Stamina { get; }
         float StaminaMax { get; }
         string StartPlayfield { get; }
+        bool IsPilot { get; }
+        IEntityData DrivingEntity { get; }
+        IEntityData CurrentStructure { get; }
         string SteamId { get; }
+        string SteamOwnerId { get; }
+        int HomeBaseId { get; }
         List<ItemStack> Toolbar { get; }
         int UpgradePoints { get; }
     }

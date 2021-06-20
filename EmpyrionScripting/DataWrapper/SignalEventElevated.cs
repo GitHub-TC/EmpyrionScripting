@@ -11,7 +11,7 @@ namespace EmpyrionScripting.DataWrapper
             _CurrentPlayfield = playfield;
         }
         public IEntityData TriggeredByShip => _CurrentPlayfield.Entities.TryGetValue(TriggeredByEntityId, out var entity) ? new EntityData(_CurrentPlayfield, entity, false) : null;
-        public PlayerData TriggeredByPlayer => _CurrentPlayfield.Players.TryGetValue(TriggeredByEntityId, out var player) ? new PlayerData(player) : null;
+        public PlayerData TriggeredByPlayer => _CurrentPlayfield.Players.TryGetValue(TriggeredByEntityId, out var player) ? new PlayerData(_CurrentPlayfield, player) : null;
 
     }
 }
