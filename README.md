@@ -730,6 +730,10 @@ Syntaxdocu:
 + {{dialog player|Id|SignalName title body}} 
   + Zeigt einen Dialog dem Spieler an (bei SignalName wenn eines dieser Signale ausgelöst wird): (player | playerId | SignalName) (title) (body) [ButtonTexts] [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
 
++ {{dialogbox player|Id|SignalName}} 
+  + Zeigt einen Dialog dem Spieler an (bei SignalName wenn eines dieser Signale ausgelöst wird): (player | playerId | SignalName) [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
+  + (title) (body) (ButtonTexts) werden aus dem {{else}} ermittelt bei dem die Playerdaten als this zur Verfügung stehen 1.Zeile=Titel, Letzte Zeile=Buttons, die Zeilen dazwischen = Body
+
 ## Elevated Scripte (Savegame oder Adm-Strukturen)
 + {{lockdevice structure device|x y z}}
   + Sperrt ein Device
@@ -1538,6 +1542,10 @@ DateTime format:
 ## Dialog windows
 + {{dialog player|Id|SignalName title body}} 
   + Displays a dialog to the player (at SignalName when one of these signals is triggered): [player | playerId | SignalName] [title] [body] [ButtonTexts] [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
+
++ {{dialogbox player|Id|SignalName}} 
+  + Displays a dialog to the player (at SignalName when one of these signals is triggered): (player | playerId | SignalName) [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
+  + (title) (body) (ButtonTexts) are determined from the {{else}} where the player data is available as this 1st line=title, last line=buttons, the lines in between = body
 
 ## Elevated scripts (Savegame or Adm structures)
 + {{lockdevice structure device | x y z}}
