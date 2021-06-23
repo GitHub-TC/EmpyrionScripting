@@ -535,7 +535,12 @@ namespace EmpyrionScripting.CustomHelpers
                 }) as ProcessBlockData;
 
                 if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (C, I) => C.AddItems(I, 1) > 0);
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (C, I) => {
+                        var pickupTarget = EmpyrionScripting.ConfigEcfAccess.FindAttribute(I, "PickupTarget")?.ToString();
+                        return !string.IsNullOrEmpty(pickupTarget) && EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(pickupTarget, out var pickupBlockId) 
+                            ? C.AddItems(pickupBlockId, 1) > 0
+                            : C.AddItems(I,             1) > 0;
+                    });
                     if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
@@ -614,7 +619,26 @@ namespace EmpyrionScripting.CustomHelpers
                 }) as ProcessBlockData;
 
                 if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, null, ExtractBlockToContainer);
+                    var ressources = new Dictionary<int, double>();
+
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, null, (c, i) => ExtractBlockToContainer(ressources, i));
+
+                    ressources.ForEach(R =>
+                    {
+                        var over = target.AddItems(R.Key, (int)R.Value);
+
+                        if (over > 0)
+                        {
+                            root.GetPlayfieldScriptData().MoveLostItems.Enqueue(new ItemMoveInfo()
+                            {
+                                Id      = R.Key,
+                                Count   = over,
+                                SourceE = E,
+                                Source  = N,
+                            });
+                        }
+                    });
+
                     if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
@@ -749,25 +773,22 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        private static bool ExtractBlockToContainer(IContainer target, int blockType)
+        private static bool ExtractBlockToContainer(Dictionary<int, double> ressources, int blockId)
         {
-            if (!EmpyrionScripting.ConfigEcfAccess.ResourcesForBlockById.TryGetValue(blockType, out var recipe)) return false;
-
-            var removeRessIfFailed = new List<KeyValuePair<int, int>>();
-
-            var targetContainerFull = recipe.Any(R =>
+            if (!EmpyrionScripting.ConfigEcfAccess.ResourcesForBlockById.TryGetValue(blockId, out var recipe))
             {
-                var over = target.AddItems(R.Key, R.Value);
+                EmpyrionScripting.Log($"No recipe for {blockId}:{(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(blockId, out var noRecipeBlock) ? noRecipeBlock.Values["Name"] : "")}", LogLevel.Message);
+                return false;
+            }
+            EmpyrionScripting.Log($"Recipe for [{blockId}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(blockId, out var blockData) ? blockData.Values["Name"] : "")}: {recipe.Aggregate("", (r, i) => $"{r}\n{i.Key}:{i.Value}")}", LogLevel.Debug);
 
-                if (over > 0) target.RemoveItems(R.Key, R.Value - over);
-                else          removeRessIfFailed.Add(new KeyValuePair<int, int>(R.Key, R.Value));
-
-                return over > 0;
+            recipe.ForEach(R =>
+            {
+                if (ressources.TryGetValue(R.Key, out var count)) ressources[R.Key] = count + R.Value;
+                else                                              ressources.Add(R.Key, R.Value);
             });
 
-            if (targetContainerFull) removeRessIfFailed.ForEach(R => target.RemoveItems(R.Key, R.Value));
-
-            return targetContainerFull;
+            return false;
         }
     }
 }

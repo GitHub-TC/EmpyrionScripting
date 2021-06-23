@@ -10,14 +10,6 @@ namespace EcfParser.UnitTests
     public class ParseTests
     {
         [TestMethod]
-        public void ReadVersionTest()
-        {
-            var line = @"VERSION: 9";
-            var result = EcfParser.Parse.Deserialize(line);
-            Assert.AreEqual(9, result.Version);
-        }
-
-        [TestMethod]
         public void ReadBlockMapping()
         {
             var result = EcfParser.Parse.ReadBlockMapping(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\Data\blocksmap.dat"));

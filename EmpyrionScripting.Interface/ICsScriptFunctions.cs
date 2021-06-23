@@ -35,7 +35,7 @@ namespace EmpyrionScripting.Interface
         T[] GetDevices<T>(IStructureData structure, string names) where T : class, IDevice;
         (IBlockData B, T D)[] GetBlockDevices<T>(IStructureData structure, string names) where T : class, IDevice;
         (IBlockData B, T D)[] GetBlockDevices<T>(params IBlockData[] block) where T : class, IDevice;
-        Dictionary<int, int> ResourcesForBlockById(int id);
+        Dictionary<int, double> ResourcesForBlockById(int id);
         bool ShowDialog(int playerId, DialogConfig dialogConfig, DialogActionHandler actionHandler, int customValue);
         bool ShowDialog(string signalNames, DialogConfig dialogConfig, DialogActionHandler actionHandler, int customValue);
     }

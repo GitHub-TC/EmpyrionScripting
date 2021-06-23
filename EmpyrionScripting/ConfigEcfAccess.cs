@@ -15,17 +15,17 @@ namespace EmpyrionScripting
         public IDictionary<string, int> BlockIdMapping;
         public IDictionary<int, string> IdBlockMapping;
 
+        public EcfFile Templates_Ecf { get; private set; }
         public EcfFile BlocksConfig_Ecf { get; set; } = new EcfFile();
         public EcfFile ItemsConfig_Ecf { get; set; } = new EcfFile();
         public EcfFile Configuration_Ecf { get; set; } = new EcfFile();
-        public EcfFile Config_Ecf { get; set; } = new EcfFile();
         public EcfFile Flat_Config_Ecf { get; set; } = new EcfFile();
         public IDictionary<int, EcfBlock> ConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public IDictionary<string, EcfBlock> ConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
         public IDictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public IDictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
         public IDictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
-        public IDictionary<int, Dictionary<int, int>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, int>>();
+        public IDictionary<int, Dictionary<int, double>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, double>>();
         public static Action<string, LogLevel> Log { get; set; } = (s, l) => Console.WriteLine(s);
         public string ContentPath { get; set; }
         public string ScenarioContentPath { get; set; }
@@ -46,13 +46,17 @@ namespace EmpyrionScripting
             CalcBlockRessources();
             timer.Stop();
 
-            BlockIdMapping          .ForEach(B => Log($"ReadBlockMappingFile: '{B.Key}' -> {B.Value}]", LogLevel.Debug));
-            BlocksConfig_Ecf .Blocks.ForEach(B => Log($"BlocksConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
-            ItemsConfig_Ecf  .Blocks.ForEach(B => Log($"ItemsConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
-            Configuration_Ecf.Blocks.ForEach(B => Log($"Configuration_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
-            Flat_Config_Ecf  .Blocks.ForEach(B => Log($"Flat_Config_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
-            FlatConfigBlockById     .ForEach(B => Log($"FlatConfigBlockById: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]", LogLevel.Debug));
-            FlatConfigBlockByName   .ForEach(B => Log($"FlatConfigBlockByName: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]", LogLevel.Debug));
+            if(EmpyrionScripting.Configuration?.Current?.LogLevel == LogLevel.Debug) { 
+                BlockIdMapping          .ForEach(B => Log($"ReadBlockMappingFile: '{B.Key}' -> {B.Value}]", LogLevel.Debug));
+                Templates_Ecf    .Blocks.ForEach(B => Log($"Templates_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
+                BlocksConfig_Ecf .Blocks.ForEach(B => Log($"BlocksConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
+                ItemsConfig_Ecf  .Blocks.ForEach(B => Log($"ItemsConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
+                Configuration_Ecf.Blocks.ForEach(B => Log($"Configuration_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
+                Flat_Config_Ecf  .Blocks.ForEach(B => Log($"Flat_Config_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
+                FlatConfigBlockById     .ForEach(B => Log($"FlatConfigBlockById: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]", LogLevel.Debug));
+                FlatConfigBlockByName   .ForEach(B => Log($"FlatConfigBlockByName: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]", LogLevel.Debug));
+                ResourcesForBlockById   .ForEach(B => Log($"ResourcesForBlockById: [{B.Key}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(B.Key, out var data) ? data.Values["Name"] : "")} -> {B.Value.Aggregate("", (r, i) => $"{r}\n{i.Value}: [{i.Key}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(i.Key, out var data) ? data.Values["Name"] : "")}")}", LogLevel.Message));
+            }
 
             Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count} BlockIdMapping:[{BlockIdMapping?.Count}] {blockMappingFile} takes:{timer.Elapsed}", LogLevel.Message);
         }
@@ -65,7 +69,7 @@ namespace EmpyrionScripting
 
         public void FlatEcfConfigData()
         {
-            Flat_Config_Ecf = new EcfFile() { Version = Configuration_Ecf.Version, Blocks = new List<EcfBlock>() };
+            Flat_Config_Ecf = new EcfFile() { Blocks = new List<EcfBlock>() };
             try { Configuration_Ecf.Blocks?.ForEach(B => Flat_Config_Ecf.Blocks.Add(MergeRefBlocks(new EcfBlock(), B))); }
             catch (Exception error) { Log($"EmpyrionScripting Configuration_Ecf.Blocks MergeRefBlocks: {error}", LogLevel.Error); }
 
@@ -90,27 +94,19 @@ namespace EmpyrionScripting
 
         public void MergeEcfFiles()
         {
+            try { Configuration_Ecf.MergeWith(Templates_Ecf); }
+            catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
+
             try { Configuration_Ecf.MergeWith(BlocksConfig_Ecf); }
             catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
 
             try { Configuration_Ecf.MergeWith(ItemsConfig_Ecf); }
             catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
-
-            try { Configuration_Ecf.MergeWith(Config_Ecf); }
-            catch (Exception error) { Log($"EmpyrionScripting MergeWith: {error}", LogLevel.Error); }
         }
 
         public void ReadEcfFiles()
         {
-            Configuration_Ecf   = ReadEcf("Config_Example.ecf", B => { });
-            Config_Ecf          = ReadEcf("Config.ecf",         B => {
-                if(B.Attr.Any(A => A.Name == "Id")) // Id forbidden in Config.ecf
-                {
-                    B.Attr?.Clear();
-                    B.Childs?.Clear();
-                    B.EcfValues?.Clear();
-                }
-            });
+            Templates_Ecf       = ReadEcf("Templates.ecf",    B => { });
             BlocksConfig_Ecf    = ReadEcf("BlocksConfig.ecf", B => { });
             ItemsConfig_Ecf     = ReadEcf("ItemsConfig.ecf",  B => { });
         }
@@ -169,22 +165,22 @@ namespace EmpyrionScripting
                 ? Path.Combine(ScenarioContentPath, "Configuration", fileName)
                 : Path.Combine(ContentPath,         "Configuration", fileName);
 
-        private Dictionary<int, Dictionary<int, int>> ResourcesForBlock()
+        private Dictionary<int, Dictionary<int, double>> ResourcesForBlock()
         {
-            var templates = new Dictionary<int, Dictionary<int, int>>();
+            var templates = new Dictionary<int, Dictionary<int, double>>();
 
             FlatConfigBlockById
                 .ForEach(B => {
                     var idCfg = B.Value.Attr.FirstOrDefault(A => A.Name == "Id");
                     if (!int.TryParse(idCfg?.Value?.ToString(), out var id)) return;
 
-                    var ressList = new Dictionary<int, int>();
+                    var ressList = new Dictionary<int, double>();
                     var templateRoot = B.Value.Attr.FirstOrDefault(A => A.Name == "TemplateRoot")?.Value?.ToString() ??
                                        idCfg.AddOns?.FirstOrDefault(A => A.Key == "Name").Value?.ToString();
                     if (string.IsNullOrEmpty(templateRoot)) return;
                     if (!FlatConfigTemplatesByName.TryGetValue(templateRoot, out var templateRootBlock)) return;
 
-                    ScanTemplates(templateRootBlock, ressList);
+                    ScanTemplates(templateRootBlock, ressList, 1);
 
                     if (ressList.Count > 0 && !templates.ContainsKey(id)) templates.Add(id, ressList);
                 });
@@ -192,7 +188,7 @@ namespace EmpyrionScripting
             return templates;
         }
 
-        private void ScanTemplates(EcfBlock templateRootBlock, Dictionary<int, int> ressList)
+        private void ScanTemplates(EcfBlock templateRootBlock, Dictionary<int, double> ressList, double multiplyer)
         {
             var templateName = templateRootBlock.Attr.FirstOrDefault(A => A.Name == "Name")?.Value.ToString();
             bool.TryParse(templateRootBlock.Attr.FirstOrDefault(A => A.Name == "BaseItem")?.Value.ToString(), out var isBaseItem);
@@ -202,21 +198,23 @@ namespace EmpyrionScripting
                 .ForEach(C => {
                     if (C.Name.ToString() == templateName) return;
 
-                    if (!isBaseItem && FlatConfigTemplatesByName.TryGetValue(C.Name.ToString(), out var recipe))
+                    if (!isBaseItem && FlatConfigTemplatesByName.TryGetValue(C.Name, out var recipe))
                     {
                         bool.TryParse(recipe.Attr.FirstOrDefault(A => A.Name == "BaseItem")?.Value.ToString(), out var isSubBaseItem);
                         if (!isSubBaseItem)
                         {
-                            ScanTemplates(recipe, ressList);
+                            var recipeMultiplyer = multiplyer * (int)C.Value;
+                            if (recipe.Values.TryGetValue("OutputCount", out var outputCount)) recipeMultiplyer /= (int)outputCount;
+                            ScanTemplates(recipe, ressList, recipeMultiplyer);
                             return;
                         }
                     }
 
-                    if (!FlatConfigBlockByName.TryGetValue(C.Name.ToString(), out var ressource)) return;
-                    if (!int.TryParse(ressource.Attr.FirstOrDefault(A => A.Name == "Id")?.Value.ToString(), out var ressId)) return;
+                    if (!FlatConfigBlockByName.TryGetValue(C.Name, out var ressource)) return;
+                    if (!ressource.Values.TryGetValue("Id", out var ressId)) return;
 
-                    if (ressList.TryGetValue(ressId, out var count)) ressList[ressId] = count + (int)C.Value;
-                    else ressList.Add(ressId, (int)C.Value);
+                    if (ressList.TryGetValue((int)ressId, out var count)) ressList[(int)ressId] = count + multiplyer * (int)C.Value;
+                    else                                                  ressList.Add((int)ressId,       multiplyer * (int)C.Value);
                 });
         }
 

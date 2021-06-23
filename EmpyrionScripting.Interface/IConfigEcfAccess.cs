@@ -10,6 +10,6 @@ namespace EmpyrionScripting.Interface
         EcfFile Configuration_Ecf { get; set; }
         IDictionary<int, EcfBlock> FlatConfigBlockById { get; set; }
         IDictionary<string, EcfBlock> FlatConfigBlockByName { get; set; }
-        IDictionary<int, Dictionary<int, int>> ResourcesForBlockById { get; set; }
+        IDictionary<int, Dictionary<int, double>> ResourcesForBlockById { get; set; }
     }
 }

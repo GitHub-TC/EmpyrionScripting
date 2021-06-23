@@ -28,11 +28,6 @@ namespace EcfParser
                         if (result.Blocks == null) result.Blocks = new List<EcfBlock>();
                         result.Blocks.Add(block);
                     }
-                    else
-                    {
-                        var attr = ReadAttribute(currentLine);
-                        if (attr != null && attr.Name.Equals("VERSION", StringComparison.InvariantCultureIgnoreCase)) result.Version = (int)attr.Value;
-                    }
                 }
             } while (i < lines.Length - 1);
 
