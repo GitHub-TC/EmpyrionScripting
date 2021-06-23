@@ -534,14 +534,10 @@ namespace EmpyrionScripting.CustomHelpers
                                     (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
                 }) as ProcessBlockData;
 
-                if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (C, I) => {
-                        var pickupTarget = EmpyrionScripting.ConfigEcfAccess.FindAttribute(I, "PickupTarget")?.ToString();
-                        return !string.IsNullOrEmpty(pickupTarget) && EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(pickupTarget, out var pickupBlockId) 
-                            ? C.AddItems(pickupBlockId, 1) > 0
-                            : C.AddItems(I,             1) > 0;
-                    });
-                    if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
+                if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks)
+                {
+                    lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, DeconstructBlock);
+                    if (processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
 
@@ -773,14 +769,39 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        private static bool DeconstructBlock(IContainer target, int blockId)
+        {
+            string blockName = EmpyrionScripting.ConfigEcfAccess.FindAttribute(blockId, "PickupTarget")?.ToString();
+
+            if (string.IsNullOrEmpty(blockName) && EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(blockId, out var blockData))
+            {
+                blockName = blockData.Values.TryGetValue("Name", out var name) ? name.ToString() : null;
+            }
+
+            if (!string.IsNullOrEmpty(blockName) && EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(blockName, out var parentBlockName)) blockName = parentBlockName;
+
+            return target.AddItems(EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(blockName, out var mappedBlockId) ? mappedBlockId : blockId, 1) > 0;
+        }
+
         private static bool ExtractBlockToContainer(Dictionary<int, double> ressources, int blockId)
         {
+            EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(blockId, out var blockData);
+
             if (!EmpyrionScripting.ConfigEcfAccess.ResourcesForBlockById.TryGetValue(blockId, out var recipe))
             {
-                EmpyrionScripting.Log($"No recipe for {blockId}:{(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(blockId, out var noRecipeBlock) ? noRecipeBlock.Values["Name"] : "")}", LogLevel.Message);
-                return false;
+                if(blockData?.Values != null && blockData.Values.ContainsKey("Name") && EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(blockData.Values["Name"].ToString(), out var parentBlockName))
+                {
+                    EmpyrionScripting.ConfigEcfAccess.ResourcesForBlockById.TryGetValue(EmpyrionScripting.ConfigEcfAccess.BlockIdMapping[parentBlockName], out var parentRecipe);
+                    recipe = parentRecipe;
+                }
+
+                if (recipe == null)
+                {
+                    EmpyrionScripting.Log($"No recipe for {blockId}:{(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(blockId, out var noRecipeBlock) ? noRecipeBlock.Values["Name"] : "")}", LogLevel.Message);
+                    return false;
+                }
             }
-            EmpyrionScripting.Log($"Recipe for [{blockId}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(blockId, out var blockData) ? blockData.Values["Name"] : "")}: {recipe.Aggregate("", (r, i) => $"{r}\n{i.Key}:{i.Value}")}", LogLevel.Debug);
+            EmpyrionScripting.Log($"Recipe for [{blockId}] {blockData?.Values["Name"]}: {recipe.Aggregate("", (r, i) => $"{r}\n{i.Key}:{i.Value}")}", LogLevel.Debug);
 
             recipe.ForEach(R =>
             {

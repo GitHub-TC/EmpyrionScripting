@@ -22,6 +22,7 @@ namespace EmpyrionScripting
         public EcfFile Flat_Config_Ecf { get; set; } = new EcfFile();
         public IDictionary<int, EcfBlock> ConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public IDictionary<string, EcfBlock> ConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public IDictionary<string, string> ParentBlockName { get; set; } = new Dictionary<string, string>();
         public IDictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public IDictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
         public IDictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
@@ -80,6 +81,17 @@ namespace EmpyrionScripting
             catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockByName: {error}", LogLevel.Error); }
 
             try { FlatConfigTemplatesByName = TemplatesByName(Flat_Config_Ecf.Blocks); }
+            catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockByName: {error}", LogLevel.Error); }
+
+            try
+            {
+                FlatConfigBlockByName
+                    .Where(B => B.Value?.Values?.ContainsKey("ChildBlocks") == true)
+                    .ForEach(B => B.Value.Values["ChildBlocks"].ToString()
+                        .Split(',').Select(N => N.Trim())
+                        .ForEach(N => { if(!ParentBlockName.ContainsKey(N)) ParentBlockName.Add(N, B.Key); })
+                    );
+            }
             catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockByName: {error}", LogLevel.Error); }
         }
 
