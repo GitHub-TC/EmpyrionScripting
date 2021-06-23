@@ -57,9 +57,10 @@ namespace EmpyrionScripting
                 FlatConfigBlockById     .ForEach(B => Log($"FlatConfigBlockById: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]", LogLevel.Debug));
                 FlatConfigBlockByName   .ForEach(B => Log($"FlatConfigBlockByName: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]", LogLevel.Debug));
                 ResourcesForBlockById   .ForEach(B => Log($"ResourcesForBlockById: [{B.Key}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(B.Key, out var data) ? data.Values["Name"] : "")} -> {B.Value.Aggregate("", (r, i) => $"{r}\n{i.Value}: [{i.Key}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(i.Key, out var data) ? data.Values["Name"] : "")}")}", LogLevel.Message));
+                ParentBlockName         .ForEach(B => Log($"ParentBlockName: {B.Key} -> {B.Value}", LogLevel.Debug));
             }
 
-            Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count} BlockIdMapping:[{BlockIdMapping?.Count}] {blockMappingFile} takes:{timer.Elapsed}", LogLevel.Message);
+            Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count} ParentBlockNames: #{ParentBlockName.Count} BlockIdMapping:[{BlockIdMapping?.Count}] {blockMappingFile} takes:{timer.Elapsed}", LogLevel.Message);
         }
 
         public void CalcBlockRessources()
@@ -83,16 +84,32 @@ namespace EmpyrionScripting
             try { FlatConfigTemplatesByName = TemplatesByName(Flat_Config_Ecf.Blocks); }
             catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockByName: {error}", LogLevel.Error); }
 
-            try
-            {
-                FlatConfigBlockByName
-                    .Where(B => B.Value?.Values?.ContainsKey("ChildBlocks") == true)
-                    .ForEach(B => B.Value.Values["ChildBlocks"].ToString()
-                        .Split(',').Select(N => N.Trim())
-                        .ForEach(N => { if(!ParentBlockName.ContainsKey(N)) ParentBlockName.Add(N, B.Key); })
-                    );
-            }
+            try{ GenerateParentBlockList(); }
             catch (Exception error) { Log($"EmpyrionScripting FlatConfigBlockByName: {error}", LogLevel.Error); }
+        }
+
+        private void GenerateParentBlockList()
+        {
+            FlatConfigBlockByName
+                .Where(B => B.Value?.Values?.ContainsKey("ChildBlocks") == true)
+                .ForEach(B => B.Value.Values["ChildBlocks"].ToString()
+                    .Split(',').Select(N => N.Trim())
+                    .ForEach(N => { if (!ParentBlockName.ContainsKey(N)) ParentBlockName.Add(N, B.Key); })
+                );
+
+            FlatConfigBlockByName
+                .Where(B => B.Value?.Values?.ContainsKey("ParentBlocks") == true)
+                .ForEach(B => B.Value.Values["ParentBlocks"].ToString()
+                    .Split(',').Select(N => N.Trim())
+                    .ForEach(N => {
+                        if (!B.Value.Values.TryGetValue("Name", out var name)           || 
+                            !FlatConfigBlockByName.TryGetValue(N, out var parentBlock)  || 
+                            !parentBlock.Values.TryGetValue("AllowPlacingAt", out var placeableAt)) return;
+
+                        placeableAt.ToString().Split(',').Select(N => N.Trim())
+                            .ForEach(P => { if (!ParentBlockName.ContainsKey(P + name.ToString())) ParentBlockName.Add(P + name.ToString(), N); });
+                    })
+                );
         }
 
         public void BuildIdAndNameAccess()

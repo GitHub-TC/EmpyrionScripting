@@ -536,7 +536,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks)
                 {
-                    lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, DeconstructBlock);
+                    lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (C, I) => DeconstructBlock(E, C, I));
                     if (processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
@@ -617,7 +617,7 @@ namespace EmpyrionScripting.CustomHelpers
                 if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
                     var ressources = new Dictionary<int, double>();
 
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, null, (c, i) => ExtractBlockToContainer(ressources, i));
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, null, (c, i) => ExtractBlockToContainer(E, ressources, i));
 
                     ressources.ForEach(R =>
                     {
@@ -769,7 +769,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        private static bool DeconstructBlock(IContainer target, int blockId)
+        private static bool DeconstructBlock(IEntityData E, IContainer target, int blockId)
         {
             string blockName = EmpyrionScripting.ConfigEcfAccess.FindAttribute(blockId, "PickupTarget")?.ToString();
 
@@ -778,21 +778,24 @@ namespace EmpyrionScripting.CustomHelpers
                 blockName = blockData.Values.TryGetValue("Name", out var name) ? name.ToString() : null;
             }
 
-            if (!string.IsNullOrEmpty(blockName) && EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(blockName, out var parentBlockName)) blockName = parentBlockName;
+            if (!string.IsNullOrEmpty(blockName) && EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(PlaceAtType(E.EntityType) + blockName, out var parentBlockName1)) blockName = parentBlockName1;
+            if (!string.IsNullOrEmpty(blockName) && EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(                            blockName, out var parentBlockName2)) blockName = parentBlockName2;
 
-            return target.AddItems(EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(blockName, out var mappedBlockId) ? mappedBlockId : blockId, 1) > 0;
+            return target.AddItems(blockName != null && EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(blockName, out var mappedBlockId) ? mappedBlockId : blockId, 1) > 0;
         }
 
-        private static bool ExtractBlockToContainer(Dictionary<int, double> ressources, int blockId)
+        private static bool ExtractBlockToContainer(IEntityData E, Dictionary<int, double> ressources, int blockId)
         {
             EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(blockId, out var blockData);
 
             if (!EmpyrionScripting.ConfigEcfAccess.ResourcesForBlockById.TryGetValue(blockId, out var recipe))
             {
-                if(blockData?.Values != null && blockData.Values.ContainsKey("Name") && EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(blockData.Values["Name"].ToString(), out var parentBlockName))
-                {
-                    EmpyrionScripting.ConfigEcfAccess.ResourcesForBlockById.TryGetValue(EmpyrionScripting.ConfigEcfAccess.BlockIdMapping[parentBlockName], out var parentRecipe);
-                    recipe = parentRecipe;
+                if(blockData?.Values != null && blockData.Values.ContainsKey("Name")){
+                    string parentBlockName = null;
+                    if (EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(PlaceAtType(E.EntityType) + blockData.Values["Name"].ToString(), out var parentBlockName1)) parentBlockName = parentBlockName1;
+                    if (EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(                            blockData.Values["Name"].ToString(), out var parentBlockName2)) parentBlockName = parentBlockName2;
+
+                    if (parentBlockName != null && EmpyrionScripting.ConfigEcfAccess.ResourcesForBlockById.TryGetValue(EmpyrionScripting.ConfigEcfAccess.BlockIdMapping[parentBlockName], out var parentRecipe)) recipe = parentRecipe;
                 }
 
                 if (recipe == null)
@@ -811,5 +814,14 @@ namespace EmpyrionScripting.CustomHelpers
 
             return false;
         }
+
+        private static string PlaceAtType(EntityType entityType) => entityType switch
+        {
+            EntityType.BA => "Base",
+            EntityType.CV => "MS",
+            EntityType.SV => "SS",
+            EntityType.HV => "GV",
+            _             => string.Empty,
+        };
     }
 }
