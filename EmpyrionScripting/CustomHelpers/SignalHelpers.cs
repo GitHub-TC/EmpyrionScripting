@@ -148,13 +148,13 @@ namespace EmpyrionScripting.CustomHelpers
 
                 var signals = structure.BlockSignals
                     .Where(S => uniqueSignalNames.ContainsKey(S.Name) && S.BlockPos.HasValue)
-                    .Select(S => new BlockData(structure.GetCurrent(), S.BlockPos.Value))
+                    .Select(S => new BlockData(structure.E, S.BlockPos.Value))
                     .ToList();
 
                 var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
                 signals.AddRange(uniqueNames
                     .SelectMany(N => structure.GetCurrent().GetDevicePositions(N))
-                    .Select(P => new BlockData(structure.GetCurrent(), P))
+                    .Select(P => new BlockData(structure.E, P))
                     );
 
                 signals.ForEach(S => S.SwitchState = state);
@@ -179,13 +179,13 @@ namespace EmpyrionScripting.CustomHelpers
 
                 var signals = structure.BlockSignals
                     .Where(S => uniqueSignalNames.ContainsKey(S.Name) && S.BlockPos.HasValue)
-                    .Select(S => new BlockData(structure.GetCurrent(), S.BlockPos.Value))
+                    .Select(S => new BlockData(structure.E, S.BlockPos.Value))
                     .ToList();
 
                 var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
                 signals.AddRange(uniqueNames
                     .SelectMany(N => structure.GetCurrent().GetDevicePositions(N))
-                    .Select(P => new BlockData(structure.GetCurrent(), P))
+                    .Select(P => new BlockData(structure.E, P))
                     );
 
                 if (signals.Any()) options.Template(output, signals.First());
@@ -211,14 +211,14 @@ namespace EmpyrionScripting.CustomHelpers
 
                 var signals = structure.BlockSignals
                     .Where(S => uniqueSignalNames.ContainsKey(S.Name) && S.BlockPos.HasValue)
-                    .Select(S => new BlockData(structure.GetCurrent(), S.BlockPos.Value))
+                    .Select(S => new BlockData(structure.E, S.BlockPos.Value))
                     .ToList();
 
                 var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
                 signals.AddRange(uniqueNames
                     .SelectMany(N => structure.GetCurrent().GetDevicePositions(N))
                     .Where(P => signals.All(S => S.Position != P))
-                    .Select(P => new BlockData(structure.GetCurrent(), P))
+                    .Select(P => new BlockData(structure.E, P))
                     );
 
                 if (signals.Any()) options.Template(output, signals);

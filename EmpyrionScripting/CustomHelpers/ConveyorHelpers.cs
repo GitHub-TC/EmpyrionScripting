@@ -461,7 +461,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("deconstruct")]
         public static void DeconstructHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length < 2 || arguments.Length > 4) throw new HandlebarsException("{{deconstruct entity container [CorePrefix] [RemoveItemsIds1,Id2,...]}} helper must have two to four argument: entity container [CorePrefix] [RemoveItemsIds]");
+            if (arguments.Length < 2 || arguments.Length > 4) throw new HandlebarsException("{{deconstruct entity container [CorePrefix] [RemoveItemsIds1,Id2,...]}} helper must have two to four argument: entity (container;container*;*;container) [CorePrefix] [RemoveItemsIds]");
 
             var root = rootObject as IScriptRootData;
             var E    = arguments[0] as IEntityData;
@@ -469,79 +469,20 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var minPos      = E.S.GetCurrent().MinPos;
-                var maxPos      = E.S.GetCurrent().MaxPos;
-                var S           = E.S.GetCurrent();
-                var coreName    = (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}";
-                var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
-                var directId    = root.IsElevatedScript ? (int.TryParse(arguments.Get(2)?.ToString(), out var manualId) ? manualId : 0) : 0;
+                var list = arguments.Get(3)?.ToString()
+                    .Split(new[] { ',', ';' })
+                    .Select(T => T.Trim())
+                    .Select(T => {
+                        var delimiter = T.IndexOf('-', 1);
+                        return delimiter > 0
+                            ? new Tuple<int, int>(int.TryParse(T.Substring(0, delimiter), out var l1) ? l1 : 0, int.TryParse(T.Substring(delimiter + 1), out var r1) ? r1 : 0)
+                            : new Tuple<int, int>(int.TryParse(T, out var l2) ? l2 : 0, int.TryParse(T, out var r2) ? r2 : 0);
+                    })
+                    .ToArray();
 
-                var list        = arguments.Get(3)?.ToString()
-                                    .Split(new []{ ',', ';' })
-                                    .Select(T => T.Trim())
-                                    .Select(T => { 
-                                        var delimiter = T.IndexOf('-', 1); 
-                                        return delimiter > 0 
-                                            ? new Tuple<int,int>(int.TryParse(T.Substring(0, delimiter), out var l1) ? l1 : 0, int.TryParse(T.Substring(delimiter + 1), out var r1) ? r1 : 0)
-                                            : new Tuple<int,int>(int.TryParse(T, out var l2) ? l2 : 0, int.TryParse(T, out var r2) ? r2 : 0); 
-                                    })
-                                    .ToArray();
-
-                var target      = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
-                if (target == null)
-                {
-                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                    options.Inverse(output, context as object);
-                    output.WriteLine($"No target container '{N}' found");
-                    return;
-                }
-                var targetPos = root.E.S.GetCurrent().GetDevicePositions(N).First();
-
-                if (directId != E.Id)
-                {
-                    if (corePosList.Count == 0)
-                    {
-                        root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                        options.Inverse(output, context as object);
-                        output.WriteLine($"No core '{coreName}' found on {E.Id}");
-                        return;
-                    }
-
-                    var corePos = corePosList.First();
-                    var core = E.S.GetCurrent().GetBlock(corePos);
-                    core.Get(out var coreBlockType, out _, out _, out _);
-
-                    if (coreBlockType != PlayerCoreType)
-                    {
-                        root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                        options.Inverse(output, context as object);
-                        output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
-                        return;
-                    }
-                }
-
-                var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
-                    Started     = DateTime.Now,
-                    Name        = E.Name,
-                    Id          = E.Id,
-                    MinPos      = minPos,
-                    MaxPos      = maxPos,
-                    X           = minPos.x,
-                    Y           = maxPos.y,
-                    Z           = minPos.z,
-                    TotalBlocks =   (Math.Abs(minPos.x) + Math.Abs(maxPos.x) + 1) *
-                                    (Math.Abs(minPos.y) + Math.Abs(maxPos.y) + 1) *
-                                    (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
-                }) as ProcessBlockData;
-
-                if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks)
-                {
-                    lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (C, I) => DeconstructBlock(E, C, I));
-                    if (processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
-                }
-                else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
-
-                options.Template(output, processBlockData);
+                ConvertBlocks(output, rootObject, options, context as object, arguments,
+                    (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}", list,
+                    DeconstructBlock);
             }
             catch (Exception error)
             {
@@ -552,99 +493,127 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("recycle")]
         public static void RecycleHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length < 2 || arguments.Length > 3) throw new HandlebarsException("{{recycle entity container [CorePrefix]}} helper must have two to four argument: entity container [CorePrefix] [RemoveItemsIds]");
+            if (arguments.Length < 2 || arguments.Length > 3) throw new HandlebarsException("{{recycle entity container [CorePrefix]}} helper must have two to four argument: entity (container;container*;*;container) [CorePrefix] [RemoveItemsIds]");
 
-            var root = rootObject as IScriptRootData;
+            var root = rootObject   as IScriptRootData;
             var E    = arguments[0] as IEntityData;
-            var N    = arguments[1]?.ToString();
 
             try
             {
-                var minPos      = E.S.GetCurrent().MinPos;
-                var maxPos      = E.S.GetCurrent().MaxPos;
-                var S           = E.S.GetCurrent();
-                var coreName    = (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}";
-                var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
-                var directId    = root.IsElevatedScript ? (int.TryParse(arguments.Get(2)?.ToString(), out var manualId) ? manualId : 0) : 0;
-
-                var target      = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(N);
-                if (target == null)
-                {
-                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                    options.Inverse(output, context as object);
-                    output.WriteLine($"No target container '{N}' found");
-                    return;
-                }
-                var targetPos = root.E.S.GetCurrent().GetDevicePositions(N).First();
-
-                if (directId != E.Id)
-                {
-                    if (corePosList.Count == 0)
-                    {
-                        root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                        options.Inverse(output, context as object);
-                        output.WriteLine($"No core '{coreName}' found on {E.Id}");
-                        return;
-                    }
-
-                    var corePos = corePosList.First();
-                    var core = E.S.GetCurrent().GetBlock(corePos);
-                    core.Get(out var coreBlockType, out _, out _, out _);
-
-                    if (coreBlockType != PlayerCoreType)
-                    {
-                        root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                        options.Inverse(output, context as object);
-                        output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
-                        return;
-                    }
-                }
-
-                var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
-                    Started     = DateTime.Now,
-                    Name        = E.Name,
-                    Id          = E.Id,
-                    MinPos      = minPos,
-                    MaxPos      = maxPos,
-                    X           = minPos.x,
-                    Y           = maxPos.y,
-                    Z           = minPos.z,
-                    TotalBlocks =   (Math.Abs(minPos.x) + Math.Abs(maxPos.x) + 1) *
-                                    (Math.Abs(minPos.y) + Math.Abs(maxPos.y) + 1) *
-                                    (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
-                }) as ProcessBlockData;
-
-                if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
-                    var ressources = new Dictionary<int, double>();
-
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, null, (c, i) => ExtractBlockToContainer(E, ressources, i));
-
-                    ressources.ForEach(R =>
-                    {
-                        var over = target.AddItems(R.Key, (int)R.Value);
-
-                        if (over > 0)
-                        {
-                            root.GetPlayfieldScriptData().MoveLostItems.Enqueue(new ItemMoveInfo()
-                            {
-                                Id      = R.Key,
-                                Count   = over,
-                                SourceE = E,
-                                Source  = N,
-                            });
-                        }
-                    });
-
-                    if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
-                }
-                else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
-
-                options.Template(output, processBlockData);
+                ConvertBlocks(output, rootObject, options, context as object, arguments, 
+                    (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}", null,
+                    ExtractBlockToRecipe);
             }
             catch (Exception error)
             {
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{deconstruct}} error " + EmpyrionScripting.ErrorFilter(error));
             }
+        }
+
+        public static void ConvertBlocks(TextWriter output, object rootObject, HelperOptions options, object context, object[] arguments, string coreName,
+            Tuple<int, int>[] list, Func<IEntityData, Dictionary<int, double>, int, bool> processBlock)
+        { 
+            var root = rootObject as IScriptRootData;
+            var E    = arguments[0] as IEntityData;
+            var N    = arguments[1]?.ToString();
+
+            var minPos      = E.S.GetCurrent().MinPos;
+            var maxPos      = E.S.GetCurrent().MaxPos;
+            var S           = E.S.GetCurrent();
+            var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
+            var directId    = root.IsElevatedScript ? (int.TryParse(arguments.Get(2)?.ToString(), out var manualId) ? manualId : 0) : 0;
+
+            var uniqueNames = root.E.S.AllCustomDeviceNames.GetUniqueNames(N).ToList();
+
+            if (!uniqueNames.Any())
+            {
+                root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                options.Inverse(output, context);
+                output.WriteLine($"No target container '{N}' found");
+                return;
+            }
+
+            var currentTarget = uniqueNames.First();
+            var firstTarget   = currentTarget;
+            uniqueNames.RemoveAt(0);
+
+            var target    = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(currentTarget);
+            var targetPos = root.E.S.GetCurrent().GetDevicePositions(currentTarget).First();
+
+            if (directId != E.Id)
+            {
+                if (corePosList.Count == 0)
+                {
+                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                    options.Inverse(output, context);
+                    output.WriteLine($"No core '{coreName}' found on {E.Id}");
+                    return;
+                }
+
+                var corePos = corePosList.First();
+                var core = E.S.GetCurrent().GetBlock(corePos);
+                core.Get(out var coreBlockType, out _, out _, out _);
+
+                if (coreBlockType != PlayerCoreType)
+                {
+                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                    options.Inverse(output, context);
+                    output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
+                    return;
+                }
+            }
+
+            var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
+                Started     = DateTime.Now,
+                Name        = E.Name,
+                Id          = E.Id,
+                MinPos      = minPos,
+                MaxPos      = maxPos,
+                X           = minPos.x,
+                Y           = maxPos.y,
+                Z           = minPos.z,
+                TotalBlocks =   (Math.Abs(minPos.x) + Math.Abs(maxPos.x) + 1) *
+                                (Math.Abs(minPos.y) + Math.Abs(maxPos.y) + 1) *
+                                (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
+            }) as ProcessBlockData;
+
+            if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
+                var ressources = new Dictionary<int, double>();
+
+                lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (c, i) => processBlock(E, ressources, i));
+
+                ressources.ForEach(R =>
+                {
+                    var over = target.AddItems(R.Key, (int)R.Value);
+
+                    while (over > 0 && uniqueNames.Any())
+                    {
+                        currentTarget = uniqueNames.First();
+                        uniqueNames.RemoveAt(0);
+
+                        target    = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(currentTarget);
+                        targetPos = root.E.S.GetCurrent().GetDevicePositions(currentTarget).First();
+
+                        over = target.AddItems(R.Key, over);
+                    }
+
+                    if (over > 0)
+                    {
+                        root.GetPlayfieldScriptData().MoveLostItems.Enqueue(new ItemMoveInfo()
+                        {
+                            Id      = R.Key,
+                            Count   = over,
+                            SourceE = E,
+                            Source  = firstTarget,
+                        });
+                    }
+                });
+
+                if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
+            }
+            else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
+
+            options.Template(output, processBlockData);
         }
 
         [HandlebarTag("replaceblocks")]
@@ -769,7 +738,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        private static bool DeconstructBlock(IEntityData E, IContainer target, int blockId)
+        private static bool DeconstructBlock(IEntityData E, Dictionary<int, double> ressources, int blockId)
         {
             string blockName = EmpyrionScripting.ConfigEcfAccess.FindAttribute(blockId, "PickupTarget")?.ToString();
 
@@ -781,10 +750,15 @@ namespace EmpyrionScripting.CustomHelpers
             if (!string.IsNullOrEmpty(blockName) && EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(PlaceAtType(E.EntityType) + blockName, out var parentBlockName1)) blockName = parentBlockName1;
             if (!string.IsNullOrEmpty(blockName) && EmpyrionScripting.ConfigEcfAccess.ParentBlockName.TryGetValue(                            blockName, out var parentBlockName2)) blockName = parentBlockName2;
 
-            return target.AddItems(blockName != null && EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(blockName, out var mappedBlockId) ? mappedBlockId : blockId, 1) > 0;
+            var id = blockName != null && EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(blockName, out var mappedBlockId) ? mappedBlockId : blockId;
+
+            if (ressources.TryGetValue(id, out var count)) ressources[id] = count + 1;
+            else                                           ressources.Add(id, 1);
+
+            return false;
         }
 
-        private static bool ExtractBlockToContainer(IEntityData E, Dictionary<int, double> ressources, int blockId)
+        private static bool ExtractBlockToRecipe(IEntityData E, Dictionary<int, double> ressources, int blockId)
         {
             EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(blockId, out var blockData);
 

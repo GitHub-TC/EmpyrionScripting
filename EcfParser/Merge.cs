@@ -6,7 +6,7 @@ namespace EcfParser
 {
     public static class Merge
     {
-        public static IDictionary<T, EcfBlock> EcfBlocksToDictionary<T>(this IEnumerable<EcfBlock> blocks, Func<EcfBlock, bool> blockSelector, Func<EcfBlock, T> keySelector)
+        public static IReadOnlyDictionary<T, EcfBlock> EcfBlocksToDictionary<T>(this IEnumerable<EcfBlock> blocks, Func<EcfBlock, bool> blockSelector, Func<EcfBlock, T> keySelector)
             => blocks
                 .Where(B => blockSelector(B))
                 .Aggregate(new Dictionary<T, EcfBlock>(), (result, b) => {

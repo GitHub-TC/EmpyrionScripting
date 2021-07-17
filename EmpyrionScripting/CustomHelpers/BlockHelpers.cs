@@ -40,7 +40,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             return uniqueNames
                 .SelectMany(N => structure.GetCurrent().GetDevicePositions(N)
-                .Select(V => new BlockData(structure.GetCurrent(), V)))
+                .Select(V => new BlockData(structure.E, V)))
                 .ToArray();
         }
 
@@ -75,7 +75,7 @@ namespace EmpyrionScripting.CustomHelpers
             return structure?.GetCurrent()
                             .GetDevices(deviceType)?
                             .Values()
-                            .Select(V => new BlockData(structure.GetCurrent(), V))
+                            .Select(V => new BlockData(structure.E, V))
                             .ToArray();
         }
 
@@ -91,7 +91,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                var block = new BlockData(structure.GetCurrent(), new Eleon.Modding.VectorInt3(x, y, z));
+                var block = new BlockData(structure.E, new Eleon.Modding.VectorInt3(x, y, z));
 
                 if (block != null) options.Template(output, block);
                 else               options.Inverse (output, context as object);

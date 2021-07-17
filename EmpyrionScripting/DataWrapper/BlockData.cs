@@ -7,6 +7,7 @@ namespace EmpyrionScripting.DataWrapper
     {
         private IBlock      _block;
         private IDevice     _device;
+        private IEntityData _entity;
         private IStructure  _structure;
 
         public VectorInt3 Position { get; }
@@ -31,16 +32,18 @@ namespace EmpyrionScripting.DataWrapper
         private int colorWest;
         private int colorEast;
 
-        public BlockData(IStructure structure, VectorInt3 pos)
+        public BlockData(IEntityData entity, VectorInt3 pos)
         {
-            _structure  = structure;
-            _block      = structure?.GetBlock(pos);
-            _device     = structure?.GetDevice<IDevice>(pos);
+            _entity     = entity;
+            _structure  = _entity.S?.GetCurrent();
+            _block      = _structure?.GetBlock(pos);
+            _device     = _structure?.GetDevice<IDevice>(pos);
             Position    = pos;
 
             if(_device is IContainer c) Device = new ContainerData(c);
         }
 
+        public IEntityData GetEntity() => _entity;
         public IStructure GetStructure() => _structure;
         public IBlock GetBlock() => _block;
         public IDevice GetDevice() => _device;
@@ -77,8 +80,8 @@ namespace EmpyrionScripting.DataWrapper
         public int Id => GetData().blockType;
         public int BlockType{ get => GetData().blockType;           set { if(BlockType  != value) _block?.Set(value, null, null, null); } }
         public bool Active  { get => GetData().blockActive.Value;   set { if(Active     != value) _block?.Set(null, null, null, value); } }
-        public int Shape    { get => GetData().blockShape;          set { if(!IsDamaged && Shape      != value) _block?.Set(null, value, null, null); } }
-        public int Rotation { get => GetData().blockRotation;       set { if(!IsDamaged && Rotation   != value) _block?.Set(null, null, value, null); } }
+        public int Shape    { get => GetData().blockShape;          set { if((_entity.IsElevated || !IsDamaged) && Shape      != value) _block?.Set(null, value, null, null); } }
+        public int Rotation { get => GetData().blockRotation;       set { if((_entity.IsElevated || !IsDamaged) && Rotation   != value) _block?.Set(null, null, value, null); } }
 
         public void SetTextureForWholeBlock(int texIdx)
         {

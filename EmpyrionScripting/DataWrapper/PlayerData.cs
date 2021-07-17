@@ -1,7 +1,9 @@
 ﻿using Eleon.Modding;
+using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.Interface;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
 {
@@ -76,5 +78,62 @@ namespace EmpyrionScripting.DataWrapper
         public string SteamOwnerId => SafeGet("SteamOwnerId", p, () => p.SteamOwnerId);
 
         public int HomeBaseId => SafeGet("HomeBaseId", p, () => p.HomeBaseId);
+
+        public bool Teleport(Vector3 pos) => SafeGet("Teleport", p, () => EmpyrionScripting.ModApi.Network.SendToDedicatedServer("EmpyrionScripting", SerializeHelper.ObjectToByteArray(
+                new TeleportPlayerData { 
+                    PlayerId = p.Id,
+                    Position = pos,
+                }),
+                currentPlayfield.Name) || p.Teleport(pos)
+        );
+        public bool Teleport(string playfieldName, Vector3 pos, Vector3 rot) => SafeGet("Teleport", p, () => p.Teleport(playfieldName, pos, rot));
+
+    }
+
+    [Serializable]
+    public class TeleportPlayerData
+    {
+        public int PlayerId { get; set; }
+        public Vector3 Position { get; set; }
+        public override string ToString() => $"PlayerId:{PlayerId} Position:{Position}";
+    }
+
+    public class PlayerCommandsDediHelper{
+        public IModApi ModApi { get; }
+        public static Action<string, LogLevel> Log { get; set; }
+
+        public PlayerCommandsDediHelper(IModApi modApi)
+        {
+            ModApi = modApi;
+
+            try
+            {
+                if (!ModApi.Network.RegisterReceiverForPlayfieldPackets(CommandCallback)) Log("RegisterReceiverForPlayfieldPackets failed", LogLevel.Error);
+            }
+            catch (Exception error)
+            {
+                Log($"PlayerCommandsDediHelper: {error}", LogLevel.Error);
+            }
+        }
+
+        private void CommandCallback(string sender, string playfieldName, byte[] data)
+        {
+            Log($"EmpyrionScripting:CommandCallback from {playfieldName} -> {sender}", LogLevel.Message);
+
+            if (sender != "EmpyrionScripting") return;
+
+            try
+            {
+                var teleportData = SerializeHelper.ByteArrayToObject<TeleportPlayerData>(data);
+                Log($"EmpyrionScripting:Teleport call from {playfieldName} -> {teleportData}", LogLevel.Message);
+
+                //var playerData = ModApi.Application.GetPlayerDataFor(teleportData.PlayerId);
+                //playerData.Value.t
+            }
+            catch (Exception error)
+            {
+                Log($"EmpyrionScripting:Teleport {error}", LogLevel.Error);
+            }
+        }
     }
 }

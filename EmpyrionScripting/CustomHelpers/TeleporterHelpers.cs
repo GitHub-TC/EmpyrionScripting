@@ -7,6 +7,7 @@ using HandlebarsDotNet;
 using System;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -31,7 +32,7 @@ namespace EmpyrionScripting.CustomHelpers
                         if (teleporter == null) return null;
 
                         var block = BlockHelpers.Devices(structure, N).FirstOrDefault();
-                        return block != null ? new DataWrapper.TeleporterData(structure.GetCurrent(), block.Position) : null;
+                        return block != null ? new DataWrapper.TeleporterData(structure.E, block.Position) : null;
                     })
                     .Where(T => T != null)
                     .ToArray();
@@ -131,6 +132,44 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("teleportplayer")]
+        public static void TeleportPlayerHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2 &&
+                arguments.Length != 3 &&
+                arguments.Length != 4 &&
+                arguments.Length != 5) throw new HandlebarsException("{{teleportplayer player (toPos| x y z) [playfieldName]}} helper must have the argument: (player) (toPos | x y z) [playfieldName]");
+
+            var root = rootObject as IScriptRootData;
+            try
+            {
+                if (!root.IsElevatedScript) { output.Write("teleportplayer only allowed in elevated scripts"); return; }
+                if (!(arguments[0] is IPlayerData player)) { output.Write("teleportplayer 'player' is missing"); return; }
+
+                var toPos         = arguments.Get(1) as Vector3?;
+                var playfieldName = arguments.Get(toPos.HasValue ? 2 : 4)?.ToString();
+
+                if (!toPos.HasValue) {
+                    int.TryParse(arguments.Get(1)?.ToString(), out var x);
+                    int.TryParse(arguments.Get(2)?.ToString(), out var y);
+                    int.TryParse(arguments.Get(3)?.ToString(), out var z);
+                    toPos = new Vector3(x, y, z);
+                }
+
+                bool success = true;
+                output.Write($"Teleport: {player.Name} to x:{toPos.Value.x} y:{toPos.Value.y} z:{toPos.Value.z}{(string.IsNullOrEmpty(playfieldName) ? "" : " to ")}{playfieldName}");
+
+                if (string.IsNullOrEmpty(playfieldName)) success = player.Teleport(toPos.Value);
+                else                                     success = player.Teleport(playfieldName, toPos.Value, Vector3.zero);
+
+                if (!success) output.Write(" failed.");
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{teleportplayer}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         private static void ChangeTeleporterData(object rootObject, object[] arguments, Action<DataWrapper.TeleporterData> change)
         {
             var root                = rootObject as IScriptRootData;
@@ -146,7 +185,7 @@ namespace EmpyrionScripting.CustomHelpers
                 if (teleporter == null) return;
 
                 var block = BlockHelpers.Devices(structure, N).FirstOrDefault();
-                if(block != null) change(new DataWrapper.TeleporterData(structure.GetCurrent(), block.Position));
+                if(block != null) change(new DataWrapper.TeleporterData(structure.E, block.Position));
             });
         }
     }

@@ -53,7 +53,7 @@ namespace EcfParser
             }
         }
 
-        public static IDictionary<string, int> ReadBlockMapping(string filename)
+        public static IReadOnlyDictionary<string, int> ReadBlockMapping(string filename)
         {
             if (!File.Exists(filename)) return null;
 
@@ -74,7 +74,7 @@ namespace EcfParser
             return result;
         }
 
-        public static void ReplaceWithMappedIds(EcfFile result, IDictionary<string, int> blockIdMapping)
+        public static void ReplaceWithMappedIds(EcfFile result, IReadOnlyDictionary<string, int> blockIdMapping)
         {
             result.Blocks.ForEach(B => {
                 if (B.Name != "Block" && B.Name != "Item") return;

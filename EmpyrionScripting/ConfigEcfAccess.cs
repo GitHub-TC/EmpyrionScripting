@@ -12,21 +12,21 @@ namespace EmpyrionScripting
 {
     public class ConfigEcfAccess : IConfigEcfAccess
     {
-        public IDictionary<string, int> BlockIdMapping;
-        public IDictionary<int, string> IdBlockMapping;
+        public IReadOnlyDictionary<string, int> BlockIdMapping { get; set; }
+        public IReadOnlyDictionary<int, string> IdBlockMapping { get; set; }
 
         public EcfFile Templates_Ecf { get; private set; }
         public EcfFile BlocksConfig_Ecf { get; set; } = new EcfFile();
         public EcfFile ItemsConfig_Ecf { get; set; } = new EcfFile();
         public EcfFile Configuration_Ecf { get; set; } = new EcfFile();
         public EcfFile Flat_Config_Ecf { get; set; } = new EcfFile();
-        public IDictionary<int, EcfBlock> ConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
-        public IDictionary<string, EcfBlock> ConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public IReadOnlyDictionary<int, EcfBlock> ConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
+        public IReadOnlyDictionary<string, EcfBlock> ConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
         public IDictionary<string, string> ParentBlockName { get; set; } = new Dictionary<string, string>();
-        public IDictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
-        public IDictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public IReadOnlyDictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
+        public IReadOnlyDictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
         public IDictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
-        public IDictionary<int, Dictionary<int, double>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, double>>();
+        public IReadOnlyDictionary<int, Dictionary<int, double>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, double>>();
         public static Action<string, LogLevel> Log { get; set; } = (s, l) => Console.WriteLine(s);
         public string ContentPath { get; set; }
         public string ScenarioContentPath { get; set; }
@@ -259,15 +259,15 @@ namespace EmpyrionScripting
             return target;
         }
 
-        public IDictionary<int, EcfBlock> BlocksById(IEnumerable<EcfBlock> blocks) =>
+        public IReadOnlyDictionary<int, EcfBlock> BlocksById(IEnumerable<EcfBlock> blocks) =>
             blocks.EcfBlocksToDictionary(B => (B.Name == "Block" || B.Name == "Item") && B.Values?.ContainsKey("Id") == true,
                                          B => (int)B.Values["Id"]);
 
-        public IDictionary<string, EcfBlock> BlocksByName(IEnumerable<EcfBlock> blocks) =>
+        public IReadOnlyDictionary<string, EcfBlock> BlocksByName(IEnumerable<EcfBlock> blocks) =>
             blocks.EcfBlocksToDictionary(B => (B.Name == "Block" || B.Name == "Item") && B.Values?.ContainsKey("Name") == true,
                                          B => B.Values["Name"]?.ToString());
 
-        public IDictionary<string, EcfBlock> TemplatesByName(IEnumerable<EcfBlock> blocks) =>
+        public IReadOnlyDictionary<string, EcfBlock> TemplatesByName(IEnumerable<EcfBlock> blocks) =>
             blocks.EcfBlocksToDictionary(B => B.Name == "Template" && B.Values?.ContainsKey("Name") == true,
                                          B => B.Values["Name"]?.ToString());
 

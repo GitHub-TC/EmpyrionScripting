@@ -215,6 +215,7 @@
     <Compile Include="SaveGamesScripts.cs" />
     <Compile Include="ScriptExecQueue.cs" />
     <Compile Include="ScriptInfo.cs" />
+    <Compile Include="SerializeHelper.cs" />
     <Compile Include="WeakDeviceLock.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -31,7 +31,7 @@ namespace EmpyrionScripting
         private const string TargetsKeyword = "Targets:";
         private const string ScriptKeyword = "Script:";
         private const string CsKeyword = "C#:";
-        ModGameAPI legacyApi;
+        ModGameAPI LegacyApi;
 
         public static EmpyrionScripting EmpyrionScriptingInstance { get; set; }
         public static ConfigEcfAccess ConfigEcfAccess { get; set; }
@@ -65,14 +65,21 @@ namespace EmpyrionScripting
             ScriptExecQueue.Log           = Log;
             ConfigEcfAccess.Log           = Log;
             Localization   .Log           = Log;
+            PlayerCommandsDediHelper.Log  = Log;
             SetupHandlebarsComponent();
         }
 
         public void Init(IModApi modAPI)
         {
             ModApi = modAPI;
+            ModApi.Log($"EmpyrionScripting Mod started: IModApi {ModApi.Application.Mode}");
 
-            ModApi.Log("EmpyrionScripting Mod started: IModApi");
+            if (ModApi.Application.Mode == ApplicationMode.DedicatedServer)
+            {
+                PlayerCommandsDediHelper = new PlayerCommandsDediHelper(modAPI);
+                return;
+            }
+
             try
             {
                 SetupHandlebarsComponent();
@@ -143,6 +150,8 @@ namespace EmpyrionScripting
             => string.IsNullOrEmpty(EmpyrionConfiguration.DedicatedYaml.CustomScenarioName)
             ? ModApi.Application?.GetPathFor(AppFolder.ActiveScenario)
             : EmpyrionConfiguration.DedicatedYaml.CustomScenarioName;
+
+        public PlayerCommandsDediHelper PlayerCommandsDediHelper { get; private set; }
 
         private static void InitEcfConfigData()
         {
@@ -347,8 +356,8 @@ namespace EmpyrionScripting
         // Hint: treat this like a constructor for your mod
         public void Game_Start(ModGameAPI legacyAPI)
         {
-            legacyApi = legacyAPI;
-            legacyApi?.Console_Write("EmpyrionScripting Mod started: Game_Start");
+            LegacyApi = legacyAPI;
+            LegacyApi?.Console_Write("EmpyrionScripting Mod started: Game_Start");
         }
 
         public static string ErrorFilter(Exception error) => Configuration?.Current.LogLevel == EmpyrionNetAPIDefinitions.LogLevel.Debug ? error.ToString() : error.Message;

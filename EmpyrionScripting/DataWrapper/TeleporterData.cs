@@ -8,7 +8,7 @@ namespace EmpyrionScripting.DataWrapper
         private ITeleporter                  _teleporter;
         private Eleon.Modding.TeleporterData _targetData;
 
-        public TeleporterData(IStructure structure, VectorInt3 pos) : base(structure, pos)
+        public TeleporterData(IEntityData entity, VectorInt3 pos) : base(entity, pos)
         {
             _teleporter = GetDevice() as ITeleporter;
             if(_teleporter != null) _targetData = _teleporter.TargetData;

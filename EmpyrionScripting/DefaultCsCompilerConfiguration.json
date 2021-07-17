@@ -47,6 +47,7 @@
       "EmpyrionScripting.CustomHelpers.HelpersTools.GetUniqueNames",
       "EmpyrionScripting.DataWrapper.ContainerData",
       "EmpyrionScripting.EnumerableExtensions.ForEach",
+      "EmpyrionScripting.Interface.IConfigEcfAccess.*",
       "EmpyrionScripting.Interface.IScriptInfo.*",
       "EmpyrionScripting.Interface.IBlockData.*",
       "EmpyrionScripting.Interface.IConsoleMock.*",
@@ -214,6 +215,8 @@
     "Admin": [
       "Eleon.Modding.IContainer.*",
       "Eleon.Modding.IPlayfield.Players",
+      "Eleon.Modding.IPlayer.Teleport",
+      "EmpyrionScripting.Interface.IPlayerData.Teleport",
       "EmpyrionScripting.DataWrapper.ContainerData.GetContainer",
       "EmpyrionScripting.Interface.IContainerSource.*",
       "EmpyrionScripting.Interface.IBlockData.Device",

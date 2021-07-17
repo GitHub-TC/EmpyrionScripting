@@ -1,5 +1,6 @@
 ﻿using Eleon.Modding;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace EmpyrionScripting.Interface
 {
@@ -35,5 +36,8 @@ namespace EmpyrionScripting.Interface
         int HomeBaseId { get; }
         List<ItemStack> Toolbar { get; }
         int UpgradePoints { get; }
+
+        bool Teleport(Vector3 pos);
+        bool Teleport(string playfieldName, Vector3 pos, Vector3 rot);
     }
 }
