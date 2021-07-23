@@ -25,7 +25,7 @@ namespace EmpyrionScripting
         public IDictionary<string, string> ParentBlockName { get; set; } = new Dictionary<string, string>();
         public IReadOnlyDictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public IReadOnlyDictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
-        public IDictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public IReadOnlyDictionary<string, EcfBlock> FlatConfigTemplatesByName { get; set; } = new Dictionary<string, EcfBlock>();
         public IReadOnlyDictionary<int, Dictionary<int, double>> ResourcesForBlockById { get; set; } = new Dictionary<int, Dictionary<int, double>>();
         public static Action<string, LogLevel> Log { get; set; } = (s, l) => Console.WriteLine(s);
         public string ContentPath { get; set; }

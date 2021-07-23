@@ -166,6 +166,49 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("concatarrays")]
+        public static void ConcatArraysHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length == 0) throw new HandlebarsException("{{concatarrays (array1,array2,array3,...)}} helper must have one argument: (array1) [(array2) ...]");
+
+            var root = rootObject as IScriptRootData;
+            try
+            {
+                List<object>               resultArray      = null;
+                Dictionary<object, object> resultDictionary = null;
+
+                arguments.Where(arg => arg != null).ForEach(arg =>
+                {
+                    if (arg is object[] arraydata) (resultArray ??= new List<object>()).AddRange(arraydata);
+                    else if (arg is IList listdata)
+                    {
+                        if (resultArray == null) resultArray = new List<object>();
+                        for (int i = 0; i < listdata.Count; i++) resultArray.Add(listdata[i]);
+                    }
+                    else if (arg is IDictionary dictdata)
+                    {
+                        if (resultDictionary == null) resultDictionary = new Dictionary<object, object>();
+                        foreach (var key in dictdata.Keys)
+                        {
+                            if (resultDictionary.ContainsKey(key)) resultDictionary[key] = dictdata[key];
+                            else                                   resultDictionary.Add(key, dictdata[key]);
+                        }
+                    }
+                    else (resultArray ??= new List<object>()).Add(arg);
+                });
+
+                if      (resultArray        != null && resultDictionary != null) output.Write("{{concatarrays}} error can't combine arrays with dictionaries");
+                else if (resultArray        != null) options.Template(output, resultArray);
+                else if (resultDictionary   != null) options.Template(output, resultDictionary);
+                else                                 options.Inverse(output, (object)context);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{concatarrays}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+
         [HandlebarTag("setblock")]
         public static void SetBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {

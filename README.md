@@ -625,6 +625,9 @@ Syntaxdocu:
 + {{lookup array index}} und + {{lookupblock array index}}
   + Liefert das Element an der Position (index) beginnend mit 0
 
++ {{concatarrays (array1,array2,array3,...)}}
+  + Kombiniert Arrays oder Dictionaries zu einem (bei Dictionaries werden vorhandene Elemente überschrieben)
+
 ## Block
 + {{block structure x y z}}
   + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
@@ -1413,6 +1416,9 @@ DateTime format:
 
 + {{lookup array index}} and {{lookupblock array index}}
   + Returns the element at the position (index) starting with 0
+
++ {{concatarrays (array1,array2,array3,...)}}
+  + Combines arrays or dictionaries into one (for dictionaries existing elements are overwritten).
 
 + {{bar data min max length \[char\] \[bgchar\] \[l|r\]}}
   + Displays a bar for (data) in the rage of (min) to (max) with the total bar length of (length)
