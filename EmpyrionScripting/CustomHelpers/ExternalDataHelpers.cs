@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using YamlDotNet.Core.Tokens;
 
 namespace EmpyrionScripting.CustomHelpers
 {

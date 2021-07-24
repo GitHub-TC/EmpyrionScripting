@@ -628,6 +628,9 @@ Syntaxdocu:
 + {{concatarrays (array1,array2,array3,...)}}
   + Kombiniert Arrays oder Dictionaries zu einem (bei Dictionaries werden vorhandene Elemente überschrieben)
 
++ {{loop array/dictionary}}
+  + Iteriert über die einzelenen Elemente des Arrays oder Dictionaries
+
 ## Block
 + {{block structure x y z}}
   + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
@@ -1419,6 +1422,9 @@ DateTime format:
 
 + {{concatarrays (array1,array2,array3,...)}}
   + Combines arrays or dictionaries into one (for dictionaries existing elements are overwritten).
+
++ {{loop array/dictionary}}
+  + iterates over the individual elements of the array or dictionary
 
 + {{bar data min max length \[char\] \[bgchar\] \[l|r\]}}
   + Displays a bar for (data) in the rage of (min) to (max) with the total bar length of (length)

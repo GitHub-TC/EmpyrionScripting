@@ -57,6 +57,25 @@ namespace EmpyrionScripting.CustomHelpers
                         : L.ThenByDescending   (V => O.Property.GetValue(V)));
         }
 
+        [HandlebarTag("loop")]
+        public static void LoopUpHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{loop array/dictionary}} helper must have one argument: (array/dictionary)");
+
+            var root = rootObject as IScriptRootData;
+            try
+            {
+                if      (arguments[0] is object[]   arraydata) arraydata.ForEach(value => options.Template(output, value));
+                else if (arguments[0] is IList       listdata) for (int i = 0; i < listdata.Count; i++) options.Template(output, listdata[i]);
+                else if (arguments[0] is IDictionary dictdata) dictdata.Keys.Cast<object>().ForEach(key => options.Template(output, new KeyValuePair<object, object>(key, dictdata[key])));
+                else if (arguments[0] is IEnumerable enumdata) enumdata.Cast<object>().ForEach(value => options.Template(output, value));
+                else                                           options.Inverse(output, (object)context);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{loop}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
 
         [HandlebarTag("sortedeach")]
         public static void SortedEachHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
