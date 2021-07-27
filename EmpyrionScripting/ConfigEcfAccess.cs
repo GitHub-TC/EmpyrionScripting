@@ -60,6 +60,19 @@ namespace EmpyrionScripting
                 ParentBlockName         .ForEach(B => Log($"ParentBlockName: {B.Key} -> {B.Value}", LogLevel.Debug));
             }
 
+            var nameIdMappingFile = Path.Combine(EmpyrionScripting.SaveGameModPath, "NameIdMapping.json");
+            try
+            {
+                if (!File.Exists(nameIdMappingFile) || (DateTime.Now - File.GetLastWriteTime(nameIdMappingFile)) > new TimeSpan(1, 0, 0))
+                {
+                    File.WriteAllText(nameIdMappingFile, Newtonsoft.Json.JsonConvert.SerializeObject(BlockIdMapping, Newtonsoft.Json.Formatting.Indented));
+                }
+            }
+            catch (Exception error)
+            {
+                Log($"EmpyrionScripting Configuration_Ecf: write id name mapping to '{nameIdMappingFile}' : {error}", LogLevel.Error);
+            }
+
             Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count} ParentBlockNames: #{ParentBlockName.Count} BlockIdMapping:[{BlockIdMapping?.Count}] {blockMappingFile} takes:{timer.Elapsed}", LogLevel.Message);
         }
 
