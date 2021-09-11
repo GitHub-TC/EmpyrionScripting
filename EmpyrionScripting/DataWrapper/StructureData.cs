@@ -75,6 +75,7 @@ namespace EmpyrionScripting.DataWrapper
 
         public IPlayerData[] Players => _p == null ? _p = E.GetCurrentPlayfield().Players.Values
             .Where(P => E.IsElevated || (E.Faction.Group == FactionGroup.Player && P.Id == E.Faction.Id) || P.Faction.Id == E.Faction.Id)
+            .Where(P => P.CurrentStructure?.Id == GetCurrent().Id)
             .Select(P => new PlayerData(E.GetCurrentPlayfield(), P)).ToArray() : _p;
         IPlayerData[] _p;
 

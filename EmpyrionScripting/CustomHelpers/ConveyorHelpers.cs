@@ -281,7 +281,20 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 try
                 {
-                    var count = restore.SourceE.S.GetCurrent().GetDevice<IContainer>(restore.Source)?.AddItems(restore.Id, restore.Count);
+
+                    var targetStructure = restore.SourceE.S.GetCurrent();
+                    var targetPos       = targetStructure.GetDevicePositions(restore.Source).FirstOrDefault();
+                    var targetContainer = targetStructure.GetDevice<IContainer>(restore.Source);
+
+                    var isLocked = restore.SourceE.GetCurrentPlayfield().IsStructureDeviceLocked(restore.SourceE.Id, targetPos);
+                    if (isLocked)
+                    {
+                        Log($"HandleMoveLostItems(container is locked): {restore.Source} {restore.Id}", LogLevel.Message);
+                        root.MoveLostItems.Enqueue(restore);
+                        continue;
+                    }
+
+                    var count = targetContainer?.AddItems(restore.Id, restore.Count);
                     if (count > 0)
                     {
                         root.MoveLostItems.Enqueue(new ItemMoveInfo()
@@ -533,12 +546,17 @@ namespace EmpyrionScripting.CustomHelpers
                 return;
             }
 
-            var currentTarget = uniqueNames.First();
-            var firstTarget   = currentTarget;
-            uniqueNames.RemoveAt(0);
+            IContainer target    = null;
+            VectorInt3 targetPos = VectorInt3.Undef;
 
-            var target    = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(currentTarget);
-            var targetPos = root.E.S.GetCurrent().GetDevicePositions(currentTarget).First();
+            var firstTarget = GetNextContainer(root, uniqueNames, ref target, ref targetPos);
+            if(firstTarget == null)
+            {
+                root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                options.Inverse(output, context);
+                output.WriteLine($"Containers '{N}' are locked");
+                return;
+            }
 
             if (directId != E.Id)
             {
@@ -586,16 +604,7 @@ namespace EmpyrionScripting.CustomHelpers
                 {
                     var over = target.AddItems(R.Key, (int)R.Value);
 
-                    while (over > 0 && uniqueNames.Any())
-                    {
-                        currentTarget = uniqueNames.First();
-                        uniqueNames.RemoveAt(0);
-
-                        target    = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(currentTarget);
-                        targetPos = root.E.S.GetCurrent().GetDevicePositions(currentTarget).First();
-
-                        over = target.AddItems(R.Key, over);
-                    }
+                    if(over > 0 && GetNextContainer(root, uniqueNames, ref target, ref targetPos) != null) over = target.AddItems(R.Key, over);
 
                     if (over > 0)
                     {
@@ -614,6 +623,22 @@ namespace EmpyrionScripting.CustomHelpers
             else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
 
             options.Template(output, processBlockData);
+        }
+
+        private static string GetNextContainer(IScriptRootData root, List<string> uniqueNames, ref IContainer target, ref VectorInt3 targetPos)
+        {
+            while (uniqueNames.Any())
+            {
+                var currentTarget = uniqueNames.First();
+                uniqueNames.RemoveAt(0);
+
+                target    = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(currentTarget);
+                targetPos = root.E.S.GetCurrent().GetDevicePositions(currentTarget).First();
+
+                if(WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos).Success) return currentTarget;
+            }
+
+            return null;
         }
 
         [HandlebarTag("replaceblocks")]
