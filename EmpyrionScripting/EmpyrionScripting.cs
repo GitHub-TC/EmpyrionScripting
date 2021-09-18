@@ -204,10 +204,11 @@ namespace EmpyrionScripting
 
             InitGameDependedData(ModApi.Application.Mode == ApplicationMode.SinglePlayer);
 
-            PlayfieldData.TryAdd(playfield.Name, data = new PlayfieldScriptData(this){
-                PlayfieldName = playfield.Name,
-                Playfield     = playfield, 
-            });
+            if (!PlayfieldData.TryAdd(playfield.Name, data = new PlayfieldScriptData(this)
+            {
+                PlayfieldName   = playfield.Name,
+                Playfield       = playfield,
+            })) Log($"PlayfieldData.TryAdd failed {playfield.Name}", LogLevel.Error);
 
             UpdateScriptingModInfoData();
 
@@ -327,7 +328,7 @@ namespace EmpyrionScripting
             PlayfieldData.Values.ForEach(PF => {
                 var output = new StringBuilder();
                 var totalExecTime = new TimeSpan();
-                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} BackgroundWorkerToDoCount:{PF.ScriptExecQueue.BackgroundWorkerToDo.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()}", LogLevel.Message);
+                Log($"ScriptInfos[{PF.PlayfieldName}]: RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} BackgroundWorkerToDoCount:{PF.ScriptExecQueue.BackgroundWorkerToDo.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()} LostItems:{PF.MoveLostItems.Aggregate((string)null, (s, i) => s == null ? $"{i.Id}#{i.Count}->{i.Source}" : $"{s}, {i.Id}#{i.Count}->{i.Source}")}", LogLevel.Message);
                 PF.ScriptExecQueue.ScriptRunInfo
                     .OrderBy(I => I.Key)
                     .ForEach(I =>

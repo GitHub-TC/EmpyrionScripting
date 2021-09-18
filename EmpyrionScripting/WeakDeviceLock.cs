@@ -13,10 +13,15 @@ namespace EmpyrionScripting
                 if (!root.ScriptWithinMainThread)
                 {
                     root.ScriptNeedsMainThread = true;
+                    Exit = true;
                     return;
                 }
 
-                if (!root.DeviceLockAllowed || root.TimeLimitReached) return;
+                if (!root.DeviceLockAllowed || root.TimeLimitReached)
+                {
+                    Exit = true;
+                    return;
+                }
 
                 Success = !playfield.IsStructureDeviceLocked(structure.Id, position);
             }
@@ -25,6 +30,7 @@ namespace EmpyrionScripting
                 throw new Exception($"WeakDeviceLock:failed on Playfield:{playfield?.Name} at Id:{structure.Id} on {position} with: {error}");
             }
         }
+        public bool Exit { get; }
 
         public bool Success { get; }
 

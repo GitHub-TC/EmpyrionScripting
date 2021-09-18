@@ -277,30 +277,80 @@ namespace EmpyrionScripting.CustomHelpers
 
         public static void HandleMoveLostItems(PlayfieldScriptData root)
         {
-            while(root.MoveLostItems.TryDequeue(out var restore))
+            var tryCounter = root.MoveLostItems.Count;
+
+            while (tryCounter-- > 0 && root.MoveLostItems.TryDequeue(out var restore))
             {
                 try
                 {
-
                     var targetStructure = restore.SourceE.S.GetCurrent();
                     var targetPos       = targetStructure.GetDevicePositions(restore.Source).FirstOrDefault();
                     var targetContainer = targetStructure.GetDevice<IContainer>(restore.Source);
 
-                    var isLocked = restore.SourceE.GetCurrentPlayfield().IsStructureDeviceLocked(restore.SourceE.Id, targetPos);
-                    if (isLocked)
+                    if(targetContainer == null)
                     {
-                        Log($"HandleMoveLostItems(container is locked): {restore.Source} {restore.Id}", LogLevel.Message);
+                        Log($"HandleMoveLostItems(target container not found): {restore.Source} {restore.Id} #{restore.Count}", LogLevel.Message);
                         root.MoveLostItems.Enqueue(restore);
                         continue;
                     }
 
-                    var count = targetContainer?.AddItems(restore.Id, restore.Count);
+                    var isLocked = restore.SourceE.GetCurrentPlayfield().IsStructureDeviceLocked(restore.SourceE.S.GetCurrent().Id, targetPos);
+                    if (isLocked)
+                    {
+                        Log($"HandleMoveLostItems(container is locked): {restore.Source} {restore.Id}", LogLevel.Debug);
+                        root.MoveLostItems.Enqueue(restore);
+                        continue;
+                    }
+
+                    var count = targetContainer.AddItems(restore.Id, restore.Count);
+                    var stackSize = 0;
+
+                    try
+                    {
+                        stackSize = (int)EmpyrionScripting.ConfigEcfAccess.FindAttribute(restore.Id, "StackSize");
+                        if (stackSize < count)
+                        {
+                            Log($"HandleMoveLostItems(split invalid stacks): {restore.Source} {restore.Id} #{restore.Count}->{stackSize}", LogLevel.Message);
+
+                            var countSplit = count;
+                            while (countSplit > 0)
+                            {
+                                root.MoveLostItems.Enqueue(new ItemMoveInfo()
+                                {
+                                    Id      = restore.Id,
+                                    Count   = Math.Min(countSplit, stackSize),
+                                    SourceE = restore.SourceE,
+                                    Source  = restore.Source,
+                                });
+                                countSplit -= stackSize;
+                            }
+
+                            continue;
+                        }
+                    }
+                    catch { /* Fehler ignorieren */ }
+
+                    // AddItem funktioniert leider nicht (mehr) wenn den der Stack gar nicht in den Container passt
+                    if (count > 0 && count == restore.Count && count > stackSize)
+                    {
+                        var content = targetContainer.GetContent();
+
+                        if (content.Count < 64)
+                        {
+                            content.Add(new ItemStack(restore.Id, restore.Count));
+                            targetContainer.SetContent(content);
+                            Log($"HandleMoveLostItems(restored set content fallback): {restore.Source} {restore.Id} #{restore.Count}", LogLevel.Message);
+
+                            continue;
+                        }
+                    }
+
                     if (count > 0)
                     {
                         root.MoveLostItems.Enqueue(new ItemMoveInfo()
                         {
                             Id      = restore.Id,
-                            Count   = count.Value,
+                            Count   = count,
                             SourceE = restore.SourceE,
                             Source  = restore.Source,
                         });
@@ -310,7 +360,7 @@ namespace EmpyrionScripting.CustomHelpers
                 }
                 catch (Exception error)
                 {
-                    Log($"HandleMoveLostItems(error): {restore.Source} {restore.Id} #{restore.Count} -> {EmpyrionScripting.ErrorFilter(error)}", LogLevel.Debug);
+                    Log($"HandleMoveLostItems(error): {restore.Source} {restore.Id} #{restore.Count} -> {EmpyrionScripting.ErrorFilter(error)}", LogLevel.Message);
                     root.MoveLostItems.Enqueue(restore);
                 }
 
@@ -493,7 +543,7 @@ namespace EmpyrionScripting.CustomHelpers
                     })
                     .ToArray();
 
-                ConvertBlocks(output, rootObject, options, context as object, arguments,
+                ConvertBlocks(output, root, options, context as object, arguments,
                     (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}", list,
                     DeconstructBlock);
             }
@@ -513,7 +563,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                ConvertBlocks(output, rootObject, options, context as object, arguments, 
+                ConvertBlocks(output, root, options, context as object, arguments, 
                     (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}", null,
                     ExtractBlockToRecipe);
             }
@@ -523,10 +573,9 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        public static void ConvertBlocks(TextWriter output, object rootObject, HelperOptions options, object context, object[] arguments, string coreName,
+        public static void ConvertBlocks(TextWriter output, IScriptRootData root, HelperOptions options, object context, object[] arguments, string coreName,
             Tuple<int, int>[] list, Func<IEntityData, Dictionary<int, double>, int, bool> processBlock)
         { 
-            var root = rootObject as IScriptRootData;
             var E    = arguments[0] as IEntityData;
             var N    = arguments[1]?.ToString();
 
@@ -557,6 +606,8 @@ namespace EmpyrionScripting.CustomHelpers
                 output.WriteLine($"Containers '{N}' are locked");
                 return;
             }
+
+            EmpyrionScripting.Log($"Ressource to first conatiner: {firstTarget}", LogLevel.Message);
 
             if (directId != E.Id)
             {
@@ -600,19 +651,61 @@ namespace EmpyrionScripting.CustomHelpers
 
                 lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (c, i) => processBlock(E, ressources, i));
 
-                ressources.ForEach(R =>
-                {
-                    var over = target.AddItems(R.Key, (int)R.Value);
+                var allToLostItemRecover = false;
+                var currentContainer = firstTarget;
 
-                    if(over > 0 && GetNextContainer(root, uniqueNames, ref target, ref targetPos) != null) over = target.AddItems(R.Key, over);
+                var ressourcesWithStackLimit = new List<KeyValuePair<int, double>>();
+
+                ressources.ForEach(r =>
+                    {
+                        try
+                        {
+                            var stackSize = (int)EmpyrionScripting.ConfigEcfAccess.FindAttribute(r.Key, "StackSize");
+                            var count = (int)r.Value;
+                            while(count > 0)
+                            {
+                                ressourcesWithStackLimit.Add(new KeyValuePair<int, double>(r.Key, Math.Min(count, stackSize)));
+                                count -= stackSize;
+                            }
+                        }
+                        catch
+                        {
+                            ressourcesWithStackLimit.Add(r);
+                        }
+                    }
+                );
+
+                ressourcesWithStackLimit.ForEach(R =>
+                {
+                    var over = allToLostItemRecover ? (int)R.Value : target.AddItems(R.Key, (int)R.Value);
+
+                    if (over > 0 && !allToLostItemRecover)
+                    {
+                        EmpyrionScripting.Log($"Container full: {R.Key} #{over} -> {currentContainer}", LogLevel.Message);
+
+                        currentContainer = GetNextContainer(root, uniqueNames, ref target, ref targetPos);
+                        if (currentContainer != null)
+                        {
+                            var nextTry = over;
+                            over = target.AddItems(R.Key, over);
+                            EmpyrionScripting.Log($"Ressource to NextContainer: {R.Key} #{nextTry} -> #{over} -> {currentContainer}", LogLevel.Message);
+                        }
+                        else
+                        {
+                            EmpyrionScripting.Log("All Container full or blocked", LogLevel.Message);
+                            allToLostItemRecover = true;
+                        }
+                    }
 
                     if (over > 0)
                     {
+                        EmpyrionScripting.Log($"Ressource to LostItemsRecover: {R.Key} #{over} -> {firstTarget}", LogLevel.Message);
+
                         root.GetPlayfieldScriptData().MoveLostItems.Enqueue(new ItemMoveInfo()
                         {
                             Id      = R.Key,
                             Count   = over,
-                            SourceE = E,
+                            SourceE = root.E,
                             Source  = firstTarget,
                         });
                     }
@@ -632,10 +725,36 @@ namespace EmpyrionScripting.CustomHelpers
                 var currentTarget = uniqueNames.First();
                 uniqueNames.RemoveAt(0);
 
-                target    = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(currentTarget);
-                targetPos = root.E.S.GetCurrent().GetDevicePositions(currentTarget).First();
+                try
+                {
+                    target    = root.E.S.GetCurrent().GetDevice<Eleon.Modding.IContainer>(currentTarget);
+                    targetPos = root.E.S.GetCurrent().GetDevicePositions(currentTarget).First();
 
-                if(WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos).Success) return currentTarget;
+                    if(target != null)
+                    {
+                        var locking = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
+
+                        if (locking.Exit)
+                        {
+                            //EmpyrionScripting.Log($"GetNextContainer:{currentTarget} at pos {targetPos} -> Exit", LogLevel.Debug);
+                            return null;
+                        }
+
+                        if (locking.Success)
+                        {
+                            EmpyrionScripting.Log($"GetNextContainer:{currentTarget} at pos {targetPos}", LogLevel.Debug);
+                            return currentTarget;
+                        }
+                        else
+                        {
+                            EmpyrionScripting.Log($"GetNextContainer: {currentTarget} at pos {targetPos} -> no free container", LogLevel.Debug);
+                        }
+                    }
+                }
+                catch (Exception error)
+                {
+                    EmpyrionScripting.Log($"GetNextContainer: {currentTarget} at pos {targetPos} -> no container {error}", LogLevel.Debug);
+                }
             }
 
             return null;

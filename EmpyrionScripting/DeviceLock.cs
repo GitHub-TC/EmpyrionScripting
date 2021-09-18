@@ -18,10 +18,15 @@ namespace EmpyrionScripting
                 if (!root.ScriptWithinMainThread)
                 {
                     root.ScriptNeedsMainThread = true;
+                    Exit = true;
                     return;
                 }
 
-                if (!root.DeviceLockAllowed || root.TimeLimitReached) return;
+                if (!root.DeviceLockAllowed || root.TimeLimitReached)
+                {
+                    Exit = true;
+                    return;
+                }
 
                 if (playfield.IsStructureDeviceLocked(structure.Id, position)) return;
 
@@ -64,6 +69,7 @@ namespace EmpyrionScripting
         }
 
         public static Action<string, LogLevel> Log { get; set; }
+        public bool Exit { get; }
         public bool Success { get; private set; }
 
         public void Dispose()

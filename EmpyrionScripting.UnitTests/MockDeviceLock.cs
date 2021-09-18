@@ -6,6 +6,8 @@ namespace EmpyrionScripting.UnitTests
     {
         public bool Success => true;
 
+        public bool Exit => false;
+
         public void Dispose()
         {
         }
