@@ -1,12 +1,10 @@
 ﻿# Empyrion Scripting
 ## Installation
-1. Downloade die ZIP Datei von https://github.com/GitHub-TC/EmpyrionScripting/releases
+1. Downloade die EmpyrionScripting.zip Datei vom aktuellen https://github.com/GitHub-TC/EmpyrionScripting/releases
 1. UnZip die Datei in dem Verzeichnis Content\\Mods directory
 
-NOTE: Dies ist eine SEHR frühe Version der LCD A10 mod mit der neuen ModAPI !!! beide sind noch vielen Änderungen unterworfen!!!
-
 #### Installation für SinglePlayer
-1. Downloade die ZIP Datei von https://github.com/GitHub-TC/EmpyrionScripting/releases
+1. Downloade die EmpyrionScripting.zip Datei vom aktuellen https://github.com/GitHub-TC/EmpyrionScripting/releases
 1. UnZip die Datei in dem Verzeichnis Content\\Mods directory
 1. Das Spiel MUSS dann ohne EAC gestartet werden damit die Mods geladen werden
 
@@ -836,13 +834,11 @@ English-Version:
 
 # Empyrion Scripting
 ## Installation
-1. Download the ZIP file from https://github.com/GitHub-TC/EmpyrionScripting/releases
+1. Download the EmpyrionScripting.zip file from the current https://github.com/GitHub-TC/EmpyrionScripting/releases
 1. unzip the file in the Content\\Mods directory
 
-NOTE: This is an EARLY A10 mod with the new ModAPI !!! both are heavily WorkInProgress !!!
-
 #### Installation for SinglePlayer
-1. Download the ZIP file from https://github.com/GitHub-TC/EmpyrionScripting/releases
+1. Download the EmpyrionScripting.zip file from the current https://github.com/GitHub-TC/EmpyrionScripting/releases
 1. UnZip the file in the directory Content\\Mods directory
 1. The game MUST then be started without EAC so the mods are loaded
 
