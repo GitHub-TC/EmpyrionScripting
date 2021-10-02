@@ -526,6 +526,9 @@ Syntaxdocu:
 + {{islocked structure x y z}}
   + Prüft bei der Struktur (structure) ob das Device (device) oder das Device an der Position (x) (y) (z) gesperrt ist.
 
++ {{trashcontainer structure containername}}
+  + Löscht unwiderruflich ALLE Items welche sich in dem Container 'containername' befinden. Für den Containernamen sind KEINE Wildcards '*' erlaubt
+
 ## Datenaufbereitung
 * {{#intervall sec}}
   * Intervall in (sec) Sekunden
@@ -1483,9 +1486,12 @@ DateTime format:
   + Concatenate the values of a1 .. aN 
   + If a value is an array of texts (string []), the next parameter is considered the separator for those entries
 
-### (islocked)
+### Devices
 + {{islocked structure device|x y z}}
   + Checks at the structure whether the device (device) or the device is locked at the position (x) (y) (z).
+
++ {{trashcontainer structure containername}}
+  + Deletes irrevocably ALL items which are in the container 'containername'. For the container name NO wildcards '*' are allowed.
 
 ### (gettexture)
 + {{gettexture block pos}}

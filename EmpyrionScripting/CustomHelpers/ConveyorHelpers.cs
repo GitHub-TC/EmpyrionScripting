@@ -161,6 +161,37 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("trashcontainer")]
+        public static void TrashContainerHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{trashcontainer structure containername}} helper must have two arguments: (structure) (containername)");
+
+            var root            = rootObject as IScriptRootData;
+            var structure       = arguments[0] as IStructureData;
+            var containerName   = arguments[1] as string;
+
+            try
+            {
+                var containerPos = structure.GetCurrent().GetDevicePositions(containerName).FirstOrDefault();
+                var container    = structure.GetCurrent().GetDevice<IContainer>(containerName);
+
+                if (container == null) throw new HandlebarsException("{{trashcontainer}} conatiner not found '" + containerName + "'");
+
+                using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), structure.GetCurrent(), containerPos);
+                if (!locked.Success)
+                {
+                    Log($"DeviceIsLocked:{structure.E.Name} -> {containerName}", LogLevel.Debug);
+                    return;
+                }
+
+                container.SetContent(new List<ItemStack>());
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{trashcontainer}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("move")]
         public static void ItemMoveHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
