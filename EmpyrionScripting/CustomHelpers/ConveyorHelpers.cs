@@ -626,20 +626,6 @@ namespace EmpyrionScripting.CustomHelpers
                 return;
             }
 
-            IContainer target    = null;
-            VectorInt3 targetPos = VectorInt3.Undef;
-
-            var firstTarget = GetNextContainer(root, uniqueNames, ref target, ref targetPos);
-            if(firstTarget == null)
-            {
-                root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                options.Inverse(output, context);
-                output.WriteLine($"Containers '{N}' are locked");
-                return;
-            }
-
-            EmpyrionScripting.Log($"Ressource to first conatiner: {firstTarget}", LogLevel.Message);
-
             if (directId != E.Id)
             {
                 if (corePosList.Count == 0)
@@ -662,6 +648,20 @@ namespace EmpyrionScripting.CustomHelpers
                     return;
                 }
             }
+
+            IContainer target = null;
+            VectorInt3 targetPos = VectorInt3.Undef;
+
+            var firstTarget = GetNextContainer(root, uniqueNames, ref target, ref targetPos);
+            if (firstTarget == null)
+            {
+                root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                options.Inverse(output, context);
+                output.WriteLine($"Containers '{N}' are locked");
+                return;
+            }
+
+            EmpyrionScripting.Log($"Ressource to first conatiner: {firstTarget}", LogLevel.Message);
 
             var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
                 Started     = DateTime.Now,
