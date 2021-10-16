@@ -7,12 +7,12 @@
     <ProjectGuid>{6EB355C6-6A17-41D8-8821-70754904F57A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ECFParser</RootNamespace>
-    <AssemblyName>ECFParser</AssemblyName>
+    <RootNamespace>EcfParser</RootNamespace>
+    <AssemblyName>EcfParser</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-	<LangVersion>8.0</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="EcfAttribute.cs" />
     <Compile Include="EcfBlock.cs" />
     <Compile Include="EcfFile.cs" />
