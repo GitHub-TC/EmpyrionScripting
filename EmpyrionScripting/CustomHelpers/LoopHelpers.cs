@@ -91,7 +91,7 @@ namespace EmpyrionScripting.CustomHelpers
                 if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
 
                 var orderedArray = array.Count() == 0 || string.IsNullOrEmpty(orderBy) 
-                    ? null 
+                    ? reverse ? array.OrderByDescending(d => d) : array.OrderBy(d => d)
                     : OrderedList(array, (reverse ? '-' : '+') + orderBy);
 
                 if (orderedArray == null) options.Inverse(output, (object)context);

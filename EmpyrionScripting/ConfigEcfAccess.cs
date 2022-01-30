@@ -48,16 +48,16 @@ namespace EmpyrionScripting
             timer.Stop();
 
             if(EmpyrionScripting.Configuration?.Current?.LogLevel == LogLevel.Debug) { 
-                BlockIdMapping          .ForEach(B => Log($"ReadBlockMappingFile: '{B.Key}' -> {B.Value}]", LogLevel.Debug));
-                Templates_Ecf    .Blocks.ForEach(B => Log($"Templates_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
-                BlocksConfig_Ecf .Blocks.ForEach(B => Log($"BlocksConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
-                ItemsConfig_Ecf  .Blocks.ForEach(B => Log($"ItemsConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
+                BlockIdMapping          .ForEach(B => Log($"ReadBlockMappingFile: '{B.Key}' -> {B.Value}]"                                                                                                     , LogLevel.Debug));
+                Templates_Ecf    .Blocks.ForEach(B => Log($"Templates_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'"    , LogLevel.Debug));
+                BlocksConfig_Ecf .Blocks.ForEach(B => Log($"BlocksConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'" , LogLevel.Debug));
+                ItemsConfig_Ecf  .Blocks.ForEach(B => Log($"ItemsConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'"  , LogLevel.Debug));
                 Configuration_Ecf.Blocks.ForEach(B => Log($"Configuration_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
-                Flat_Config_Ecf  .Blocks.ForEach(B => Log($"Flat_Config_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
-                FlatConfigBlockById     .ForEach(B => Log($"FlatConfigBlockById: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]", LogLevel.Debug));
-                FlatConfigBlockByName   .ForEach(B => Log($"FlatConfigBlockByName: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]", LogLevel.Debug));
+                Flat_Config_Ecf  .Blocks.ForEach(B => Log($"Flat_Config_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'"  , LogLevel.Debug));
+                FlatConfigBlockById     .ForEach(B => Log($"FlatConfigBlockById: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]"                                                  , LogLevel.Debug));
+                FlatConfigBlockByName   .ForEach(B => Log($"FlatConfigBlockByName: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]"                                                , LogLevel.Debug));
                 ResourcesForBlockById   .ForEach(B => Log($"ResourcesForBlockById: [{B.Key}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(B.Key, out var data) ? data.Values["Name"] : "")} -> {B.Value.Aggregate("", (r, i) => $"{r}\n{i.Value}: [{i.Key}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(i.Key, out var data) ? data.Values["Name"] : "")}")}", LogLevel.Message));
-                ParentBlockName         .ForEach(B => Log($"ParentBlockName: {B.Key} -> {B.Value}", LogLevel.Debug));
+                ParentBlockName         .ForEach(B => Log($"ParentBlockName: {B.Key} -> {B.Value}"                                                                                                             , LogLevel.Debug));
             }
 
             var nameIdMappingFile = Path.Combine(EmpyrionScripting.SaveGameModPath, "NameIdMapping.json");

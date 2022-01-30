@@ -12,13 +12,13 @@
     <description>A interface to the EmpyrionScriptingMod C#</description>
     <copyright>Copyright 2020</copyright>
     <dependencies>
-      <group targetFramework=".NETFramework4.6.1">
+      <group targetFramework=".NETFramework4.8">
       </group>
     </dependencies>
   </metadata>
   <files>    
-    <file src="bin\Debug\Mif.dll" target="lib\net461\Mif.dll" />
-    <file src="bin\Debug\ModApi.dll" target="lib\net461\ModApi.dll" />
-    <file src="bin\Debug\UnityEngine.CoreModule.dll" target="lib\net461\UnityEngine.CoreModule.dll" />
+    <file src="bin\Debug\Mif.dll" target="lib\net48\Mif.dll" />
+    <file src="bin\Debug\ModApi.dll" target="lib\net48\ModApi.dll" />
+    <file src="bin\Debug\UnityEngine.CoreModule.dll" target="lib\net48\UnityEngine.CoreModule.dll" />
   </files>
 </package>

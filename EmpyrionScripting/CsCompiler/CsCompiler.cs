@@ -151,19 +151,38 @@ namespace EmpyrionScripting.CsCompiler
 
             using (var loader = new InteractiveAssemblyLoader())
             {
-                var options = ScriptOptions.Default
-                        .WithAllowUnsafe(false)
-                        .WithEmitDebugInformation(false)
-                        .WithCheckOverflow(true)
-                        .WithOptimizationLevel(OptimizationLevel.Release)
+                ScriptOptions options;
+                try
+                {
+                    options = ScriptOptions.Default;
+                }
+                catch (Exception optionsError)
+                {
+                    Log($"GetExec:ScriptOptions:Init: {optionsError}", LogLevel.Error);
+                    throw;
+                }
 
-                        .WithImports(DefaultConfiguration.Current.Usings)
-                        .AddImports(Configuration.Current.Usings)
+                try
+                {
+                    options
+                            .WithAllowUnsafe(false)
+                            .WithEmitDebugInformation(Configuration.Current.DebugMode)
+                            .WithCheckOverflow(true)
+                            .WithOptimizationLevel(Configuration.Current.DebugMode ? OptimizationLevel.Debug : OptimizationLevel.Release)
 
-                        .WithReferences(DefaultConfiguration.Current.AssemblyReferences)
-                        .AddReferences(Configuration.Current.AssemblyReferences)
-                        .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location)
-                        .AddReferences(CustomAssemblies.Values.Select(A => A.LoadedAssembly));
+                            .WithImports(DefaultConfiguration.Current.Usings)
+                            .AddImports(Configuration.Current.Usings)
+
+                            .WithReferences(DefaultConfiguration.Current.AssemblyReferences)
+                            .AddReferences(Configuration.Current.AssemblyReferences)
+                            .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location)
+                            .AddReferences(CustomAssemblies.Values.Select(A => A.LoadedAssembly));
+                }
+                catch (Exception optionsError)
+                {
+                    Log($"GetExec:ScriptOptions:Configure: {optionsError}", LogLevel.Error);
+                    throw;
+                }
 
                 csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
                 var compilation = csScript.GetCompilation();

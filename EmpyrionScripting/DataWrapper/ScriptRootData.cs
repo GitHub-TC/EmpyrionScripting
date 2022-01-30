@@ -178,7 +178,7 @@ namespace EmpyrionScripting.DataWrapper
             }
         }
 
-        public IEntityCultureInfo CultureInfo { get; set; }
+        public IEntityCultureInfo CultureInfo { get; set; } = new EntityCultureInfo();
 
         private static bool SafeIsNoProxyCheck(IEntity entity)
         {

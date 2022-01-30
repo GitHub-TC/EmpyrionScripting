@@ -221,8 +221,8 @@ namespace EmpyrionScripting.UnitTests
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
-                DateTime.Now.ToString(),
-                lcdMod.ExecuteHandlebarScript(pf, "", "{{datetime}}")
+                DateTime.UtcNow.ToString(),
+                lcdMod.ExecuteHandlebarScript(pf, new ScriptRootData(), "{{datetime}}")
             );
         }
 
@@ -231,9 +231,12 @@ namespace EmpyrionScripting.UnitTests
         {
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
+            var root = new ScriptRootData();
+            root.Data.TryAdd("x", 0.5);
+
             Assert.AreEqual(
                 "50,0%",
-                lcdMod.ExecuteHandlebarScript(pf, 0.5, "{{format . '{0:P1}'}}")
+                lcdMod.ExecuteHandlebarScript(pf, root, "{{format Data.x '{0:P1}'}}")
             );
         }
 
@@ -242,9 +245,12 @@ namespace EmpyrionScripting.UnitTests
         {
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
+            var root = new ScriptRootData();
+            root.Data.TryAdd("x", -0.5);
+
             Assert.AreEqual(
                 "-50,0%",
-                lcdMod.ExecuteHandlebarScript(pf, -0.5, "{{format . '{0:P1}'}}")
+                lcdMod.ExecuteHandlebarScript(pf, root, "{{format Data.x '{0:P1}'}}")
             );
         }
 
@@ -254,8 +260,8 @@ namespace EmpyrionScripting.UnitTests
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
-                DateTime.Now.ToString(),
-                lcdMod.ExecuteHandlebarScript(pf, "", "{{datetime MESZ}}")
+                DateTime.UtcNow.ToString(),
+                lcdMod.ExecuteHandlebarScript(pf, new ScriptRootData(), "{{datetime MESZ}}")
             );
         }
 
@@ -265,8 +271,8 @@ namespace EmpyrionScripting.UnitTests
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
             Assert.AreEqual(
-                DateTime.Now.ToString("dd MMM HH:mm:ss"),
-                lcdMod.ExecuteHandlebarScript(pf, "", "{{datetime 'dd MMM HH:mm:ss'}}")
+                DateTime.UtcNow.ToString("dd MMM HH:mm:ss"),
+                lcdMod.ExecuteHandlebarScript(pf, new ScriptRootData(), "{{datetime 'dd MMM HH:mm:ss'}}")
             );
         }
 
@@ -284,6 +290,7 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodReadItemsInfo()
         {
+            EmpyrionScripting.SaveGameModPath = string.Empty;
             var ecf = new ConfigEcfAccess();
             ecf.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null, null, null);
             var localization = new Localization(@"C:\steamcmd\empyrion\Content", null);
@@ -319,12 +326,13 @@ namespace EmpyrionScripting.UnitTests
             var es = Substitute.For<IStructure>();
             es.GetDevice<IContainer>("BoxB").Returns(boxB);
 
+            var E = Substitute.For<IEntityData>();
             var s = Substitute.For<IStructureData>();
             s.AllCustomDeviceNames.Returns(new[] { "BoxA", "BoxB", "BoxC", "BoxX" });
             s.Items.Returns(new[] {
-                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA } }.ToList() },
-                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB } }.ToList() },
-                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30 } }.ToList()  },
+                new ItemsData(){ Id = 1, Count = 11, Name = "a", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxA", Id = 1, Count = 10, Container = boxA, E = E } }.ToList() },
+                new ItemsData(){ Id = 2, Count = 20, Name = "b", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxB", Id = 2, Count = 20, Container = boxB, E = E } }.ToList() },
+                new ItemsData(){ Id = 3, Count = 30, Name = "c", Source = new []{ (IItemsSource)new ItemsSource() { CustomName = "BoxC", Id = 3, Count = 30,                   E = E } }.ToList()  },
             });
             s.ContainerSource.Returns(new System.Collections.Concurrent.ConcurrentDictionary<string, IContainerSource>() {
                 ["BoxA"] = new ContainerSource() { Container = boxA, CustomName = "BoxA"},
@@ -333,15 +341,17 @@ namespace EmpyrionScripting.UnitTests
 
             s.GetCurrent().Returns(es);
 
-            var E = Substitute.For<IEntityData>();
             E.S.Returns(s);
 
             var lcdData = Substitute.For<IScriptRootData>();
             lcdData.E.Returns(E);
             lcdData.DeviceLockAllowed.Returns(true);
+            lcdData.ScriptWithinMainThread = true;
 
             var lcdMod = new EmpyrionScripting();
-            var pf = new PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod){ Playfield = Substitute.For<IPlayfield>() };
+            pf.Playfield.IsStructureDeviceLocked(Arg.Any<int>(), Arg.Any<VectorInt3>()).ReturnsForAnyArgs(false);
+
             Assert.AreEqual("9-1", lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#items E.S 'BoxA'}}{{move this ../E.S 'BoxB'}}{{Count}}-{{Id}}{{/move}}{{/items}}"));
         }
 
@@ -382,11 +392,14 @@ namespace EmpyrionScripting.UnitTests
 
             var lcdData = Substitute.For<IScriptRootData>();
             lcdData.DeviceLockAllowed.Returns(true);
+            lcdData.ScriptWithinMainThread = true;
 
             lcdData.E.Returns(e);
             lcdData.E.S.Returns(s);
             var lcdMod = new EmpyrionScripting();
-            var pf = new PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod) { Playfield = Substitute.For<IPlayfield>() };
+            pf.Playfield.IsStructureDeviceLocked(Arg.Any<int>(), Arg.Any<VectorInt3>()).ReturnsForAnyArgs(false);
+
             Assert.AreEqual("1#9 CVa:BoxA->CVa:BoxB", lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#items E.S 'BoxA'}}{{move this ../E.S 'Box*'}}{{Id}}#{{Count}} {{SourceE.Name}}:{{Source}}->{{DestinationE.Name}}:{{Destination}}{{/move}}{{/items}}"));
         }
 
@@ -473,11 +486,14 @@ namespace EmpyrionScripting.UnitTests
 
             var lcdData = Substitute.For<IScriptRootData>();
             lcdData.DeviceLockAllowed.Returns(true);
+            lcdData.ScriptWithinMainThread = true;
 
             lcdData.E.Returns(eCV);
             lcdData.E.S.Returns(sCV);
             var lcdMod = new EmpyrionScripting();
-            var pf = new PlayfieldScriptData(lcdMod);
+            var pf = new PlayfieldScriptData(lcdMod) { Playfield = Substitute.For<IPlayfield>() };
+            pf.Playfield.IsStructureDeviceLocked(Arg.Any<int>(), Arg.Any<VectorInt3>()).ReturnsForAnyArgs(false);
+
             Assert.AreEqual("SVa:1#9 SVa:BoxA->CVb:BoxB", lcdMod.ExecuteHandlebarScript(pf, lcdData, "{{#each E.S.DockedE}}{{Name}}:{{#items S 'BoxA'}}{{move this @root/E.S 'Box*'}}{{Id}}#{{Count}} {{SourceE.Name}}:{{Source}}->{{DestinationE.Name}}:{{Destination}}{{/move}}{{/items}}{{/each}}"));
         }
 
@@ -518,10 +534,7 @@ namespace EmpyrionScripting.UnitTests
         {
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
-            Assert.AreEqual(
-                "123",
-                lcdMod.ExecuteHandlebarScript(pf, "", "{{#split '3,2,1' ','}}{{#sortedeach . ''}}{{.}}{{/sortedeach}}{{/split}}")
-            );
+            Assert.AreEqual("123", lcdMod.ExecuteHandlebarScript(pf, new ScriptRootData(), "{{#split '3,2,1' ','}}{{#sortedeach . ''}}{{.}}{{/sortedeach}}{{/split}}"));
         }
 
         [TestMethod]
@@ -529,10 +542,7 @@ namespace EmpyrionScripting.UnitTests
         {
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
-            Assert.AreEqual(
-                "321",
-                lcdMod.ExecuteHandlebarScript(pf, "", "{{#split '3,2,1' ','}}{{#sortedeach . '' true}}{{.}}{{/sortedeach}}{{/split}}")
-            );
+            Assert.AreEqual("321", lcdMod.ExecuteHandlebarScript(pf, new ScriptRootData(), "{{#split '3,2,1' ','}}{{#sortedeach . '' true}}{{.}}{{/sortedeach}}{{/split}}"));
         }
 
         [TestMethod]
@@ -540,14 +550,14 @@ namespace EmpyrionScripting.UnitTests
         {
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
-            Assert.AreEqual(
-                "[1, c][2, a][3, b]",
-                lcdMod.ExecuteHandlebarScript(pf, new [] { 
+            var root = new ScriptRootData();
+            root.Data.TryAdd("X",
+                new[] {
                     new KeyValuePair<int, string>(1, "c"),
                     new KeyValuePair<int, string>(2, "a"),
-                    new KeyValuePair<int, string>(3, "b"),
-                }, "{{#sortedeach . 'Key'}}{{.}}{{/sortedeach}}")
-            );
+                    new KeyValuePair<int, string>(3, "b")
+                });
+            Assert.AreEqual("[1, c][2, a][3, b]", lcdMod.ExecuteHandlebarScript(pf, root, "{{#sortedeach Data.X 'Key'}}{{.}}{{/sortedeach}}"));
         }
 
         [TestMethod]
@@ -555,13 +565,17 @@ namespace EmpyrionScripting.UnitTests
         {
             var lcdMod = new EmpyrionScripting();
             var pf = new PlayfieldScriptData(lcdMod);
-            Assert.AreEqual(
-                "[2, a][3, b][1, c]",
-                lcdMod.ExecuteHandlebarScript(pf, new[] {
+            var root = new ScriptRootData();
+            root.Data.TryAdd("X",
+                new[] {
                     new KeyValuePair<int, string>(1, "c"),
                     new KeyValuePair<int, string>(2, "a"),
-                    new KeyValuePair<int, string>(3, "b"),
-                }, "{{#sortedeach . 'Value'}}{{.}}{{/sortedeach}}")
+                    new KeyValuePair<int, string>(3, "b")
+                });
+
+            Assert.AreEqual(
+                "[2, a][3, b][1, c]",
+                lcdMod.ExecuteHandlebarScript(pf, root, "{{#sortedeach Data.X 'Value'}}{{.}}{{/sortedeach}}")
             );
         }
 
