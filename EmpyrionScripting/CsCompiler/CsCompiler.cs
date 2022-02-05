@@ -164,7 +164,7 @@ namespace EmpyrionScripting.CsCompiler
 
                 try
                 {
-                    options
+                    options = options
                             .WithAllowUnsafe(false)
                             .WithEmitDebugInformation(Configuration.Current.DebugMode)
                             .WithCheckOverflow(true)
@@ -175,7 +175,7 @@ namespace EmpyrionScripting.CsCompiler
 
                             .WithReferences(DefaultConfiguration.Current.AssemblyReferences)
                             .AddReferences(Configuration.Current.AssemblyReferences)
-                            .AddReferences(typeof(EmpyrionScripting).Assembly.Location, typeof(IScriptRootData).Assembly.Location)
+                            .WithReferences(typeof(EmpyrionScripting).Assembly, typeof(IScriptModData).Assembly)
                             .AddReferences(CustomAssemblies.Values.Select(A => A.LoadedAssembly));
                 }
                 catch (Exception optionsError)

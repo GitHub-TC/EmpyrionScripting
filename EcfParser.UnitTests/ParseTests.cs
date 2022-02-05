@@ -73,9 +73,8 @@ namespace EcfParser.UnitTests
             var result = EcfParser.Parse.Deserialize(line.Split('\n'));
             Assert.AreEqual(1, result.Blocks.Count);
             Assert.AreEqual("Item", result.Blocks[0].Name);
-            Assert.AreEqual("Id", result.Blocks[0].Attr.First().Name);
-            Assert.AreEqual("FusionCell", result.Blocks[0].Attr.First().AddOns.FirstOrDefault(a => a.Key == "Name").Value);
-            Assert.AreEqual(2373, (int)result.Blocks[0].Attr.First().Value);
+            Assert.AreEqual("Name", result.Blocks[0].Attr.First().Name);
+            Assert.AreEqual("FusionCell", result.Blocks[0].Attr.FirstOrDefault(a => a.Name == "Name").Value);
             Assert.AreEqual(7, result.Blocks[0].Attr.Count);
         }
 

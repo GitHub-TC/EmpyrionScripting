@@ -13,6 +13,7 @@ namespace EmpyrionLCDInfo.UnitTests
         [TestMethod]
         public void TestMethodConfigTemplates()
         {
+            EmpyrionScripting.EmpyrionScripting.SaveGameModPath = string.Empty;
             var config = new ConfigEcfAccess();
             //config.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null, null, null);
             config.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", "Reforged Eden", @"C:\steamcmd\empyrion.server\Saves\Games\Default\blocksmap.dat", null);

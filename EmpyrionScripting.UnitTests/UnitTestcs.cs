@@ -44,11 +44,15 @@ namespace EmpyrionScripting.UnitTests
             var dict = new ConcurrentDictionary<string, object>();
 
             var data = Substitute.For<IScriptRootData>();
+            var playfield = Substitute.For<IPlayfield>();
+            playfield.Name.Returns("PlayfieldTestName");
+            data.P = new PlayfieldData(playfield);
             data.GetPersistendData().ReturnsForAnyArgs(dict);
             data.Data = dict;
+            data.Console.Returns(new CsHelper.ConsoleMock(data));
 
             data.CycleCounter.Returns(0);
-            Assert.AreEqual("Exception: Test\n\nScript output up to exception:\n", lcdMod.ExecuteCsScript(pf, data, "throw new Exception(\"Test\");"));
+            Assert.AreEqual("Exception: Test\n\nScript output up to exception:\n", lcdMod.ExecuteCsScript(pf, data, "throw new System.Exception(\"Test\");"));
         }
 
         [TestMethod]
@@ -106,10 +110,10 @@ namespace EmpyrionScripting.UnitTests
 
             var dict = new ConcurrentDictionary<string, object>();
 
-            var data = Substitute.For<IScriptRootData>();
+            var root = Substitute.For<IScriptRootData>();
             var playfield = Substitute.For<IPlayfield>();
             playfield.Name.Returns("PlayfieldTestName");
-            data.CsRoot.Returns(new CsHelper.CsScriptFunctions(data));
+            root.CsRoot.Returns(new CsHelper.CsScriptFunctions(root));
 
             var e = Substitute.For<IEntityData>();
             var s = Substitute.For<IStructureData>();
@@ -130,7 +134,7 @@ namespace EmpyrionScripting.UnitTests
             IItemsSource boxItemContent = new ItemsSource()
             {
                 E = e,
-                Id = 2373,
+                Id = 4421,
                 Count = 500,
                 CustomName = "Box1",
                 Container = c,
@@ -141,7 +145,7 @@ namespace EmpyrionScripting.UnitTests
 
             var items = new[] { new ItemsData() {
                  Count = 50,
-                 Id = 2373,
+                 Id = 4421,
                  Key = "Fuelcell",
                  Name = "Energie",
                  Source = itemSource,
@@ -149,20 +153,21 @@ namespace EmpyrionScripting.UnitTests
             s.Items.Returns(items);
 
             e.S.Returns(s);
-            data.E.Returns(e);
-            data.P = new PlayfieldData(playfield);
-            data.GetPersistendData().ReturnsForAnyArgs(dict);
-            data.Data = dict;
-            data.DeviceLockAllowed.Returns(true);
+            root.E.Returns(e);
+            root.P = new PlayfieldData(playfield);
+            root.GetPersistendData().ReturnsForAnyArgs(dict);
+            root.Data = dict;
+            root.DeviceLockAllowed.Returns(true);
+            root.ScriptWithinMainThread.Returns(true);
 
-            data.CycleCounter.Returns(0);
-            Assert.AreEqual("Id:2373 Count:15 Source:Box1", lcdMod.ExecuteCsScript(pf, data, @"
-                var mi = CsRoot.Fill(E.S.Items.First(I => I.Id == 2373), E.S, StructureTankType.Fuel)[0];
+            root.CycleCounter.Returns(0);
+            Assert.AreEqual("Id:4421 Count:16 Source:Box1", lcdMod.ExecuteCsScript(pf, root, @"
+                var mi = CsRoot.Fill(E.S.Items.First(I => I.Id == 4421), E.S, StructureTankType.Fuel)[0];
                 return $""Id:{mi.Id} Count:{mi.Count} Source:{mi.Source}"";
             "));
 
-            Assert.AreEqual(9500, fuelTankContent, "FuelTankContext");
-            Assert.AreEqual(485, boxItemContent.Count, "BoxItemContent");
+            Assert.AreEqual(5000, fuelTankContent, "FuelTankContext");
+            Assert.AreEqual(500, boxItemContent.Count, "BoxItemContent");
         }
 
         [TestMethod]
@@ -246,19 +251,21 @@ namespace EmpyrionScripting.UnitTests
 
             // MOVE ==================================================================
 
-            var lcdData = Substitute.For<IScriptRootData>();
-            lcdData.DeviceLockAllowed.Returns(true);
-            lcdData.CsRoot.Returns(new CsHelper.CsScriptFunctions(lcdData));
-            lcdData.Console.Returns(new CsHelper.ConsoleMock(lcdData));
+            var root = Substitute.For<IScriptRootData>();
+            root.DeviceLockAllowed.Returns(true);
+            root.CsRoot.Returns(new CsHelper.CsScriptFunctions(root));
+            root.Console.Returns(new CsHelper.ConsoleMock(root));
+            root.DeviceLockAllowed.Returns(true);
+            root.ScriptWithinMainThread.Returns(true);
 
-            lcdData.E.Returns(eCV);
-            lcdData.E.S.Returns(sCV);
+            root.E.Returns(eCV);
+            root.E.S.Returns(sCV);
             var lcdMod = new EmpyrionScripting();
             lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var s = new StringBuilder();
             var pf = new PlayfieldScriptData(lcdMod);
-            Assert.AreEqual("SVa:1#9 SVa:BoxA->CVb:BoxB", lcdMod.ExecuteCsScript(pf, lcdData, @"
+            Assert.AreEqual("SVa:1#9 SVa:BoxA->CVb:BoxB", lcdMod.ExecuteCsScript(pf, root, @"
                 E.S.DockedE.ForEach(e => { 
                     Console.Write(e.Name + "":"");
                     CsRoot.Items(e.S, ""BoxA"")
@@ -328,6 +335,8 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodCsAssemlbyReturn()
         {
+            EmpyrionScripting.SaveGameModPath = ".";
+
             var lcdMod = new EmpyrionScripting();
             lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
@@ -335,22 +344,28 @@ namespace EmpyrionScripting.UnitTests
 
             var dict = new ConcurrentDictionary<string, object>();
 
-            var data = Substitute.For<IScriptRootData>();
-            data.GetPersistendData().ReturnsForAnyArgs(dict);
-            data.Data = dict;
+            var entity = Substitute.For<IEntity>();
+            var root = new ScriptRootData(new PlayfieldScriptData(lcdMod), new[] { entity }, new[] { entity }, Substitute.For<IPlayfield>(), entity, dict, new EventStore(entity));
+            var playfield = Substitute.For<IPlayfield>();
+            playfield.Name.Returns("PlayfieldTestName");
+            root.P = new PlayfieldData(playfield);
+            root.ScriptId = "Test";
+            root.Data = dict;
 
-            data.CycleCounter.Returns(0);
-            Assert.AreEqual("42", lcdMod.ExecuteCsScript(pf, data, "public class ModMain { public static int Main(IScriptModData root) { return 42; }}"));
+            Assert.AreEqual("42", lcdMod.ExecuteCsScript(pf, root, "public class ModMain { public static int Main(IScriptModData root) { return 42; }}"));
         }
 
         [TestMethod]
         public void TestMethodCsConfigFindAttribute()
         {
+            EmpyrionScripting.SaveGameModPath = ".";
+
             var ecf = new ConfigEcfAccess();
             ecf.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null, null, null);
 
-            Assert.IsNotNull(ecf.FindAttribute(2248, "Mass"));
-            Assert.IsNotNull(ecf.FindAttribute(2248, "StackSize"));
+            var fusionCellId = (int)ecf.FlatConfigBlockByName["FusionCell"].Values.First(a => a.Key == "Id").Value;
+            Assert.IsNotNull(ecf.FindAttribute(fusionCellId, "Mass"));
+            Assert.IsNotNull(ecf.FindAttribute(fusionCellId, "StackSize"));
         }
     }
 }

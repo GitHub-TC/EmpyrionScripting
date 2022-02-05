@@ -18,7 +18,7 @@ namespace EcfParser.Tests
 ";
 
             var ecf2Lines = @"
-{ Block Id: 267
+{ Block Id: 267, Name: CockpitMS02
   BlastRadius: 20
   IsLockable: false
 }
@@ -60,7 +60,7 @@ namespace EcfParser.Tests
 ";
 
             var ecf2Lines = @"
-{ Block Id: 267
+{ Block Id: 267, Name: CockpitMS02
   BlastRadius: 20
   IsLockable: false
 }
@@ -90,7 +90,7 @@ namespace EcfParser.Tests
 ";
 
             var ecf2Lines = @"
-{ Block Id: 267
+{ Block Id: 267, Name: CockpitMS02
   Mass: 284, display: false
   BlastRadius: 20
   IsLockable: false
@@ -123,7 +123,7 @@ namespace EcfParser.Tests
 ";
 
             var ecf2Lines = @"
-{ Block Id: 267
+{ Block Id: 267, Name: CockpitMS02
   BlastRadius: 20, display: false
   IsLockable: false
 }
@@ -174,10 +174,9 @@ namespace EcfParser.Tests
             Assert.AreEqual(1, ecf1.Blocks.Count);
             var block = ecf1.Blocks.First();
 
-            Assert.AreEqual(284, (int)block.Attr.FirstOrDefault(a => a.Name == "Mass").Value);
-            Assert.AreEqual(20, (int)block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").Value);
-            Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "BlastRadius").AddOns.First(p => p.Key == "display").Value);
-            Assert.AreEqual(false, (bool)block.Attr.FirstOrDefault(a => a.Name == "IsLockable").Value);
+            Assert.AreEqual(14.36, (double)block.Attr.FirstOrDefault(a => a.Name == "Mass").Value);
+            Assert.AreEqual(140, (int)block.Attr.FirstOrDefault(a => a.Name == "MarketPrice").Value);
+            Assert.AreEqual(1, (int)block.Attr.FirstOrDefault(a => a.Name == "Volume").Value);
         }
     }
 }
