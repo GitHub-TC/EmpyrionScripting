@@ -1,5 +1,6 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.Interface;
+using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
 {
@@ -43,10 +44,32 @@ namespace EmpyrionScripting.DataWrapper
             if(_device is IContainer c) Device = new ContainerData(c);
         }
 
+        public BlockData(BlockData blockData, IBlock parentBlock)
+        {
+            _entity    = blockData._entity;
+            _structure = blockData._structure;
+            _block     = parentBlock;
+            _device    = blockData._device;
+            Position   = blockData.Position;
+            Device     = blockData.Device;
+        }
+
         public IEntityData GetEntity() => _entity;
         public IStructure GetStructure() => _structure;
         public IBlock GetBlock() => _block;
         public IDevice GetDevice() => _device;
+
+        public IBlockData ParentBlock
+        {
+            get
+            {
+                if(_parentBlock != null) return _parentBlock;
+                if (_block.ParentBlock == null) return null;
+
+                return _parentBlock = new BlockData(this, _block.ParentBlock);
+            }
+        }
+        BlockData _parentBlock;
 
         public object Device { get; }
 

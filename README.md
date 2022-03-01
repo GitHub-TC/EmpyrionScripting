@@ -38,6 +38,10 @@ YouTube video;
 
 * Änderungen mit der A11: https://youtu.be/hxvKs5U1I6I
 
+Beginners guide (english):
+* https://steamcommunity.com/workshop/filedetails/discussion/1751409371/3191368095147121750/
+* https://youtu.be/IjJTNp_ZYUI
+
 ## Beispiele
 Allgemein: 
 Benötigt werden mindestens 2 LCD und mindestens 1 Container
@@ -870,6 +874,10 @@ YouTube video;
 * https://youtu.be/qhOnj2D3ejo
 
 * Changes with the A11: https://youtu.be/hxvKs5U1I6I
+
+Beginners guide (english):
+* https://steamcommunity.com/workshop/filedetails/discussion/1751409371/3191368095147121750/
+* https://youtu.be/IjJTNp_ZYUI
 
 ## Examples
 General:

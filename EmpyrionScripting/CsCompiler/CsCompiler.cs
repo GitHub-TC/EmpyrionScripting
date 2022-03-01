@@ -41,6 +41,25 @@ namespace EmpyrionScripting.CsCompiler
             SaveGameModPath = saveGameModPath;
 
             LoadConfiguration();
+
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+        }
+
+        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            int nameEndPos = args.Name.IndexOf(',');
+            var dllPath = Path.Combine(Path.GetDirectoryName(typeof(CsCompiler).Assembly.Location), nameEndPos == -1 ? args.Name : args.Name.Substring(0, nameEndPos) + ".dll");
+
+            try
+            {
+                return Assembly.LoadFrom(dllPath);
+            }
+            catch (Exception error)
+            {
+                if (Log == null) Console.WriteLine($"CurrentDomain_AssemblyResolve: ({dllPath}) {sender}:{args.Name} for {args.RequestingAssembly?.FullName} -> {error}");
+                else             Log($"CurrentDomain_AssemblyResolve: ({dllPath}) {sender}:{args.Name} for {args.RequestingAssembly?.FullName} -> {error}", LogLevel.Error);
+                return null;
+            }
         }
 
         public static Action<string, LogLevel> Log { get; set; }
@@ -75,6 +94,17 @@ namespace EmpyrionScripting.CsCompiler
             };
             DefaultConfiguration.ConfigFileLoaded += (o, a) => ConfigurationChanged?.Invoke(this, EventArgs.Empty); ;
             DefaultConfiguration.Load();
+
+            Log?.Invoke($"GAC:{typeof(object).Assembly.GlobalAssemblyCache} Mono:{IsRunningOnMono}", LogLevel.Message);
+        }
+
+        private static bool IsRunningOnMono
+        {
+            get
+            {
+                try{ return !(Type.GetType("Mono.Runtime") is null);                 }
+                catch { return false; }
+            }
         }
 
         private void CheckCustomAssemblies()
