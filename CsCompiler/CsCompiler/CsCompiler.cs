@@ -1,7 +1,6 @@
-﻿using EmpyrionNetAPIDefinitions;
+﻿using Eleon.Modding;
+using EmpyrionNetAPIDefinitions;
 using EmpyrionNetAPITools;
-using EmpyrionScripting.CsHelper;
-using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using Microsoft.CodeAnalysis;
@@ -26,6 +25,9 @@ namespace EmpyrionScripting.CsCompiler
         public ConfigurationManager<CsCompilerConfiguration> Configuration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
         public ConfigurationManager<CsCompilerConfiguration> DefaultConfiguration { get; set; } = new ConfigurationManager<CsCompilerConfiguration>() { Current = new CsCompilerConfiguration() };
         public string SaveGameModPath { get; }
+        public IModApi ModApi { get; }
+        public Assembly MainAssembly { get; }
+
         public event EventHandler ConfigurationChanged;
 
         public ConcurrentDictionary<string, CustomAssembly> CustomAssemblies { get; set; } = new ConcurrentDictionary<string, CustomAssembly>();
@@ -36,10 +38,11 @@ namespace EmpyrionScripting.CsCompiler
             public Assembly LoadedAssembly { get; set; }
         }
 
-        public CsCompiler(string saveGameModPath)
+        public CsCompiler(string saveGameModPath, Eleon.Modding.IModApi modApi, Assembly mainAssembly)
         {
             SaveGameModPath = saveGameModPath;
-
+            ModApi = modApi;
+            MainAssembly = mainAssembly;
             LoadConfiguration();
 
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
@@ -62,11 +65,12 @@ namespace EmpyrionScripting.CsCompiler
             }
         }
 
+        public Action<IScriptRootModData, List<string>> ScriptErrorTracking { get; set; }
         public static Action<string, LogLevel> Log { get; set; }
 
         private void LoadConfiguration()
         {
-            if(EmpyrionScripting.ModApi != null) ConfigurationManager<CsCompilerConfiguration>.Log = EmpyrionScripting.ModApi.Log;
+            if(ModApi != null) ConfigurationManager<CsCompilerConfiguration>.Log = ModApi.Log;
 
             Configuration = new ConfigurationManager<CsCompilerConfiguration>()
             {
@@ -90,7 +94,7 @@ namespace EmpyrionScripting.CsCompiler
 
             DefaultConfiguration = new ConfigurationManager<CsCompilerConfiguration>()
             {
-                ConfigFilename = Path.Combine(Path.GetDirectoryName(typeof(EmpyrionScripting).Assembly.Location), "DefaultCsCompilerConfiguration.json")
+                ConfigFilename = Path.Combine(Path.GetDirectoryName(MainAssembly.Location), "DefaultCsCompilerConfiguration.json")
             };
             DefaultConfiguration.ConfigFileLoaded += (o, a) => ConfigurationChanged?.Invoke(this, EventArgs.Empty); ;
             DefaultConfiguration.Load();
@@ -169,7 +173,7 @@ namespace EmpyrionScripting.CsCompiler
             }
         }
 
-        internal Func<object, string> GetExec<T>(CsModPermission csScriptsAllowed, T rootObjectCompileTime, string script) where T : IScriptRootData
+        public Func<object, string> GetExec<T>(CsModPermission csScriptsAllowed, T rootObjectCompileTime, string script) where T : IScriptRootModData
         {
             var messages = new List<string>();
             bool success = true;
@@ -177,7 +181,7 @@ namespace EmpyrionScripting.CsCompiler
 
             Script<object> csScript = null;
             CsModPermission permissionNeeded;
-            var rootCompileTime = rootObjectCompileTime as IScriptRootData;
+            var rootCompileTime = rootObjectCompileTime as IScriptModData;
 
             using (var loader = new InteractiveAssemblyLoader())
             {
@@ -205,7 +209,7 @@ namespace EmpyrionScripting.CsCompiler
 
                             .WithReferences(DefaultConfiguration.Current.AssemblyReferences)
                             .AddReferences(Configuration.Current.AssemblyReferences)
-                            .WithReferences(typeof(EmpyrionScripting).Assembly, typeof(IScriptModData).Assembly)
+                            .WithReferences(MainAssembly, typeof(IScriptModData).Assembly)
                             .AddReferences(CustomAssemblies.Values.Select(A => A.LoadedAssembly));
                 }
                 catch (Exception optionsError)
@@ -276,24 +280,18 @@ namespace EmpyrionScripting.CsCompiler
             {
                 Log?.Invoke($"C# Compile [{rootCompileTime.ScriptId}]:{string.Join("\n", messages)}", LogLevel.Error);
 
-                if (EmpyrionScripting.Configuration.Current.ScriptTrackingError)
-                {
-                    File.AppendAllText(rootObjectCompileTime is ScriptSaveGameRootData root
-                        ? EmpyrionScripting.GetTrackingFileName(root)
-                        : EmpyrionScripting.GetTrackingFileName(rootObjectCompileTime.E.GetCurrent(), rootObjectCompileTime.Script.GetHashCode().ToString()) + ".error",
-                        string.Join("\n", messages));
-                }
+                ScriptErrorTracking(rootObjectCompileTime, messages);
             }
 
             return rootObject =>
             {
                 if (!success) return string.Join("\n", messages);
 
-                var root = rootObject as IScriptRootData;
-                if (csScriptsAllowed == CsModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "C# scripts are only allowed in SaveGameScripts";
+                var root = rootObject as IScriptRootModData;
+                if (csScriptsAllowed == CsModPermission.SaveGame && !(root is IScriptSaveGameRootData))                      return "C# scripts are only allowed in SaveGameScripts";
                 if (csScriptsAllowed == CsModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "C# scripts are only allowed on admin structures";
 
-                if (permissionNeeded == CsModPermission.SaveGame && !(root is ScriptSaveGameRootData))                       return "This script is only allowed in SaveGameScripts";
+                if (permissionNeeded == CsModPermission.SaveGame && !(root is IScriptSaveGameRootData))                      return "This script is only allowed in SaveGameScripts";
                 if (permissionNeeded == CsModPermission.Admin    && root.E.GetCurrent().Faction.Group != FactionGroup.Admin) return "This script is only allowed on admin structures";
 
                 string exceptionMessage = null;
@@ -307,7 +305,7 @@ namespace EmpyrionScripting.CsCompiler
 
                         if (mainMethod != null)
                         {
-                            if(root.CsRoot is CsScriptFunctions csRoot) csRoot.ScriptRoot = root;
+                            if(root.CsRoot is ICsScriptRootFunctions csRoot) csRoot.ScriptRoot = root;
                             result = mainMethod.Invoke(null, new[] { root as IScriptModData });
                         }
                         else
@@ -339,17 +337,12 @@ namespace EmpyrionScripting.CsCompiler
                         {
                             Log?.Invoke($"C# Run [{root.ScriptId}]:{exceptionMessage}\n{output}", LogLevel.Error);
 
-                            if (EmpyrionScripting.Configuration.Current.ScriptTrackingError)
-                            {
-                                File.AppendAllText(root is ScriptSaveGameRootData saveGameRoot
-                                    ? EmpyrionScripting.GetTrackingFileName(saveGameRoot)
-                                    : EmpyrionScripting.GetTrackingFileName(root.E.GetCurrent(), root.Script.GetHashCode().ToString()) + ".error",
-                                    $"{exceptionMessage}\n\nScript output up to exception:\n{output}");
-                            }
+                            ScriptErrorTracking(rootObjectCompileTime, new []{ exceptionMessage }.ToList());
                         }
                     }
                 }
             };
         }
+
     }
 }

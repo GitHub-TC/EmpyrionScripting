@@ -4,9 +4,9 @@ using System;
 
 namespace EmpyrionScripting.CsHelper
 {
-    public partial class CsScriptFunctions
+    public partial class CsScriptFunctions : ICsScriptRootFunctions
     {
-        public IScriptRootData ScriptRoot { get; set; }
+        public IScriptRootModData ScriptRoot { get; set; }
 
         public IScriptModData Root => ScriptRoot;
 

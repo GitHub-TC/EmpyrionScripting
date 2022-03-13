@@ -94,7 +94,8 @@ namespace EmpyrionScripting
                 TaskTools.Log = ModApi.LogError;
                 StaticCsCompiler.CsCompiler.Log = Log;
 
-                CsCompiler = new CsCompiler.CsCompiler(SaveGameModPath);
+                CsCompiler = new CsCompiler.CsCompiler(SaveGameModPath, ModApi, typeof(EmpyrionScripting).Assembly);
+                CsCompiler.ScriptErrorTracking = ScriptErrorTracking;
                 CsCompiler.ConfigurationChanged += CsCompiler_ConfigurationChanged;
 
                 ModApi.Application.OnPlayfieldLoaded    += Application_OnPlayfieldLoaded;
@@ -118,6 +119,17 @@ namespace EmpyrionScripting
 
             ModApi.Log("EmpyrionScripting Mod init finish");
 
+        }
+
+        private static void ScriptErrorTracking<T>(T rootObjectCompileTime, List<string> messages) where T : IScriptRootModData
+        {
+            if (Configuration.Current.ScriptTrackingError)
+            {
+                File.AppendAllText(rootObjectCompileTime is ScriptSaveGameRootData root
+                    ? GetTrackingFileName(root)
+                    : GetTrackingFileName(rootObjectCompileTime.E.GetCurrent(), rootObjectCompileTime.Script.GetHashCode().ToString()) + ".error",
+                    string.Join("\n", messages));
+            }
         }
 
         private void Application_GameEntered(bool hasEntered)

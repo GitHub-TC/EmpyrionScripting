@@ -101,6 +101,7 @@ namespace EmpyrionScripting.DataWrapper
 
         public bool IsElevatedScript { get; }
         public ICsScriptFunctions CsRoot { get; }
+
         public IConsoleMock Console { get; }
         public DateTime DateTimeNow => DateTime.Now;
 
@@ -159,7 +160,7 @@ namespace EmpyrionScripting.DataWrapper
         public bool ScriptWithinMainThread { get; set; }
         public bool ScriptNeedsMainThread { get; set; }
         public int ScriptPriority { get; set; }
-        public ScriptInfo ScriptDiagnosticInfo { get; set; }
+        public IScriptInfo ScriptDiagnosticInfo { get; set; }
         public bool Running { get; set; }
 
         public Func<bool> ScriptLoopTimeLimitReached { get; set; } = () => false;
@@ -171,7 +172,7 @@ namespace EmpyrionScripting.DataWrapper
                 if(ScriptLoopTimeLimitReached())
                 {
                     Running = false;
-                    if (ScriptDiagnosticInfo != null) Interlocked.Increment(ref ScriptDiagnosticInfo._TimeLimitReached);
+                    if (ScriptDiagnosticInfo is ScriptInfo scriptInfo) Interlocked.Increment(ref scriptInfo._TimeLimitReached);
                 }
 
                 return !Running;

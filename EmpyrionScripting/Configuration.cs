@@ -18,13 +18,6 @@ namespace EmpyrionScripting
         public int Amount { get; set; }
     }
 
-    public enum CsModPermission
-    {
-        Player,
-        Admin,
-        SaveGame,
-    }
-
     public enum ExecMethod
     {
         None,

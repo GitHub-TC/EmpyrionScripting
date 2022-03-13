@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30002.166
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmpyrionScripting", "EmpyrionScripting\EmpyrionScripting.csproj", "{DC79FD9D-5E85-4588-A4BD-46F7ED62150F}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcfParser", "EcfParser\EcfParser.csproj", "{6EB355C6-6A17-41D8-8821-70754904F57A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcfParser.UnitTests", "EcfParser.UnitTests\EcfParser.UnitTests.csproj", "{634C1CC3-EDFA-4ADD-9544-4738A4BAEF1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsCompiler", "CsCompiler\CsCompiler.csproj", "{84CECEFA-6313-4CC7-8785-ACBDD0C64CCA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{634C1CC3-EDFA-4ADD-9544-4738A4BAEF1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{634C1CC3-EDFA-4ADD-9544-4738A4BAEF1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{634C1CC3-EDFA-4ADD-9544-4738A4BAEF1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84CECEFA-6313-4CC7-8785-ACBDD0C64CCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84CECEFA-6313-4CC7-8785-ACBDD0C64CCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84CECEFA-6313-4CC7-8785-ACBDD0C64CCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84CECEFA-6313-4CC7-8785-ACBDD0C64CCA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

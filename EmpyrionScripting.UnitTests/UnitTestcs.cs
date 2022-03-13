@@ -20,7 +20,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsSimpleTextReturn()
         {
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
             var pf = new PlayfieldScriptData(lcdMod);
 
             var dict = new ConcurrentDictionary<string, object>();
@@ -37,7 +37,8 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsScriptWithException()
         {
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
+            lcdMod.CsCompiler.ScriptErrorTracking = (m, l) => { }; 
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
@@ -59,7 +60,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsPlayfieldName()
         {
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
@@ -81,7 +82,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsExtMethods()
         {
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
@@ -104,7 +105,7 @@ namespace EmpyrionScripting.UnitTests
             ConveyorHelpers.CreateDeviceLock = (R, P, S, V) => new MockDeviceLock();
 
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
@@ -261,7 +262,7 @@ namespace EmpyrionScripting.UnitTests
             root.E.Returns(eCV);
             root.E.S.Returns(sCV);
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var s = new StringBuilder();
             var pf = new PlayfieldScriptData(lcdMod);
@@ -282,7 +283,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsReturnAction()
         {
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
@@ -300,7 +301,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsReturnFunc()
         {
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
@@ -318,7 +319,7 @@ namespace EmpyrionScripting.UnitTests
         public void TestMethodCsReturnTask()
         {
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
@@ -338,7 +339,7 @@ namespace EmpyrionScripting.UnitTests
             EmpyrionScripting.SaveGameModPath = ".";
 
             var lcdMod = new EmpyrionScripting();
-            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".");
+            lcdMod.CsCompiler = new CsCompiler.CsCompiler(".", null, typeof(EmpyrionScripting).Assembly);
             lcdMod.CsCompiler.Configuration.Current.WithinLearnMode = true;
             var pf = new PlayfieldScriptData(lcdMod);
 
