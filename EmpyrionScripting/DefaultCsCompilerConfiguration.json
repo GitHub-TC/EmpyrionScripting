@@ -19,6 +19,7 @@
     "UnityEngine"
   ],
   "AssemblyReferences": [
+    "Mif",
     "ModApi",
     "System.Core",
     "System.Numerics",
@@ -35,6 +36,8 @@
       "Eleon.Modding.IContainer.Contains",
       "Eleon.Modding.IContainer.GetContent",
       "Eleon.Modding.IContainer.GetTotalItems",
+      "Eleon.Modding.Id",
+      "Eleon.Modding.Id.*",
       "Eleon.Modding.IEntity.Name",
       "Eleon.Modding.ILcd.*",
       "Eleon.Modding.ILight.*",

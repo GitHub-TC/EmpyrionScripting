@@ -353,7 +353,7 @@ namespace EmpyrionScripting.UnitTests
             root.ScriptId = "Test";
             root.Data = dict;
 
-            Assert.AreEqual("42", lcdMod.ExecuteCsScript(pf, root, "public class ModMain { public static int Main(IScriptModData root) { return 42; }}"));
+            Assert.AreEqual("42", lcdMod.ExecuteCsScript(pf, root, "public class ModMain { public static int Main(IScriptModData root) { return new Eleon.Modding.Id(42).id; }}"));
         }
 
         [TestMethod]
