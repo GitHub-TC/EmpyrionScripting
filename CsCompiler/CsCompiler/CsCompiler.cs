@@ -212,7 +212,7 @@ namespace EmpyrionScripting.CsCompiler
                     catch
                     {
                         // DLL im Empyrionverzeichnis
-                        dllPath = Path.Combine(Path.GetDirectoryName(typeof(IMod).Assembly.Location), Path.GetFileName(dllPath));
+                        dllPath = Path.Combine(Path.GetDirectoryName(typeof(IModApi).Assembly.Location), Path.GetFileName(dllPath));
                         loadedAssembly = Assembly.LoadFrom(dllPath);
                     }
                 }
