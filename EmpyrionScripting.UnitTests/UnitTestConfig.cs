@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using EcfParser;
 using EmpyrionScripting;
+using EmpyrionScripting.Interface;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EmpyrionLCDInfo.UnitTests

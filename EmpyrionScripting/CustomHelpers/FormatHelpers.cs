@@ -1,4 +1,5 @@
 ﻿using EmpyrionScripting.CsHelper;
+using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;

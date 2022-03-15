@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace EmpyrionScripting
+namespace EmpyrionScripting.Interface
 {
     public static class EnumerableExtensions
     {

@@ -1,5 +1,6 @@
 ﻿using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.DataWrapper;
+using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using System;
 using System.Collections.Concurrent;

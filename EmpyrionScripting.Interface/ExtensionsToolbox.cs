@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace EmpyrionScripting
+namespace EmpyrionScripting.Interface
 {
     public static class ExtensionsToolbox
     {
