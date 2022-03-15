@@ -30,9 +30,12 @@ namespace EmpyrionScripting.CsCompiler
 
         public event EventHandler ConfigurationChanged;
 
-        public ConcurrentDictionary<string, CustomAssembly> CustomAssemblies { get; set; } = new ConcurrentDictionary<string, CustomAssembly>();
+        static IEnumerable<string> IgnoreErrorsForDlls { get; } = new[] { "RoslynCsCompiler.resources.dll", "System.Runtime.Loader.dll", "Microsoft.VisualStudio.TestPlatform.TestFramework.resources.dll" };
 
-        public class CustomAssembly
+        public ConcurrentDictionary<string, LoadedAssemblyInfo> CustomAssemblies { get; set; } = new ConcurrentDictionary<string, LoadedAssemblyInfo>();
+        public ConcurrentDictionary<string, LoadedAssemblyInfo> MainAssemblies   { get; set; } = new ConcurrentDictionary<string, LoadedAssemblyInfo>();
+
+        public class LoadedAssemblyInfo
         {
             public string FullAssemblyDllName { get; set; }
             public Assembly LoadedAssembly { get; set; }
@@ -59,13 +62,15 @@ namespace EmpyrionScripting.CsCompiler
             }
             catch (Exception error)
             {
+                if (IgnoreErrorsForDlls.Contains(Path.GetFileName(dllPath))) return GetType().Assembly;
+
                 if (Log == null) Console.WriteLine($"CurrentDomain_AssemblyResolve: ({dllPath}) {sender}:{args.Name} for {args.RequestingAssembly?.FullName} -> {error}");
                 else             Log($"CurrentDomain_AssemblyResolve: ({dllPath}) {sender}:{args.Name} for {args.RequestingAssembly?.FullName} -> {error}", LogLevel.Error);
                 return null;
             }
         }
 
-        public Action<IScriptRootModData, List<string>> ScriptErrorTracking { get; set; }
+        public Action<IScriptRootModData, List<string>> ScriptErrorTracking { get; set; } = (m, l) => { };
         public static Action<string, LogLevel> Log { get; set; }
 
         private void LoadConfiguration()
@@ -81,6 +86,7 @@ namespace EmpyrionScripting.CsCompiler
                 try
                 {
                     CheckCustomAssemblies();
+                    CheckMainAssemblies(Configuration?.Current?.AssemblyReferences.Concat(DefaultConfiguration?.Current?.AssemblyReferences));
                     ConfigurationChanged?.Invoke(this, EventArgs.Empty);
                 }
                 catch (Exception error)
@@ -96,7 +102,18 @@ namespace EmpyrionScripting.CsCompiler
             {
                 ConfigFilename = Path.Combine(Path.GetDirectoryName(MainAssembly.Location), "DefaultCsCompilerConfiguration.json")
             };
-            DefaultConfiguration.ConfigFileLoaded += (o, a) => ConfigurationChanged?.Invoke(this, EventArgs.Empty); ;
+            DefaultConfiguration.ConfigFileLoaded += (o, a) =>
+            {
+                try
+                {
+                    CheckMainAssemblies(Configuration?.Current?.AssemblyReferences.Concat(DefaultConfiguration?.Current?.AssemblyReferences));
+                    ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+                }
+                catch (Exception error)
+                {
+                    Log?.Invoke($"DefaultCsCompilerConfiguration.ConfigFileLoaded: {DefaultConfiguration.ConfigFilename} -> {error}", LogLevel.Error);
+                }
+            };
             DefaultConfiguration.Load();
 
             Log?.Invoke($"GAC:{typeof(object).Assembly.GlobalAssemblyCache} Mono:{IsRunningOnMono}", LogLevel.Message);
@@ -140,14 +157,74 @@ namespace EmpyrionScripting.CsCompiler
                 dllPath = Path.Combine(SaveGameModPath, dll).NormalizePath();
                 Log?.Invoke($"CustomAssemblyLoad: {dll} ({dllPath})", LogLevel.Message);
                 var loadedAssembly = Assembly.LoadFile(dllPath);
-                CustomAssembly current = null;
+                LoadedAssemblyInfo current = null;
                 CustomAssemblies.AddOrUpdate(dllPath,
-                    current = new CustomAssembly() { FullAssemblyDllName = dllPath, LoadedAssembly = loadedAssembly }, 
+                    current = new LoadedAssemblyInfo() { FullAssemblyDllName = dllPath, LoadedAssembly = loadedAssembly }, 
                     (d, a) => { current = a;  a.LoadedAssembly = loadedAssembly; return a; });
             }
             catch (Exception error)
             {
                 Log?.Invoke($"CustomAssemblyLoad: {dll} ({dllPath}) -> {error}", LogLevel.Error);
+            }
+        }
+
+        private void CheckMainAssemblies(IEnumerable<string> assemblyReferences)
+        {
+            var processed = MainAssemblies.Select(dll => dll.Key).ToList();
+
+            assemblyReferences.ForEach(dll => {
+                try
+                {
+                    if (!MainAssemblies.ContainsKey(dll)) LoadMainAssembly(dll);
+                    else                                  processed.Remove(dll);
+                }
+                catch (Exception error)
+                {
+                    Log?.Invoke($"CheckMainAssemblies: {dll} -> {error}", LogLevel.Error);
+                }
+            });
+
+            processed.ForEach(dll => MainAssemblies.TryRemove(dll, out var mainAssembly));
+        }
+
+        private void LoadMainAssembly(string dll)
+        {
+            string dllPath = null;
+
+            try
+            {
+                Log?.Invoke($"MainAssemblyLoad: {dll} ({dllPath})", LogLevel.Message);
+                Assembly loadedAssembly = null;
+                try
+                {
+                    // direkte Angabe
+                    dllPath = dll.EndsWith(".dll", StringComparison.InvariantCultureIgnoreCase) ? dll : dll + ".dll";
+                    loadedAssembly = Assembly.LoadFrom(dllPath);
+                }
+                catch
+                {
+                    try
+                    {
+                        // DLL im Modverzeichnis
+                        dllPath = Path.Combine(Path.GetDirectoryName(MainAssembly.Location), Path.GetFileName(dllPath));
+                        loadedAssembly = Assembly.LoadFrom(dllPath);
+                    }
+                    catch
+                    {
+                        // DLL im Empyrionverzeichnis
+                        dllPath = Path.Combine(Path.GetDirectoryName(typeof(IMod).Assembly.Location), Path.GetFileName(dllPath));
+                        loadedAssembly = Assembly.LoadFrom(dllPath);
+                    }
+                }
+
+                LoadedAssemblyInfo current = null;
+                MainAssemblies.AddOrUpdate(dllPath,
+                    current = new LoadedAssemblyInfo() { FullAssemblyDllName = dllPath, LoadedAssembly = loadedAssembly },
+                    (d, a) => { current = a; a.LoadedAssembly = loadedAssembly; return a; });
+            }
+            catch (Exception error)
+            {
+                Log?.Invoke($"MainAssemblyLoad: {dll} ({dllPath}) -> {error}", LogLevel.Error);
             }
         }
 
@@ -209,7 +286,8 @@ namespace EmpyrionScripting.CsCompiler
 
                             .WithReferences(DefaultConfiguration.Current.AssemblyReferences)
                             .AddReferences(Configuration.Current.AssemblyReferences)
-                            .WithReferences(MainAssembly, typeof(IScriptModData).Assembly)
+                            .WithReferences(MainAssembly, typeof(IScriptModData).Assembly, typeof(IMod).Assembly, typeof(IModApi).Assembly)
+                            .AddReferences(MainAssemblies.Values.Select(A => A.LoadedAssembly))
                             .AddReferences(CustomAssemblies.Values.Select(A => A.LoadedAssembly));
                 }
                 catch (Exception optionsError)
@@ -266,6 +344,15 @@ namespace EmpyrionScripting.CsCompiler
                                     callMainType = assembly.GetTypes().SingleOrDefault(MT => MT.Name == "ModMain");
                                     mainMethod = callMainType.GetMethod("Main");
                                 }
+                            }
+                            else
+                            {
+                                result.Diagnostics
+                                    .Where(diag => diag.Id != "CS7022")
+                                    .ForEach(diag =>
+                                {
+                                    messages.Add(diag.ToString());
+                                });
                             }
                         }
                         catch (Exception loadError)

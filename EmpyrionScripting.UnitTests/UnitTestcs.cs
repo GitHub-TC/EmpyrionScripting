@@ -346,7 +346,7 @@ namespace EmpyrionScripting.UnitTests
             var dict = new ConcurrentDictionary<string, object>();
 
             var entity = Substitute.For<IEntity>();
-            var root = new ScriptRootData(new PlayfieldScriptData(lcdMod), new[] { entity }, new[] { entity }, Substitute.For<IPlayfield>(), entity, dict, new EventStore(entity));
+            var root = new ScriptSaveGameRootData(new PlayfieldScriptData(lcdMod), new[] { entity }, new[] { entity }, Substitute.For<IPlayfield>(), entity, dict, new EventStore(entity));
             var playfield = Substitute.For<IPlayfield>();
             playfield.Name.Returns("PlayfieldTestName");
             root.P = new PlayfieldData(playfield);

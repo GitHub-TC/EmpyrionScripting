@@ -94,8 +94,7 @@ namespace EmpyrionScripting
                 TaskTools.Log = ModApi.LogError;
                 StaticCsCompiler.CsCompiler.Log = Log;
 
-                CsCompiler = new CsCompiler.CsCompiler(SaveGameModPath, ModApi, typeof(EmpyrionScripting).Assembly);
-                CsCompiler.ScriptErrorTracking = ScriptErrorTracking;
+                CsCompiler = new StaticCsCompiler.CsCompiler(SaveGameModPath, ModApi, typeof(EmpyrionScripting).Assembly) { ScriptErrorTracking = ScriptErrorTracking };
                 CsCompiler.ConfigurationChanged += CsCompiler_ConfigurationChanged;
 
                 ModApi.Application.OnPlayfieldLoaded    += Application_OnPlayfieldLoaded;
