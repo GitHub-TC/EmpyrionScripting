@@ -40,11 +40,11 @@ namespace EmpyrionScripting
 
             var timer = Stopwatch.StartNew();
             ReadBlockMappingFile(blockMappingFile, modApi);
-            ReadEcfFiles();
-            MergeEcfFiles();
-            BuildIdAndNameAccess();
-            FlatEcfConfigData();
-            CalcBlockRessources();
+            Log($"ReadEcfFiles",            LogLevel.Message); ReadEcfFiles();
+            Log($"MergeEcfFiles",           LogLevel.Message); MergeEcfFiles();
+            Log($"BuildIdAndNameAccess",    LogLevel.Message); BuildIdAndNameAccess();
+            Log($"FlatEcfConfigData",       LogLevel.Message); FlatEcfConfigData();
+            Log($"CalcBlockRessources",     LogLevel.Message); CalcBlockRessources();
             timer.Stop();
 
             if(EmpyrionScripting.Configuration?.Current?.LogLevel == LogLevel.Debug) { 
@@ -222,7 +222,7 @@ namespace EmpyrionScripting
                     if (string.IsNullOrEmpty(templateRoot)) return;
                     if (!FlatConfigTemplatesByName.TryGetValue(templateRoot, out var templateRootBlock)) return;
 
-                    ScanTemplates(templateRootBlock, ressList, 1);
+                    ScanTemplates(templateRootBlock, ressList, 1, new string [] { });
 
                     if (ressList.Count > 0 && !templates.ContainsKey(id)) templates.Add(id, ressList);
                 });
@@ -230,7 +230,7 @@ namespace EmpyrionScripting
             return templates;
         }
 
-        private void ScanTemplates(EcfBlock templateRootBlock, Dictionary<int, double> ressList, double multiplyer)
+        private void ScanTemplates(EcfBlock templateRootBlock, Dictionary<int, double> ressList, double multiplyer, string[] scanedNames)
         {
             var templateName = templateRootBlock.Attr.FirstOrDefault(A => A.Name == "Name")?.Value.ToString();
             bool.TryParse(templateRootBlock.Attr.FirstOrDefault(A => A.Name == "BaseItem")?.Value.ToString(), out var isBaseItem);
@@ -247,7 +247,8 @@ namespace EmpyrionScripting
                         {
                             var recipeMultiplyer = multiplyer * (int)C.Value;
                             if (recipe.Values.TryGetValue("OutputCount", out var outputCount)) recipeMultiplyer /= (int)outputCount;
-                            ScanTemplates(recipe, ressList, recipeMultiplyer);
+                            if (scanedNames.Contains(C.Name)) Log($"Cyclic Templates: {string.Join(",", scanedNames)} -> {C.Name}", LogLevel.Error);
+                            else                              ScanTemplates(recipe, ressList, recipeMultiplyer, scanedNames.Concat(new[] {C.Name}).ToArray());
                             return;
                         }
                     }
