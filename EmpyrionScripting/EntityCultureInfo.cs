@@ -30,6 +30,7 @@ namespace EmpyrionScripting
         {
             var c = (CultureInfo)currentUICulture.Clone();
 
+            c.NumberFormat.PercentSymbol          = "%";  // z.B. fr-FR benutzt ein von EGS nicht darstellbares Zeichen
             c.NumberFormat.PercentNegativePattern = 1;
             c.NumberFormat.PercentPositivePattern = 1;
 
