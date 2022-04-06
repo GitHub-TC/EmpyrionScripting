@@ -109,6 +109,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IdListsTests.cs" />
     <Compile Include="MockDeviceLock.cs" />
     <Compile Include="UnitTestConfig.cs" />
     <Compile Include="UnitTestCs.cs" />

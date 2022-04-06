@@ -123,10 +123,9 @@ namespace EmpyrionScripting.DataWrapper
 
         public IPlayfield GetCurrentPlayfield() => playfield;
 
-        public Dictionary<string, string> Ids => EmpyrionScripting.Configuration.Current.Ids;
-
-        public string OreIds => "2248,2249,2250,2251,2252,2253,2254,2269,2270,2284,2293,2297";
-        public string IngotIds => "2271,2272,2273,2274,2275,2276,2277,2278,2279,2280,2281,2285,2294,2298";
+        public Dictionary<string, string> Ids => EmpyrionScripting.Configuration.Current.MappedIds;
+        public Dictionary<string, string> PlainIds => EmpyrionScripting.Configuration.Current.Ids;
+        public Dictionary<string, string> NamedIds => EmpyrionScripting.Configuration.Current.NamedIds;
 
         public IPlayfieldData P { get => _p == null ? _p = new PlayfieldData(playfield) : _p; set => _p = value; }
         private IPlayfieldData _p;

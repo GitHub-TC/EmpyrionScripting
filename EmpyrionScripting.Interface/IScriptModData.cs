@@ -20,8 +20,8 @@ namespace EmpyrionScripting.Interface
         string Error { get; set; }
         int FontSize { get; set; }
         Dictionary<string, string> Ids { get; }
-        string IngotIds { get; }
-        string OreIds { get; }
+        Dictionary<string, string> PlainIds { get; }
+        Dictionary<string, string> NamedIds { get; }
         List<string> LcdTargets { get; set; }
         IPlayfieldData P { get; set; }
         string ScriptId { get; set; }

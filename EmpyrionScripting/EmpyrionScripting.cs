@@ -172,6 +172,7 @@ namespace EmpyrionScripting
                 CurrentScenario,
                 Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "blocksmap.dat"), ModApi);
             ItemInfos = new ItemInfos(ConfigEcfAccess, Localization);
+            Configuration_ProcessIdsLists();
         }
 
         private void CsCompiler_ConfigurationChanged(object sender, EventArgs e)
@@ -193,7 +194,27 @@ namespace EmpyrionScripting
             {
                 ConfigFilename = Path.Combine(SaveGameModPath, "Configuration.json")
             };
+            Configuration.ConfigFileLoaded += (s,e) => Configuration_ProcessIdsLists();
             Configuration.Load();
+            if (Configuration.LoadException == null || !File.Exists(Configuration.ConfigFilename)) Configuration.Save();
+        }
+
+        private static void Configuration_ProcessIdsLists()
+        {
+            if (ConfigEcfAccess == null) return;
+
+            var lists = new IdLists
+            {
+                BlockIdMapping = ConfigEcfAccess.BlockIdMapping,
+                IdBlockMapping = ConfigEcfAccess.IdBlockMapping
+            };
+
+            lists.ProcessLists(Configuration.Current.Ids);
+
+            Configuration.Current.MappedIds = lists.MappedIds;
+            Configuration.Current.NamedIds  = lists.NamedIds;
+
+            Configuration.Current.Ids       = lists.NamedIds;
             if (Configuration.LoadException == null || !File.Exists(Configuration.ConfigFilename)) Configuration.Save();
         }
 

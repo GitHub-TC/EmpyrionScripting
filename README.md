@@ -377,7 +377,7 @@ Welt
 ```
 ----------------------------------------------------
 ## ERZE und BARREN IDENTIFIKATIONS NUMMER:
-@root/OreIds
+@root.Ids.Ore
 
 + Item Id: 4296, Name: Magnesium Erz
 + Item Id: 4297, Name: Eisen Erz
@@ -393,7 +393,7 @@ Welt
 + Item Id: 4345, Name: Gold Erz
 
 ---
-@root/IngotIds
+@root.Ids.Ingots
 
 + Item Id: 4319, Name: Magnesiumpulver
 + Item Id: 4320, Name: Eisen Barren
@@ -1214,7 +1214,7 @@ Welt
 ----------------------------------------------------
 ## ERZE und BARREN IDENTIFIKATIONS NUMMER:
 
-@root/OreIds
+@root.Ids.Ore
 
 + Item Id: 4296, Name: MagnesiumOre
 + Item Id: 4297, Name: IronOre
@@ -1230,7 +1230,7 @@ Welt
 + Item Id: 4345, Name: GoldOre
 
 ---
-@root/IngotIds
+@root.Ids.Ingot
 
 + Item Id: 4319, Name: MagnesiumPowder
 + Item Id: 4320, Name: IronIngot

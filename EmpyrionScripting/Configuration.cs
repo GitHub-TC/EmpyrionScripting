@@ -73,6 +73,13 @@ namespace EmpyrionScripting
             ["AmmoCV"       ] = ",4150,4152,4249,4253,4254,4258,4262,4263,4267",
             ["AmmoBA"       ] = ",4150,4152,4249,4252,4257,4264,4265,4266,",
         };
+
+        [JsonIgnore]
+        public Dictionary<string, string> MappedIds { get; set; }
+
+        [JsonIgnore]
+        public Dictionary<string, string> NamedIds { get; set; }
+
         public Dictionary<StructureTankType, AllowedItem[]> StructureTank { get; set; } = new Dictionary<StructureTankType, AllowedItem[]>()
         {
             [StructureTankType.Oxygen  ] = new[] { new AllowedItem(4176, 250) },
