@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 
 namespace EcfParser.UnitTests
 {
@@ -368,6 +369,64 @@ namespace EcfParser.UnitTests
             var b = blockById[1367];
         }
 
+        [TestMethod]
+        public void ReadHarvestPlant()
+        {
+            var line = @"
+{ Block Id: 1329, Name: TomatoStage4
+  Class: CropsGrown
+  AllowedInBlueprint: false, display: true 
+  IndexName: Plant
+  CropType: Vegetables, display: true
+  { Child DropOnHarvest
+    Item: Vegetables
+    Count: 4
+  }
+  { Child CropsGrown   
+    OnHarvest: TomatoStage4NoFruit
+    OnDeath: PlantDead2
+  }
+  Material: plants
+  Shape: ModelEntity
+  Model: @models2/Entities/Farming/SpeedTrees/TomatoPlantStage4Prefab
+  PickupTarget: TomatoStage1
+  IsAccessible: false, type: bool
+  Collide: ""bullet,rocket,melee,sight""
+  AllowPlacingAt: ""Base,MS"", display: true
+  SizeInBlocks: ""1,1,1"", display: true
+  SizeInBlocksLocked: ""Base,MS""
+  ShowBlockName: true
+  XpFactor: 2.0
+}
+";
+
+            var alias = new Dictionary<string, int> { { "TomatoStage4", 1329 } };
+
+            var result = EcfParser.Parse.Deserialize(line.Split('\n'));
+
+            Assert.AreEqual(1, result.Blocks.Count);
+            var harvestData =
+                result.Blocks
+                    .Where(b => b.Attr.FirstOrDefault(a => a.Name == "Class")?.Value?.ToString() == "CropsGrown")
+                    .Select(b =>
+                    {
+                        var childDropOnHarvest = b.Childs.FirstOrDefault(c => c.Key == "Child DropOnHarvest");
+                        var dropOnHarvestItem  = childDropOnHarvest.Value.Attr.FirstOrDefault(a => a.Name == "Item").Value;
+                        var dropOnHarvestCount = int.TryParse(childDropOnHarvest.Value.Attr.FirstOrDefault(a => a.Name == "Count")?.Value?.ToString(), out var count) ? count : 0;
+
+                        var childOnHarvest     = b.Childs.FirstOrDefault(c => c.Key == "Child CropsGrown").Value.Attr.FirstOrDefault(a => a.Name == "OnHarvest").Value;
+
+                        return new
+                        {
+                            Id                  = b.Name,
+                            DropOnHarvestItem   = dropOnHarvestItem,
+                            DropOnHarvestCount  = dropOnHarvestCount,
+                            ChildOnHarvest      = childOnHarvest
+                        };
+                    })
+                    .ToDictionary(b => b.Id, b => b);
+
+        }
 
     }
 }

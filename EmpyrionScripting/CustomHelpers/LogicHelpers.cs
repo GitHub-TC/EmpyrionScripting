@@ -107,7 +107,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        private static bool In(object left, object right)
+        public static bool In(object left, object right)
         {
             if (left == null || right == null) return false;
 

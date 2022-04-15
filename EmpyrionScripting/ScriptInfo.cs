@@ -13,6 +13,7 @@ namespace EmpyrionScripting
         public int EntityId { get; set; }
         public int ScriptPriority { get; set; }
         public bool NeedsMainThread { get; set; }
+        public bool NeedsDeviceLock { get; set; }
         public bool IsElevatedScript { get; set; }
 
         public int RunningInstances => _RunningInstances;

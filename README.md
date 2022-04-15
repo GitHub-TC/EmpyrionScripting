@@ -488,6 +488,10 @@ Syntaxdocu:
   + Hinweis: Der Kern der Struktur muss 'Core-Recycle-ID' (wobei ID für die Id der Struktur steht) heißen
   + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
 
++ {{harvest structure block's target gx gy gz \[removeDeadPlants\]}}
+  + Mit dem Befehl können Pflanzen abgebaut werden. Dazu ist ein "Gärtner" (NPC Crew) und Geld (als Bezahlung) im Kühlschrank notwendig. 
+    Auf Wunsch können auch die toten Planzen entsorgt werden. Dies kostet jedoch den 100 fachen Preis
+
 ## Lichter
 + {{lights structure names}}
   + Lichter der Struktur (structure) mit den Namen (names) auswählen
@@ -649,6 +653,9 @@ Syntaxdocu:
 + {{setcolor block colorid [pos]}}
   + Setzt die Farbe des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden, wenn keine Position angegeben wird wird der ganze Block gesetzt
 
++ {{blocks structure fromX fromY fromZ toX toY toZ}}
+  + Liefert in Paketen von 100 Blöcken alle Blöckte des angegeben Bereiches für eine weitere verarbeitung z.B. mit dem 'harvest' Befehl
+  
 ## Rechnen
 + {{math (lvalue) op (rvalue) [digits]}}
   + op = +, -, *, /, %
@@ -1482,9 +1489,12 @@ DateTime format:
   + Distance between (lVector) and (rVector)
   + Optional a format
 
-### (block)
+### (blocks)
 + {{block structure x y z}}
 
++ {{blocks structure fromX fromY fromZ toX toY toZ}}
+  + Returns in packets of 100 blocks all blocks of the specified range for further processing, e.g. with the 'harvest' command.
+  
 ### (concat)
 + {{concat a1 a2 a3 ...}}
   + Concatenate the values of a1 .. aN 
@@ -1543,7 +1553,14 @@ DateTime format:
 + {{entitiesbyid ids}}
   + Get nearby Entity (with same faction) with IDs in (id1;id2;id3)
 
-### (deconstruct)
+## Move/Fill/Process
++ {{move item structure names \[maxLimit\]}}
+  + Move item (item) to the structure (structure) to the containers with the names (names).
+  + \[maxLimit\] is an optional parameter that limits the number in the target container
+
++ {{fill item structure tank \[max\]}}
+  + Fills up the tank = fuel/oxygen/pentaxide with the item in the structure. The percentage fill level can be optionally limited with (max). Default is 100.
+
 + {{deconstruct entity container \[CorePrefix\] \[RemoveItemsIds1,Id2,...\]}}
    + Deconstruct the entity 'entity' and moves parts to container named as 'container''
    + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
@@ -1554,6 +1571,10 @@ DateTime format:
    + Note: The core of the structure must be called 'Core-Recycle-ID' (where ID stands for the ID of the structure)
    + With the configuration setting DeconstructBlockSubstitution, a replacement (by another block type) / deletion (by 0) of block types can be defined
     
++ {{harvest structure block's target gx gy gz \[removeDeadPlants\]}}
+  + The command can be used to mine plants. This requires a "gardener" (NPC crew) and money (as payment) in the refrigerator. 
+    If desired, the dead plants can also be disposed of. However, this costs 100 times the price
+
 ## Positions (structure and world)
 + {{structtoglobalpos structure (vector | x y z)}}
   + Returns the world coorinates of structurepos structure (vector | x y z)

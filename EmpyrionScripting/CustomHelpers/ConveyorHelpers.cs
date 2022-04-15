@@ -254,7 +254,7 @@ namespace EmpyrionScripting.CustomHelpers
                     }
 
                     var count = S.Count;
-                    count -= S.Container.RemoveItems(S.Id, count);
+                    count -= S.Container?.RemoveItems(S.Id, count) ?? count;
                     Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
 
                     ItemMoveInfo currentMoveInfo = null;
@@ -285,7 +285,7 @@ namespace EmpyrionScripting.CustomHelpers
                      if (count > 0)
                      {
                          var retoureCount = count;
-                         count = S.Container.AddItems(S.Id, retoureCount);
+                         count = S.Container?.AddItems(S.Id, retoureCount) ?? retoureCount;
                          Log($"Move(retoure): {S.CustomName} {retoureCount} -> {count}", LogLevel.Debug);
                      }
 
@@ -428,6 +428,105 @@ namespace EmpyrionScripting.CustomHelpers
             return maxLimit.HasValue
                 ? target.AddItems(S.Id, tryMoveCount) + (count - tryMoveCount)
                 : target.AddItems(S.Id, tryMoveCount);
+        }
+
+        [HandlebarTag("harvest")]
+        public static void HarvestHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 6 && arguments.Length != 7) throw new HandlebarsException("{{harvest structure block's target gx gy gz [removeDeadPlants]}} helper must have six argument: (structure) (block's) (target) (gardenerX) (gardenerY) (gardenerZ) (removeDeadPlants) -> " + arguments.Length.ToString());
+
+            var root        = rootObject as IScriptRootData;
+            var structure   = arguments[0] as IStructureData;
+
+            try
+            {
+                BlockData[] blocks = null;
+                if (arguments.Get(1) is BlockData[] blockArray) blocks = blockArray;
+                if (arguments.Get(1) is BlockData blockSingle)  blocks = new[] { blockSingle };
+
+                var namesSearch = arguments.Get<string>(2);
+                int.TryParse(arguments.Get(3)?.ToString(), out var gx);
+                int.TryParse(arguments.Get(4)?.ToString(), out var gy);
+                int.TryParse(arguments.Get(5)?.ToString(), out var gz);
+                bool.TryParse(arguments.Get(6)?.ToString(), out var removeDeadPlants);
+
+                if (blocks?.Length == 0)
+                {
+                    output.WriteLine($"No blocks {arguments.Get(1)} for harvesting");
+                    return;
+                }
+
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch).ToList();
+                if (!uniqueNames.Any())
+                {
+                    output.WriteLine($"NoDevicesFound: {namesSearch}");
+                    return;
+                }
+
+                var gardener = new BlockData(structure.E, new VectorInt3(gx, gy, gz));  
+                if(gardener == null || !root.Ids.TryGetValue("Gardeners", out var gardenersList) || !LogicHelpers.In(gardener.Id, gardenersList))
+                {
+                    output.WriteLine($"No gardener {(gardener != null ? root.ConfigEcfAccess.IdBlockMapping.TryGetValue(gardener.Id, out var foundBlock) ? foundBlock : gardener.Id.ToString() : "?")} found at x:{gx} y:{gy} z:{gz}: {(root.NamedIds.TryGetValue("Gardeners", out var allowedGardenersList) ? allowedGardenersList : "No gardener allowed")}");
+                    return;
+                }
+
+                IContainer container    = null;
+                VectorInt3 containerPos = VectorInt3.Undef;
+
+                var firstTarget = GetNextContainer(root, uniqueNames, ref container, ref containerPos);
+                if (string.IsNullOrEmpty(firstTarget))
+                {
+                    if(firstTarget == null) output.WriteLine($"Containers '{namesSearch}' are locked");
+                    return;
+                }
+
+                using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), structure.GetCurrent(), containerPos);
+                if (!locked.Success)
+                {
+                    Log($"DeviceIsLocked (harvest): {containerPos}", LogLevel.Debug);
+                    return;
+                }
+
+                foreach (var block in blocks)
+                {
+                    var amount = EmpyrionScripting.Configuration.Current.GardenerSalary.Amount;
+
+                    if (!root.ConfigEcfAccess.HarvestBlockData.TryGetValue(block.Id, out var harvestInfo)) continue;
+
+                    // Tote Pflanzen stehen lassen oder das 100 fache für das "Aufräumen" nehmen
+                    if (harvestInfo.DropOnHarvestId == 0)
+                    {
+                        if (removeDeadPlants) amount *= 100;
+                        else                  continue;
+                    }
+
+                    var salary = container.GetTotalItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId);
+                    if (salary < amount)
+                    {
+                        output.WriteLine($"Not enougth salary for gardener: {amount} of {(root.ConfigEcfAccess.IdBlockMapping.TryGetValue(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, out var salaryItemName) ? salaryItemName : EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId.ToString())}");
+                        return;
+                    }
+
+                    var count = harvestInfo.DropOnHarvestId == 0 ? 0 : container.AddItems(harvestInfo.DropOnHarvestId, harvestInfo.DropOnHarvestCount);
+                    if (count > 0)
+                    {
+                        container.RemoveItems(harvestInfo.DropOnHarvestId, harvestInfo.DropOnHarvestCount - count);
+                        options.Inverse(output, context as object);
+                        return;
+                    }
+                    else
+                    {
+                        container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
+                        block.GetBlock().Set(harvestInfo.ChildOnHarvestId);
+                        options.Template(output, harvestInfo);
+                    }
+                }
+
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{harvest}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
         }
 
         [HandlebarTag("fill")]
@@ -610,11 +709,15 @@ namespace EmpyrionScripting.CustomHelpers
             var E    = arguments[0] as IEntityData;
             var N    = arguments[1]?.ToString();
 
-            var minPos      = E.S.GetCurrent().MinPos;
+            var minPos = E.S.GetCurrent().MinPos;
             var maxPos      = E.S.GetCurrent().MaxPos;
             var S           = E.S.GetCurrent();
             var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
             var directId    = root.IsElevatedScript ? (int.TryParse(arguments.Get(2)?.ToString(), out var manualId) ? manualId : 0) : 0;
+
+            // Empyrion hat einen "komischen" y-offest von 128
+            minPos = new VectorInt3(minPos.x, 128 + minPos.y, minPos.z);
+            maxPos = new VectorInt3(maxPos.x, 128 + maxPos.y, maxPos.z);
 
             var uniqueNames = root.E.S.AllCustomDeviceNames.GetUniqueNames(N).ToList();
 
@@ -653,11 +756,11 @@ namespace EmpyrionScripting.CustomHelpers
             VectorInt3 targetPos = VectorInt3.Undef;
 
             var firstTarget = GetNextContainer(root, uniqueNames, ref target, ref targetPos);
-            if (firstTarget == null)
+            if (string.IsNullOrEmpty(firstTarget))
             {
                 root.GetPersistendData().TryRemove(root.ScriptId, out _);
                 options.Inverse(output, context);
-                output.WriteLine($"Containers '{N}' are locked");
+                if(firstTarget == null) output.WriteLine($"Containers '{N}' are locked");
                 return;
             }
 
@@ -680,7 +783,7 @@ namespace EmpyrionScripting.CustomHelpers
             if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
                 var ressources = new Dictionary<int, double>();
 
-                lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (c, i) => processBlock(E, ressources, i));
+                lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (c, i) => processBlock(E, ressources, i), 100);
 
                 var allToLostItemRecover = false;
                 var currentContainer = firstTarget;
@@ -715,16 +818,16 @@ namespace EmpyrionScripting.CustomHelpers
                         EmpyrionScripting.Log($"Container full: {R.Key} #{over} -> {currentContainer}", LogLevel.Message);
 
                         currentContainer = GetNextContainer(root, uniqueNames, ref target, ref targetPos);
-                        if (currentContainer != null)
+                        if (string.IsNullOrEmpty(currentContainer))
+                        {
+                            if(currentContainer == null) EmpyrionScripting.Log("All Container full or blocked", LogLevel.Message);
+                            allToLostItemRecover = true;
+                        }
+                        else
                         {
                             var nextTry = over;
                             over = target.AddItems(R.Key, over);
                             EmpyrionScripting.Log($"Ressource to NextContainer: {R.Key} #{nextTry} -> #{over} -> {currentContainer}", LogLevel.Message);
-                        }
-                        else
-                        {
-                            EmpyrionScripting.Log("All Container full or blocked", LogLevel.Message);
-                            allToLostItemRecover = true;
                         }
                     }
 
@@ -768,7 +871,7 @@ namespace EmpyrionScripting.CustomHelpers
                         if (locking.Exit)
                         {
                             //EmpyrionScripting.Log($"GetNextContainer:{currentTarget} at pos {targetPos} -> Exit", LogLevel.Debug);
-                            return null;
+                            return string.Empty;
                         }
 
                         if (locking.Success)
@@ -818,6 +921,10 @@ namespace EmpyrionScripting.CustomHelpers
                                     .ToArray();
                 int.TryParse(arguments.Get(2)?.ToString(), out var replaceId);
 
+                // Empyrion hat einen "komischen" y-offest von 128
+                minPos = new VectorInt3(minPos.x, 128 + minPos.y, minPos.z);
+                maxPos = new VectorInt3(maxPos.x, 128 + maxPos.y, maxPos.z);
+
                 var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
                     Started     = DateTime.Now,
                     Name        = E.Name,
@@ -833,7 +940,7 @@ namespace EmpyrionScripting.CustomHelpers
                 }) as ProcessBlockData;
 
                 if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list, (C, I) => C.AddItems(I, 1) > 0);
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list, (C, I) => C.AddItems(I, 1) > 0, 100);
                     if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
@@ -847,9 +954,9 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
 
-        static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData, 
+        public static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData, 
             IContainer target, VectorInt3 targetPos, string N, int replaceId, Tuple<int,int>[] list,
-            Func<IContainer, int, bool> processBlock)
+            Func<IContainer, int, bool> processBlock, int maxBlocksPerCycle)
         {
             IDeviceLock locked = null;
 
@@ -863,7 +970,7 @@ namespace EmpyrionScripting.CustomHelpers
                         {
                             processBlockData.CheckedBlocks++;
 
-                            var block = S.GetBlock(processBlockData.X, 128 + processBlockData.Y, processBlockData.Z);
+                            var block = S.GetBlock(processBlockData.X, processBlockData.Y, processBlockData.Z);
                             if (block != null)
                             {
                                 block.Get(out var blockType, out _, out _, out _);
@@ -894,11 +1001,23 @@ namespace EmpyrionScripting.CustomHelpers
                                             return;
                                         }
                                     }
+                                    else if(N == null)
+                                    {
+                                        if (processBlock(target, blockType))
+                                        {
+                                            processBlockData.CheckedBlocks--;
+                                            return;
+                                        }
+                                    }
 
-                                    block.Set(replaceId);
+                                    if (replaceId >= 0) block.Set(replaceId);
                                     processBlockData.RemovedBlocks++;
 
-                                    if (processBlockData.RemovedBlocks > 100 && processBlockData.RemovedBlocks % 100 == 0 && root.TimeLimitReached) return;
+                                    if (processBlockData.RemovedBlocks % maxBlocksPerCycle == 0 || root.TimeLimitReached)
+                                    {
+                                        processBlockData.Z++;
+                                        return;
+                                    }
                                 }
                             }
                         }

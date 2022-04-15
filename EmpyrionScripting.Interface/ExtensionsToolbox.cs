@@ -25,6 +25,11 @@ namespace EmpyrionScripting.Interface
             return args.Length > index ? args[index] : null;
         }
 
+        public static T Get<T>(this object[] args, int index) where T : class
+        {
+            return args.Length > index ? args[index] as T : default;
+        }
+
         public static IEnumerable<T> ForEach<T>(this IEnumerable<T> data, Action<T> action, Func<bool> terminate)
         {
             if (data == null || terminate()) return Enumerable.Empty<T>();

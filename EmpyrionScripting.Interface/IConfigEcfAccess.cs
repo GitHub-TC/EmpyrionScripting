@@ -14,5 +14,6 @@ namespace EmpyrionScripting.Interface
         IReadOnlyDictionary<int, EcfBlock> FlatConfigBlockById { get; }
         IReadOnlyDictionary<string, EcfBlock> FlatConfigBlockByName { get; }
         IReadOnlyDictionary<int, Dictionary<int, double>> ResourcesForBlockById { get; }
+        Dictionary<int, IHarvestInfo> HarvestBlockData { get; }
     }
 }

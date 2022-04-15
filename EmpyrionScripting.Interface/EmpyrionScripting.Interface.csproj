@@ -71,6 +71,7 @@
     <Compile Include="IEntityCultureInfo.cs" />
     <Compile Include="IEntityData.cs" />
     <Compile Include="IEventStore.cs" />
+    <Compile Include="IHarvestInfo.cs" />
     <Compile Include="IItemMoveInfo.cs" />
     <Compile Include="IItemsData.cs" />
     <Compile Include="IItemsSource.cs" />

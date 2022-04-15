@@ -31,6 +31,7 @@ namespace EmpyrionScripting.Interface
         IConfigEcfAccess ConfigEcfAccess { get; }
         bool ScriptWithinMainThread { get; set; }
         bool ScriptNeedsMainThread { get; set; }
+        bool ScriptNeedsDeviceLock { get; set; }
         ConcurrentDictionary<string, object> CacheData { get; }
         string ScriptingModInfoData { get; }
         ConcurrentDictionary<string, string> ScriptingModScriptsInfoData { get; }

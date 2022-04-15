@@ -10,6 +10,8 @@ namespace EmpyrionScripting
         {
             try
             {
+                root.ScriptNeedsDeviceLock = true;
+
                 if (!root.ScriptWithinMainThread)
                 {
                     root.ScriptNeedsMainThread = true;

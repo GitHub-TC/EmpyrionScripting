@@ -183,6 +183,7 @@
     <Compile Include="DataWrapper\EventStore.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HandlebarsHelpers.cs" />
+    <Compile Include="DataWrapper\HarvestInfo.cs" />
     <Compile Include="IdLists.cs" />
     <Compile Include="Internal.Interface\IDeviceLock.cs" />
     <Compile Include="Internal.Interface\IPlayfieldScriptData.cs" />

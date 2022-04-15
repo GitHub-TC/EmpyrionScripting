@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using EcfParser;
 using EmpyrionScripting;
 using EmpyrionScripting.Interface;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 
 namespace EmpyrionLCDInfo.UnitTests
 {
@@ -66,6 +68,17 @@ namespace EmpyrionLCDInfo.UnitTests
                     if (ressList.TryGetValue(ressId, out var count)) ressList[ressId] = count + (int)C.Value;
                     else ressList.Add(ressId, (int)C.Value);
                 });
+        }
+
+        [TestMethod]
+        public void ReadHarvestData()
+        {
+            EmpyrionScripting.EmpyrionScripting.SaveGameModPath = string.Empty;
+            var config = new ConfigEcfAccess();
+            //config.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null, null, null);
+            config.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", "Reforged Eden", @"C:\steamcmd\empyrion.server\Saves\Games\DefaultRE\Mods\EmpyrionScripting\NameIdMapping.json", null);
+
+            int i = config.HarvestBlockData.Count;
         }
     }
 }

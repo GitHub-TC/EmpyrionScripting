@@ -2,6 +2,7 @@
 using Eleon.Modding;
 using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.Interface;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -30,6 +31,7 @@ namespace EmpyrionScripting
         public static Action<string, LogLevel> Log { get; set; } = (s, l) => Console.WriteLine(s);
         public string ContentPath { get; set; }
         public string ScenarioContentPath { get; set; }
+        public Dictionary<int, IHarvestInfo> HarvestBlockData { get; set; }
 
         public void ReadConfigEcf(string contentPath, string activeScenario, string blockMappingFile, IModApi modApi)
         {
@@ -45,6 +47,7 @@ namespace EmpyrionScripting
             Log($"BuildIdAndNameAccess",    LogLevel.Message); BuildIdAndNameAccess();
             Log($"FlatEcfConfigData",       LogLevel.Message); FlatEcfConfigData();
             Log($"CalcBlockRessources",     LogLevel.Message); CalcBlockRessources();
+            Log($"GetHarvestBlockData",     LogLevel.Message); GetHarvestBlockData();
             timer.Stop();
 
             if(EmpyrionScripting.Configuration?.Current?.LogLevel == LogLevel.Debug) { 
@@ -79,6 +82,53 @@ namespace EmpyrionScripting
         public void CalcBlockRessources()
         {
             try { ResourcesForBlockById = ResourcesForBlock(); }
+            catch (Exception error) { Log($"EmpyrionScripting RecipeForBlock: {error}", LogLevel.Error); }
+        }
+
+        public void GetHarvestBlockData()
+        {
+            try
+            {
+                var deadPlants = new Dictionary<int, IHarvestInfo>();
+
+                HarvestBlockData = FlatConfigBlockById
+                  .Where(B => B.Value?.Values?.TryGetValue("Class", out object className) == true && className.ToString() == "CropsGrown")
+                  .Select(B => {
+                      var logLevel = LogLevel.Debug;
+                      try
+                      {
+                          var childDropOnHarvest = B.Value.Childs.FirstOrDefault(c => c.Key == "Child DropOnHarvest");
+                          var dropOnHarvestItem  = childDropOnHarvest.Value.Attr.FirstOrDefault(a => a.Name == "Item").Value?.ToString() ?? string.Empty;
+                          var dropOnHarvestCount = int.TryParse(childDropOnHarvest.Value.Attr.FirstOrDefault(a => a.Name == "Count")?.Value?.ToString(), out var count) ? count : 0;
+
+                          var childCropsGrown   = B.Value.Childs?.FirstOrDefault(c => c.Key == "Child CropsGrown").Value.Attr;
+                          var childOnHarvest    = childCropsGrown.FirstOrDefault(a => a.Name == "OnHarvest")?.Value?.ToString() ?? string.Empty;
+                          var childOnDead       = childCropsGrown.FirstOrDefault(a => a.Name == "OnDeath"  )?.Value?.ToString() ?? string.Empty;
+                          if (BlockIdMapping.TryGetValue(childOnDead, out int childOnDeadId) && !deadPlants.ContainsKey(childOnDeadId)) deadPlants.Add(childOnDeadId, new HarvestInfo { Id = childOnDeadId });
+
+                          logLevel = LogLevel.Error;
+
+                          return new HarvestInfo
+                          {
+                              Id                    = B.Key,
+                              DropOnHarvestId       = BlockIdMapping.TryGetValue(dropOnHarvestItem, out int harvestItemId) ? harvestItemId : 0,
+                              DropOnHarvestItem     = dropOnHarvestItem,
+                              DropOnHarvestCount    = dropOnHarvestCount,
+                              ChildOnHarvestId      = BlockIdMapping.TryGetValue(childOnHarvest, out int harvestItemChildId) ? harvestItemChildId : 0,
+                              ChildOnHarvestItem    = childOnHarvest,
+                          };
+                      }
+                      catch (Exception error )
+                      {
+                          Log?.Invoke($"HarvestBlockData failed {B.Key} {error}", logLevel);
+                          return null;
+                      }
+                  })
+                  .Where(h => h != null && h.Id != 0 && h.DropOnHarvestCount != 0 && h.DropOnHarvestId != 0 && h.ChildOnHarvestId != 0)
+                  .ToDictionary(h => h.Id, h => (IHarvestInfo)h);
+
+                deadPlants.ForEach(d => HarvestBlockData.Add(d.Key, d.Value));
+            }
             catch (Exception error) { Log($"EmpyrionScripting RecipeForBlock: {error}", LogLevel.Error); }
         }
 
@@ -166,6 +216,12 @@ namespace EmpyrionScripting
                 else
                 {
                     Log($"ReadBlockMappingFile: BlockIdMapping API:[{BlockIdMapping?.Count}]", LogLevel.Message);
+                    try {
+                        BlockIdMapping = JsonConvert.DeserializeObject<Dictionary<string, int>>(File.ReadAllText(blockMappingFile)); 
+                    } 
+                    catch {
+                        Log($"ReadBlockMappingFile: BlockIdMapping File{blockMappingFile}:[{BlockIdMapping?.Count}]", LogLevel.Message);
+                    }
                 }
             }
             catch (Exception error)

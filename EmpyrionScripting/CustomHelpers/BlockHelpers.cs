@@ -1,10 +1,14 @@
-﻿using EmpyrionScripting.CsHelper;
+﻿using Eleon.Modding;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
+using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static EmpyrionScripting.CustomHelpers.ConveyorHelpers;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -99,6 +103,64 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{block}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("blocks")]
+        public static void ObjectBlocksHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 7) throw new HandlebarsException("{{blocks structure fromX fromY fromZ toX toY toZ}} helper must have exactly seven argument: (structure) (x) (y) (z)  (x)(y) (z)");
+
+            var root        = rootObject as IScriptRootData;
+            var structure   = arguments[0] as StructureData;
+            int.TryParse(arguments[1].ToString(), out var fromX);
+            int.TryParse(arguments[2].ToString(), out var fromY);
+            int.TryParse(arguments[3].ToString(), out var fromZ);
+            int.TryParse(arguments[4].ToString(), out var toX);
+            int.TryParse(arguments[5].ToString(), out var toY);
+            int.TryParse(arguments[6].ToString(), out var toZ);
+
+            try
+            {
+                if (root.ScriptNeedsDeviceLock && !root.DeviceLockAllowed     ) return;
+                if (root.ScriptNeedsMainThread && !root.ScriptWithinMainThread) return;
+                if (root.TimeLimitReached)                                      return;
+
+                var minPos = new VectorInt3(Math.Min(fromX, toX), Math.Min(fromY, toY), Math.Min(fromZ, toZ));
+                var maxPos = new VectorInt3(Math.Max(fromX, toX), Math.Max(fromY, toY), Math.Max(fromZ, toZ));
+
+                var cacheId = $"{root.ScriptId}{structure.E.Id}{fromX}{fromY}{fromZ}{toX}{toY}{toZ}";
+                var processBlockData = root.GetPersistendData().GetOrAdd(cacheId, K => new ProcessBlockData()
+                {
+                    Started     = DateTime.Now,
+                    Name        = structure.E.Name,
+                    Id          = structure.E.Id,
+                    MinPos      = minPos,
+                    MaxPos      = maxPos,
+                    X           = minPos.x,
+                    Y           = minPos.y,
+                    Z           = minPos.z,
+                    TotalBlocks = (toX - fromX + 1) * (toY - fromY + 1) * (toZ - fromZ + 1)
+                }) as ProcessBlockData;
+
+                //output.WriteLine($" x:{processBlockData.X} y:{processBlockData.Y} z:{processBlockData.Z}->#{processBlockData.CheckedBlocks} von {processBlockData.TotalBlocks}");
+                if (processBlockData.CheckedBlocks < processBlockData.TotalBlocks)
+                {
+                    List<VectorInt3> blockPos = new List<VectorInt3>();
+
+                    lock (processBlockData) ProcessBlockPart(output, root, structure.GetCurrent(), processBlockData, null, VectorInt3.Undef, null, -1, null, (c, i) => {
+                        blockPos.Add(new VectorInt3(processBlockData.X, processBlockData.Y, processBlockData.Z));
+                        return false;
+                    }, 100);
+
+                    if (blockPos.Count > 0) options.Template(output, blockPos.Select(pos => new BlockData(structure.E, pos)).ToArray());
+                    else                    options.Inverse (output, context as object);
+                }
+                else root.GetPersistendData().TryRemove(cacheId, out _);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{blocks}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 

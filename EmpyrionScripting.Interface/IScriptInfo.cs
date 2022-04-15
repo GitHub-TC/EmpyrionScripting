@@ -15,5 +15,6 @@ namespace EmpyrionScripting.Interface
         bool NeedsMainThread { get; }
         bool IsElevatedScript { get; }
         ScriptLanguage ScriptLanguage { get; }
+        bool NeedsDeviceLock { get; }
     }
 }

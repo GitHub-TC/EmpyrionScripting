@@ -158,6 +158,7 @@ namespace EmpyrionScripting.DataWrapper
 
         public bool ScriptWithinMainThread { get; set; }
         public bool ScriptNeedsMainThread { get; set; }
+        public bool ScriptNeedsDeviceLock { get; set; }
         public int ScriptPriority { get; set; }
         public IScriptInfo ScriptDiagnosticInfo { get; set; }
         public bool Running { get; set; }

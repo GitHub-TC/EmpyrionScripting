@@ -35,6 +35,7 @@ namespace EmpyrionScripting
         public ConcurrentQueue<string> BackgroundExecQueue { get; private set; } = new ConcurrentQueue<string>();
 
         public ConcurrentDictionary<string, bool> ScriptNeedsMainThread { get; set; } = new ConcurrentDictionary<string, bool>();
+        public ConcurrentDictionary<string, bool> ScriptNeedsDeviceLock { get; set; } = new ConcurrentDictionary<string, bool>();
         public int GameUpdateScriptLoopTimeLimitReached { get; private set; }
         public static Stopwatch ScriptLoopTimeLimiter { get; } = new Stopwatch();
         public ConcurrentBag<string> BackgroundWorkerToDo { get; set; } = new ConcurrentBag<string>();
@@ -55,6 +56,9 @@ namespace EmpyrionScripting
         {
             if (ScriptNeedsMainThread.TryGetValue(data.ScriptId, out var needMainThread)) data.ScriptNeedsMainThread = needMainThread;
             else                                                                          ScriptNeedsMainThread.TryAdd(data.ScriptId, false);
+
+            if (ScriptNeedsDeviceLock.TryGetValue(data.ScriptId, out var needDeviceLock)) data.ScriptNeedsDeviceLock = needDeviceLock;
+            else                                                                          ScriptNeedsDeviceLock.TryAdd(data.ScriptId, false);
 
             if (WaitForExec.TryAdd(data.ScriptId, data)) ExecQueue.Enqueue(data.ScriptId);
             else                                         WaitForExec.AddOrUpdate(data.ScriptId, data, (scriptId, oldData) => data);
@@ -199,7 +203,9 @@ namespace EmpyrionScripting
                 Interlocked.Decrement(ref info._RunningInstances);
 
                 info.NeedsMainThread = data.ScriptNeedsMainThread;
+                info.NeedsDeviceLock = data.ScriptNeedsDeviceLock;
                 ScriptNeedsMainThread.TryUpdate(data.ScriptId, data.ScriptNeedsMainThread, false);
+                ScriptNeedsDeviceLock.TryUpdate(data.ScriptId, data.ScriptNeedsDeviceLock, false);
 
                 info.ExecTime += DateTime.Now - info.LastStart;
             }
