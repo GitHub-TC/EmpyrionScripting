@@ -48,6 +48,7 @@ namespace EmpyrionScripting
         public bool ScriptTrackingError { get; set; }
         public bool DetailedScriptsInfoData { get; set; }
         public int MaxStoredEventsPerSignal { get; set; } = 10;
+        public int ProcessMaxBlocksPerCycle { get; set; } = 200;
         public AllowedItem GardenerSalary { get; set; } = new AllowedItem(4344, 10); // Money Card
 
         public Dictionary<int, int> DeconstructBlockSubstitution { get; set; } = new Dictionary<int, int>() { [331] = 0, [541] = 0, [542] = 0, [543] = 0, [544] = 0 };

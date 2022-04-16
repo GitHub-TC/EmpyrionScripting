@@ -783,7 +783,7 @@ namespace EmpyrionScripting.CustomHelpers
             if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
                 var ressources = new Dictionary<int, double>();
 
-                lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (c, i) => processBlock(E, ressources, i), 100);
+                lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (c, i) => processBlock(E, ressources, i));
 
                 var allToLostItemRecover = false;
                 var currentContainer = firstTarget;
@@ -940,7 +940,7 @@ namespace EmpyrionScripting.CustomHelpers
                 }) as ProcessBlockData;
 
                 if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list, (C, I) => C.AddItems(I, 1) > 0, 100);
+                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list, (C, I) => C.AddItems(I, 1) > 0);
                     if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
@@ -954,9 +954,9 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
 
-        public static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData, 
-            IContainer target, VectorInt3 targetPos, string N, int replaceId, Tuple<int,int>[] list,
-            Func<IContainer, int, bool> processBlock, int maxBlocksPerCycle)
+        public static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData,
+            IContainer target, VectorInt3 targetPos, string N, int replaceId, Tuple<int, int>[] list,
+            Func<IContainer, int, bool> processBlock)
         {
             IDeviceLock locked = null;
 
@@ -1013,7 +1013,7 @@ namespace EmpyrionScripting.CustomHelpers
                                     if (replaceId >= 0) block.Set(replaceId);
                                     processBlockData.RemovedBlocks++;
 
-                                    if (processBlockData.RemovedBlocks % maxBlocksPerCycle == 0 || root.TimeLimitReached)
+                                    if (processBlockData.RemovedBlocks % EmpyrionScripting.Configuration.Current.ProcessMaxBlocksPerCycle == 0 || root.TimeLimitReached)
                                     {
                                         processBlockData.Z++;
                                         return;

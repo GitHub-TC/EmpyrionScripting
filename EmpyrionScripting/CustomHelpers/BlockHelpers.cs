@@ -148,10 +148,11 @@ namespace EmpyrionScripting.CustomHelpers
                 {
                     List<VectorInt3> blockPos = new List<VectorInt3>();
 
-                    lock (processBlockData) ProcessBlockPart(output, root, structure.GetCurrent(), processBlockData, null, VectorInt3.Undef, null, -1, null, (c, i) => {
+                    lock (processBlockData) ProcessBlockPart(output, root, structure.GetCurrent(), processBlockData, null, VectorInt3.Undef, null, -1, null, (c, i) =>
+                    {
                         blockPos.Add(new VectorInt3(processBlockData.X, processBlockData.Y, processBlockData.Z));
                         return false;
-                    }, 100);
+                    });
 
                     if (blockPos.Count > 0) options.Template(output, blockPos.Select(pos => new BlockData(structure.E, pos)).ToArray());
                     else                    options.Inverse (output, context as object);
