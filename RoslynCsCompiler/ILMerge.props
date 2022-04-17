@@ -8,7 +8,7 @@
     <!-- *** set this file to Type=None, CopyToOutput=Never ***                            -->
 
     <!-- If True, all copy local dependencies will also be merged from referenced projects whether they are referenced in the current project explicitly or not -->
-    <ILMergeTransitive>false</ILMergeTransitive>
+    <ILMergeTransitive>true</ILMergeTransitive>
 
     <!-- Extra ILMerge library paths (semicolon-separated). Dont put your package dependencies here, they will be added automagically -->
     <ILMergeLibraryPath></ILMergeLibraryPath>
