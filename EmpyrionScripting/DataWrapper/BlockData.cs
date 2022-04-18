@@ -38,38 +38,17 @@ namespace EmpyrionScripting.DataWrapper
             _entity     = entity;
             _structure  = _entity.S?.GetCurrent();
             _block      = _structure?.GetBlock(pos);
+            _block      = _block.ParentBlock ?? _block;
             _device     = _structure?.GetDevice<IDevice>(pos);
             Position    = pos;
 
             if(_device is IContainer c) Device = new ContainerData(c);
         }
 
-        public BlockData(BlockData blockData, IBlock parentBlock)
-        {
-            _entity    = blockData._entity;
-            _structure = blockData._structure;
-            _block     = parentBlock;
-            _device    = blockData._device;
-            Position   = blockData.Position;
-            Device     = blockData.Device;
-        }
-
         public IEntityData GetEntity() => _entity;
         public IStructure GetStructure() => _structure;
         public IBlock GetBlock() => _block;
         public IDevice GetDevice() => _device;
-
-        public IBlockData ParentBlock
-        {
-            get
-            {
-                if(_parentBlock != null) return _parentBlock;
-                if (_block.ParentBlock == null) return null;
-
-                return _parentBlock = new BlockData(this, _block.ParentBlock);
-            }
-        }
-        BlockData _parentBlock;
 
         public object Device { get; }
 

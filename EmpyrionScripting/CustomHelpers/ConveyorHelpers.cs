@@ -517,9 +517,7 @@ namespace EmpyrionScripting.CustomHelpers
                     else
                     {
                         container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
-                        var iBlock = block.GetBlock();
-                        if (iBlock.ParentBlock != null) iBlock = iBlock.ParentBlock;
-                        iBlock.Set(harvestInfo.ChildOnHarvestId);
+                        block.GetBlock().Set(harvestInfo.ChildOnHarvestId);
                         options.Template(output, harvestInfo);
                     }
                 }
@@ -975,8 +973,6 @@ namespace EmpyrionScripting.CustomHelpers
                             var block = S.GetBlock(processBlockData.X, processBlockData.Y, processBlockData.Z);
                             if (block != null)
                             {
-                                if(block.ParentBlock != null) block = block.ParentBlock;
-
                                 block.Get(out var blockType, out _, out _, out _);
 
                                 if(list != null     && 
