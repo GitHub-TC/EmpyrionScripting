@@ -3,11 +3,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Text;
 using Eleon.Modding;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
+using HandlebarsDotNet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -709,5 +712,64 @@ namespace EmpyrionScripting.UnitTests
             Assert.AreEqual("2314", LoopHelpers.OrderedList(l, "+NeedsMainThread,-ExecTime,+ScriptLanguage").Aggregate("", (S,E) => S + ((ScriptInfo)E).ScriptId));
         }
 
+        [TestMethod]
+        public void TestMethodObjectBlocksHelper()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var root = Substitute.For<IScriptRootData>();
+
+            var E = Substitute.For<IEntityData>();
+            var structure = Substitute.For<IStructureData>();
+
+            var iStructure = Substitute.For<IStructure>();
+            var iEntity = Substitute.For<IEntity>();
+
+            iEntity.Structure.Returns(iStructure);
+            structure.GetCurrent().Returns(iStructure);
+
+            E.GetCurrent().Returns(iEntity);
+
+            root.ScriptNeedsDeviceLock.Returns(false);
+            root.ScriptNeedsMainThread.Returns(false);
+            root.TimeLimitReached.Returns(false);
+
+            var cacheData = new ConcurrentDictionary<string, object>();
+            root.GetPersistendData().Returns(cacheData);
+
+            root.ScriptId.Returns("test");
+
+            E.Id.Returns(42);
+
+            root.E.Returns(E);
+
+            var blockCalls = new StringBuilder();
+            iStructure.GetBlock(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>()).ReturnsForAnyArgs((c) => { blockCalls.Append($"{c[0]},{c[1]},{c[2]}:"); return Substitute.For<IBlock>();});
+
+            var options = Activator.CreateInstance(typeof(HelperOptions), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new object[] { 
+                new Action<TextWriter, object>((w, o) => { }), 
+                new Action<TextWriter, object>((w, o) => { })}
+            , null) as HelperOptions;
+
+            var output = new StringWriter();
+
+            blockCalls.Clear();
+            BlockHelpers.ObjectBlocksHelper(output, root, options, root, new object[] { structure, -1, -1, -1, 1, 1, 1 });
+            Assert.AreEqual("-1,-1,-1:-1,-1,0:-1,-1,1:0,-1,-1:0,-1,0:0,-1,1:1,-1,-1:1,-1,0:1,-1,1:", blockCalls.ToString());
+
+            blockCalls.Clear();
+            BlockHelpers.ObjectBlocksHelper(output, root, options, root, new object[] { structure,  1, -1, -1, -1, 1, 1 });
+            Assert.AreEqual("-1,-1,-1:-1,-1,0:-1,-1,1:0,-1,-1:0,-1,0:0,-1,1:1,-1,-1:1,-1,0:1,-1,1:", blockCalls.ToString());
+
+            blockCalls.Clear();
+            BlockHelpers.ObjectBlocksHelper(output, root, options, root, new object[] { structure, -1,  1, -1, 1, -1, 1 });
+            Assert.AreEqual("-1,-1,-1:-1,-1,0:-1,-1,1:0,-1,-1:0,-1,0:0,-1,1:1,-1,-1:1,-1,0:1,-1,1:", blockCalls.ToString());
+
+            blockCalls.Clear();
+            BlockHelpers.ObjectBlocksHelper(output, root, options, root, new object[] { structure, -1, -1,  1, 1, 1, -1 });
+            Assert.AreEqual("-1,-1,-1:-1,-1,0:-1,-1,1:0,-1,-1:0,-1,0:0,-1,1:1,-1,-1:1,-1,0:1,-1,1:", blockCalls.ToString());
+
+        }
     }
 }

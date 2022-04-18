@@ -112,7 +112,7 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 7) throw new HandlebarsException("{{blocks structure fromX fromY fromZ toX toY toZ}} helper must have exactly seven argument: (structure) (x) (y) (z)  (x)(y) (z)");
 
             var root        = rootObject as IScriptRootData;
-            var structure   = arguments[0] as StructureData;
+            var structure   = arguments[0] as IStructureData;
             int.TryParse(arguments[1].ToString(), out var fromX);
             int.TryParse(arguments[2].ToString(), out var fromY);
             int.TryParse(arguments[3].ToString(), out var fromZ);
@@ -140,7 +140,7 @@ namespace EmpyrionScripting.CustomHelpers
                     X           = minPos.x,
                     Y           = minPos.y,
                     Z           = minPos.z,
-                    TotalBlocks = (toX - fromX + 1) * (toY - fromY + 1) * (toZ - fromZ + 1)
+                    TotalBlocks = (maxPos.x - minPos.x + 1) * (maxPos.y - minPos.y + 1) * (maxPos.z - minPos.z + 1)
                 }) as ProcessBlockData;
 
                 //output.WriteLine($" x:{processBlockData.X} y:{processBlockData.Y} z:{processBlockData.Z}->#{processBlockData.CheckedBlocks} von {processBlockData.TotalBlocks}");
