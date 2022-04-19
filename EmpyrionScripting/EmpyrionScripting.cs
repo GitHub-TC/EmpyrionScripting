@@ -453,7 +453,7 @@ namespace EmpyrionScripting
 
             try
             {
-                if (!entity.Structure.IsPowered) return 0;
+                if (!entity.Structure.IsPowered && entity.Structure.Fuel > 0) return 0;
 
                 var entityScriptData = new ScriptRootData(playfieldData, playfieldData.AllEntities, playfieldData.CurrentEntities, playfieldData.Playfield, entity,
                     playfieldData.PersistendData, (EventStore)playfieldData.EventStore.GetOrAdd(entity.Id, id => new EventStore(entity)));
