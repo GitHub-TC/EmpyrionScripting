@@ -5,8 +5,10 @@ using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -200,19 +202,30 @@ namespace EmpyrionScripting.CustomHelpers
 
             var root  = rootObject as IScriptRootData;
             var items = arguments[0] as ItemsData[];
-            var ids   = (arguments[1] as string)
+            var idsList = (arguments[1] as string)
                             .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(N => int.TryParse(N, out int i) ? i : 0)
-                            .Where(i => i != 0)
+                            .Select(I => I.Trim())
+                            .Where(I => !string.IsNullOrEmpty(I))
                             .ToArray();
 
             try
             {
+                var ids = new List<int>();
+
+                idsList.ForEach(I => {
+                    var delimiter = I.IndexOf('-', I.StartsWith("-") ? 1 : 0);
+                    if(delimiter > 0){
+                        if (int.TryParse(I.Substring(0, delimiter), out int fromId) && int.TryParse(I.Substring(delimiter + 1), out var toId)) ids.AddRange(Enumerable.Range(fromId, toId - fromId + 1));
+                    }
+                    else if(int.TryParse(I, out var id)) ids.Add(id);
+                });
+
                 if (root.TimeLimitReached) return;
 
                 var list = items.ToDictionary(I => I.Id, I => I);
                 ids.Where(i => !list.ContainsKey(i)).ForEach(i => {
-                    EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(i, out ItemInfo details);
+                    ItemInfo details = null;
+                    EmpyrionScripting.ItemInfos?.ItemInfo?.TryGetValue(i, out details);
                     list.Add(i, new ItemsData()
                     {
                         Id    = i,

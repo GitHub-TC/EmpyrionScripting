@@ -771,5 +771,26 @@ namespace EmpyrionScripting.UnitTests
             Assert.AreEqual("-1,-1,-1:-1,-1,0:-1,-1,1:0,-1,-1:0,-1,0:0,-1,1:1,-1,-1:1,-1,0:1,-1,1:", blockCalls.ToString());
 
         }
+
+        [TestMethod]
+        public void TestMethodItemListBlockHelper()
+        {
+            var root = Substitute.For<IScriptRootData>();
+            root.TimeLimitReached.Returns(false);
+
+            var optionCalls = new StringBuilder();
+
+            var options = Activator.CreateInstance(typeof(HelperOptions), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new object[] {
+                new Action<TextWriter, object>((w, o) => { optionCalls.Append($"T{((ItemsData)o).Id},"); }),
+                new Action<TextWriter, object>((w, o) => { optionCalls.Append($"I{o},"); })}
+            , null) as HelperOptions;
+
+            var output = new StringWriter();
+
+            optionCalls.Clear();
+            ItemAccessHelpers.ItemListBlockHelper(output, root, options, root, new object[] { new ItemsData[] { }, "1,2,10-20,33" });
+            Assert.AreEqual("T1,T2,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T33,", optionCalls.ToString());
+
+        }
     }
 }
