@@ -138,7 +138,7 @@ namespace EmpyrionScripting
             ModApi.Log("Application_GameEntered init finish");
         }
 
-        private static void InitGameDependedData(bool forceInit)
+        private void InitGameDependedData(bool forceInit)
         {
             if (forceInit || !AppFoldersLogged)
             {
@@ -152,15 +152,20 @@ namespace EmpyrionScripting
                     $"AppFolder.Cache:{ModApi.Application?.GetPathFor(AppFolder.Cache)}\n" +
                     $"AppFolder.ActiveScenario:{ModApi.Application?.GetPathFor(AppFolder.ActiveScenario)} -> CurrentScenario:{CurrentScenario}");
             }
-            
+            SaveGameModPath = Path.Combine(ModApi.Application?.GetPathFor(AppFolder.SaveGame), "Mods", EmpyrionConfiguration.ModName);
+            if(forceInit) LoadConfiguration();
+
             if(forceInit || Localization    == null) Localization = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content), CurrentScenario);
             if(forceInit || ConfigEcfAccess == null) InitEcfConfigData();
         }
 
         private static string CurrentScenario
-            => string.IsNullOrEmpty(EmpyrionConfiguration.DedicatedYaml.CustomScenarioName)
-            ? ModApi.Application?.GetPathFor(AppFolder.ActiveScenario)
-            : EmpyrionConfiguration.DedicatedYaml.CustomScenarioName;
+            =>
+            string.IsNullOrEmpty(Configuration.Current.OverrideScenarioPath)
+            ? string.IsNullOrEmpty(EmpyrionConfiguration.DedicatedYaml.CustomScenarioName)
+                ? ModApi.Application?.GetPathFor(AppFolder.ActiveScenario)
+                : EmpyrionConfiguration.DedicatedYaml.CustomScenarioName
+            : Configuration.Current.OverrideScenarioPath;
 
         public PlayerCommandsDediHelper PlayerCommandsDediHelper { get; private set; }
 

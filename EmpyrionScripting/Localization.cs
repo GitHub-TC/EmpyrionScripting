@@ -73,7 +73,9 @@ namespace EmpyrionScripting
 
             var languagePos = LocalisationData["KEY"].IndexOf(language);
             return languagePos == -1 || languagePos >= i18nData.Count
-                ? name
+                ? i18nData.Count >= 1
+                    ? i18nData[0] // Fallback Engisch
+                    : name
                 : i18nData[languagePos];
         }
     }
