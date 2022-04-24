@@ -12,6 +12,8 @@ namespace EmpyrionScripting.DataWrapper
         private readonly WeakReference<IEntity> entity;
         private readonly WeakReference<IPlayfield> playfield;
         private EntityType LastKnownType;
+        public string LastKnownName;
+        private bool WeakReferenceFailed;
 
         public EntityData(bool isPublic)
         {
@@ -37,11 +39,17 @@ namespace EmpyrionScripting.DataWrapper
             get {
                 try
                 {
-                    return LastKnownType = GetCurrent() == null ? EntityType.Unknown : GetCurrent().Type;
+                    if (WeakReferenceFailed || GetCurrent() == null) return EntityType.Unknown;
+
+                    LastKnownType = GetCurrent().Type;
+                    if (string.IsNullOrEmpty(LastKnownName)) LastKnownName = Name;
+
+                    return LastKnownType;
                 }
                 catch (Exception error)
                 {
-                    EmpyrionScripting.Log($"WeakReference<IEntity> LastKnownType:{LastKnownType} but nothing in game? {error}", EmpyrionNetAPIDefinitions.LogLevel.Message);
+                    EmpyrionScripting.Log($"WeakReference<IEntity> {LastKnownType}/{LastKnownName} no longer present in the game (perhaps the playfield will be unloaded) {error}", EmpyrionNetAPIDefinitions.LogLevel.Message);
+                    WeakReferenceFailed = true;
                     return EntityType.Unknown;
                 }
             }
