@@ -137,7 +137,7 @@ namespace EmpyrionScripting.CsCompiler
                 try
                 {
                     dllPath = Path.Combine(SaveGameModPath, dll).NormalizePath();
-                    if (!CustomAssemblies.ContainsKey(dllPath)) LoadCustomAssembly(dllPath);
+                    if (!CustomAssemblies.ContainsKey(dllPath)) LoadCustomAssembly(CustomAssemblies, SaveGameModPath, dllPath);
                     else                                        processed.Remove(dllPath);
                 }
                 catch (Exception error)
@@ -149,22 +149,22 @@ namespace EmpyrionScripting.CsCompiler
             processed.ForEach(dll => CustomAssemblies.TryRemove(dll, out var customAssembly));
         }
 
-        private void LoadCustomAssembly(string dll)
+        public static void LoadCustomAssembly(ConcurrentDictionary<string, LoadedAssemblyInfo> customAssemblies, string saveGameModPath, string dll)
         {
             string dllPath = dll;
             try
             {
-                dllPath = Path.Combine(SaveGameModPath, dll).NormalizePath();
+                dllPath = Path.Combine(saveGameModPath, dll).NormalizePath();
                 Log?.Invoke($"CustomAssemblyLoad: {dll} ({dllPath})", LogLevel.Message);
                 var loadedAssembly = Assembly.LoadFile(dllPath);
                 LoadedAssemblyInfo current = null;
-                CustomAssemblies.AddOrUpdate(dllPath,
+                customAssemblies.AddOrUpdate(dllPath,
                     current = new LoadedAssemblyInfo() { FullAssemblyDllName = dllPath, LoadedAssembly = loadedAssembly }, 
                     (d, a) => { current = a;  a.LoadedAssembly = loadedAssembly; return a; });
             }
             catch (Exception error)
             {
-                Log?.Invoke($"CustomAssemblyLoad: {dll} ({dllPath}) -> {error}", LogLevel.Error);
+                Log?.Invoke($"AssemblyLoad: {dll} ({dllPath}) -> {error}", LogLevel.Error);
             }
         }
 

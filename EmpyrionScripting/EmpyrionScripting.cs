@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static EmpyrionScripting.CsCompiler.CsCompiler;
 using StaticCsCompiler = EmpyrionScripting.CsCompiler;
 
 namespace EmpyrionScripting
@@ -52,6 +53,7 @@ namespace EmpyrionScripting
         public ConcurrentDictionary<string, PlayfieldScriptData> PlayfieldData { get; set; } = new ConcurrentDictionary<string, PlayfieldScriptData>();
         public static string ScriptingModInfoData { get; private set; } = string.Empty;
         public static ConcurrentDictionary<string, string> ScriptingModScriptsInfoData { get; } = new ConcurrentDictionary<string, string>();
+        public static ConcurrentDictionary<string, LoadedAssemblyInfo> AddOnAssemblies { get; set; } = new ConcurrentDictionary<string, LoadedAssemblyInfo>();
 
         private static readonly Assembly CurrentAssembly = Assembly.GetAssembly(typeof(EmpyrionScripting));
         public static string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
@@ -65,7 +67,8 @@ namespace EmpyrionScripting
             ScriptExecQueue.Log           = Log;
             ConfigEcfAccess.Log           = Log;
             Localization   .Log           = Log;
-            PlayerCommandsDediHelper.Log  = Log;
+            PlayerCommandsDediHelper    .Log  = Log;
+            StaticCsCompiler.CsCompiler .Log  = Log;
             SetupHandlebarsComponent();
         }
 
@@ -138,6 +141,29 @@ namespace EmpyrionScripting
             ModApi.Log("Application_GameEntered init finish");
         }
 
+        private void CheckAddOnAssemblies()
+        {
+            ModApi.Log($"CheckAddOnAssemblies: #{Configuration?.Current?.AddOnAssemblies?.Length}");
+            var processed = AddOnAssemblies.Select(dll => dll.Key).ToList();
+
+            Configuration?.Current?.AddOnAssemblies?.ForEach(dll => {
+                string dllPath = dll;
+                try
+                {
+                    dllPath = Path.Combine(SaveGameModPath, dll).NormalizePath();
+                    if (!AddOnAssemblies.ContainsKey(dllPath)) LoadCustomAssembly(AddOnAssemblies, SaveGameModPath, dllPath);
+                    else processed.Remove(dllPath);
+                }
+                catch (Exception error)
+                {
+                    ModApi.LogError($"CheckAddOnAssembly: {dll} ({dllPath}) -> {error}");
+                }
+            });
+
+            processed.ForEach(dll => AddOnAssemblies.TryRemove(dll, out var customAssembly));
+        }
+
+
         private void InitGameDependedData(bool forceInit)
         {
             if (forceInit || !AppFoldersLogged)
@@ -199,7 +225,11 @@ namespace EmpyrionScripting
             {
                 ConfigFilename = Path.Combine(SaveGameModPath, "Configuration.json")
             };
-            Configuration.ConfigFileLoaded += (s,e) => Configuration_ProcessIdsLists();
+            Configuration.ConfigFileLoaded += (s, e) =>
+            {
+                CheckAddOnAssemblies();
+                Configuration_ProcessIdsLists();
+            };
             Configuration.Load();
             if (Configuration.LoadException == null || !File.Exists(Configuration.ConfigFilename)) Configuration.Save();
         }

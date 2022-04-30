@@ -752,6 +752,51 @@ Syntaxdocu:
   + Zeigt einen Dialog dem Spieler an (bei SignalName wenn eines dieser Signale ausgelöst wird): (player | playerId | SignalName) [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
   + (title) (body) (ButtonTexts) werden aus dem {{else}} ermittelt bei dem die Playerdaten als this zur Verfügung stehen 1.Zeile=Titel, Letzte Zeile=Buttons, die Zeilen dazwischen = Body
 
+
+## Externe Daten
++ {{external 'Key' [args]}}
+  + 'Key' Schlüssel für den Zugriff auf die externen Daten
+  + [args] Zuätzliche Parameter welche die externe Datenzugriffsmethode benötigt
+    
+Hier mit ist es möglich externe Daten aus den AddOnAssemblys abzurufen. Welche Parameter zusätzlich benötigt werden müssen der Dokumentation 
+der jeweiligen externen Datenquelle entnommen werden.
+
+### Bereitstellung einer DLL für die externen Daten (mit einem Beispiel aus dem EmpyrionGalaxyNavtigator)
+Diese Dll muss eine Klasse welche das IMod Interface implementiert besitzen. Außerdem muss die ein Property 'ScriptExternalDataAccess' implementieren.
+```
+public class ExternalDataAccess : IMod
+{
+    public IDictionary<string, Func<IEntity, object[], object>> ScriptExternalDataAccess { get; }
+
+    public ExternalDataAccess()
+    {
+        ScriptExternalDataAccess = new Dictionary<string, Func<IEntity, object[], object>>()
+        {
+            ["Navigation"] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ?         Navigation(entity) : null,
+            ["MaxWarp"   ] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ? (object)MaxWarp   (entity) : null,
+        };
+    }
+```
+
+Des weiteren muss der Pfad zu der DLL in der Konfigurationsdatei des EmpyrionScripting angegeben werden. (Basis ist das Modverzeichnis des EmpyrionScripting im Savegame)
+```
+"AddOnAssemblies": [
+    "..\\EmpyrionGalaxyNavigator\\EmpyrionGalaxyNavigatorDataAccess.dll"
+],
+```
+
+Und die DLL muss an ihrem vorgesehen Platz kopiert werden (im Fall des EmyprionGalaxyNavigators in dessen Modverzeichins im Savegame)
+![](Screenshots/AddOnAssembly.png)
+
+Beim Aufruf der Funktionen werden die aktuelle Entität sowie die übergebenen 'args' mit übergeben.
+(in diesem Fall werden keine weiteren Parameter für den Zugriff auf den GalaxyNavigator benötigt)
+```
+{{#external 'MaxWarp'}}
+Maximale Sprungreichweite: {{.}}
+{{/external}}
+```
+
+
 ## Elevated Scripte (Savegame oder Adm-Strukturen)
 + {{lockdevice structure device|x y z}}
   + Sperrt ein Device
@@ -1589,6 +1634,49 @@ DateTime format:
 + {{dialogbox player|Id|SignalName}} 
   + Displays a dialog to the player (at SignalName when one of these signals is triggered): (player | playerId | SignalName) [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
   + (title) (body) (ButtonTexts) are determined from the {{else}} where the player data is available as this 1st line=title, last line=buttons, the lines in between = body
+
+## External data
++ {{external 'Key' [args]}}
+  + 'Key' Key for accessing the external data.
+  + [args] Additional parameters needed by the external data access method.
+    
+Here with it is possible to retrieve external data from the AddOnAssemblys. Which parameters are additionally required must be taken from the documentation 
+of the respective external data source.
+
+### Providing a DLL for the external data (with an example from the EmpyrionGalaxyNavtigator).
+This Dll must have a class which implements the IMod interface. Also, the must implement a property 'ScriptExternalDataAccess'.
+```
+public class ExternalDataAccess : IMod
+{
+    public IDictionary<string, Func<IEntity, object[], object>> ScriptExternalDataAccess { get; }
+
+    public ExternalDataAccess()
+    {
+        ScriptExternalDataAccess = new Dictionary<string, Func<IEntity, object[], object>>()
+        {
+            ["Navigation"] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ?         Navigation(entity) : null,
+            ["MaxWarp" ]   = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ? (object)MaxWarp   (entity) : null,
+        };
+    }
+```
+
+Furthermore the path to the DLL must be specified in the configuration file of the EmpyrionScripting. (Basis is the mod directory of the EmpyrionScripting in the savegame).
+```
+"AddOnAssemblies": [
+    "..\EmpyrionGalaxyNavigator\EmpyrionGalaxyNavigatorDataAccess.dll"
+],
+```
+
+And the DLL must be copied to its intended place (in the case of EmyprionGalaxyNavigator in its mod directory in the savegame)
+![](Screenshots/AddOnAssembly.png)
+
+When the functions are called, the current entity and the passed 'args' are also passed.
+(in this case no further parameters are needed to access the GalaxyNavigator).
+```
+{{#external 'MaxWarp'}}
+Maximum jump range: {{.}}
+{{/external}}
+```
 
 ## Elevated scripts (Savegame or Adm structures)
 + {{lockdevice structure device | x y z}}

@@ -29,7 +29,7 @@ namespace EmpyrionScripting.DataWrapper
             }
         }
 
-
+        public IPlayer GetCurrent() => p;
         public int Id => SafeGet("Id", p, () => p.Id);
         public string Name => p?.Name;
     }

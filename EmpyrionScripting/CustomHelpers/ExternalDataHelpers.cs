@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.CsHelper;
+﻿using Eleon.Modding;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
@@ -10,7 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using YamlDotNet.Core.Tokens;
+using System.Collections.Concurrent;
+using EmpyrionScripting.DataWrapper;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -409,5 +411,85 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        public class ExternalDataAccess
+        {
+            public IMod Instance { get; set; }
+            public Func<IEntity, object[], object> Data { get; set; }
+        }
+
+        public static Lazy<ConcurrentDictionary<string, ExternalDataAccess>> ExternalDataModules { get; } = new Lazy<ConcurrentDictionary<string, ExternalDataAccess>>(ExternalDataModulesFactory);
+
+        private static ConcurrentDictionary<string, ExternalDataAccess> ExternalDataModulesFactory()
+        {
+            var externalDataModules = new ConcurrentDictionary<string, ExternalDataAccess>();
+            EmpyrionScripting.AddOnAssemblies.Values.ForEach(A => {
+                EmpyrionScripting.Log($"AddOnAssembly: {A.FullAssemblyDllName}", EmpyrionNetAPIDefinitions.LogLevel.Message);
+                A.LoadedAssembly.GetTypes().ForEach(T => {
+                    if (typeof(IMod).IsAssignableFrom(T))
+                    {
+                        EmpyrionScripting.Log($"Found mod class: {T}", EmpyrionNetAPIDefinitions.LogLevel.Message);
+                        var getDataProperty = T.GetProperty("ScriptExternalDataAccess", typeof(IDictionary<string, Func<IEntity, object[], object>>));
+
+                        if(getDataProperty != null)
+                        {
+                            EmpyrionScripting.Log($"Found mod Data property: {T}", EmpyrionNetAPIDefinitions.LogLevel.Message);
+                            var externalDataAccess = (IMod)Activator.CreateInstance(T);
+                            var initialized = false;
+
+                            ((IDictionary<string, Func<IEntity, object[], object>>)getDataProperty.GetValue(externalDataAccess))
+                                .ForEach(D => {
+                                    if(externalDataModules.TryAdd(D.Key, new ExternalDataAccess { Instance = externalDataAccess, Data = D.Value }))
+                                    {
+                                        if (!initialized)
+                                        {
+                                            EmpyrionScripting.Log($"Init external mod: {T}", EmpyrionNetAPIDefinitions.LogLevel.Message);
+
+                                            externalDataAccess.Init(EmpyrionScripting.ModApi);
+                                            EmpyrionScripting.StopScriptsEvent += (sender, args) => externalDataAccess.Shutdown();
+
+                                            initialized = true;
+                                        }
+
+                                        EmpyrionScripting.Log($"Init external data: {D.Key}", EmpyrionNetAPIDefinitions.LogLevel.Message);
+                                    }
+                                });
+                        }
+                    }
+                });
+            });
+
+            return externalDataModules;
+        }
+
+
+        [HandlebarTag("external")]
+        public static void ExternalData(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length == 0) throw new HandlebarsException("{{external data [args]}} helper must have at least one argument: (data)");
+
+            try
+            {
+                var root     = rootObject as IScriptRootData;
+                var dataType = arguments.Get<string>(0);
+
+                if (ExternalDataModules.Value.TryGetValue(dataType, out var access)) options.Template(output, access.Data(root.E.GetCurrent(), arguments.Skip(1).Select(D => ToOridinal(D)).ToArray()));
+                else                                                                 options.Inverse (output, context as object);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, rootObject)) output.Write("{{external}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        private static object ToOridinal(object obj)
+        {
+            if (obj is IEntityData       entity      ) return entity.GetCurrent();
+            if (obj is IStructureData    structure   ) return structure.GetCurrent();
+            if (obj is IBlockData        block       ) return block.Device;
+            if (obj is IItemsData        item        ) return new ItemStack { id = item.Id, count = item.Count };
+            if (obj is LimitedPlayerData player      ) return player.GetCurrent();
+
+            return obj;
+        }
     }
 }
