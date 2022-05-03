@@ -257,6 +257,7 @@ namespace EmpyrionScripting
         {
             ModApi.Log("Mod exited:Shutdown");
             StopScriptsEvent.Invoke(this, EventArgs.Empty);
+            ModApi.Log("Mod exited:Shutdown finished");
         }
 
         private void SetupHandlebarsComponent()
@@ -829,8 +830,19 @@ namespace EmpyrionScripting
         public void Game_Exit()
         {
             ModApi.Log("Mod exited:Game_Exit");
+
+            try
+            {
+                ModApi.Application.GameEntered          -= Application_GameEntered;
+                ModApi.Application.OnPlayfieldLoaded    -= Application_OnPlayfieldLoaded;
+                ModApi.Application.OnPlayfieldUnloading -= Application_OnPlayfieldUnloading;
+            }
+            catch (Exception error) { Log($"Game_Exit: detach events: {error}", LogLevel.Error); }
+
             try { StopScriptsEvent?.Invoke(this, EventArgs.Empty); }
             catch (Exception error) { Log($"Game_Exit: StopScriptsEvent: {error}", LogLevel.Error); }
+
+            ModApi.Log("Mod exited:Game_Exit finished");
         }
 
         public void Game_Update()
