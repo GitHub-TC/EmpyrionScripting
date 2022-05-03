@@ -4,6 +4,7 @@ using EmpyrionScripting.Interface;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static System.Collections.Specialized.BitVector32;
 
 namespace EmpyrionScripting.DataWrapper
 {
@@ -70,6 +71,11 @@ namespace EmpyrionScripting.DataWrapper
         public float StaminaMax => SafeGet("StaminaMax", p, () => p.StaminaMax);
 
         public bool IsPilot => SafeGet("IsPilot", p, () => p.IsPilot);
+
+        public Vector3 Position => SafeGet("Position", p, () => p.Position);
+        public int FactionId => SafeGet("Faction", p, () => p.Faction.Id);
+        public int BelongsTo => SafeGet("BelongsTo", p, () => p.BelongsTo);
+        public int DockedTo => SafeGet("DockedTo", p, () => p.DockedTo);
 
         public IEntityData DrivingEntity => SafeGet("DrivingEntity", p, () => new EntityData(currentPlayfield, p.DrivingEntity));
 
