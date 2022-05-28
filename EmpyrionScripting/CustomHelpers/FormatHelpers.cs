@@ -24,8 +24,9 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 
                 if (int.TryParse(data, out int itemId)) {
-                    if (EmpyrionScripting.ConfigEcfAccess.IdBlockMapping.TryGetValue(itemId, out var name)) data = name;
-                    else if (EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(itemId, out ItemInfo details2)) data = details2.Key;
+                    if      (EmpyrionScripting.ConfigEcfAccess.IdBlockMapping.TryGetValue(itemId, out var name))                            data = name;
+                    else if (EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(itemId, out ItemInfo details2))                               data = details2.Key;
+                    else if (itemId.IsToken() && EmpyrionScripting.ConfigEcfAccess.TokenById.TryGetValue(itemId.TokenId(), out var token))  data = token.Values?.FirstOrDefault(A => A.Key == "Name").Value?.ToString() ?? itemId.TokenId().ToString();
                 }
 
                 output.Write(EmpyrionScripting.Localization.GetName(data, language));

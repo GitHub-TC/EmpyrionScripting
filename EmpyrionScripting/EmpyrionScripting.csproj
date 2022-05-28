@@ -161,6 +161,7 @@
     <Compile Include="DataWrapper\ContainerSource.cs" />
     <Compile Include="CustomHelpers\BlockHelpers.cs" />
     <Compile Include="CustomHelpers\ConveyorHelpers.cs" />
+    <Compile Include="DataWrapper\ItemTokenAccess.cs" />
     <Compile Include="DataWrapper\SignalData.cs" />
     <Compile Include="DataWrapper\SignalEvent.cs" />
     <Compile Include="DataWrapper\SignalEventBase.cs" />

@@ -419,6 +419,14 @@ Syntaxdocu:
 + https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
 
+## Items
+Items habe folgende Basisdaten
+
+* Id : Vollständige eineindeutige Zahl. Für Tokens ist es eine Kombination aus 'TokenId * 100000 + ItemId'
+* IsToken: 'true' wenn es sich um eine Token handelt sonst 'false'
+* ItemId: Der Tokenunabhänige Teil der Id (dies entwpricht dem Tokenitem in Empyrion)
+* TokenId: Die Id des Tokens wenn es sich um ein Token handelt
+
 ## Bedingungen
 * {{#test Select Op Value}}
   * Op: eq is =
@@ -1308,6 +1316,14 @@ Syntaxdocu:
 + https://zordius.github.io/HandlebarsCookbook/index.html
 + https://zordius.github.io/HandlebarsCookbook/0014-path.html
 + https://github.com/rexm/Handlebars.Net
+
+## Items
+Items have the following basic data
+
+* Id : Complete one-to-one number. For tokens it is a combination of 'TokenId * 100000 + ItemId'.
+* IsToken: 'true' if it is a token otherwise 'false'.
+* ItemId: The token-independent part of the Id (this is equivalent to the token item in Empyrion).
+* TokenId: The Id of the token if it is a token.
 
 ### (test)
 * {{#test Select Op Value}}

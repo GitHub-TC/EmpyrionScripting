@@ -19,10 +19,12 @@ namespace EmpyrionScripting
         public EcfFile Templates_Ecf { get; private set; }
         public EcfFile BlocksConfig_Ecf { get; set; } = new EcfFile();
         public EcfFile ItemsConfig_Ecf { get; set; } = new EcfFile();
+        public EcfFile TokenConfig_Ecf { get; set; } = new EcfFile();
         public EcfFile Configuration_Ecf { get; set; } = new EcfFile();
         public EcfFile Flat_Config_Ecf { get; set; } = new EcfFile();
         public IReadOnlyDictionary<int, EcfBlock> ConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public IReadOnlyDictionary<string, EcfBlock> ConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
+        public IReadOnlyDictionary<int, EcfBlock> TokenById { get; set; } = new Dictionary<int, EcfBlock>();
         public IDictionary<string, string> ParentBlockName { get; set; } = new Dictionary<string, string>();
         public IReadOnlyDictionary<int, EcfBlock> FlatConfigBlockById { get; set; } = new Dictionary<int, EcfBlock>();
         public IReadOnlyDictionary<string, EcfBlock> FlatConfigBlockByName { get; set; } = new Dictionary<string, EcfBlock>();
@@ -55,10 +57,12 @@ namespace EmpyrionScripting
                 Templates_Ecf    .Blocks.ForEach(B => Log($"Templates_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'"    , LogLevel.Debug));
                 BlocksConfig_Ecf .Blocks.ForEach(B => Log($"BlocksConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'" , LogLevel.Debug));
                 ItemsConfig_Ecf  .Blocks.ForEach(B => Log($"ItemsConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'"  , LogLevel.Debug));
+                TokenConfig_Ecf  .Blocks.ForEach(B => Log($"TokenConfig_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'"  , LogLevel.Debug));
                 Configuration_Ecf.Blocks.ForEach(B => Log($"Configuration_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'", LogLevel.Debug));
                 Flat_Config_Ecf  .Blocks.ForEach(B => Log($"Flat_Config_Ecf.Blocks: '{B.Name}[{B.Values?.FirstOrDefault(A => A.Key == "Id").Value}] '{B.Values?.FirstOrDefault(A => A.Key == "Name").Value}'"  , LogLevel.Debug));
                 FlatConfigBlockById     .ForEach(B => Log($"FlatConfigBlockById: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]"                                                  , LogLevel.Debug));
                 FlatConfigBlockByName   .ForEach(B => Log($"FlatConfigBlockByName: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]"                                                , LogLevel.Debug));
+                TokenById               .ForEach(B => Log($"TokenById: '{B.Key}' -> {B.Value?.Values?.FirstOrDefault(A => A.Key == "Name").Value}]"                                                            , LogLevel.Debug));
                 ResourcesForBlockById   .ForEach(B => Log($"ResourcesForBlockById: [{B.Key}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(B.Key, out var data) ? data.Values["Name"] : "")} -> {B.Value.Aggregate("", (r, i) => $"{r}\n{i.Value}: [{i.Key}] {(EmpyrionScripting.ConfigEcfAccess.FlatConfigBlockById.TryGetValue(i.Key, out var data) ? data.Values["Name"] : "")}")}", LogLevel.Message));
                 ParentBlockName         .ForEach(B => Log($"ParentBlockName: {B.Key} -> {B.Value}"                                                                                                             , LogLevel.Debug));
             }
@@ -182,6 +186,9 @@ namespace EmpyrionScripting
 
             try { ConfigBlockByName = BlocksByName(Configuration_Ecf.Blocks); }
             catch (Exception error) { Log($"EmpyrionScripting ConfigBlockByName: {error}", LogLevel.Error); }
+
+            try { TokenById = TokensById(TokenConfig_Ecf.Blocks); }
+            catch (Exception error) { Log($"EmpyrionScripting TokenById: {error}", LogLevel.Error); }
         }
 
         public void MergeEcfFiles()
@@ -201,6 +208,7 @@ namespace EmpyrionScripting
             Templates_Ecf       = ReadEcf("Templates.ecf",    B => { });
             BlocksConfig_Ecf    = ReadEcf("BlocksConfig.ecf", B => { });
             ItemsConfig_Ecf     = ReadEcf("ItemsConfig.ecf",  B => { });
+            TokenConfig_Ecf     = ReadEcf("TokenConfig.ecf",  B => { });
         }
 
         public void ReadBlockMappingFile(string blockMappingFile, IModApi modApi)
@@ -337,6 +345,9 @@ namespace EmpyrionScripting
             blocks.EcfBlocksToDictionary(B => (B.Name == "Block" || B.Name == "Item") && B.Values?.ContainsKey("Name") == true,
                                          B => B.Values["Name"]?.ToString());
 
+        public IReadOnlyDictionary<int, EcfBlock> TokensById(IEnumerable<EcfBlock> blocks) =>
+            blocks.EcfBlocksToDictionary(B => B.Name == "Token" && B.Values?.ContainsKey("Id") == true,
+                                         B => (int)B.Values["Id"]);
         public IReadOnlyDictionary<string, EcfBlock> TemplatesByName(IEnumerable<EcfBlock> blocks) =>
             blocks.EcfBlocksToDictionary(B => B.Name == "Template" && B.Values?.ContainsKey("Name") == true,
                                          B => B.Values["Name"]?.ToString());

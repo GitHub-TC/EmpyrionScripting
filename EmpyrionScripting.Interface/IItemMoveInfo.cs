@@ -1,12 +1,12 @@
 ﻿namespace EmpyrionScripting.Interface
 {
-    public interface IItemMoveInfo
+
+    public interface IItemMoveInfo : IItemBase
     {
         int Count { get; }
         string Destination { get; }
         IEntityData DestinationE { get; }
         string Error { get; }
-        int Id { get; }
         string Source { get; }
         IEntityData SourceE { get; }
     }

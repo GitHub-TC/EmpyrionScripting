@@ -5,6 +5,7 @@
         Player,
         Admin,
         SaveGame,
+        None
     }
 
 }

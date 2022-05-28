@@ -2,10 +2,9 @@
 
 namespace EmpyrionScripting.Interface
 {
-    public interface IItemsData
+    public interface IItemsData : IItemBase
     {
         int Count { get; set; }
-        int Id { get; set; }
         string Key { get; set; }
         string Name { get; set; }
         List<IItemsSource> Source { get; set; }

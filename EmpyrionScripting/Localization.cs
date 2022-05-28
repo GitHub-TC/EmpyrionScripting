@@ -16,7 +16,7 @@ namespace EmpyrionScripting
         {
             var scenarioPath = string.IsNullOrEmpty(activeScenario) ? null : Path.Combine(contentPath, "Scenarios", activeScenario);
 
-            LocalisationData = ReadLocalisation(contentPath);
+            LocalisationData = ReadLocalisation(contentPath).ToDictionary(item => item.Key, item => RemoveFormats(item.Value));
 
             if (!string.IsNullOrEmpty(scenarioPath))
             {
@@ -31,7 +31,7 @@ namespace EmpyrionScripting
         private List<string> RemoveFormats(List<string> values)
             => values.Select(v => RemoveFormats(v)).ToList();
 
-        private string RemoveFormats(string value)
+        public static string RemoveFormats(string value)
         {
             if (string.IsNullOrEmpty(value)) return value;
 
@@ -75,8 +75,8 @@ namespace EmpyrionScripting
             return languagePos == -1 || languagePos >= i18nData.Count
                 ? i18nData.Count >= 1
                     ? i18nData[0] // Fallback Engisch
-                    : name
-                : i18nData[languagePos];
+                    : RemoveFormats(name)
+                : string.IsNullOrEmpty(i18nData[languagePos]) ? i18nData[0] : i18nData[languagePos];
         }
     }
 }

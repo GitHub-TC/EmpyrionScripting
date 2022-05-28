@@ -252,6 +252,8 @@ namespace EmpyrionScripting.CsCompiler
 
         public Func<object, string> GetExec<T>(CsModPermission csScriptsAllowed, T rootObjectCompileTime, string script) where T : IScriptRootModData
         {
+            if (csScriptsAllowed == CsModPermission.None) return o => "Sorry the C# scripting is deactivate on this server.";
+
             var messages = new List<string>();
             bool success = true;
             MethodInfo mainMethod = null;

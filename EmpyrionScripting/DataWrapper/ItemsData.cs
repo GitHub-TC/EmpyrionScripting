@@ -4,19 +4,25 @@ using EmpyrionScripting.Interface;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class ItemsSource : IItemsSource
+    public class ItemBase : IItemBase
+    {
+        public int Id { get; set; }
+        public int ItemId => Id % ItemTokenAccess.TokenIdSeperator;
+        public int TokenId => Id / ItemTokenAccess.TokenIdSeperator;
+        public bool IsToken => Id > ItemTokenAccess.TokenIdSeperator;
+    }
+
+    public class ItemsSource : ItemBase, IItemsSource
     {
         public IEntityData E { get; set; }
         public IContainer Container { get; set; }
         public VectorInt3 Position { get; set; }
         public string CustomName { get; set; }
-        public int Id { get; set; }
         public int Count { get; set; }
     }
 
-    public class ItemsData : IItemsData
+    public class ItemsData : ItemBase, IItemsData
     {
-        public int Id { get; set; }
         public int Count { get; set; }
         public string Name { get; set; }
         public string Key { get; set; }
@@ -35,4 +41,5 @@ namespace EmpyrionScripting.DataWrapper
             return this;
         }
     }
+
 }

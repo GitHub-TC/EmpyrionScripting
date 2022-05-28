@@ -22,10 +22,9 @@ namespace EmpyrionScripting.CustomHelpers
         public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateDeviceLock { get; set; } = (R, P, S, V) => new DeviceLock(R, P, S, V);
         public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> WeakCreateDeviceLock { get; set; } = (R, P, S, V) => new WeakDeviceLock(R, P, S, V);
 
-        public class ItemMoveInfo : IItemMoveInfo
+        public class ItemMoveInfo : ItemBase, IItemMoveInfo
         {
             public static IList<IItemMoveInfo> Empty = Array.Empty<ItemMoveInfo>();
-            public int Id { get; set; }
             public IEntityData SourceE { get; set; }
             public string Source { get; set; }
             public IEntityData DestinationE { get; set; }
@@ -246,6 +245,8 @@ namespace EmpyrionScripting.CustomHelpers
 
             lock (moveLock) item.Source
                  .ForEach(S => {
+                     if (S.IsToken) return;
+
                     using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
                     if (!locked.Success)
                     {
