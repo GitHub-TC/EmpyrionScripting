@@ -69,7 +69,7 @@ namespace EmpyrionScripting
         public string GetName(string name, string language)
         {
             if (string.IsNullOrEmpty(name)) return string.Empty;
-            if (!LocalisationData.TryGetValue(name, out List<string> i18nData)) return name;
+            if (!LocalisationData.TryGetValue(name, out List<string> i18nData)) return RemoveFormats(name);
 
             var languagePos = LocalisationData["KEY"].IndexOf(language);
             return languagePos == -1 || languagePos >= i18nData.Count
