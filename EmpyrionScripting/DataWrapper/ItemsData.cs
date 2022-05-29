@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Eleon.Modding;
 using EmpyrionScripting.Interface;
 
@@ -19,6 +20,8 @@ namespace EmpyrionScripting.DataWrapper
         public VectorInt3 Position { get; set; }
         public string CustomName { get; set; }
         public int Count { get; set; }
+        public int Ammo { get; set; }
+        public int Decay { get; set; }
     }
 
     public class ItemsData : ItemBase, IItemsData
@@ -27,6 +30,8 @@ namespace EmpyrionScripting.DataWrapper
         public string Name { get; set; }
         public string Key { get; set; }
         public List<IItemsSource> Source { get; set; }
+        public int Ammo { get; set; }
+        public int Decay { get; set; }
 
         public ItemsData AddCount(int count, IItemsSource source)
         {
@@ -39,6 +44,14 @@ namespace EmpyrionScripting.DataWrapper
                 Count += count;
             }
             return this;
+        }
+    }
+
+    public static class ItemStackExtensions{
+        public static List<ItemStack> UniqueSlots(this IEnumerable<ItemStack> items)
+        {
+            byte index = 0;
+            return items.Select(i => new ItemStack(i.id, i.count) { slotIdx = index++, decay = i.decay, ammo = i.ammo }).ToList();
         }
     }
 

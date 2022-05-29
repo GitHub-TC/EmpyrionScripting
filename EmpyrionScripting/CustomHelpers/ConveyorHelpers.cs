@@ -31,6 +31,8 @@ namespace EmpyrionScripting.CustomHelpers
             public string Destination { get; set; }
             public int Count { get; set; }
             public string Error { get; set; }
+            public int Ammo { get; set; }
+            public int Decay { get; set; }
         }
 
         [HandlebarTag("islocked")]
@@ -245,48 +247,82 @@ namespace EmpyrionScripting.CustomHelpers
 
             lock (moveLock) item.Source
                  .ForEach(S => {
-                     if (S.IsToken) return;
+                     using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
+                     if (!locked.Success)
+                     {
+                         Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
+                         return;
+                     }
 
-                    using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
-                    if (!locked.Success)
-                    {
-                        Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
-                        return;
-                    }
+                     var count = S.Count;
+                     if (S.Container == null) count = 0;
+                     if (S.IsToken)
+                     {
+                         var containerItems = S.Container.GetContent();
+                         var remainingCount = count;
+                         for (int i = containerItems.Count - 1; i >= 0 && remainingCount > 0; i--)
+                         {
+                             var item = containerItems[i];
+                             if(item.CreateId() == S.Id)
+                             {
+                                 var getCount = item.count;
+                                 containerItems.RemoveAt(i);
+                                 item.count -= remainingCount;
+                                 remainingCount -= getCount;
 
-                    var count = S.Count;
-                    count -= S.Container?.RemoveItems(S.Id, count) ?? count;
-                    Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
+                                 if(item.count >= 0) containerItems.Insert(i, item);  
+                             }
+                         }
 
-                    ItemMoveInfo currentMoveInfo = null;
+                         count -= remainingCount;
+                         S.Container.SetContent(containerItems); // hier wird ausnahmsweite kein UniqueSlots() benötigt
+                     }
+                     else count -= S.Container.RemoveItems(S.Id, count);
 
-                    if (count > 0) uniqueNames
-                                    .Where(N => N != S.CustomName)
-                                    .ForEach(N => {
-                                        var startCount = count;
-                                        count = MoveItem(root, S, N, structure, count, maxLimit);
-                                        if(startCount != count){
-                                            var movedCount = startCount - count;
-                                            moveInfos.Add(currentMoveInfo = new ItemMoveInfo() {
-                                                Id              = S.Id,
-                                                Count           = movedCount,
-                                                SourceE         = S.E,
-                                                Source          = S.CustomName,
-                                                DestinationE    = structure.E,
-                                                Destination     = N,
-                                            });
+                     Log($"Move(RemoveItems): {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
 
-                                            Log($"Move(AddItems): {S.CustomName} {S.Id} #{S.Count}->{startCount - count}", LogLevel.Debug);
+                     ItemMoveInfo currentMoveInfo = null;
 
-                                            // Für diesen Scriptdurchlauf dieses Item aus der Verarbeitung nehmen
-                                            S.Count -= movedCount;
-                                        };
-                                    }, () => root.TimeLimitReached);
-
+                     if (count > 0) uniqueNames
+                                 .Where(N => N != S.CustomName)
+                                 .ForEach(N => {
+                                     var startCount = count;
+                                     count = MoveItem(root, S, N, structure, count, maxLimit);
+                                     if(startCount != count){
+                                         var movedCount = startCount - count;
+                                         moveInfos.Add(currentMoveInfo = new ItemMoveInfo() {
+                                             Id              = S.Id,
+                                             Count           = movedCount,
+                                             Ammo            = S.Ammo,
+                                             Decay           = S.Decay,
+                                             SourceE         = S.E,
+                                             Source          = S.CustomName,
+                                             DestinationE    = structure.E,
+                                             Destination     = N,
+                                         });
+          
+                                         Log($"Move(AddItems): {S.CustomName} {S.Id} #{S.Count}->{N} #{startCount - count}", LogLevel.Debug);
+          
+                                         // Für diesen Scriptdurchlauf dieses Item aus der Verarbeitung nehmen
+                                         S.Count -= movedCount;
+                                     };
+                                 }, () => root.TimeLimitReached);
+          
                      if (count > 0)
                      {
                          var retoureCount = count;
-                         count = S.Container?.AddItems(S.Id, retoureCount) ?? retoureCount;
+                         if (S.IsToken)
+                         {
+                             var containerItems = S.Container.GetContent();
+                             if (containerItems.Count < 64)
+                             {
+                                 containerItems.Add(new ItemStack(S.ItemId, count) { ammo = S.Ammo, decay = S.Decay });
+                                 S.Container.SetContent(containerItems.UniqueSlots());
+                                 count = 0;
+                             }
+                         }
+                         else count = S.Container?.AddItems(S.Id, retoureCount) ?? retoureCount;
+
                          Log($"Move(retoure): {S.CustomName} {retoureCount} -> {count}", LogLevel.Debug);
                      }
 
@@ -295,14 +331,16 @@ namespace EmpyrionScripting.CustomHelpers
                          root.GetPlayfieldScriptData().MoveLostItems.Enqueue(new ItemMoveInfo()
                          {
                              Id         = S.Id,
+                             Ammo       = S.Ammo,
+                             Decay      = S.Decay,
                              Count      = count,
                              SourceE    = S.E,
                              Source     = S.CustomName,
                          });
-                        currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName} -> add to retry list";
+                     currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName} -> add to retry list";
                      }
-
-                 }, () => root.TimeLimitReached);
+          
+                  }, () => root.TimeLimitReached);
 
             return moveInfos;
         }
@@ -334,33 +372,40 @@ namespace EmpyrionScripting.CustomHelpers
                         continue;
                     }
 
-                    var count = targetContainer.AddItems(restore.Id, restore.Count);
+                    var count     = restore.Count;
                     var stackSize = 0;
 
-                    try
+                    if (!restore.IsToken)
                     {
-                        stackSize = (int)EmpyrionScripting.ConfigEcfAccess.FindAttribute(restore.Id, "StackSize");
-                        if (stackSize < count)
+                        count = targetContainer.AddItems(restore.Id, restore.Count);
+
+                        try
                         {
-                            Log($"HandleMoveLostItems(split invalid stacks): {restore.Source} {restore.Id} #{restore.Count}->{stackSize}", LogLevel.Message);
-
-                            var countSplit = count;
-                            while (countSplit > 0)
+                            stackSize = (int)EmpyrionScripting.ConfigEcfAccess.FindAttribute(restore.Id, "StackSize");
+                            if (stackSize < count)
                             {
-                                root.MoveLostItems.Enqueue(new ItemMoveInfo()
-                                {
-                                    Id      = restore.Id,
-                                    Count   = Math.Min(countSplit, stackSize),
-                                    SourceE = restore.SourceE,
-                                    Source  = restore.Source,
-                                });
-                                countSplit -= stackSize;
-                            }
+                                Log($"HandleMoveLostItems(split invalid stacks): {restore.Source} {restore.Id} #{restore.Count}->{stackSize}", LogLevel.Message);
 
-                            continue;
+                                var countSplit = count;
+                                while (countSplit > 0)
+                                {
+                                    root.MoveLostItems.Enqueue(new ItemMoveInfo()
+                                    {
+                                        Id      = restore.Id,
+                                        Ammo    = restore.Ammo,
+                                        Decay   = restore.Decay,
+                                        Count   = Math.Min(countSplit, stackSize),
+                                        SourceE = restore.SourceE,
+                                        Source  = restore.Source,
+                                    });
+                                    countSplit -= stackSize;
+                                }
+
+                                continue;
+                            }
                         }
+                        catch { /* Fehler ignorieren */ }
                     }
-                    catch { /* Fehler ignorieren */ }
 
                     // AddItem funktioniert leider nicht (mehr) wenn den der Stack gar nicht in den Container passt
                     if (count > 0 && count == restore.Count && count > stackSize)
@@ -369,9 +414,9 @@ namespace EmpyrionScripting.CustomHelpers
 
                         if (content.Count < 64)
                         {
-                            content.Add(new ItemStack(restore.Id, restore.Count));
-                            targetContainer.SetContent(content);
-                            Log($"HandleMoveLostItems(restored set content fallback): {restore.Source} {restore.Id} #{restore.Count}", LogLevel.Message);
+                            content.Add(new ItemStack(restore.ItemId, restore.Count) { ammo = restore.Ammo, decay = restore.Decay});
+                            targetContainer.SetContent(content.UniqueSlots());
+                            if(!restore.IsToken) Log($"HandleMoveLostItems(restored set content fallback): {restore.Source} {restore.Id} #{restore.Count}", LogLevel.Message);
 
                             continue;
                         }
@@ -382,6 +427,8 @@ namespace EmpyrionScripting.CustomHelpers
                         root.MoveLostItems.Enqueue(new ItemMoveInfo()
                         {
                             Id      = restore.Id,
+                            Ammo    = restore.Ammo,
+                            Decay   = restore.Decay,
                             Count   = count,
                             SourceE = restore.SourceE,
                             Source  = restore.Source,
@@ -402,7 +449,7 @@ namespace EmpyrionScripting.CustomHelpers
 
         private static int MoveItem(IScriptRootData root, IItemsSource S, string N, IStructureData targetStructure, int count, int? maxLimit)
         {
-            var target = targetStructure?.GetCurrent()?.GetDevice<Eleon.Modding.IContainer>(N);
+            var target = targetStructure?.GetCurrent()?.GetDevice<IContainer>(N);
             if (target == null)
             {
                 Log($"TargetNoFound: {S.Id} #{S.Count} => {N}", LogLevel.Debug);
@@ -415,7 +462,7 @@ namespace EmpyrionScripting.CustomHelpers
                 return count;
             }
 
-            var tryMoveCount = maxLimit.HasValue
+            var tryMoveCount = maxLimit.HasValue && !S.IsToken
                 ? Math.Max(0, Math.Min(count, maxLimit.Value - target.GetTotalItems(S.Id)))
                 : count;
 
@@ -426,7 +473,18 @@ namespace EmpyrionScripting.CustomHelpers
                 return count;
             }
 
-            return maxLimit.HasValue
+            if (S.IsToken)
+            {
+                var itemList = target.GetContent();
+                if(itemList.Count < 64)
+                {
+                    itemList.Add(new ItemStack(S.ItemId, tryMoveCount) { ammo = S.Ammo, decay = S.Decay });
+                    target.SetContent(itemList.UniqueSlots());
+                    return 0;
+                }
+                return tryMoveCount;
+            }
+            else return maxLimit.HasValue
                 ? target.AddItems(S.Id, tryMoveCount) + (count - tryMoveCount)
                 : target.AddItems(S.Id, tryMoveCount);
         }

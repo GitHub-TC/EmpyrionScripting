@@ -32,7 +32,7 @@ namespace EmpyrionScripting.Tests
             ids.ProcessLists(new Dictionary<string, string>() { ["test"] = "1,2,3,10,-10" });
 
             Assert.AreEqual(",-10,1-3,10,", ids.MappedIds["test"]);
-            Assert.AreEqual(",y,a,b,c,x,",    ids.NamedIds ["test"]);
+            Assert.AreEqual(",a,b,c,x,y,",  ids.NamedIds ["test"]);
         }
 
         [TestMethod]
@@ -61,7 +61,7 @@ namespace EmpyrionScripting.Tests
             ids.ProcessLists(new Dictionary<string, string>() { ["test"] = "1,b,3,10,-10" });
 
             Assert.AreEqual(",-10,1-3,10,", ids.MappedIds["test"]);
-            Assert.AreEqual(",y,a,b,c,x,", ids.NamedIds["test"]);
+            Assert.AreEqual(",a,b,c,x,y,", ids.NamedIds["test"]);
         }
 
         [TestMethod]
@@ -90,7 +90,7 @@ namespace EmpyrionScripting.Tests
             ids.ProcessLists(new Dictionary<string, string>() { ["test"] = "1,b-c,10,-10" });
 
             Assert.AreEqual(",-10,1-3,10,", ids.MappedIds["test"]);
-            Assert.AreEqual(",y,a,b,c,x,", ids.NamedIds["test"]);
+            Assert.AreEqual(",a,b,c,x,y,", ids.NamedIds["test"]);
         }
 
         [TestMethod]
@@ -119,7 +119,7 @@ namespace EmpyrionScripting.Tests
             ids.ProcessLists(new Dictionary<string, string>() { ["test"] = "1,b-c,20,-10" });
 
             Assert.AreEqual(",-10,1-3,20,", ids.MappedIds["test"]);
-            Assert.AreEqual(",y,a,b,c,20,", ids.NamedIds["test"]);
+            Assert.AreEqual(",20,a,b,c,y,", ids.NamedIds["test"]);
         }
 
         [TestMethod]
@@ -148,7 +148,7 @@ namespace EmpyrionScripting.Tests
             ids.ProcessLists(new Dictionary<string, string>() { ["test"] = "1,b-c,z,-10" });
 
             Assert.AreEqual(",-10,1-3,", ids.MappedIds["test"]);
-            Assert.AreEqual(",y,a,b,c,z,", ids.NamedIds["test"]);
+            Assert.AreEqual(",a,b,c,y,z,", ids.NamedIds["test"]);
         }
 
         [TestMethod]
@@ -177,7 +177,7 @@ namespace EmpyrionScripting.Tests
             ids.ProcessLists(new Dictionary<string, string>() { ["test"] = ",1,b,z, b-c,z,-10," });
 
             Assert.AreEqual(",-10,1-3,", ids.MappedIds["test"]);
-            Assert.AreEqual(",y,a,b,c,z,", ids.NamedIds["test"]);
+            Assert.AreEqual(",a,b,c,y,z,", ids.NamedIds["test"]);
         }
 
     }

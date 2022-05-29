@@ -103,13 +103,15 @@ namespace EmpyrionScripting.DataWrapper
                             .ForEach(I =>
                             {
                                 EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(I.id, out ItemInfo details);
-                                IItemsSource source = new ItemsSource() { E = E, Id = I.CreateId(), Count = I.count, Container = container, CustomName = block.CustomName, Position = P };
+                                IItemsSource source = new ItemsSource() { E = E, Id = I.CreateId(), Count = I.count, Ammo = I.ammo, Decay = I.decay, Container = container, CustomName = block.CustomName, Position = P };
                                 allItems.AddOrUpdate(I.id,
                                 new ItemsData()
                                 {
                                     Source = new[] { source }.ToList(),
                                     Id     = I.id,
                                     Count  = I.count,
+                                    Ammo   = I.ammo, 
+                                    Decay  = I.decay,
                                     Key    = details == null ? I.id.ToString() : details.Key,
                                     Name   = details == null ? I.id.ToString() : details.Name,
                                 },

@@ -102,6 +102,8 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodFillFuel()
         {
+            EmpyrionScripting.SaveGameModPath = ".";
+
             ConveyorHelpers.CreateDeviceLock = (R, P, S, V) => new MockDeviceLock();
 
             var lcdMod = new EmpyrionScripting();
@@ -112,6 +114,7 @@ namespace EmpyrionScripting.UnitTests
             var dict = new ConcurrentDictionary<string, object>();
 
             var root = Substitute.For<IScriptRootData>();
+
             var playfield = Substitute.For<IPlayfield>();
             playfield.Name.Returns("PlayfieldTestName");
             root.CsRoot.Returns(new CsHelper.CsScriptFunctions(root));
@@ -174,6 +177,8 @@ namespace EmpyrionScripting.UnitTests
         [TestMethod]
         public void TestMethodItemsMoveToOtherEntity()
         {
+            EmpyrionScripting.SaveGameModPath = ".";
+
             ConveyorHelpers.CreateDeviceLock = (R, P, S, V) => new MockDeviceLock();
             
             // SV ==================================================================

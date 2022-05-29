@@ -57,7 +57,7 @@ public class ModMain
                             WriteTo(infoOutLcds, $"Transfer failed: Item:[{i.id}] {i.count} {root.CsRoot.I18n(i.id)}");
                         }
                     });
-                    nativeContainer.SetContent(failedItems);
+                    nativeContainer.SetContent(failedItems.UniqueSlots());
                 });
             });
 
@@ -110,12 +110,7 @@ public class ModMain
                             }
                         }
                     }
-                    if (items.Count > 0 && itemsAdded)
-                    {
-                        byte index = 0;
-                        nativeContainer.SetContent(items
-                            .Select(i => new ItemStack(i.id, i.count) { slotIdx = index++, decay = i.decay, ammo = i.ammo }).ToList());
-                    }
+                    if (items.Count > 0 && itemsAdded) nativeContainer.SetContent(items.UniqueSlots());
                 });
             });
 
