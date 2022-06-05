@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -41,6 +42,32 @@ namespace EmpyrionScripting.UnitTests
                 }, "{{#each I}}{{test Id eq 1}}Yes:{{Name}}{{else}}No:{{Name}}{{/test}}{{/each}}")
             );
         }
+
+        [TestMethod]
+        public void TestMethodDynamic()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var dynList = new Dictionary<string, object>();
+
+            var i1 = new Dictionary<string, object>();
+            i1.Add("Id",    1);
+            i1.Add("Name", "Test");
+            i1.Add("Sub",  i1);
+            dynList.Add("I", i1);
+
+            Assert.AreEqual(
+                "1:Test->1",
+                lcdMod.ExecuteHandlebarScript(pf, i1, "{{Id}}:{{Name}}->{{Sub.Id}}")
+            );
+
+            Assert.AreEqual(
+                "Yes:Test",
+                lcdMod.ExecuteHandlebarScript(pf, new { I = dynList }, "{{#each I}}{{test Id eq 1}}Yes:{{Name}}{{else}}No:{{Name}}{{/test}}{{/each}}")
+            );
+        }
+
 
         [TestMethod]
         public void TestMethodTestLEQ()

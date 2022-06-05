@@ -50,6 +50,8 @@ namespace EmpyrionScripting
 
         public CsCompiler.CsCompiler CsCompiler { get; set; }
 
+        public static SqlDbAccess SqlDbAccess { get; } = new SqlDbAccess();
+
         public ConcurrentDictionary<string, PlayfieldScriptData> PlayfieldData { get; set; } = new ConcurrentDictionary<string, PlayfieldScriptData>();
         public static string ScriptingModInfoData { get; private set; } = string.Empty;
         public static ConcurrentDictionary<string, string> ScriptingModScriptsInfoData { get; } = new ConcurrentDictionary<string, string>();
@@ -60,15 +62,16 @@ namespace EmpyrionScripting
 
         public EmpyrionScripting()
         {
-            EmpyrionScriptingInstance     = this;
-            EmpyrionConfiguration.ModName = "EmpyrionScripting";
-            DeviceLock     .Log           = Log;
-            ConveyorHelpers.Log           = Log;
-            ScriptExecQueue.Log           = Log;
-            ConfigEcfAccess.Log           = Log;
-            Localization   .Log           = Log;
+            EmpyrionScriptingInstance         = this;
+            EmpyrionConfiguration.ModName     = "EmpyrionScripting";
+            DeviceLock     .Log               = Log;
+            ConveyorHelpers.Log               = Log;
+            ScriptExecQueue.Log               = Log;
+            ConfigEcfAccess.Log               = Log;
+            Localization   .Log               = Log;
             PlayerCommandsDediHelper    .Log  = Log;
             StaticCsCompiler.CsCompiler .Log  = Log;
+            SqlDbAccess.Log                   = Log;
             SetupHandlebarsComponent();
         }
 
@@ -227,6 +230,9 @@ namespace EmpyrionScripting
             };
             Configuration.ConfigFileLoaded += (s, e) =>
             {
+                SqlDbAccess.SaveGamePath    = Path.Combine(SaveGameModPath, "..");
+                SqlDbAccess.ElevatedQueries = Configuration.Current.DBQueries.Elevated;
+                SqlDbAccess.PlayerQueries   = Configuration.Current.DBQueries.Player;
                 CheckAddOnAssemblies();
                 Configuration_ProcessIdsLists();
             };
@@ -407,6 +413,7 @@ namespace EmpyrionScripting
                         Log(line, I.Value._RunningInstances > 0 ? LogLevel.Error : LogLevel.Debug);
                     });
 
+                output.Insert(0, $"SQL Queries #{SqlDbAccess?.QueryCounter} take {SqlDbAccess?.OverallQueryTime}\n - Player:{SqlDbAccess?.PlayerQueries?.Keys.Aggregate("", (l, k) => $"{l} {k}")}\n - Elevated:{SqlDbAccess?.ElevatedQueries?.Keys.Aggregate("", (l, k) => $"{l} {k}")}\n");
                 output.Insert(0, $"RunCount:{PF.ScriptExecQueue.ScriptRunInfo.Count} ExecQueue:{PF.ScriptExecQueue.ExecQueue.Count} WaitForExec:{PF.ScriptExecQueue.WaitForExec.Count} BackgroundWorkerToDoCount:{PF.ScriptExecQueue.BackgroundWorkerToDo.Count} Sync:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count(S => S.Value)} GameUpdateTimeLimitReached:{PF.ScriptExecQueue.GameUpdateScriptLoopTimeLimitReached} Total:{PF.ScriptExecQueue.ScriptNeedsMainThread.Count()} TotalExecTime:{totalExecTime}\n");
                 var result = output.ToString();
                 ScriptingModScriptsInfoData.AddOrUpdate(PF.PlayfieldName, result, (k, o) => result);

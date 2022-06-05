@@ -760,6 +760,76 @@ Items habe folgende Basisdaten
   + Zeigt einen Dialog dem Spieler an (bei SignalName wenn eines dieser Signale ausgelöst wird): (player | playerId | SignalName) [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
   + (title) (body) (ButtonTexts) werden aus dem {{else}} ermittelt bei dem die Playerdaten als this zur Verfügung stehen 1.Zeile=Titel, Letzte Zeile=Buttons, die Zeilen dazwischen = Body
 
+## DB Zugriff
++ {{db queryname [top] [orderBy] [additionalWhereAnd] [parameters]}}
+  + 'queryname' der Name der SQL Query welche über die Konfiguration zur Verfügung gestellt wird
+  + 'top' nur die ersten X Einträge liefern
+  + 'orderby' Abfrage mit dem Feld sortieren. Standardmässig aufsteigend 'feldname asc' kann aber auch absteigend 'feldname desc' eingestellt werden
+  + 'additionalWhereAnd' zusätzliche 'where' Bedingung
+  + 'parameter' falls das Script weitere Parameter erforder können deren Werte hier angegeben werden die Parameter stehen dann unter @1..N der Abfrage zur Verfügung
+
+Um die 'global.db' Datenbank des EmpyrionSavegames zu durchforsten und eigene Queries der Konfiguration hinzuzufügen bietet sich der SQLiteBrowser https://sqlitebrowser.org/ an.
+
+Der Query stehen Standardmäßig folgende Parameter zur Verfügung:
+ + @PlayerId             = @root.E.S.Pilot.Id   
+ + @FactionId            = @root.E.Faction.Id   
+ + @FactionGroup  (int)  = @root.E.Faction.Group
+ + @EntityId             = @root.E.Id           
+
+Folgende Queries stehen zur Verfügung:
+
+### Entities
+```
+SELECT * FROM Structures 
+LEFT JOIN Entities ON Structures.entityid = Entities.entityid
+LEFT JOIN Playfields ON Entities.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE (isremoved = 0 AND ((facgroup = 1 AND facid = @FactionId) OR (facgroup = 1 AND facid = @PlayerId) OR (facgroup = 0 AND facid = @FactionId)))
+```
+
+### DiscoveredPOIs
+```
+SELECT * FROM DiscoveredPOIs
+LEFT JOIN Entities ON DiscoveredPOIs.poiid = Entities.entityid
+LEFT JOIN Playfields ON Entities.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE (Entities.isremoved = 0 AND ((DiscoveredPOIs.facgroup = 1 AND DiscoveredPOIs.facid = @FactionId) OR (DiscoveredPOIs.facgroup = 1 AND DiscoveredPOIs.facid = @EntityId) OR (DiscoveredPOIs.facgroup = 0 AND DiscoveredPOIs.facid = @EntityId) OR (DiscoveredPOIs.facgroup = 0 AND DiscoveredPOIs.facid = @PlayerId) OR (DiscoveredPOIs.facgroup = 0 AND DiscoveredPOIs.facid = @FactionId)))
+```
+
+### TerrainPlaceables
+```
+SELECT * FROM TerrainPlaceables 
+LEFT JOIN Entities ON TerrainPlaceables.entityid = Entities.entityid
+LEFT JOIN Playfields ON Entities.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE (isremoved = 0 AND ((facgroup = 1 AND facid = @FactionId) OR (facgroup = 1 AND facid = @PlayerId) OR (facgroup = 0 AND facid = @FactionId)))
+```
+
+### Playfields
+```
+SELECT * FROM Playfields 
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE ((DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId) OR (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId))
+```
+
+### PlayfieldResources
+```
+SELECT * FROM Playfields 
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+LEFT JOIN PlayfieldResources ON PlayfieldResources.pfid = Playfields.pfid
+WHERE ((DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId) OR (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId))
+```
+
+### PlayerData
+```
+SELECT * FROM PlayerData 
+LEFT JOIN Entities ON Entities.entityid = PlayerData.entityid
+LEFT JOIN Playfields ON Playfields.pfid = PlayerData.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE ((Entities.facgroup = 1 AND Entities.facid = @FactionId) OR (Entities.facgroup = 1 AND Entities.facid = @PlayerId) OR (Entities.facgroup = 0 AND Entities.facid = @FactionId))
+```
 
 ## Externe Daten
 + {{external 'Key' [args]}}
@@ -1651,6 +1721,77 @@ DateTime format:
 + {{dialogbox player|Id|SignalName}} 
   + Displays a dialog to the player (at SignalName when one of these signals is triggered): (player | playerId | SignalName) [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
   + (title) (body) (ButtonTexts) are determined from the {{else}} where the player data is available as this 1st line=title, last line=buttons, the lines in between = body
+
+## DB Access
++ {{db queryname [top] [orderBy] [additionalWhereAnd] [parameters]}}
+  + 'queryname' the name of the SQL query which is provided by the configuration.
+  + 'top' provide only the first X entries
+  + 'orderby' query with the field sort. By default ascending 'fieldname asc' but can also be set to descending 'fieldname desc'.
+  + 'additionalWhereAnd' additional 'where' condition
+  + 'parameter' if the script requires additional parameters their values can be specified here the parameters are then available under @1..N of the query
+
+To search the 'global.db' database of the EmpyrionSavegame and to add own queries to the configuration you can use the SQLiteBrowser https://sqlitebrowser.org/.
+
+By default the following parameters are available for the query:
+ + @PlayerId = @root.E.S.Pilot.Id   
+ + @FactionId = @root.E.Faction.Id   
+ + @FactionGroup (int) = @root.E.Faction.Group
+ + @EntityId = @root.E.Id           
+
+The following queries are available:
+
+### Entities
+```
+SELECT * FROM Structures 
+LEFT JOIN Entities ON Structures.entityid = Entities.entityid
+LEFT JOIN Playfields ON Entities.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE (isremoved = 0 AND ((facgroup = 1 AND facid = @FactionId) OR (facgroup = 1 AND facid = @PlayerId) OR (facgroup = 0 AND facid = @FactionId)))
+```
+
+### DiscoveredPOIs
+```
+SELECT * FROM DiscoveredPOIs
+LEFT JOIN Entities ON DiscoveredPOIs.poiid = Entities.entityid
+LEFT JOIN Playfields ON Entities.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE (Entities.isremoved = 0 AND ((DiscoveredPOIs.facgroup = 1 AND DiscoveredPOIs.facid = @FactionId) OR (DiscoveredPOIs.facgroup = 1 AND DiscoveredPOIs.facid = @EntityId) OR (DiscoveredPOIs.facgroup = 0 AND DiscoveredPOIs.facid = @EntityId) OR (DiscoveredPOIs.facgroup = 0 AND DiscoveredPOIs.facid = @PlayerId) OR (DiscoveredPOIs.facgroup = 0 AND DiscoveredPOIs.facid = @FactionId)))
+```
+
+### TerrainPlaceables
+```
+SELECT * FROM TerrainPlaceables 
+LEFT JOIN Entities ON TerrainPlaceables.entityid = Entities.entityid
+LEFT JOIN Playfields ON Entities.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE (isremoved = 0 AND ((facgroup = 1 AND facid = @FactionId) OR (facgroup = 1 AND facid = @PlayerId) OR (facgroup = 0 AND facid = @FactionId)))
+```
+
+### Playfields
+```
+SELECT * FROM Playfields 
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE ((DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId) OR (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId))
+```
+
+### PlayfieldResources
+```
+SELECT * FROM Playfields 
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = Playfields.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+LEFT JOIN PlayfieldResources ON PlayfieldResources.pfid = Playfields.pfid
+WHERE ((DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId) OR (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId))
+```
+
+### PlayerData
+```
+SELECT * FROM PlayerData 
+LEFT JOIN Entities ON Entities.entityid = PlayerData.entityid
+LEFT JOIN Playfields ON Playfields.pfid = PlayerData.pfid
+LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE ((Entities.facgroup = 1 AND Entities.facid = @FactionId) OR (Entities.facgroup = 1 AND Entities.facid = @PlayerId) OR (Entities.facgroup = 0 AND Entities.facid = @FactionId))
+```
 
 ## External data
 + {{external 'Key' [args]}}
