@@ -86,18 +86,20 @@ namespace EmpyrionScripting
 
                 using (var cmd = new SQLiteCommand(DbConnection))
                 {
-                    var sqlQuery = new StringBuilder(query.Query);
-
+                    var andCustomWhere = string.Empty;
                     if (!string.IsNullOrEmpty(additionalWhereAnd) && !additionalWhereAnd.Contains("/*") && !additionalWhereAnd.Contains("--"))
                     {
-                        if(query.Query.IndexOf("WHERE", StringComparison.InvariantCultureIgnoreCase) > 0) sqlQuery.AppendFormat(" AND ({0})", additionalWhereAnd);
-                        else                                                                              sqlQuery.AppendFormat(" WHERE {0}", additionalWhereAnd);
+                        andCustomWhere = query.Query.IndexOf("WHERE", StringComparison.InvariantCultureIgnoreCase) > 0
+                            ? $" AND ({additionalWhereAnd})"
+                            : $" WHERE {additionalWhereAnd}";
                     }
+
+                    var sqlQuery = new StringBuilder(query.Query.Replace("{additionalWhereAnd}", andCustomWhere));
 
                     if (!string.IsNullOrEmpty(orderBy))
                     {
                         var checkOrderBy = orderBy.Split(' ');
-                        sqlQuery.AppendFormat("\nORDER BY {0}{1}", checkOrderBy.First(), checkOrderBy.Skip(1).FirstOrDefault()?.ToLower() == "asc" ? " asc" : " desc");
+                        sqlQuery.AppendFormat("\nORDER BY {0}{1}", checkOrderBy.First(), checkOrderBy.Skip(1).FirstOrDefault()?.ToLower() == "desc" ? " desc" : " asc");
                     }
 
                     cmd.CommandText = sqlQuery.ToString();
