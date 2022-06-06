@@ -807,27 +807,37 @@ WHERE (isremoved = 0 AND ((facgroup = 1 AND facid = @FactionId) OR (facgroup = 1
 
 ### Playfields
 ```
-SELECT * FROM Playfields 
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = Playfields.pfid
-LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE ((DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId) OR (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId))
+SELECT * FROM Playfields
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
+JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE playfields.ssid IN (
+SELECT ssid FROM Playfields
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
+WHERE (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId)
+GROUP BY playfields.ssid
+) {additionalWhereAnd}
 ```
 
 ### PlayfieldResources
 ```
-SELECT * FROM Playfields 
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = Playfields.pfid
-LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-LEFT JOIN PlayfieldResources ON PlayfieldResources.pfid = Playfields.pfid
-WHERE ((DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId) OR (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId))
+SELECT * FROM Playfields
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
+JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+JOIN PlayfieldResources ON PlayfieldResources.pfid = Playfields.pfid
+WHERE playfields.ssid IN (
+SELECT ssid FROM Playfields
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
+WHERE (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId)
+GROUP BY playfields.ssid
+) {additionalWhereAnd}
 ```
 
 ### PlayerData
 ```
 SELECT * FROM PlayerData 
-LEFT JOIN Entities ON Entities.entityid = PlayerData.entityid
-LEFT JOIN Playfields ON Playfields.pfid = PlayerData.pfid
-LEFT JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+JOIN Entities ON Entities.entityid = PlayerData.entityid
+JOIN Playfields ON Playfields.pfid = PlayerData.pfid
+JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
 WHERE ((Entities.facgroup = 1 AND Entities.facid = @FactionId) OR (Entities.facgroup = 1 AND Entities.facid = @PlayerId) OR (Entities.facgroup = 0 AND Entities.facid = @FactionId))
 ```
 
@@ -1769,20 +1779,29 @@ WHERE (isremoved = 0 AND ((facgroup = 1 AND facid = @FactionId) OR (facgroup = 1
 
 ### Playfields
 ```
-SELECT * FROM DiscoveredPlayfields 
-JOIN Playfields ON Playfields.pfid = DiscoveredPlayfields.pfid
+SELECT * FROM Playfields
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
 JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE ((DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId) OR (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId)) {additionalWhereAnd}
-GROUP BY Playfields.name
+WHERE playfields.ssid IN (
+SELECT ssid FROM Playfields
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
+WHERE (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId)
+GROUP BY playfields.ssid
+) {additionalWhereAnd}
 ```
 
 ### PlayfieldResources
 ```
-SELECT * FROM DiscoveredPlayfields 
-JOIN Playfields ON Playfields.pfid = DiscoveredPlayfields.pfid
+SELECT * FROM Playfields
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
 JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-JOIN PlayfieldResources ON PlayfieldResources.pfid = DiscoveredPlayfields.pfid
-WHERE ((DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId) OR (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId)) {additionalWhereAnd}
+JOIN PlayfieldResources ON PlayfieldResources.pfid = Playfields.pfid
+WHERE playfields.ssid IN (
+SELECT ssid FROM Playfields
+LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
+WHERE (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId)
+GROUP BY playfields.ssid
+) {additionalWhereAnd}
 ```
 
 ### PlayerData
