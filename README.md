@@ -1841,7 +1841,7 @@ public class ExternalDataAccess : IMod
 Furthermore the path to the DLL must be specified in the configuration file of the EmpyrionScripting. (Basis is the mod directory of the EmpyrionScripting in the savegame).
 ```
 "AddOnAssemblies": [
-    "..\EmpyrionGalaxyNavigator\EmpyrionGalaxyNavigatorDataAccess.dll"
+    "..\\EmpyrionGalaxyNavigator\\EmpyrionGalaxyNavigatorDataAccess.dll"
 ],
 ```
 
