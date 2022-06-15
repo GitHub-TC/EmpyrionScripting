@@ -38,7 +38,7 @@
     <Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="F:\NuGet.Local\Debug\$(PackageId).$(PackageVersion)\" />
   </Target>
   <ItemGroup>
-    <PackageReference Include="NuGet.CommandLine" Version="5.1.0">
+    <PackageReference Include="NuGet.CommandLine" Version="5.2.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
