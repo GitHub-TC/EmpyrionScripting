@@ -752,6 +752,13 @@ Items habe folgende Basisdaten
 + {{globaltostructpos structure (vector | x y z)}}
   + Liefert die Position (vector | x y z) der Weltkoordinaten aus sicht der Struktur
 
+## JSON
++ {{fromjson string}}
+  + liefert eine aus dem JSON 'string' resultierende Datenstruktur
+
+{{tojson object}}
+  + erzeugt aus dem Objket 'object' einen JSON Datenstring
+
 ## Dialogfenster
 + {{dialog player|Id|SignalName title body}} 
   + Zeigt einen Dialog dem Spieler an (bei SignalName wenn eines dieser Signale ausgelöst wird): (player | playerId | SignalName) (title) (body) [ButtonTexts] [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
@@ -1723,6 +1730,13 @@ DateTime format:
 
 + {{globaltostructpos structure (vector | x y z)}}
   + Returns the position (vector | x y z) of the world coordinates from the point of view of the structure
+
+## JSON
++ {{fromjson string}}
+  + returns a data structure resulting from the JSON 'string'.
+
+{{tojson object}}
+  + creates a JSON data string from the object
 
 ## Dialog windows
 + {{dialog player|Id|SignalName title body}} 

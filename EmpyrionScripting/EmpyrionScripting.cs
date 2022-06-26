@@ -3,6 +3,7 @@ using EmpyrionNetAPIAccess;
 using EmpyrionNetAPIDefinitions;
 using EmpyrionNetAPITools;
 using EmpyrionNetAPITools.Extensions;
+using EmpyrionScripting.CsCompiler;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
@@ -20,6 +21,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static EmpyrionScripting.CsCompiler.CsCompiler;
+using static EmpyrionScripting.SaveGamesScripts;
 using StaticCsCompiler = EmpyrionScripting.CsCompiler;
 
 namespace EmpyrionScripting
@@ -56,7 +58,6 @@ namespace EmpyrionScripting
         public static string ScriptingModInfoData { get; private set; } = string.Empty;
         public static ConcurrentDictionary<string, string> ScriptingModScriptsInfoData { get; } = new ConcurrentDictionary<string, string>();
         public static ConcurrentDictionary<string, LoadedAssemblyInfo> AddOnAssemblies { get; set; } = new ConcurrentDictionary<string, LoadedAssemblyInfo>();
-
         private static readonly Assembly CurrentAssembly = Assembly.GetAssembly(typeof(EmpyrionScripting));
         public static string Version { get; } = $"{CurrentAssembly.GetAttribute<AssemblyTitleAttribute>()?.Title } by {CurrentAssembly.GetAttribute<AssemblyCompanyAttribute>()?.Company} Version:{CurrentAssembly.GetAttribute<AssemblyFileVersionAttribute>()?.Version}";
 
@@ -165,7 +166,6 @@ namespace EmpyrionScripting
 
             processed.ForEach(dll => AddOnAssemblies.TryRemove(dll, out var customAssembly));
         }
-
 
         private void InitGameDependedData(bool forceInit)
         {
@@ -586,7 +586,7 @@ namespace EmpyrionScripting
 
         public static string GetTrackingFileName(ScriptSaveGameRootData root)
         {
-            var trackfile = Path.Combine(SaveGameModPath, "ScriptTracking", Path.GetFileName(root.ScriptId));
+            var trackfile = Path.Combine(SaveGameModPath, "ScriptTracking", Path.GetFileName(root.ScriptId) + (root.ScriptLanguage == ScriptLanguage.CompiledDll ? ".log" : ""));
             Directory.CreateDirectory(Path.GetDirectoryName(trackfile));
             return trackfile;
         }
@@ -664,7 +664,7 @@ namespace EmpyrionScripting
                         var data = new ScriptSaveGameRootData(entityScriptData)
                         {
                             ScriptLanguage = ScriptLanguage.Handlebar,
-                            Script         = hbsCode,
+                            Script         = hbsCode.ToString(),
                             ScriptId       = entityScriptData.E.Id + "/" + S,
                             ScriptPath     = Path.GetDirectoryName(path)
                         };
@@ -678,7 +678,7 @@ namespace EmpyrionScripting
                         var data = new ScriptSaveGameRootData(entityScriptData)
                         {
                             ScriptLanguage = ScriptLanguage.Cs,
-                            Script         = csCode,
+                            Script         = csCode.ToString(),
                             ScriptId       = entityScriptData.E.Id + "/" + S,
                             ScriptPath     = Path.GetDirectoryName(path)
                         };
@@ -687,22 +687,59 @@ namespace EmpyrionScripting
 
                         Interlocked.Increment(ref count);
                     }
+                    else if (SaveGamesScripts.SaveGameScripts.TryGetValue(path + ".DLL", out var dllCode))
+                    {
+                        if(dllCode is PreCompiledScript preCompiledScript && preCompiledScript.MainMethod != null)
+                        {
+                            var data = new ScriptSaveGameRootData(entityScriptData)
+                            {
+                                ScriptLanguage = ScriptLanguage.CompiledDll,
+                                MainMethod     = preCompiledScript.MainMethod,
+                                ScriptId       = entityScriptData.E.Id + "/" + S,
+                                ScriptPath     = Path.GetDirectoryName(path)
+                            };
+                            AddTargetsAndDisplayType(data, Path.GetFileNameWithoutExtension(S) + "*");
+                            playfieldData.ScriptExecQueue.Add(data);
+
+                            Interlocked.Increment(ref count);
+                        }
+                    }
                     else
                     {
                         SaveGamesScripts.SaveGameScripts
                             .Where(F => Path.GetDirectoryName(F.Key) == path)
                             .ForEach(F => {
-                                var data = new ScriptSaveGameRootData(entityScriptData)
+                                if (F.Value is PreCompiledScript preCompiledScript)
                                 {
-                                    ScriptLanguage  = Path.GetExtension(F.Key).Equals(".cs", StringComparison.InvariantCultureIgnoreCase) ? ScriptLanguage.Cs : ScriptLanguage.Handlebar,
-                                    Script          = F.Value,
-                                    ScriptId        = entityScriptData.E.Id + "/" + F.Key,
-                                    ScriptPath      = Path.GetDirectoryName(F.Key)
-                                };
-                                AddTargetsAndDisplayType(data, Path.GetFileNameWithoutExtension(F.Key) + "*");
-                                playfieldData.ScriptExecQueue.Add(data);
+                                    if (preCompiledScript.MainMethod != null)
+                                    {
+                                        var data = new ScriptSaveGameRootData(entityScriptData)
+                                        {
+                                            ScriptLanguage  = ScriptLanguage.CompiledDll, 
+                                            MainMethod      = preCompiledScript.MainMethod,
+                                            ScriptId        = entityScriptData.E.Id + "/" + F.Key,
+                                            ScriptPath      = Path.GetDirectoryName(F.Key)
+                                        };
+                                        AddTargetsAndDisplayType(data, Path.GetFileNameWithoutExtension(F.Key) + "*");
+                                        playfieldData.ScriptExecQueue.Add(data);
 
-                                Interlocked.Increment(ref count);
+                                        Interlocked.Increment(ref count);
+                                    }
+                                }
+                                else if(!Path.GetExtension(F.Key).Equals(".dll", StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    var data = new ScriptSaveGameRootData(entityScriptData)
+                                    {
+                                        ScriptLanguage  = Path.GetExtension(F.Key).Equals(".cs", StringComparison.InvariantCultureIgnoreCase) ? ScriptLanguage.Cs : ScriptLanguage.Handlebar,
+                                        Script          = F.Value.ToString(),
+                                        ScriptId        = entityScriptData.E.Id + "/" + F.Key,
+                                        ScriptPath      = Path.GetDirectoryName(F.Key)
+                                    };
+                                    AddTargetsAndDisplayType(data, Path.GetFileNameWithoutExtension(F.Key) + "*");
+                                    playfieldData.ScriptExecQueue.Add(data);
+
+                                    Interlocked.Increment(ref count);
+                                }
                             });
                     }
                 });
@@ -734,15 +771,21 @@ namespace EmpyrionScripting
             try
             {
                 if (playfieldData.PauseScripts) return;
+                //Log($"ProcessScript [{data.ScriptId}] {data.ScriptLanguage} -> {data}", LogLevel.Debug);
 
                 var stringBlankLines = data.ScriptLanguage == ScriptLanguage.Handlebar ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None;
 
                 var result = 
                     (data.ScriptLanguage == ScriptLanguage.Handlebar
                         ? ExecuteHandlebarScript(playfieldData, data, data.Script)
-                        : ExecuteCsScript       (playfieldData, data, data.Script)
-                    ).Split(new[] { '\n' }, stringBlankLines)
-                    .ToList();
+                        : data.ScriptLanguage == ScriptLanguage.CompiledDll
+                            ? ExecuteMainMethodScript (playfieldData, data, (data as ScriptSaveGameRootData).MainMethod)
+                            : ExecuteCsScript         (playfieldData, data, data.Script)
+                    )
+                    ?.Split(new[] { '\n' }, stringBlankLines)
+                    ?.ToList();
+
+                if (result == null) return;
 
                 if (result.Count > 0 && result[0].StartsWith(TargetsKeyword))
                 {
@@ -757,7 +800,7 @@ namespace EmpyrionScripting
                                                 .Reverse()
                                                 .ToList();
 
-                data.LcdTargets
+                data.LcdTargets?
                     .Select(L => new { Lcd = data.E.S.GetCurrent().GetDevice<ILcd>(L), Name = L })
                     .Where(L => L.Lcd != null)
                     .ForEach(L =>
@@ -808,7 +851,51 @@ namespace EmpyrionScripting
                 }
 
                 if (playfieldData.PauseScripts) return;
-                data.LcdTargets.ForEach(L => data.E.S.GetCurrent().GetDevice<ILcd>(L)?.SetText($"{ctrlError.Message} {DateTime.Now.ToLongTimeString()}"));
+                data.LcdTargets?.ForEach(L => data.E.S.GetCurrent().GetDevice<ILcd>(L)?.SetText($"{ctrlError.Message} {DateTime.Now.ToLongTimeString()}"));
+            }
+        }
+
+        private string ExecuteMainMethodScript<T>(PlayfieldScriptData playfieldData, T data, MethodInfo mainMethod) where T : IScriptRootData
+        {
+            Log($"ExecuteMainMethodScript [{data.ScriptId}]:{mainMethod}", LogLevel.Debug);
+
+            using var output = new StringWriter();
+
+            var root = data as IScriptRootModData;
+            root.ScriptOutput = output;
+            string exceptionMessage = null;
+
+            try
+            {
+                object result = null;
+
+                if (mainMethod != null)
+                {
+                    if (root.CsRoot is ICsScriptRootFunctions csRoot) csRoot.ScriptRoot = root;
+                    result = mainMethod.Invoke(null, new[] { root as IScriptModData });
+                }
+
+                if      (result is Action action)                       action();
+                else if (result is Action<IScriptModData> simpleaction) simpleaction(root);
+                else if (result is Func<IScriptModData, object> func)   output.Write(func(root)?.ToString());
+                else if (result is Task task)                           task.RunSynchronously();
+                else                                                    output.Write(result?.ToString());
+
+                return exceptionMessage == null ? output.ToString() : $"{exceptionMessage}\n\nScript output up to exception:\n{output}";
+            }
+            catch (Exception error)
+            {
+                exceptionMessage = error.ToString();
+                return root.IsElevatedScript ? error.ToString() : error.Message;
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(exceptionMessage))
+                {
+                    Log($"DLL Run [{root.ScriptId}]:{exceptionMessage}\n{output}", LogLevel.Error);
+
+                    ScriptErrorTracking(root, new[] { exceptionMessage }.ToList());
+                }
             }
         }
 

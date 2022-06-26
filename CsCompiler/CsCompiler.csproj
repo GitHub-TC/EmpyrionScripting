@@ -82,6 +82,7 @@
     <Compile Include="CsCompiler\AnalysisExtensions.cs" />
     <Compile Include="CsCompiler\CsCompiler.cs" />
     <Compile Include="CsCompiler\CsCompilerConfiguration.cs" />
+    <Compile Include="CsCompiler\LoadedAssemblyInfo.cs" />
     <Compile Include="CsCompiler\WhitelistDiagnosticAnalyzer.cs" />
     <Compile Include="CsModPermission.cs" />
     <Compile Include="ICsScriptRootFunctions.cs" />

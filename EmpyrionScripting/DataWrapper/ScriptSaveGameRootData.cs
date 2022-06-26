@@ -1,6 +1,7 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.Interface;
 using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace EmpyrionScripting.DataWrapper
 {
@@ -25,6 +26,7 @@ namespace EmpyrionScripting.DataWrapper
         {
         }
 
+        public MethodInfo MainMethod { get; set; }
         public string ScriptPath { get; set; }
         public string MainScriptPath { get; set; }
         public IModApi ModApi { get; set; }

@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
+using RoslynCsCompiler;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using static RoslynCsCompiler.CompilerAccess;
 
 namespace EmpyrionScripting.CsCompiler
 {
@@ -35,17 +37,12 @@ namespace EmpyrionScripting.CsCompiler
         public ConcurrentDictionary<string, LoadedAssemblyInfo> CustomAssemblies { get; set; } = new ConcurrentDictionary<string, LoadedAssemblyInfo>();
         public ConcurrentDictionary<string, LoadedAssemblyInfo> MainAssemblies   { get; set; } = new ConcurrentDictionary<string, LoadedAssemblyInfo>();
 
-        public class LoadedAssemblyInfo
-        {
-            public string FullAssemblyDllName { get; set; }
-            public Assembly LoadedAssembly { get; set; }
-        }
-
         public CsCompiler(string saveGameModPath, Eleon.Modding.IModApi modApi, Assembly mainAssembly)
         {
-            SaveGameModPath = saveGameModPath;
-            ModApi = modApi;
-            MainAssembly = mainAssembly;
+            CompilerAccess.Log = error => Log?.Invoke(error, LogLevel.Error);
+            SaveGameModPath    = saveGameModPath;
+            ModApi             = modApi;
+            MainAssembly       = mainAssembly;
             LoadConfiguration();
 
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
@@ -66,7 +63,8 @@ namespace EmpyrionScripting.CsCompiler
 
                 if (Log == null) Console.WriteLine($"CurrentDomain_AssemblyResolve: ({dllPath}) {sender}:{args.Name} for {args.RequestingAssembly?.FullName} -> {error}");
                 else             Log($"CurrentDomain_AssemblyResolve: ({dllPath}) {sender}:{args.Name} for {args.RequestingAssembly?.FullName} -> {error}", LogLevel.Error);
-                return null;
+
+                return MainAssembly;
             }
         }
 
@@ -149,7 +147,7 @@ namespace EmpyrionScripting.CsCompiler
             processed.ForEach(dll => CustomAssemblies.TryRemove(dll, out var customAssembly));
         }
 
-        public static void LoadCustomAssembly(ConcurrentDictionary<string, LoadedAssemblyInfo> customAssemblies, string saveGameModPath, string dll)
+        public static T LoadCustomAssembly<T>(ConcurrentDictionary<string, T> customAssemblies, string saveGameModPath, string dll) where T : ILoadedAssemblyInfo, new()
         {
             string dllPath = dll;
             try
@@ -157,14 +155,17 @@ namespace EmpyrionScripting.CsCompiler
                 dllPath = Path.Combine(saveGameModPath, dll).NormalizePath();
                 Log?.Invoke($"CustomAssemblyLoad: {dll} ({dllPath})", LogLevel.Message);
                 var loadedAssembly = Assembly.LoadFile(dllPath);
-                LoadedAssemblyInfo current = null;
+                T current = default;
                 customAssemblies.AddOrUpdate(dllPath,
-                    current = new LoadedAssemblyInfo() { FullAssemblyDllName = dllPath, LoadedAssembly = loadedAssembly }, 
+                    current = new T() { FullAssemblyDllName = dllPath, LoadedAssembly = loadedAssembly }, 
                     (d, a) => { current = a;  a.LoadedAssembly = loadedAssembly; return a; });
+
+                return current;
             }
             catch (Exception error)
             {
                 Log?.Invoke($"AssemblyLoad: {dll} ({dllPath}) -> {error}", LogLevel.Error);
+                return default;
             }
         }
 
@@ -263,6 +264,8 @@ namespace EmpyrionScripting.CsCompiler
             CsModPermission permissionNeeded;
             var rootCompileTime = rootObjectCompileTime as IScriptModData;
 
+            Log($"GetExec C#:{rootCompileTime.ScriptId}", LogLevel.Debug);
+
             using (var loader = new InteractiveAssemblyLoader())
             {
                 ScriptOptions options;
@@ -299,15 +302,29 @@ namespace EmpyrionScripting.CsCompiler
                     throw;
                 }
 
-                csScript = CSharpScript.Create<object>(script, options, typeof(IScriptModData), loader);
-                var compilation = csScript.GetCompilation();
-
                 var WhitelistDiagnosticAnalyzer = new WhitelistDiagnosticAnalyzer(DefaultConfiguration, Configuration);
 
-                var analyzerCompilation = compilation
-                    .WithAnalyzers(ImmutableArray.Create<DiagnosticAnalyzer>(WhitelistDiagnosticAnalyzer))
-                    .GetAnalysisResultAsync(CancellationToken.None)
-                    .GetAwaiter().GetResult().CompilationDiagnostics;
+                CompilerAccess.CompileResult<object> compileResult = null;
+
+                try
+                {
+                    Log($"GetExec C# compile:{rootCompileTime.ScriptId}", LogLevel.Debug);
+                    compileResult = CompilerAccess.CompileAsync<object>(script, options, typeof(IScriptModData), loader, WhitelistDiagnosticAnalyzer).GetAwaiter().GetResult();
+                    Log($"GetExec C# compile finished:{rootCompileTime.ScriptId}", LogLevel.Debug);
+                }
+                catch (Exception error)
+                {
+                    Log($"Microsoft.CodeAnalysis.Diagnostics.AnalysisResult: {error}", LogLevel.Error);
+                    return o => "Microsoft.CodeAnalysis.Diagnostics.AnalysisResult error details in the log file";
+                }
+
+                if(compileResult != null) return o => $"Sorry C# scripting error: {CompilerAccess.LastError}";
+
+                csScript            = compileResult.Script;
+                var compilation     = compileResult.Compilation;
+                var analysisResult  = compileResult.AnalysisResult;
+
+                var analyzerCompilation = analysisResult.CompilationDiagnostics;
 
                 analyzerCompilation.ForEach(A => AnalyzeDiagnostics(A.Value, messages, ref success));
 
@@ -322,20 +339,23 @@ namespace EmpyrionScripting.CsCompiler
 
                 permissionNeeded = WhitelistDiagnosticAnalyzer.PermissionNeeded;
 
-                Assembly assembly = null;
-
                 if (compilation.Assembly.TypeNames.Contains("ModMain"))
                 {
+                    Log($"GetExec C# get entry point:{rootCompileTime.ScriptId}", LogLevel.Debug);
+
                     using (var assemblyStream = new MemoryStream())
                     {
                         try
                         {
+                            var destDllPath = Path.Combine(Path.GetTempPath(), "EGS-CS", Path.GetRandomFileName() + ".dll");
+                            Directory.CreateDirectory(Path.GetDirectoryName(destDllPath));
+
                             var result = compilation.Emit(assemblyStream);
                             var resultSuccess = result.Success;
 
                             if (resultSuccess)
                             {
-                                assembly = Assembly.ReflectionOnlyLoad(assemblyStream.ToArray());
+                                var assembly = Assembly.ReflectionOnlyLoad(assemblyStream.ToArray());
                                 var callMainType = assembly.GetTypes().SingleOrDefault(MT => MT.Name == "ModMain");
                                 mainMethod = callMainType.GetMethod("Main");
 
@@ -347,6 +367,8 @@ namespace EmpyrionScripting.CsCompiler
                                     callMainType = assembly.GetTypes().SingleOrDefault(MT => MT.Name == "ModMain");
                                     mainMethod = callMainType.GetMethod("Main");
                                 }
+
+                                if(mainMethod != null) Log($"GetExec C# entry point found:{rootCompileTime.ScriptId}", LogLevel.Debug);
                             }
                             else
                             {
@@ -372,6 +394,8 @@ namespace EmpyrionScripting.CsCompiler
 
                 ScriptErrorTracking(rootObjectCompileTime, messages);
             }
+
+            Log($"GetExec C# create exec:{rootCompileTime.ScriptId}", LogLevel.Debug);
 
             return rootObject =>
             {
@@ -434,5 +458,26 @@ namespace EmpyrionScripting.CsCompiler
             };
         }
 
+        public static async Task<CompileResult<T>> CompileAsync<T>(string scriptString, ScriptOptions options, Type rootType, InteractiveAssemblyLoader loader, DiagnosticAnalyzer diagnosticAnalyzer)
+        {
+            try
+            {
+                var script = CSharpScript.Create<T>(scriptString, options, rootType, loader);
+                var compilation = script.GetCompilation();
+                return new CompileResult<T>
+                {
+                    Script         = script,
+                    Compilation    = compilation,
+                    AnalysisResult = await compilation
+                                        .WithAnalyzers(ImmutableArray.Create(diagnosticAnalyzer))
+                                        .GetAnalysisResultAsync(CancellationToken.None)
+                };
+            }
+            catch (Exception error)
+            {
+                Log?.Invoke($"CompileAsync: {error}", LogLevel.Error);
+                return null;
+            }
+        }
     }
 }

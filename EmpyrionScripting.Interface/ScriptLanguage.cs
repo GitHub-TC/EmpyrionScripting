@@ -3,6 +3,7 @@
     public enum ScriptLanguage
     {
         Handlebar,
-        Cs
+        Cs,
+        CompiledDll
     }
 }

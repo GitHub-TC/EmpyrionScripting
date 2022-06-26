@@ -1,15 +1,25 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.CsCompiler;
 using EmpyrionScripting.Interface;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using static EmpyrionScripting.CsCompiler.CsCompiler;
 
 namespace EmpyrionScripting
 {
     public class SaveGamesScripts
     {
+        public class PreCompiledScript : LoadedAssemblyInfo
+        {
+            public MethodInfo MainMethod { get; set; }
+        }
+
         FileSystemWatcher SaveGameScriptsWatcher { get; set; }
-        public ConcurrentDictionary<string, string> SaveGameScripts { get; private set; }
+        public ConcurrentDictionary<string, object> SaveGameScripts { get; private set; }
+        public static ConcurrentDictionary<string, PreCompiledScript> PreCompiledScriptAssemblies { get; set; } = new ConcurrentDictionary<string, PreCompiledScript>();
         public string MainScriptPath { get; set; }
         public string SaveGameModPath { get; set; }
         public IModApi ModApi { get; }
@@ -68,16 +78,44 @@ namespace EmpyrionScripting
                 SaveGameScripts.TryRemove(E.FullPath.NormalizePath(), out _);
             };
 
-            SaveGameScripts = new ConcurrentDictionary<string, string>(
+            SaveGameScripts = new ConcurrentDictionary<string, object>(
                                     Directory.GetFiles(MainScriptPath, "*.*", SearchOption.AllDirectories)
                                     .Where(N => IsScriptFile(Path.GetExtension(N).ToLower()))
-                                    .ToDictionary(F => F.NormalizePath(), F => File.ReadAllText(F)));
+                                    .ToDictionary(F => F.NormalizePath(), F => Path.GetExtension(F).Equals(".dll", System.StringComparison.InvariantCultureIgnoreCase) ? LoadScriptAssembly(F) : (object)File.ReadAllText(F)));
 
             SaveGameScriptsWatcher.EnableRaisingEvents = true;
 
             SaveGameScripts.Keys.ForEach(F => ModApi?.Log($"SaveGameScript: found script: {F}"));
         }
 
-        private bool IsScriptFile(string fileext) => fileext == ".cs" || fileext == ".hbs";
+        private PreCompiledScript LoadScriptAssembly(string dll)
+        {
+            if (PreCompiledScriptAssemblies.TryGetValue(dll, out var loadedAssemblyInfo)) return loadedAssemblyInfo;
+
+            try
+            {
+                if (!PreCompiledScriptAssemblies.ContainsKey(dll)) loadedAssemblyInfo = LoadCustomAssembly(PreCompiledScriptAssemblies, SaveGameModPath, dll);
+
+                var callMainType = loadedAssemblyInfo.LoadedAssembly.GetTypes().SingleOrDefault(MT => MT.Name == "ModMain");
+                loadedAssemblyInfo.MainMethod = callMainType.GetMethod("Main");
+
+                if(loadedAssemblyInfo.MainMethod == null) ModApi?.Log($"LoadScriptAssembly: No Main method in class ModMain {dll} ({dll}) -> {callMainType}");
+                else                                      ModApi?.Log($"LoadScriptAssembly: Found Main method in class ModMain {dll} ({dll}) -> {callMainType}");
+
+                return loadedAssemblyInfo;
+            }
+            catch (FileLoadException error)
+            {
+                ModApi?.Log($"LoadScriptAssembly: {dll} ({dll}) -> {error}");
+            }
+            catch (Exception error)
+            {
+                ModApi?.Log($"LoadScriptAssembly: {dll} ({dll}) -> {error}");
+            }
+
+            return null;
+        }
+
+        private bool IsScriptFile(string fileext) => fileext == ".cs" || fileext == ".hbs" || fileext == ".dll";
     }
 }

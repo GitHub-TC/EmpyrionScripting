@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using EmpyrionScripting.DataWrapper;
+using Newtonsoft.Json;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -272,6 +273,38 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{split}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("fromjson")]
+        public static void FromJsonHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{fromjson string}} helper must have at least one argument: (string)");
+
+            var data = arguments[0].ToString();
+
+            try
+            {
+                options.Template(output, JsonConvert.DeserializeObject(data));
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{fromjson}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("tojson")]
+        public static void ToJsonHelper(TextWriter output, object root, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{tojson object}} helper must have at least one argument: (object)");
+
+            try
+            {
+                output.Write(JsonConvert.SerializeObject(arguments[0]));
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{trim}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
