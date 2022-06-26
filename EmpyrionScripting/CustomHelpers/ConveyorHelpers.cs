@@ -20,7 +20,7 @@ namespace EmpyrionScripting.CustomHelpers
         readonly static object moveLock = new object();
         public static Action<string, LogLevel> Log { get; set; }
         public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateDeviceLock { get; set; } = (R, P, S, V) => new DeviceLock(R, P, S, V);
-        public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> WeakCreateDeviceLock { get; set; } = (R, P, S, V) => new WeakDeviceLock(R, P, S, V);
+        public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateWeakDeviceLock { get; set; } = (R, P, S, V) => new WeakDeviceLock(R, P, S, V);
 
         public class ItemMoveInfo : ItemBase, IItemMoveInfo
         {
@@ -104,7 +104,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                using (var locked = CreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), position))
+                using (var locked = CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), position))
                 {
                     if (locked.Success) options.Template(output, context as object);
                     else                options.Inverse (output, context as object);
@@ -178,7 +178,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 if (container == null) throw new HandlebarsException("{{trashcontainer}} conatiner not found '" + containerName + "'");
 
-                using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), structure.GetCurrent(), containerPos);
+                using var locked = CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), structure.GetCurrent(), containerPos);
                 if (!locked.Success)
                 {
                     Log($"DeviceIsLocked:{structure.E.Name} -> {containerName}", LogLevel.Debug);
@@ -247,7 +247,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             lock (moveLock) item.Source
                  .ForEach(S => {
-                     using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
+                     using var locked = CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
                      if (!locked.Success)
                      {
                          Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
@@ -466,7 +466,7 @@ namespace EmpyrionScripting.CustomHelpers
                 ? Math.Max(0, Math.Min(count, maxLimit.Value - target.GetTotalItems(S.Id)))
                 : count;
 
-            using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), targetStructure.GetCurrent(), targetData.Position);
+            using var locked = CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), targetStructure.GetCurrent(), targetData.Position);
             if (!locked.Success)
             {
                 Log($"DeviceIsLocked (Target): {S.Id} #{S.Count} => {targetData.CustomName}", LogLevel.Debug);
@@ -539,7 +539,7 @@ namespace EmpyrionScripting.CustomHelpers
                     return;
                 }
 
-                using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), structure.GetCurrent(), containerPos);
+                using var locked = CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), structure.GetCurrent(), containerPos);
                 if (!locked.Success)
                 {
                     Log($"DeviceIsLocked (harvest): {containerPos}", LogLevel.Debug);
@@ -645,7 +645,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             lock(moveLock) item.Source
                 .ForEach(S => {
-                    using var locked = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
+                    using var locked = CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), S.E?.S.GetCurrent(), S.Position);
                     if (!locked.Success)
                     {
                         Log($"DeviceIsLocked (Source): {S.Id} #{S.Count} => {S.CustomName}", LogLevel.Debug);
@@ -925,7 +925,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                     if(target != null)
                     {
-                        var locking = WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
+                        var locking = CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
 
                         if (locking.Exit)
                         {
@@ -1045,7 +1045,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                                     if (blockType > 0 && N != null)
                                     {
-                                        locked = locked ?? WeakCreateDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
+                                        locked = locked ?? CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
                                         if (!locked.Success)
                                         {
                                             processBlockData.CheckedBlocks--;

@@ -13,7 +13,7 @@ namespace EmpyrionScripting.CsHelper
         public bool IsLocked(IStructureData structure, IBlockData block) => ScriptRoot.GetCurrentPlayfield().IsStructureDeviceLocked(structure.GetCurrent().Id, block.Position);
         public void WithLockedDevice(IStructureData structure, IBlockData block, Action action, Action lockFailed = null)
         {
-            using (var locked = ConveyorHelpers.CreateDeviceLock(ScriptRoot as IScriptRootData, ScriptRoot.GetCurrentPlayfield(), structure.GetCurrent(), block.Position))
+            using (var locked = ConveyorHelpers.CreateWeakDeviceLock(ScriptRoot as IScriptRootData, ScriptRoot.GetCurrentPlayfield(), structure.GetCurrent(), block.Position))
             {
                 if (locked.Success) action();
                 else                lockFailed?.Invoke();

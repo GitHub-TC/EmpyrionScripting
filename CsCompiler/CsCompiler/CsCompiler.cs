@@ -310,7 +310,7 @@ namespace EmpyrionScripting.CsCompiler
                 {
                     Log($"GetExec C# compile:{rootCompileTime.ScriptId}", LogLevel.Debug);
                     compileResult = CompilerAccess.CompileAsync<object>(script, options, typeof(IScriptModData), loader, WhitelistDiagnosticAnalyzer).GetAwaiter().GetResult();
-                    Log($"GetExec C# compile finished:{rootCompileTime.ScriptId}", LogLevel.Debug);
+                    Log($"GetExec C# compile finished:{rootCompileTime.ScriptId} Script:{compileResult?.Script} Compilation:{compileResult?.Compilation} AnalysisResult:{compileResult?.AnalysisResult}", LogLevel.Debug);
                 }
                 catch (Exception error)
                 {
@@ -318,11 +318,17 @@ namespace EmpyrionScripting.CsCompiler
                     return o => "Microsoft.CodeAnalysis.Diagnostics.AnalysisResult error details in the log file";
                 }
 
-                if(compileResult != null) return o => $"Sorry C# scripting error: {CompilerAccess.LastError}";
+                if (compileResult == null)
+                {
+                    Log($"GetExec C# scripting error:{rootCompileTime.ScriptId} {CompilerAccess.LastError}", LogLevel.Debug);
+                    return o => $"Sorry C# scripting error: {CompilerAccess.LastError}";
+                }
 
                 csScript            = compileResult.Script;
                 var compilation     = compileResult.Compilation;
                 var analysisResult  = compileResult.AnalysisResult;
+
+                Log($"GetExec C# analysis:{rootCompileTime.ScriptId}", LogLevel.Debug);
 
                 var analyzerCompilation = analysisResult.CompilationDiagnostics;
 
@@ -338,6 +344,8 @@ namespace EmpyrionScripting.CsCompiler
                 }
 
                 permissionNeeded = WhitelistDiagnosticAnalyzer.PermissionNeeded;
+
+                Log($"GetExec C# assembly:{rootCompileTime.ScriptId} {compilation.Assembly}", LogLevel.Debug);
 
                 if (compilation.Assembly.TypeNames.Contains("ModMain"))
                 {

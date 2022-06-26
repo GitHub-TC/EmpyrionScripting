@@ -910,13 +910,17 @@ namespace EmpyrionScripting
             return generator(data);
         }
 
+        public bool WithinCsCompiler { get; set; }
+
         public string ExecuteCsScript<T>(PlayfieldScriptData playfieldData, T data, string script) where T : IScriptRootData
         {
-            if (!playfieldData.LcdCompileCache.TryGetValue(script, out Func<object, string> generator))
-            {
-                generator = CsCompiler.GetExec(Configuration.Current.CsScriptsAllowedFor, data, script);
-                playfieldData.LcdCompileCache.TryAdd(script, generator);
-            }                                                      
+            if (playfieldData.LcdCompileCache.TryGetValue(script, out Func<object, string> generator)) return generator(data);
+            if (WithinCsCompiler) return string.Empty;
+
+            WithinCsCompiler = true;
+            generator = CsCompiler.GetExec(Configuration.Current.CsScriptsAllowedFor, data, script);
+            playfieldData.LcdCompileCache.TryAdd(script, generator);
+            WithinCsCompiler = false;
 
             return generator(data);
         }

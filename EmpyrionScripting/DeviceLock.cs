@@ -40,6 +40,8 @@ namespace EmpyrionScripting
                     if (witherror)
                     {
                         Log($"Lock:Callback:Error {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
+                        if (!playfield.IsStructureDeviceLocked(structure.Id, position)) return;
+
                         playfield.LockStructureDevice(structure.Id, position, false, null);
                     }
                     else
@@ -53,6 +55,8 @@ namespace EmpyrionScripting
 
                 if (Success) unlockAction = () =>
                  {
+                     if (!playfield.IsStructureDeviceLocked(structure.Id, position)) return;
+
                      e.Reset();
                      playfield.LockStructureDevice(structure.Id, position, false, (id, pos, s) => {
                          if (id != structure.Id || pos != position) return;
