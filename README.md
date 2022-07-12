@@ -1,5 +1,5 @@
 ﻿# Empyrion Scripting
-[English version](#Empyrion Scripting (english))
+[English version](#Empyrion-Scripting-(english))
 
 ## Installation
 1. Downloade die EmpyrionScripting.zip Datei vom aktuellen https://github.com/GitHub-TC/EmpyrionScripting/releases
