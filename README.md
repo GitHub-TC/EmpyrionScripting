@@ -1,4 +1,6 @@
 ﻿# Empyrion Scripting
+[English version](#Empyrion Scripting (english))
+
 ## Installation
 1. Downloade die EmpyrionScripting.zip Datei vom aktuellen https://github.com/GitHub-TC/EmpyrionScripting/releases
 1. UnZip die Datei in dem Verzeichnis Content\\Mods directory
@@ -984,7 +986,7 @@ English-Version:
 
 ---
 
-# Empyrion Scripting
+#Empyrion Scripting (english)
 ## Installation
 1. Download the EmpyrionScripting.zip file from the current https://github.com/GitHub-TC/EmpyrionScripting/releases
 1. unzip the file in the Content\\Mods directory
