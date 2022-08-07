@@ -51,19 +51,19 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("devicesoftype")]
         public static void DevicesOfTypeBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{devicesoftype structure type}} helper must have exactly two argument: (structure) (type)");
-
-            var structure  = arguments[0] as IStructureData;
-            var typeSearch = arguments[1].ToString();
+            if (arguments.Length != 2) throw new HandlebarsException("{{devicesoftype structure type's}} helper must have exactly two argument: (structure) (type's)");
 
             try
             {
-                if (!Enum.TryParse<DeviceTypeName>(typeSearch, true, out var deviceType))
-                {
-                    output.Write("{{devicesoftype}} error unknown device " + typeSearch);
-                }
+                var structure = arguments[0] as IStructureData;
+                var typeSearch = arguments[1].ToString().Split(';', ',');
 
-                var blocks = DevicesOfType(structure, deviceType);
+                var blocks = typeSearch.SelectMany(
+                    type => !Enum.TryParse<DeviceTypeName>(type, true, out var deviceType)
+                            ? Enumerable.Empty<IBlockData>()
+                            : DevicesOfType(structure, deviceType)
+                    )
+                    .ToArray();
 
                 if (blocks != null && blocks.Length > 0) options.Template(output, blocks);
                 else                                     options.Inverse(output, context as object);
