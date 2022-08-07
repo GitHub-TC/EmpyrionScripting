@@ -1,4 +1,6 @@
 ﻿# Empyrion Scripting
+[English part of this ReadMe.md](#English-Version)
+
 ## Installation
 1. Downloade die EmpyrionScripting.zip Datei vom aktuellen https://github.com/GitHub-TC/EmpyrionScripting/releases
 1. UnZip die Datei in dem Verzeichnis Content\\Mods directory
@@ -980,7 +982,7 @@ ASTIC/TC
 
 ***
 
-English-Version:
+# English Version
 
 ---
 
