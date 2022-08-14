@@ -5,6 +5,7 @@ using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
+using Humanizer;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -492,7 +493,7 @@ namespace EmpyrionScripting.CustomHelpers
         enum GardenerOperation
         {
             Harvest,
-            Pickup
+            Pickup,
         }
 
         [HandlebarTag("harvest")]
@@ -504,11 +505,86 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
         [HandlebarTag("pickupplants")]
-        public static void ClearingPlantsHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        public static void PickupPlantsHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 6 && arguments.Length != 7) throw new HandlebarsException("{{clearingplants structure block's target gx gy gz [removeDeadPlants]}} helper must have six argument: (structure) (block's) (target) (gardenerX) (gardenerY) (gardenerZ) (removeDeadPlants) -> " + arguments.Length.ToString());
+            if (arguments.Length != 6 && arguments.Length != 7) throw new HandlebarsException("{{pickupplants structure block's target gx gy gz [removeDeadPlants]}} helper must have six argument: (structure) (block's) (target) (gardenerX) (gardenerY) (gardenerZ) (removeDeadPlants) -> " + arguments.Length.ToString());
 
             PlantsFunction(GardenerOperation.Pickup, output, rootObject, options, (object)context, arguments);
+        }
+
+        [HandlebarTag("replantplants")]
+        public static void ReplantPlantsHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{replantplants structure target}} helper must have two argument: (structure) (target) -> " + arguments.Length.ToString());
+
+            var root        = rootObject as IScriptRootData;
+            var structure   = arguments[0] as IStructureData;
+            var namesSearch = arguments.Get<string>(1);
+
+            try
+            {
+                var cacheId = $"{structure.E.Id}PickupPlants";
+                if (!root.GetPersistendData().TryGetValue(cacheId, out var data))
+                {
+                    options.Inverse(output, context as object);
+                    return;
+                }
+
+                var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch).ToList();
+                if (!uniqueNames.Any())
+                {
+                    output.WriteLine($"NoDevicesFound: {namesSearch}");
+                    return;
+                }
+
+                IContainer container = null;
+                VectorInt3 containerPos = VectorInt3.Undef;
+
+                var firstTarget = GetNextContainer(root, uniqueNames, ref container, ref containerPos);
+                if (string.IsNullOrEmpty(firstTarget))
+                {
+                    if (firstTarget == null) output.WriteLine($"Containers '{namesSearch}' are locked");
+                    return;
+                }
+
+                using var locked = CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), structure.GetCurrent(), containerPos);
+                if (!locked.Success)
+                {
+                    Log($"DeviceIsLocked (harvest): {containerPos}", LogLevel.Debug);
+                    return;
+                }
+
+                var plantListData = (List<PickupPlantData>)data;
+                for (int i = Math.Min(plantListData.Count, EmpyrionScripting.Configuration.Current.ProcessMaxBlocksPerCycle) - 1; i >= 0; i--)
+                {
+                    var plant = plantListData[i];
+                    plantListData.RemoveAt(i);
+
+                    var block = structure.GetCurrent().GetBlock(new VectorInt3(plant.X, plant.Y, plant.Z));
+                    block.Get(out var blockType, out _, out _, out _);
+                    if (blockType == 0)
+                    {
+                        var remainingCount = container.RemoveItems(plant.Id, 1);
+                        if(remainingCount == 0) block.Set(plant.Id);
+                    }
+
+                    options.Template(output, plant);
+                }
+
+                if (plantListData.Count == 0) root.GetPersistendData().TryRemove(cacheId, out _);
+                else                          root.GetPersistendData().AddOrUpdate(cacheId, plantListData, (n, l) => plantListData);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{replantplants}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        class PickupPlantData {
+            public int Id { get; set; }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public int Z { get; set; }
         }
 
         static void PlantsFunction(GardenerOperation op, TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
@@ -572,7 +648,7 @@ namespace EmpyrionScripting.CustomHelpers
                     if (!root.ConfigEcfAccess.HarvestBlockData.TryGetValue(block.Id, out var harvestInfo)) continue;
 
                     // Tote Pflanzen stehen lassen oder das 100 fache für das "Aufräumen" nehmen
-                    if (op == GardenerOperation.Pickup) amount *= 100;
+                    if (op == GardenerOperation.Pickup) amount *= 10;
                     else if (harvestInfo.Name.Contains("PlantDead"))
                     {
                         if (removeDeadPlants) amount *= 100;
@@ -620,6 +696,28 @@ namespace EmpyrionScripting.CustomHelpers
                         else
                         {
                             options.Template(output, harvestInfo);
+                        }
+
+                        if(op == GardenerOperation.Pickup)
+                        {
+                            var pickupData = new PickupPlantData
+                            {
+                                Id = opId,
+                                X  = block.Position.x,
+                                Y  = block.Position.y,
+                                Z  = block.Position.z,
+                            }; 
+
+                            var cacheId = $"{structure.E.Id}PickupPlants";
+                            root.GetPersistendData().AddOrUpdate(cacheId, new List<PickupPlantData> { pickupData }, (n, data) => { 
+                                var pickupListData = (List<PickupPlantData>)data;
+                                var found = pickupListData.FirstOrDefault(p => p.X == pickupData.X && p.Y == pickupData.Y && p.Z == pickupData.Z);
+
+                                if (found == null) pickupListData.Add(pickupData);
+                                else               found.Id = pickupData.Id;
+
+                                return data; 
+                            });
                         }
 
                         container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);

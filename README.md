@@ -506,6 +506,10 @@ Items habe folgende Basisdaten
   + Mit dem Befehl können Pflanzen abgebaut werden. Dazu ist ein "Gärtner" (NPC Crew) und Geld (als Bezahlung) im Kühlschrank notwendig. 
     Auf Wunsch können auch die toten Planzen entsorgt werden. Dies kostet jedoch den 100 fachen Preis
 
++ {{replantplants structure target}}
+  + Mit dem Befehl können die mit 'pickupplants' abgebauten Pflanzen wieder angebaut werden. 
+    Hinweis: Dies ist jedoch nur möglich wenn kein Wechsel des Playfields oder ein Logout stattgefunden hat.
+
 ## Lichter
 + {{lights structure names}}
   + Lichter der Struktur (structure) mit den Namen (names) auswählen
@@ -1733,6 +1737,10 @@ DateTime format:
 + {{pickupplants structure block's target gx gy gz \[removeDeadPlants\]}}
   + With this command, plants can be removed. This requires a "gardener" (NPC crew) and money (as payment) in the fridge. 
     If desired, the dead plants can also be disposed of. However, this costs 100 times the price
+
++ {{replantplants structure target}}
+  + With this command, the plants removed with 'pickupplants' can be replanted. 
+    Note: This is only possible if the playfield has not been changed or a logout has not taken place.
 
 ## Positions (structure and world)
 + {{structtoglobalpos structure (vector | x y z)}}
