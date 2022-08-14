@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsCompiler", "CsCompiler\Cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoslynCsCompiler", "RoslynCsCompiler\RoslynCsCompiler.csproj", "{09FBBFBB-1257-483A-BEB3-99939F249C27}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfExtractCustomIcons", "WpfExtractCustomIcons\WpfExtractCustomIcons.csproj", "{3E707A29-8AB4-42B7-8BF5-FC93A9C95CFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{84CECEFA-6313-4CC7-8785-ACBDD0C64CCA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{09FBBFBB-1257-483A-BEB3-99939F249C27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{09FBBFBB-1257-483A-BEB3-99939F249C27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E707A29-8AB4-42B7-8BF5-FC93A9C95CFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E707A29-8AB4-42B7-8BF5-FC93A9C95CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E707A29-8AB4-42B7-8BF5-FC93A9C95CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E707A29-8AB4-42B7-8BF5-FC93A9C95CFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

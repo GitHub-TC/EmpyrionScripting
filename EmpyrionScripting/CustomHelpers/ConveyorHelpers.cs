@@ -337,7 +337,7 @@ namespace EmpyrionScripting.CustomHelpers
                              SourceE    = S.E,
                              Source     = S.CustomName,
                          });
-                     currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName} -> add to retry list";
+                         currentMoveInfo.Error = $"{{move}} error lost #{count} of item {S.Id} in container {S.CustomName} -> add to retry list";
                      }
           
                   }, () => root.TimeLimitReached);
@@ -489,13 +489,32 @@ namespace EmpyrionScripting.CustomHelpers
                 : target.AddItems(S.Id, tryMoveCount);
         }
 
+        enum GardenerOperation
+        {
+            Harvest,
+            Pickup
+        }
+
         [HandlebarTag("harvest")]
         public static void HarvestHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
             if (arguments.Length != 6 && arguments.Length != 7) throw new HandlebarsException("{{harvest structure block's target gx gy gz [removeDeadPlants]}} helper must have six argument: (structure) (block's) (target) (gardenerX) (gardenerY) (gardenerZ) (removeDeadPlants) -> " + arguments.Length.ToString());
 
-            var root        = rootObject as IScriptRootData;
-            var structure   = arguments[0] as IStructureData;
+            PlantsFunction(GardenerOperation.Harvest, output, rootObject, options, (object)context, arguments);
+        }
+
+        [HandlebarTag("pickupplants")]
+        public static void ClearingPlantsHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 6 && arguments.Length != 7) throw new HandlebarsException("{{clearingplants structure block's target gx gy gz [removeDeadPlants]}} helper must have six argument: (structure) (block's) (target) (gardenerX) (gardenerY) (gardenerZ) (removeDeadPlants) -> " + arguments.Length.ToString());
+
+            PlantsFunction(GardenerOperation.Pickup, output, rootObject, options, (object)context, arguments);
+        }
+
+        static void PlantsFunction(GardenerOperation op, TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            var root      = rootObject as IScriptRootData;
+            var structure = arguments[0] as IStructureData;
 
             try
             {
@@ -553,7 +572,8 @@ namespace EmpyrionScripting.CustomHelpers
                     if (!root.ConfigEcfAccess.HarvestBlockData.TryGetValue(block.Id, out var harvestInfo)) continue;
 
                     // Tote Pflanzen stehen lassen oder das 100 fache für das "Aufräumen" nehmen
-                    if (harvestInfo.DropOnHarvestId == 0)
+                    if (op == GardenerOperation.Pickup) amount *= 100;
+                    else if (harvestInfo.Name.Contains("PlantDead"))
                     {
                         if (removeDeadPlants) amount *= 100;
                         else                  continue;
@@ -566,18 +586,44 @@ namespace EmpyrionScripting.CustomHelpers
                         return;
                     }
 
-                    var count = harvestInfo.DropOnHarvestId == 0 ? 0 : container.AddItems(harvestInfo.DropOnHarvestId, harvestInfo.DropOnHarvestCount);
-                    if (count > 0)
+                    if (harvestInfo.Name.Contains("PlantDead"))
                     {
-                        container.RemoveItems(harvestInfo.DropOnHarvestId, harvestInfo.DropOnHarvestCount - count);
-                        options.Inverse(output, context as object);
-                        return;
-                    }
-                    else
-                    {
-                        container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
-                        block.GetBlock().Set(harvestInfo.ChildOnHarvestId);
                         options.Template(output, harvestInfo);
+
+                        container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
+                        block.GetBlock().Set(0);
+
+                        continue;
+                    }
+
+                    var opId      = op == GardenerOperation.Harvest ? harvestInfo.DropOnHarvestId    : harvestInfo.PickupTargetId;
+                    var opCount   = op == GardenerOperation.Harvest ? harvestInfo.DropOnHarvestCount : 1;
+                    var opChildId = op == GardenerOperation.Harvest ? harvestInfo.ChildOnHarvestId   : 0;
+
+                    if (opId != 0 && opCount !=  0)
+                    {
+                        var count = container.AddItems(opId, opCount);
+                        if (count > 0)
+                        {
+                            root.GetPlayfieldScriptData().MoveLostItems.Enqueue(new ItemMoveInfo()
+                            {
+                                Id      = opId,
+                                Ammo    = 0,
+                                Decay   = 0,
+                                Count   = count,
+                                SourceE = structure.E,
+                                Source  = firstTarget,
+                            });
+                            output.WriteLine($"{op} lost #{count} of item {opId} -> add to retry list");
+                            options.Inverse(output, context as object);
+                        }
+                        else
+                        {
+                            options.Template(output, harvestInfo);
+                        }
+
+                        container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
+                        block.GetBlock().Set(opChildId);
                     }
                 }
 

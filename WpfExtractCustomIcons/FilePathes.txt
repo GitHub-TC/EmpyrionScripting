@@ -1,0 +1,6 @@
+﻿C:\steamcmd\empyrion\Content\Scenarios\Giga RE2022 V1+\SharedData\Content\Bundles\ItemIcons
+C:\steamcmd\empyrion\Content\Scenarios\Giga RE2022 V1+\Content\Configuration
+C:\steamcmd\empyrion\Saves\Games\GigaGamingNeue Era V1+\Mods\EmpyrionScripting\NameIdMapping.json
+
+C:\steamcmd\empyrion\DedicatedServer\EmpyrionAdminHelper\Items
+C:\steamcmd\empyrion\Content\Configuration

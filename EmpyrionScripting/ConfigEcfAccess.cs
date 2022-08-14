@@ -44,12 +44,12 @@ namespace EmpyrionScripting
 
             var timer = Stopwatch.StartNew();
             ReadBlockMappingFile(blockMappingFile, modApi);
-            Log($"ReadEcfFiles",            LogLevel.Message); ReadEcfFiles();
-            Log($"MergeEcfFiles",           LogLevel.Message); MergeEcfFiles();
-            Log($"BuildIdAndNameAccess",    LogLevel.Message); BuildIdAndNameAccess();
-            Log($"FlatEcfConfigData",       LogLevel.Message); FlatEcfConfigData();
-            Log($"CalcBlockRessources",     LogLevel.Message); CalcBlockRessources();
-            Log($"GetHarvestBlockData",     LogLevel.Message); GetHarvestBlockData();
+            Log($"ReadEcfFiles"              , LogLevel.Message); ReadEcfFiles();
+            Log($"MergeEcfFiles"             , LogLevel.Message); MergeEcfFiles();
+            Log($"BuildIdAndNameAccess"      , LogLevel.Message); BuildIdAndNameAccess();
+            Log($"FlatEcfConfigData"         , LogLevel.Message); FlatEcfConfigData();
+            Log($"CalcBlockRessources"       , LogLevel.Message); CalcBlockRessources();
+            Log($"GetHarvestBlockData"       , LogLevel.Message); GetHarvestBlockData();
             timer.Stop();
 
             if(EmpyrionScripting.Configuration?.Current?.LogLevel == LogLevel.Debug) { 
@@ -96,18 +96,21 @@ namespace EmpyrionScripting
                 var deadPlants = new Dictionary<int, IHarvestInfo>();
 
                 HarvestBlockData = FlatConfigBlockById
-                  .Where(B => B.Value?.Values?.TryGetValue("Class", out object className) == true && className.ToString() == "CropsGrown")
+                  .Where(B => B.Value?.Values?.TryGetValue("Class", out object className) == true && (className.ToString() == "CropsGrown" || className.ToString() == "PlantGrowing"))
                   .Select(B => {
                       var logLevel = LogLevel.Debug;
                       try
                       {
-                          var childDropOnHarvest = B.Value.Childs.FirstOrDefault(c => c.Key == "Child DropOnHarvest");
-                          var dropOnHarvestItem  = childDropOnHarvest.Value.Attr.FirstOrDefault(a => a.Name == "Item").Value?.ToString() ?? string.Empty;
-                          var dropOnHarvestCount = int.TryParse(childDropOnHarvest.Value.Attr.FirstOrDefault(a => a.Name == "Count")?.Value?.ToString(), out var count) ? count : 0;
+                          int pickupTargetId = 0;
+                          var withPickupTarget = B.Value.Values.TryGetValue("PickupTarget", out var pickupTarget) && BlockIdMapping.TryGetValue(pickupTarget.ToString(), out pickupTargetId);
 
-                          var childCropsGrown   = B.Value.Childs?.FirstOrDefault(c => c.Key == "Child CropsGrown").Value.Attr;
-                          var childOnHarvest    = childCropsGrown.FirstOrDefault(a => a.Name == "OnHarvest")?.Value?.ToString() ?? string.Empty;
-                          var childOnDead       = childCropsGrown.FirstOrDefault(a => a.Name == "OnDeath"  )?.Value?.ToString() ?? string.Empty;
+                          var childDropOnHarvest = B.Value.Childs.FirstOrDefault(c => c.Key == "Child DropOnHarvest");
+                          var dropOnHarvestItem  = childDropOnHarvest.Value?.Attr.FirstOrDefault(a => a.Name == "Item").Value?.ToString() ?? string.Empty;
+                          var dropOnHarvestCount = int.TryParse(childDropOnHarvest.Value?.Attr.FirstOrDefault(a => a.Name == "Count")?.Value?.ToString(), out var count) ? count : 0;
+
+                          var childCropsGrown   = B.Value.Childs?.FirstOrDefault(c => c.Key == "Child CropsGrown").Value?.Attr;
+                          var childOnHarvest    = childCropsGrown?.FirstOrDefault(a => a.Name == "OnHarvest")?.Value?.ToString() ?? string.Empty;
+                          var childOnDead       = childCropsGrown?.FirstOrDefault(a => a.Name == "OnDeath"  )?.Value?.ToString() ?? string.Empty;
                           if (BlockIdMapping.TryGetValue(childOnDead, out int childOnDeadId) && !deadPlants.ContainsKey(childOnDeadId)) deadPlants.Add(childOnDeadId, new HarvestInfo { Id = childOnDeadId });
 
                           logLevel = LogLevel.Error;
@@ -115,11 +118,13 @@ namespace EmpyrionScripting
                           return new HarvestInfo
                           {
                               Id                    = B.Key,
+                              Name                  = B.Value.Values.TryGetValue("Name", out var name) ? name.ToString() : null,
                               DropOnHarvestId       = BlockIdMapping.TryGetValue(dropOnHarvestItem, out int harvestItemId) ? harvestItemId : 0,
                               DropOnHarvestItem     = dropOnHarvestItem,
                               DropOnHarvestCount    = dropOnHarvestCount,
                               ChildOnHarvestId      = BlockIdMapping.TryGetValue(childOnHarvest, out int harvestItemChildId) ? harvestItemChildId : 0,
                               ChildOnHarvestItem    = childOnHarvest,
+                              PickupTargetId        = withPickupTarget ? pickupTargetId : 0,
                           };
                       }
                       catch (Exception error )
@@ -128,7 +133,7 @@ namespace EmpyrionScripting
                           return null;
                       }
                   })
-                  .Where(h => h != null && h.Id != 0 && h.DropOnHarvestCount != 0 && h.DropOnHarvestId != 0 && h.ChildOnHarvestId != 0)
+                  .Where(h => h != null && h.Id != 0 && ((h.DropOnHarvestCount != 0 && h.DropOnHarvestId != 0 && h.ChildOnHarvestId != 0) || h.PickupTargetId != 0))
                   .ToDictionary(h => h.Id, h => (IHarvestInfo)h);
 
                 deadPlants.ForEach(d => HarvestBlockData.Add(d.Key, d.Value));
@@ -205,10 +210,10 @@ namespace EmpyrionScripting
 
         public void ReadEcfFiles()
         {
-            Templates_Ecf       = ReadEcf("Templates.ecf",    B => { });
-            BlocksConfig_Ecf    = ReadEcf("BlocksConfig.ecf", B => { });
-            ItemsConfig_Ecf     = ReadEcf("ItemsConfig.ecf",  B => { });
-            TokenConfig_Ecf     = ReadEcf("TokenConfig.ecf",  B => { });
+            Templates_Ecf       = ReadEcf("Templates.ecf",    true,  B => { });
+            BlocksConfig_Ecf    = ReadEcf("BlocksConfig.ecf", true,  B => { });
+            ItemsConfig_Ecf     = ReadEcf("ItemsConfig.ecf",  true,  B => { });
+            TokenConfig_Ecf     = ReadEcf("TokenConfig.ecf",  false, B => { });
         }
 
         public void ReadBlockMappingFile(string blockMappingFile, IModApi modApi)
@@ -249,7 +254,7 @@ namespace EmpyrionScripting
             }
         }
 
-        private EcfFile ReadEcf(string filename, Action<EcfBlock> mapId)
+        private EcfFile ReadEcf(string filename, bool withIdMapping, Action<EcfBlock> mapId)
         {
             var result = new EcfFile();
             try
@@ -258,7 +263,7 @@ namespace EmpyrionScripting
                 Log($"EmpyrionScripting {fullFilename}: start", LogLevel.Message);
                 result = Parse.Deserialize(File.ReadAllLines(fullFilename));
                 result.Blocks.ForEach(mapId);
-                if (BlockIdMapping != null) Parse.ReplaceWithMappedIds(result, BlockIdMapping);
+                if (withIdMapping && BlockIdMapping != null) Parse.ReplaceWithMappedIds(result, BlockIdMapping);
                 Log($"EmpyrionScripting {fullFilename}: #{result.Blocks.Count}", LogLevel.Message);
             }
             catch (Exception error) { Log($"EmpyrionScripting {filename}: {error}", LogLevel.Error); }

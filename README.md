@@ -499,6 +499,10 @@ Items habe folgende Basisdaten
   + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
 
 + {{harvest structure block's target gx gy gz \[removeDeadPlants\]}}
+  + Mit dem Befehl können Pflanzen geernet werden. Dazu ist ein "Gärtner" (NPC Crew) und Geld (als Bezahlung) im Kühlschrank notwendig. 
+    Auf Wunsch können auch die toten Planzen entsorgt werden. Dies kostet jedoch den 100 fachen Preis
+
++ {{pickupplants structure block's target gx gy gz \[removeDeadPlants\]}}
   + Mit dem Befehl können Pflanzen abgebaut werden. Dazu ist ein "Gärtner" (NPC Crew) und Geld (als Bezahlung) im Kühlschrank notwendig. 
     Auf Wunsch können auch die toten Planzen entsorgt werden. Dies kostet jedoch den 100 fachen Preis
 
@@ -1724,6 +1728,10 @@ DateTime format:
     
 + {{harvest structure block's target gx gy gz \[removeDeadPlants\]}}
   + The command can be used to mine plants. This requires a "gardener" (NPC crew) and money (as payment) in the refrigerator. 
+    If desired, the dead plants can also be disposed of. However, this costs 100 times the price
+
++ {{pickupplants structure block's target gx gy gz \[removeDeadPlants\]}}
+  + With this command, plants can be removed. This requires a "gardener" (NPC crew) and money (as payment) in the fridge. 
     If desired, the dead plants can also be disposed of. However, this costs 100 times the price
 
 ## Positions (structure and world)

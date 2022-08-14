@@ -1,0 +1,20 @@
+﻿<Window x:Class="WpfExtractCustomIcons.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfExtractCustomIcons"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Margin="0,0,0,278">
+        <Label Content="Icon folder" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="IconFolder" HorizontalAlignment="Left" Margin="96,14,0,0" TextWrapping="Wrap" Text="C:\steamcmd\empyrion\Content\Scenarios\Giga RE2022 V1+\SharedData\Content\Bundles\ItemIcons" VerticalAlignment="Top" Width="684"/>
+        <Label Content="ECF folder" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="ECFFolder" HorizontalAlignment="Left" Margin="96,46,0,0" TextWrapping="Wrap" Text="C:\steamcmd\empyrion\Content\Scenarios\Giga RE2022 V1+\Content\Configuration" VerticalAlignment="Top" Width="684"/>
+        <Label Content="IdMappingFile" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="IdMappingFilename" HorizontalAlignment="Left" Margin="96,86,0,0" TextWrapping="Wrap" Text="C:\steamcmd\empyrion\Saves\Games\GigaGamingNeue Era V1+\Mods\EmpyrionScripting\NameIdMapping.json" VerticalAlignment="Top" Width="684"/>
+        <Button Content="Extract to" HorizontalAlignment="Left" Margin="15,115,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        <TextBox x:Name="ExtractToFolder" HorizontalAlignment="Left" Margin="96,116,0,0" TextWrapping="Wrap" Text="T:\TEMP\Icons" VerticalAlignment="Top" Width="684"/>
+        <TextBlock x:Name="Logging" HorizontalAlignment="Left" Margin="10,167,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="128" Width="770"/>
+    </Grid>
+</Window>
