@@ -9,7 +9,6 @@ using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -36,6 +35,13 @@ namespace EmpyrionScripting
         private const string CsKeyword = "C#:";
         ModGameAPI LegacyApi;
 
+        public class DediLegacyModBase : EmpyrionModBase
+        {
+            public override void Initialize(ModGameAPI dediAPI){}
+        }
+
+        public DediLegacyModBase DediLegacyMod { get; set; }
+
         public static EmpyrionScripting EmpyrionScriptingInstance { get; set; }
         public static ConfigEcfAccess ConfigEcfAccess { get; set; }
         public static ItemInfos ItemInfos { get; set; }
@@ -43,6 +49,9 @@ namespace EmpyrionScripting
         public static ConfigurationManager<Configuration> Configuration { get; set; } = new ConfigurationManager<Configuration>() { Current = new Configuration() };
         public static Localization Localization { get; set; }
         public static IModApi ModApi { get; set; }
+        public bool WithinCsCompiler { get; set; }
+        public ModGameAPI ModGameDediAPI { get; set; }
+
         public SaveGamesScripts SaveGamesScripts { get; set; }
         public string L { get; private set; }
         public DateTime LastAlive { get; private set; }
@@ -428,12 +437,13 @@ namespace EmpyrionScripting
             StopScriptsEvent += (S, E) => exec.Set();
         }
 
-        // Called once early when the game starts (but not again if player quits from game to title menu and starts (or resumes) a game again
-        // Hint: treat this like a constructor for your mod
         public void Game_Start(ModGameAPI legacyAPI)
         {
             LegacyApi = legacyAPI;
             LegacyApi?.Console_Write("EmpyrionScripting Mod started: Game_Start");
+
+            DediLegacyMod = new DediLegacyModBase();
+            DediLegacyMod?.Game_Start(legacyAPI);
         }
 
         public static string ErrorFilter(Exception error) => Configuration?.Current.LogLevel == EmpyrionNetAPIDefinitions.LogLevel.Debug ? error.ToString() : error.Message;
@@ -910,8 +920,6 @@ namespace EmpyrionScripting
             return generator(data);
         }
 
-        public bool WithinCsCompiler { get; set; }
-
         public string ExecuteCsScript<T>(PlayfieldScriptData playfieldData, T data, string script) where T : IScriptRootData
         {
             if (playfieldData.LcdCompileCache.TryGetValue(script, out Func<object, string> generator)) return generator(data);
@@ -929,6 +937,8 @@ namespace EmpyrionScripting
         {
             ModApi.Log("Mod exited:Game_Exit");
 
+            DediLegacyMod?.Game_Exit();
+
             try
             {
                 ModApi.Application.GameEntered          -= Application_GameEntered;
@@ -945,6 +955,8 @@ namespace EmpyrionScripting
 
         public void Game_Update()
         {
+            DediLegacyMod?.Game_Update();
+
             if (PlayfieldData == null) return;
 
             try
@@ -973,6 +985,7 @@ namespace EmpyrionScripting
         public void Game_Event(CmdId eventId, ushort seqNr, object data)
         {
             Log($"EmpyrionScripting Mod: Game_Event {eventId} {seqNr} {data}", LogLevel.Debug);
+            DediLegacyMod?.Game_Event(eventId, seqNr, data);
         }
 
         public void Dispose()

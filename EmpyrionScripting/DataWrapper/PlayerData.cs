@@ -85,13 +85,21 @@ namespace EmpyrionScripting.DataWrapper
 
         public int HomeBaseId => SafeGet("HomeBaseId", p, () => p.HomeBaseId);
 
-        public bool Teleport(Vector3 pos) => SafeGet("Teleport", p, () => EmpyrionScripting.ModApi.Network.SendToDedicatedServer("EmpyrionScripting", SerializeHelper.ObjectToByteArray(
-                new TeleportPlayerData { 
+        public bool Teleport(Vector3 pos) 
+        {
+            var data = SerializeHelper.ObjectToByteArray(
+                new TeleportPlayerData
+                {
                     PlayerId = p.Id,
-                    Position = pos,
-                }),
-                currentPlayfield.Name) || p.Teleport(pos)
-        );
+                    X = pos.x,
+                    Y = pos.y,
+                    Z = pos.z,
+                });
+
+            EmpyrionScripting.Log($"Teleport: {p.Id} -> {pos} with {data} #{data.Length}", LogLevel.Debug);
+            return SafeGet("Teleport", p, () => EmpyrionScripting.ModApi.Network.SendToDedicatedServer("EmpyrionScripting", data, currentPlayfield.Name));
+        }
+
         public bool Teleport(string playfieldName, Vector3 pos, Vector3 rot) => SafeGet("Teleport", p, () => p.Teleport(playfieldName, pos, rot));
 
     }
@@ -100,8 +108,11 @@ namespace EmpyrionScripting.DataWrapper
     public class TeleportPlayerData
     {
         public int PlayerId { get; set; }
-        public Vector3 Position { get; set; }
-        public override string ToString() => $"PlayerId:{PlayerId} Position:{Position}";
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+
+        public override string ToString() => $"PlayerId:{PlayerId} Position: x:{X} y:{Y} z:{Z}";
     }
 
     public class PlayerCommandsDediHelper{
@@ -115,6 +126,7 @@ namespace EmpyrionScripting.DataWrapper
             try
             {
                 if (!ModApi.Network.RegisterReceiverForPlayfieldPackets(CommandCallback)) Log("RegisterReceiverForPlayfieldPackets failed", LogLevel.Error);
+                else                                                                      Log($"PlayerCommandsDediHelper: RegisterReceiverForPlayfieldPackets", LogLevel.Debug);
             }
             catch (Exception error)
             {
@@ -124,17 +136,17 @@ namespace EmpyrionScripting.DataWrapper
 
         private void CommandCallback(string sender, string playfieldName, byte[] data)
         {
-            Log($"EmpyrionScripting:CommandCallback from {playfieldName} -> {sender}", LogLevel.Message);
-
             if (sender != "EmpyrionScripting") return;
 
             try
             {
                 var teleportData = SerializeHelper.ByteArrayToObject<TeleportPlayerData>(data);
-                Log($"EmpyrionScripting:Teleport call from {playfieldName} -> {teleportData}", LogLevel.Message);
+                Log($"EmpyrionScripting:Teleport call from {playfieldName} -> {teleportData}", LogLevel.Debug);
 
-                //var playerData = ModApi.Application.GetPlayerDataFor(teleportData.PlayerId);
-                //playerData.Value.t
+                EmpyrionScripting.EmpyrionScriptingInstance.DediLegacyMod
+                    .Request_Entity_Teleport(new IdPositionRotation() { id = teleportData.PlayerId, pos = new PVector3(teleportData.X, teleportData.Y, teleportData.Z), rot = new PVector3() })
+                    .GetAwaiter()
+                    .GetResult();
             }
             catch (Exception error)
             {

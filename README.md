@@ -762,6 +762,12 @@ Items habe folgende Basisdaten
 + {{globaltostructpos structure (vector | x y z)}}
   + Liefert die Position (vector | x y z) der Weltkoordinaten aus sicht der Struktur
 
+
+## Teleport
++ {{teleportplayer player (device | toPos | x y z)}}
+ + Teleportiert den Spieler zu dem Device/Block der Struktur
+ + 'toPos' und 'x y z' sind nur in Adminscripten erlaubt
+
 ## JSON
 + {{fromjson string}}
   + liefert eine aus dem JSON 'string' resultierende Datenstruktur
@@ -1748,6 +1754,11 @@ DateTime format:
 
 + {{globaltostructpos structure (vector | x y z)}}
   + Returns the position (vector | x y z) of the world coordinates from the point of view of the structure
+
+## Teleport
++ {{teleportplayer player (device | toPos | x y z)}}
+ + Teleports the player to the device/block of the structure.
+ + 'toPos' and 'x y z' are only allowed in elevated scripts
 
 ## JSON
 + {{fromjson string}}

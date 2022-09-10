@@ -138,21 +138,28 @@ namespace EmpyrionScripting.CustomHelpers
             if (arguments.Length != 2 &&
                 arguments.Length != 3 &&
                 arguments.Length != 4 &&
-                arguments.Length != 5) throw new HandlebarsException("{{teleportplayer player (toPos| x y z) [playfieldName]}} helper must have the argument: (player) (toPos | x y z) [playfieldName]");
+                arguments.Length != 5) throw new HandlebarsException("{{teleportplayer player (device | toPos | x y z) [playfieldName]}} helper must have the argument: (player) (toPos | x y z) [playfieldName]");
 
             var root = rootObject as IScriptRootData;
             try
             {
-                if (!root.IsElevatedScript) { output.Write("teleportplayer only allowed in elevated scripts"); return; }
                 if (!(arguments[0] is IPlayerData player)) { output.Write("teleportplayer 'player' is missing"); return; }
+
+                var toBlock = arguments.Get(1) as IBlockData;
+                if (toBlock == null && !root.IsElevatedScript) { output.Write("teleportplayer to pos only allowed in elevated scripts"); return; }
 
                 var toPos         = arguments.Get(1) as Vector3?;
                 var playfieldName = arguments.Get(toPos.HasValue ? 2 : 4)?.ToString();
+                if (!string.IsNullOrEmpty(playfieldName) && !root.IsElevatedScript) { output.Write("teleportplayer to playfield only allowed in elevated scripts"); return; }
 
-                if (!toPos.HasValue) {
-                    int.TryParse(arguments.Get(1)?.ToString(), out var x);
-                    int.TryParse(arguments.Get(2)?.ToString(), out var y);
-                    int.TryParse(arguments.Get(3)?.ToString(), out var z);
+                if(toBlock != null)
+                {
+                    toPos = root.E.S.StructToGlobalPos(toBlock.Position);
+                }
+                else if (!toPos.HasValue) {
+                    float.TryParse(arguments.Get(1)?.ToString(), out var x);
+                    float.TryParse(arguments.Get(2)?.ToString(), out var y);
+                    float.TryParse(arguments.Get(3)?.ToString(), out var z);
                     toPos = new Vector3(x, y, z);
                 }
 
