@@ -97,7 +97,7 @@ namespace EmpyrionScripting.DataWrapper
                 });
 
             EmpyrionScripting.Log($"Teleport: {p.Id} -> {pos} with {data} #{data.Length}", LogLevel.Debug);
-            return SafeGet("Teleport", p, () => EmpyrionScripting.ModApi.Network.SendToDedicatedServer("EmpyrionScripting", data, currentPlayfield.Name));
+            return SafeGet("Teleport", p, () => EmpyrionScripting.ModApi.Network.SendToDedicatedServer("EmpyrionScripting", data, currentPlayfield.Name)) || p.Teleport(pos);
         }
 
         public bool Teleport(string playfieldName, Vector3 pos, Vector3 rot) => SafeGet("Teleport", p, () => p.Teleport(playfieldName, pos, rot));
