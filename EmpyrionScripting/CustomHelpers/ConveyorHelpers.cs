@@ -865,6 +865,9 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
+                // Eigene Struktur nicht "abbauen"
+                if (E.Id == root.E.Id) return;
+
                 var list = arguments.Get(3)?.ToString()
                     .Split(new[] { ',', ';' })
                     .Select(T => T.Trim())
@@ -896,6 +899,9 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
+                // Eigene Struktur nicht "abbauen"
+                if (E.Id == root.E.Id) return;
+
                 ConvertBlocks(output, root, options, context as object, arguments, 
                     (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}", null,
                     ExtractBlockToRecipe);
@@ -967,7 +973,7 @@ namespace EmpyrionScripting.CustomHelpers
                 return;
             }
 
-            EmpyrionScripting.Log($"Ressource to first conatiner: {firstTarget}", LogLevel.Message);
+            EmpyrionScripting.Log($"{root.E.Name}/{root.E.Id} Ressource to first conatiner: {firstTarget}", LogLevel.Message);
 
             var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
                 Started     = DateTime.Now,
@@ -1018,25 +1024,25 @@ namespace EmpyrionScripting.CustomHelpers
 
                     if (over > 0 && !allToLostItemRecover)
                     {
-                        EmpyrionScripting.Log($"Container full: {R.Key} #{over} -> {currentContainer}", LogLevel.Message);
+                        EmpyrionScripting.Log($"{root.E.Name}/{root.E.Id} Container full: {R.Key} #{over} -> {currentContainer}", LogLevel.Message);
 
                         currentContainer = GetNextContainer(root, uniqueNames, ref target, ref targetPos);
                         if (string.IsNullOrEmpty(currentContainer))
                         {
-                            if(currentContainer == null) EmpyrionScripting.Log("All Container full or blocked", LogLevel.Message);
+                            if(currentContainer == null) EmpyrionScripting.Log($"{root.E.Name}/{root.E.Id} All Container full or blocked", LogLevel.Message);
                             allToLostItemRecover = true;
                         }
                         else
                         {
                             var nextTry = over;
                             over = target.AddItems(R.Key, over);
-                            EmpyrionScripting.Log($"Ressource to NextContainer: {R.Key} #{nextTry} -> #{over} -> {currentContainer}", LogLevel.Message);
+                            EmpyrionScripting.Log($"{root.E.Name}/{root.E.Id} Ressource to NextContainer: {R.Key} #{nextTry} -> #{over} -> {currentContainer}", LogLevel.Message);
                         }
                     }
 
                     if (over > 0)
                     {
-                        EmpyrionScripting.Log($"Ressource to LostItemsRecover: {R.Key} #{over} -> {firstTarget}", LogLevel.Message);
+                        EmpyrionScripting.Log($"{root.E.Name}/{root.E.Id} Ressource to LostItemsRecover: {R.Key} #{over} -> {firstTarget}", LogLevel.Message);
 
                         root.GetPlayfieldScriptData().MoveLostItems.Enqueue(new ItemMoveInfo()
                         {
