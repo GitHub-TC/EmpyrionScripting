@@ -381,18 +381,19 @@ Welt
 ## ERZE und BARREN IDENTIFIKATIONS NUMMER:
 @root.Ids.Ore
 
-+ Item Id: 4296, Name: Magnesium Erz
-+ Item Id: 4297, Name: Eisen Erz
-+ Item Id: 4298, Name: Kobalt Erz
-+ Item Id: 4299, Name: Silizium Erz
-+ Item Id: 4300, Name: Neodymium Erz
-+ Item Id: 4301, Name: Kupfer Erz
++ Item Id: 4296, Name: Magnesiumerz
++ Item Id: 4297, Name: Eisenerz
++ Item Id: 4298, Name: Kobalterz
++ Item Id: 4299, Name: Siliziumerz
++ Item Id: 4300, Name: Neodymiumerz
++ Item Id: 4301, Name: Kupfererz
 + Item Id: 4302, Name: Promethium
-+ Item Id: 4317, Name: Erestrum Erz
-+ Item Id: 4318, Name: Zascosium Erz
-+ Item Id: 4332, Name: Sathium Erz
-+ Item Id: 4341, Name: Pentaxid Erz
-+ Item Id: 4345, Name: Gold Erz
++ Item Id: 4317, Name: Erestrumerz
++ Item Id: 4318, Name: Zascosiumerz
++ Item Id: 4332, Name: Sathiumerz
++ Item Id: 4341, Name: Pentaxiderz
++ Item Id: 4345, Name: Golderz
++ Item Id: 4359, Name: Titanerz
 
 ---
 @root.Ids.Ingots
@@ -411,6 +412,7 @@ Welt
 + Item Id: 4333, Name: Sathium Barren
 + Item Id: 4342, Name: Pentaxid Kristalle
 + Item Id: 4346, Name: Gold Barren
++ Item Id: 4360, Name: Titanstäbe
 
 ---
 # Technical
@@ -1392,6 +1394,7 @@ Welt
 + Item Id: 4332, Name: SathiumOre
 + Item Id: 4341, Name: PentaxidOre
 + Item Id: 4345, Name: GoldOre
++ Item Id: 4359, Name: TitaniumOre
 
 ---
 @root.Ids.Ingot
@@ -1410,6 +1413,7 @@ Welt
 + Item Id: 4333, Name: SathiumIngot
 + Item Id: 4342, Name: PentaxidCrystal
 + Item Id: 4346, Name: GoldIngot
++ Item Id: 4360, Name: TitaniumRods
 
 ---
 # Technical

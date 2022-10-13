@@ -1,7 +1,6 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.Interface;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -32,8 +31,8 @@ namespace EmpyrionScripting.DataWrapper
 
         public string[] DeviceNames => Enum.GetNames(typeof(DeviceTypeName));
 
-        public int Id => GetCurrent().Id;
-        public virtual string Name => GetCurrent().Name;
+        public int Id => GetCurrent()?.Id ?? 0;
+        public virtual string Name => GetCurrent()?.Name;
         public EntityType EntityType
         {
             get {
@@ -54,17 +53,17 @@ namespace EmpyrionScripting.DataWrapper
                 }
             }
         }
-        public bool IsLocal => GetCurrent().IsLocal;
-        public bool IsPoi => GetCurrent().IsPoi;
-        public bool IsProxy => GetCurrent().IsProxy;
+        public bool IsLocal => GetCurrent()?.IsLocal ?? false;
+        public bool IsPoi => GetCurrent()?.IsPoi ?? false;
+        public bool IsProxy => GetCurrent()?.IsProxy ?? true;
 
-        public Vector3 Pos => GetCurrent().Position;
-        public Vector3 Rot => GetCurrent().Rotation.eulerAngles;
-        public Vector3 Forward => GetCurrent().Forward;
+        public Vector3 Pos => GetCurrent()?.Position ?? Vector3.zero;
+        public Vector3 Rot => GetCurrent()?.Rotation.eulerAngles ?? Vector3.zero;
+        public Vector3 Forward => GetCurrent()?.Forward ?? Vector3.zero;
         public float Distance { get; set; }
-        public FactionData Faction => GetCurrent().Faction;
+        public FactionData Faction => GetCurrent()?.Faction ?? new FactionData();
 
-        public int BelongsTo => GetCurrent().BelongsTo;
+        public int BelongsTo => GetCurrent()?.BelongsTo ?? 0;
         public int DockedTo { get { try { return GetCurrent().DockedTo; } catch { return 0; } } }
 
         public bool IsElevated { 

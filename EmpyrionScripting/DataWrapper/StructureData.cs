@@ -15,21 +15,21 @@ namespace EmpyrionScripting.DataWrapper
 
         public StructureData()
         {
-            _n = new Lazy<string[]>(() => GetCurrent().GetAllCustomDeviceNames().OrderBy(N => N).ToArray());
+            _n = new Lazy<string[]>(() => GetCurrent()?.GetAllCustomDeviceNames().OrderBy(N => N).ToArray());
             _is = new Lazy<Tuple<ItemsData[], ConcurrentDictionary<string, IContainerSource>>>(() => CollectAllItems(GetCurrent()));
-            _d = new Lazy<IEntityData[]>(() => GetCurrent()
+            _d = new Lazy<IEntityData[]>(() => GetCurrent()?
                 .GetDockedVessels()
                 .Select(S => E.GetCurrentPlayfield().Entities.FirstOrDefault(E => E.Value.Structure?.Id == S.Id))
                 .Where(E => E.Value != null)
                 .Select(DockedE => new EntityData(E.GetCurrentPlayfield(), DockedE.Value)).ToArray());
-            _s = new Lazy<WeakReference<IStructure>>(() => new WeakReference<IStructure>(E.GetCurrent().Structure));
-            _pilot = new Lazy<IPlayerData>(() => new PlayerData(E.GetCurrentPlayfield(), GetCurrent().Pilot));
-            _passengers = new Lazy<IPlayerData[]>(() => GetCurrent().GetPassengers()?.Select(P => new PlayerData(E.GetCurrentPlayfield(), P)).ToArray());
-            _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().FuelTank, StructureTankType.Fuel));
-            _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().OxygenTank, StructureTankType.Oxygen));
-            _PentaxidTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent().PentaxidTank, StructureTankType.Pentaxid));
-            _ControlPanelSignals = new Lazy<ISignalData[]>(() => GetCurrent().GetControlPanelSignals().Select(S => new SignalData(this, S)).ToArray());
-            _BlockSignals = new Lazy<ISignalData[]>(() => GetCurrent().GetBlockSignals().Select(S => new SignalData(this, S)).ToArray());
+            _s = new Lazy<WeakReference<IStructure>>(() => new WeakReference<IStructure>(E.GetCurrent()?.Structure));
+            _pilot = new Lazy<IPlayerData>(() => new PlayerData(E.GetCurrentPlayfield(), GetCurrent()?.Pilot));
+            _passengers = new Lazy<IPlayerData[]>(() => GetCurrent()?.GetPassengers()?.Select(P => new PlayerData(E.GetCurrentPlayfield(), P)).ToArray());
+            _FuelTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent()?.FuelTank, StructureTankType.Fuel));
+            _OxygenTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent()?.OxygenTank, StructureTankType.Oxygen));
+            _PentaxidTank = new Lazy<StructureTank>(() => new StructureTank(GetCurrent()?.PentaxidTank, StructureTankType.Pentaxid));
+            _ControlPanelSignals = new Lazy<ISignalData[]>(() => GetCurrent()?.GetControlPanelSignals().Select(S => new SignalData(this, S)).ToArray());
+            _BlockSignals = new Lazy<ISignalData[]>(() => GetCurrent()?.GetBlockSignals().Select(S => new SignalData(this, S)).ToArray());
         }
 
         public StructureData(IEntityData entity) : this()
@@ -39,31 +39,31 @@ namespace EmpyrionScripting.DataWrapper
 
         public virtual IEntityData E { get; protected set; }
 
-        public bool IsPowerd => GetCurrent().IsPowered;
-        public float DamageLevel => GetCurrent().DamageLevel;
-        public bool IsOfflineProtectable => GetCurrent().IsOfflineProtectable;
-        public bool IsReady => GetCurrent().IsReady;
+        public bool IsPowerd => GetCurrent()?.IsPowered ?? false;
+        public float DamageLevel => GetCurrent()?.DamageLevel ?? 0;
+        public bool IsOfflineProtectable => GetCurrent()?.IsOfflineProtectable ?? false;
+        public bool IsReady => GetCurrent()?.IsReady ?? false;
 
-        public int BlockCount => GetCurrent().BlockCount;
-        public int TriangleCount => GetCurrent().TriangleCount;
-        public int LightCount => GetCurrent().LightCount;
+        public int BlockCount => GetCurrent()?.BlockCount ?? 0;
+        public int TriangleCount => GetCurrent()?.TriangleCount ?? 0;
+        public int LightCount => GetCurrent()?.LightCount ?? 0;
 
-        public float Fuel => GetCurrent().Fuel;
-        public int PowerConsumption => GetCurrent().PowerConsumption;
-        public int PowerOutCapacity => GetCurrent().PowerOutCapacity;
+        public float Fuel => GetCurrent()?.Fuel ?? 0;
+        public int PowerConsumption => GetCurrent()?.PowerConsumption ?? 0;
+        public int PowerOutCapacity => GetCurrent()?.PowerOutCapacity ?? 0;
 
-        public int SizeClass => GetCurrent().SizeClass;
+        public int SizeClass => GetCurrent()?.SizeClass ?? 0;
 
-        public bool IsShieldActive => GetCurrent().IsShieldActive;
-        public int ShieldLevel => GetCurrent().ShieldLevel;
+        public bool IsShieldActive => GetCurrent()?.IsShieldActive ?? false;
+        public int ShieldLevel => GetCurrent()?.ShieldLevel ?? 0;
 
-        public float TotalMass => GetCurrent().TotalMass;
-        public bool HasLandClaimDevice => GetCurrent().HasLandClaimDevice;
-        public ulong LastVisitedTicks => GetCurrent().LastVisitedTicks;
-        public string PlayerCreatedSteamId => GetCurrent().PlayerCreatedSteamId;
+        public float TotalMass => GetCurrent()?.TotalMass ?? 0;
+        public bool HasLandClaimDevice => GetCurrent()?.HasLandClaimDevice ?? false;
+        public ulong LastVisitedTicks => GetCurrent()?.LastVisitedTicks ?? 0;
+        public string PlayerCreatedSteamId => GetCurrent()?.PlayerCreatedSteamId;
 
-        public VectorInt3 MinPos => GetCurrent().MinPos;
-        public VectorInt3 MaxPos => GetCurrent().MaxPos;
+        public VectorInt3 MinPos => GetCurrent()?.MinPos ?? VectorInt3.Undef;
+        public VectorInt3 MaxPos => GetCurrent()?.MaxPos ?? VectorInt3.Undef;
 
         public string[] AllCustomDeviceNames => _n.Value;
         readonly Lazy<string[]> _n;
@@ -75,7 +75,7 @@ namespace EmpyrionScripting.DataWrapper
 
         public IPlayerData[] Players => _p == null ? _p = E.GetCurrentPlayfield().Players.Values
             .Where(P => E.IsElevated || (E.Faction.Group == FactionGroup.Player && P.Id == E.Faction.Id) || P.Faction.Id == E.Faction.Id)
-            .Where(P => P.CurrentStructure?.Id == GetCurrent().Id)
+            .Where(P => P.CurrentStructure?.Id == GetCurrent()?.Id)
             .Select(P => new PlayerData(E.GetCurrentPlayfield(), P)).ToArray() : _p;
         IPlayerData[] _p;
 
@@ -90,7 +90,7 @@ namespace EmpyrionScripting.DataWrapper
 
             Parallel.ForEach(AllCustomDeviceNames, N =>
             {
-                GetCurrent().GetDevicePositions(N)
+                GetCurrent()?.GetDevicePositions(N)
                     .ForEach(P =>
                     {
                         var container = structure.GetDevice<IContainer>(P);
