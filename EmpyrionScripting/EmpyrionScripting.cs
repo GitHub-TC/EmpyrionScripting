@@ -178,6 +178,8 @@ namespace EmpyrionScripting
 
         private void InitGameDependedData(bool forceInit)
         {
+            ModApi.Log($"InitGameDependedData: forceInit:{forceInit}");
+
             if (forceInit || !AppFoldersLogged)
             {
                 AppFoldersLogged = true;
@@ -206,7 +208,6 @@ namespace EmpyrionScripting
             : Configuration.Current.OverrideScenarioPath;
 
         public PlayerCommandsDediHelper PlayerCommandsDediHelper { get; private set; }
-
         private static void InitEcfConfigData()
         {
             ConfigEcfAccess = new ConfigEcfAccess();
@@ -233,12 +234,16 @@ namespace EmpyrionScripting
         private void LoadConfiguration()
         {
             ConfigurationManager<Configuration>.Log = ModApi.Log;
+            if (!string.IsNullOrEmpty(Configuration.ConfigFilename)) return;
+
             Configuration = new ConfigurationManager<Configuration>()
             {
                 ConfigFilename = Path.Combine(SaveGameModPath, "Configuration.json")
             };
             Configuration.ConfigFileLoaded += (s, e) =>
             {
+                ModApi.Log($"ConfigurationChanged/Loaded: {Configuration.ConfigFilename}");
+
                 SqlDbAccess.SaveGamePath    = Path.Combine(SaveGameModPath, "..");
                 SqlDbAccess.ElevatedQueries = Configuration.Current.DBQueries.Elevated;
                 SqlDbAccess.PlayerQueries   = Configuration.Current.DBQueries.Player;
