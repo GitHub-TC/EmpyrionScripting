@@ -641,7 +641,7 @@ namespace EmpyrionScripting.CustomHelpers
                     return;
                 }
 
-                foreach (var block in blocks)
+                foreach (var block in blocks.Where(b => !b.HasParentBlock))
                 {
                     var amount = EmpyrionScripting.Configuration.Current.GardenerSalary.Amount;
 
@@ -721,10 +721,9 @@ namespace EmpyrionScripting.CustomHelpers
                         }
 
                         container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
-
-                        Log($"{structure.E.Name}/{structure.E.Id} PickupPlants:[{op}] x:{block.Position.x} y:{block.Position.y} z:{block.Position.z} ID:{block.Id}{(block.IsParentBlock ? "(parent)" : "")} -> {opChildId}", LogLevel.Message);
-
                         block.GetBlock().Set(opChildId);
+
+                        Log($"{structure.E.Name}/{structure.E.Id} PickupPlants:[{op}] x:{block.Position.x} y:{block.Position.y} z:{block.Position.z} ID:{block.Id}{(block.HasParentBlock ? "(parent)" : "")} -> {opChildId}", LogLevel.Message);
                     }
                 }
 
@@ -1183,7 +1182,7 @@ namespace EmpyrionScripting.CustomHelpers
                             processBlockData.CheckedBlocks++;
 
                             var block = S.GetBlock(processBlockData.X, processBlockData.Y, processBlockData.Z);
-                            if (block != null && (block.ParentBlock == null || block.ParentBlock == block))
+                            if (block != null)
                             {
                                 block.Get(out var blockType, out _, out _, out _);
 
