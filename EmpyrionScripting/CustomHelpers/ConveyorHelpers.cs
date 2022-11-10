@@ -721,6 +721,9 @@ namespace EmpyrionScripting.CustomHelpers
                         }
 
                         container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
+
+                        Log($"{structure.E.Name}/{structure.E.Id} PickupPlants:[{op}] x:{block.Position.x} y:{block.Position.y} z:{block.Position.z} ID:{block.Id}{(block.IsParentBlock ? "(parent)" : "")} -> {opChildId}", LogLevel.Message);
+
                         block.GetBlock().Set(opChildId);
                     }
                 }
@@ -1180,7 +1183,7 @@ namespace EmpyrionScripting.CustomHelpers
                             processBlockData.CheckedBlocks++;
 
                             var block = S.GetBlock(processBlockData.X, processBlockData.Y, processBlockData.Z);
-                            if (block != null)
+                            if (block != null && (block.ParentBlock == null || block.ParentBlock == block))
                             {
                                 block.Get(out var blockType, out _, out _, out _);
 

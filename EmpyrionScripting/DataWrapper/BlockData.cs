@@ -7,6 +7,7 @@ namespace EmpyrionScripting.DataWrapper
     public class BlockData : IBlockData
     {
         private IBlock      _block;
+
         private IDevice     _device;
         private IEntityData _entity;
         private IStructure  _structure;
@@ -35,12 +36,13 @@ namespace EmpyrionScripting.DataWrapper
 
         public BlockData(IEntityData entity, VectorInt3 pos)
         {
-            _entity     = entity;
-            _structure  = _entity.S?.GetCurrent();
-            _block      = _structure?.GetBlock(pos);
-            _block      = _block.ParentBlock ?? _block;
-            _device     = _structure?.GetDevice<IDevice>(pos);
-            Position    = pos;
+            _entity       = entity;
+            _structure    = _entity.S?.GetCurrent();
+            _block        = _structure?.GetBlock(pos);
+            IsParentBlock = _block.ParentBlock == null || _block.ParentBlock == _block;
+            _block        = _block.ParentBlock ?? _block;
+            _device       = _structure?.GetDevice<IDevice>(pos);
+            Position      = pos;
 
             if(_device is IContainer c) Device = new ContainerData(c);
         }
@@ -51,6 +53,7 @@ namespace EmpyrionScripting.DataWrapper
         public IDevice GetDevice() => _device;
 
         public object Device { get; }
+        public bool IsParentBlock { get; }
 
         private BlockData GetData()
         {
