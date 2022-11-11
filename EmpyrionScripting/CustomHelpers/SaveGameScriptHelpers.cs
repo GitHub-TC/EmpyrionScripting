@@ -141,7 +141,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                block.GetBlock().SetDamage(damage);
+                block.GetBlock().ParentBlock.SetDamage(damage);
             }
             catch (Exception error)
             {

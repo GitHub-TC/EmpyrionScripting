@@ -641,7 +641,7 @@ namespace EmpyrionScripting.CustomHelpers
                     return;
                 }
 
-                foreach (var block in blocks.Where(b => !b.HasParentBlock))
+                foreach (var block in blocks)
                 {
                     var amount = EmpyrionScripting.Configuration.Current.GardenerSalary.Amount;
 
@@ -667,7 +667,7 @@ namespace EmpyrionScripting.CustomHelpers
                         options.Template(output, harvestInfo);
 
                         container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
-                        block.GetBlock().Set(0);
+                        block.ChangeBlockType(0);
 
                         continue;
                     }
@@ -720,10 +720,10 @@ namespace EmpyrionScripting.CustomHelpers
                             });
                         }
 
-                        container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
-                        block.GetBlock().Set(opChildId);
+                        Log($"{structure.E.Name}/{structure.E.Id} PickupPlants:[{op}] x:{block.Position.x} y:{block.Position.y} z:{block.Position.z} ID:{block.Id} -> {opChildId}", LogLevel.Message);
 
-                        Log($"{structure.E.Name}/{structure.E.Id} PickupPlants:[{op}] x:{block.Position.x} y:{block.Position.y} z:{block.Position.z} ID:{block.Id}{(block.HasParentBlock ? "(parent)" : "")} -> {opChildId}", LogLevel.Message);
+                        container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
+                        block.ChangeBlockType(opChildId);
                     }
                 }
 
@@ -1221,7 +1221,7 @@ namespace EmpyrionScripting.CustomHelpers
                                         }
                                     }
 
-                                    if (replaceId >= 0) block.Set(replaceId);
+                                    if (replaceId >= 0) block.ParentBlock.Set(replaceId);
                                     processBlockData.RemovedBlocks++;
 
                                     if (processBlockData.RemovedBlocks % EmpyrionScripting.Configuration.Current.ProcessMaxBlocksPerCycle == 0 || root.TimeLimitReached)

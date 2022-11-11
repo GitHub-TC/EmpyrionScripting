@@ -33,8 +33,8 @@ namespace EmpyrionScripting.Interface
         bool IsDamaged { get; }
         string SendSignalName { get; }
         bool SignalState { get; }
-        bool HasParentBlock { get; }
 
+        void ChangeBlockType(int newType);
         void SetColorForWholeBlock(int texIdx);
         void SetColors(int? top, int? bottom, int? north, int? south, int? west, int? east);
         void SetTextureForWholeBlock(int texIdx);

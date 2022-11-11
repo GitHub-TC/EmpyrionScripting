@@ -1,5 +1,7 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.Interface;
+using JetBrains.Annotations;
+using System;
 using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
@@ -39,7 +41,6 @@ namespace EmpyrionScripting.DataWrapper
             _entity        = entity;
             _structure     = _entity.S?.GetCurrent();
             _block         = _structure?.GetBlock(pos);
-            HasParentBlock = _block.ParentBlock == null || _block.ParentBlock != _block;
             _block         = _block.ParentBlock ?? _block;
             _device        = _structure?.GetDevice<IDevice>(pos);
             Position       = pos;
@@ -53,7 +54,6 @@ namespace EmpyrionScripting.DataWrapper
         public IDevice GetDevice() => _device;
 
         public object Device { get; }
-        public bool HasParentBlock { get; }
 
         private BlockData GetData()
         {
@@ -156,6 +156,12 @@ namespace EmpyrionScripting.DataWrapper
             if (east    .HasValue && EastColor    != east     .Value) { changed = true; colorEast    = east.Value;  }
 
             if(changed) _block?.SetColors(colorTop, colorBottom, colorNorth, colorSouth, colorWest, colorEast);
+        }
+
+        public void ChangeBlockType(int newType)
+        {
+            if (_block.ParentBlock == null) _block            .Set(newType);
+            else                            _block.ParentBlock.Set(newType);
         }
 
         public bool SwitchState { get { var s = GetData()._block?.GetSwitchState(); return s == null ? false : s.Value; }  set { var s = GetData()._block?.GetSwitchState(); if(s != value) GetData()._block?.SetSwitchState(value); } }
