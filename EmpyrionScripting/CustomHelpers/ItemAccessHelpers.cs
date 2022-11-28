@@ -122,6 +122,46 @@ namespace EmpyrionScripting.CustomHelpers
                 ? (found.Values.TryGetValue(name, out var data) ? data : null)
                 : null;
 
+        [HandlebarTag("devicecontents")]
+        public static void DeviceContentsHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{devicecontents device}} helper must have exactly one argument: (device)");
+
+            var root = rootObject as IScriptRootData;
+            var block = arguments[0] as BlockData;
+            var allItems = new ConcurrentDictionary<int, ItemsData>();
+
+            try
+            {
+                var containerData = block.Device as ContainerData;
+                var container = containerData.GetContainer();
+                container.GetContent().ForEach(I =>
+                {
+                EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(I.id, out ItemInfo details);
+                IItemsSource source = new ItemsSource() { E = block.GetEntity(), Id = I.CreateId(), Count = I.count, Ammo = I.ammo, Decay = I.decay, Container = container, CustomName = block.CustomName, Position = block.Position };
+                allItems.AddOrUpdate(I.id,
+                new ItemsData()
+                {
+                    Source = new[] { source }.ToList(),
+                    Id = I.id,
+                    Count = I.count,
+                    Ammo = I.ammo,
+                    Decay = I.decay,
+                    Key = details == null ? I.id.ToString() : details.Key,
+                    Name = details == null ? I.id.ToString() : details.Name,
+                },
+                (K, U) => U.AddCount(I.count, source));
+                });
+                var items = allItems.Values.OrderBy(I => I.Id).ToArray();
+                if (items.Length > 0) items.ForEach(item => options.Template(output, item), () => root.TimeLimitReached);
+                else options.Inverse(output, context as object);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{devicecontents}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("items")]
         public static void ItemsBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
@@ -171,7 +211,6 @@ namespace EmpyrionScripting.CustomHelpers
             if (root.TimeLimitReached) return Array.Empty<ItemsData>();
 
             var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(names);
-
             var allItems = new ConcurrentDictionary<int, ItemsData>();
             structure.Items
                 .SelectMany(I => I.Source.Where(S => S.CustomName != null && uniqueNames.Contains(S.CustomName)))
@@ -245,6 +284,5 @@ namespace EmpyrionScripting.CustomHelpers
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{itemlist}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
-
     }
 }

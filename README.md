@@ -458,6 +458,8 @@ Items habe folgende Basisdaten
 ## Inhalte
 + {{#items structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln
 
++ {{#devicecontents device}} = Alle Items aus den Devices ermitteln
+
 + {{#getitems structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln und als Liste liefern z.B. für itemlist
 
 * {{#itemlist list 'id1;id2;id3,...'}}
@@ -1095,6 +1097,18 @@ Meine Erze
 {{/items}}
 ```
 ---
+
+## What's in all the devices
+```
+{{#devicesoftype @root.E.S 'Container;Fridge;HarvestCntr;AmmoCntr;WarpDriveTank'}}
+{{#each .}}
+{{#devicecontents .}}
+{{Count}}{{Name}}
+{{/devicecontents}}
+{{/each}}
+{{/devicesoftype}}
+```
+
 ## Output of all ores in the base / ship / HV / CV
 
 Input on the LCD (everything without "")
@@ -1484,6 +1498,10 @@ Items have the following basic data
 * {{#scroll lines delay \[step\]}}
   * Text scroll block with (lines) od text, scrolls with (delay) seconds
   * optional (step) lines per step
+
++ {{#items structure 'box1; box2; fridge *; ...'}} = Determine all the items from the containers (names) = 'box1; box2; fridge *; ...'
+
++ {{#devicecontents device}} = Determine all the items from the devices
 
 + {{#getitems structure 'box1; box2; fridge *; ...'}} = Determine all items from the containers (names) = 'box1; box2; fridge *; ...' and deliver them as a list e.g. for itemlist
 
