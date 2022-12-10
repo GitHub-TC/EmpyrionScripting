@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 
@@ -28,22 +29,30 @@ namespace EmpyrionScripting.CustomHelpers
                     {
                         var contains = N.Substring(1, N.Length - 2).ToLower();
                         names.AddRange(sourceNames.Where(SN => SN.ToLower().Contains(contains)));
+                        names.AddRange(sourceNames.Where(SN => SN.ToLower().Equals(contains, StringComparison.InvariantCultureIgnoreCase)));
                     }
                     else if (N.EndsWith("*"))
                     {
-                        var startsWith = N.Substring(0, N.Length - 1);
-                        names.AddRange(sourceNames.Where(SN => SN.StartsWith(startsWith, StringComparison.InvariantCultureIgnoreCase)));
+                        var startsWith = N.Substring(0, N.Length - 1).ToLower();
+                        names.AddRange(sourceNames.Where(SN => SN.ToLower().StartsWith(startsWith, StringComparison.InvariantCultureIgnoreCase)));
+                        names.AddRange(sourceNames.Where(SN => SN.ToLower().Equals(startsWith, StringComparison.InvariantCultureIgnoreCase)));
                     }
                     else if (N.StartsWith("*"))
                     {
-                        var endsWith = N.Substring(1);
-                        names.AddRange(sourceNames.Where(SN => SN.EndsWith(endsWith, StringComparison.InvariantCultureIgnoreCase)));
+                        var endsWith = N.Substring(1).ToLower();
+                        names.AddRange(sourceNames.Where(SN => SN.ToLower().EndsWith(endsWith, StringComparison.InvariantCultureIgnoreCase)));
+                        names.AddRange(sourceNames.Where(SN => SN.ToLower().Equals(endsWith, StringComparison.InvariantCultureIgnoreCase)));
                     }
-                    else names.AddRange(sourceNames.Where(SN => SN.Equals(N, StringComparison.InvariantCultureIgnoreCase)));
+                    else
+                    {
+                        var equal = N.ToLower();
+                        names.AddRange(sourceNames.Where(SN => SN.ToLower().Equals(equal, StringComparison.InvariantCultureIgnoreCase)));
+                    }
                 });
 
             return names
                 .OrderBy(N => N)
+                .Distinct()
                 .ToArray();
         }
 
