@@ -952,7 +952,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var core = E.S.GetCurrent().GetBlock(corePos);
                 core.Get(out var coreBlockType, out _, out _, out _);
 
-                if (!EmpyrionScripting.Configuration.Current.PlayerCoreTypes.Contains(coreBlockType))
+                if (!EmpyrionScripting.Configuration.Current.HarvestCoreTypes.Contains(coreBlockType))
                 {
                     root.GetPersistendData().TryRemove(root.ScriptId, out _);
                     options.Inverse(output, context);
@@ -1188,7 +1188,7 @@ namespace EmpyrionScripting.CustomHelpers
                                    list.Length > 0  && 
                                   !list.Any(L => L.Item1 <= blockType && L.Item2 >= blockType)) blockType = 0;
 
-                                if (blockType > 0 && !EmpyrionScripting.Configuration.Current.PlayerCoreTypes.Contains(blockType))
+                                if (blockType > 0 && !EmpyrionScripting.Configuration.Current.HarvestCoreTypes.Contains(blockType))
                                 {
                                     if (EmpyrionScripting.Configuration.Current?.DeconstructBlockSubstitution != null &&
                                         EmpyrionScripting.Configuration.Current.DeconstructBlockSubstitution.TryGetValue(blockType, out var substituteTo)) blockType = substituteTo;

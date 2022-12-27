@@ -103,7 +103,7 @@ namespace EmpyrionScripting
         public string NumberSpaceReplace { get; set; } = " "; // eigentlich :-( funktioniert aber leider nicht mehr "\u2007\u2009";
         public string BarStandardValueSign { get; set; } = "\u2588";
         public string BarStandardSpaceSign { get; set; } = "\u2591";
-        public int[] PlayerCoreTypes { get; set; } = new[] { 558 };
+        public int[] HarvestCoreTypes { get; set; } = new[] { 558 };
 
         public string[] ElevatedGroups { get; set; } = new[] {
                 "Admin",
