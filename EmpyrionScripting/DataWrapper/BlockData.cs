@@ -158,11 +158,7 @@ namespace EmpyrionScripting.DataWrapper
             if(changed) _block?.SetColors(colorTop, colorBottom, colorNorth, colorSouth, colorWest, colorEast);
         }
 
-        public void ChangeBlockType(int newType)
-        {
-            if (_block.ParentBlock == null) _block            .Set(newType);
-            else                            _block.ParentBlock.Set(newType);
-        }
+        public void ChangeBlockType(int newType) => _block.Set(newType);
 
         public bool SwitchState { get { var s = GetData()._block?.GetSwitchState(); return s == null ? false : s.Value; }  set { var s = GetData()._block?.GetSwitchState(); if(s != value) GetData()._block?.SetSwitchState(value); } }
         public int Damage => _block.GetDamage();

@@ -16,8 +16,6 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class ConveyorHelpers
     {
-        private const int PlayerCoreType = 558;
-
         readonly static object moveLock = new object();
         public static Action<string, LogLevel> Log { get; set; }
         public static Func<IScriptRootData, IPlayfield, IStructure, VectorInt3, IDeviceLock> CreateDeviceLock { get; set; } = (R, P, S, V) => new DeviceLock(R, P, S, V);
@@ -954,7 +952,7 @@ namespace EmpyrionScripting.CustomHelpers
                 var core = E.S.GetCurrent().GetBlock(corePos);
                 core.Get(out var coreBlockType, out _, out _, out _);
 
-                if (coreBlockType != PlayerCoreType)
+                if (!EmpyrionScripting.Configuration.Current.PlayerCoreTypes.Contains(coreBlockType))
                 {
                     root.GetPersistendData().TryRemove(root.ScriptId, out _);
                     options.Inverse(output, context);
@@ -1190,7 +1188,7 @@ namespace EmpyrionScripting.CustomHelpers
                                    list.Length > 0  && 
                                   !list.Any(L => L.Item1 <= blockType && L.Item2 >= blockType)) blockType = 0;
 
-                                if (blockType > 0 && blockType != PlayerCoreType)
+                                if (blockType > 0 && !EmpyrionScripting.Configuration.Current.PlayerCoreTypes.Contains(blockType))
                                 {
                                     if (EmpyrionScripting.Configuration.Current?.DeconstructBlockSubstitution != null &&
                                         EmpyrionScripting.Configuration.Current.DeconstructBlockSubstitution.TryGetValue(blockType, out var substituteTo)) blockType = substituteTo;
