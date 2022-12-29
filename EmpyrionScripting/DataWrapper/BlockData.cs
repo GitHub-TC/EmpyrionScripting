@@ -75,6 +75,12 @@ namespace EmpyrionScripting.DataWrapper
         {
             if (colorsReaded) return this;
             _block?.GetColors(out colorTop, out colorBottom, out colorNorth, out colorSouth, out colorWest, out colorEast);
+            colorTop    = colorTop    >= 0 && colorTop    <= 31 ? colorTop    : 0;
+            colorBottom = colorBottom >= 0 && colorBottom <= 31 ? colorBottom : 0;
+            colorNorth  = colorNorth  >= 0 && colorNorth  <= 31 ? colorNorth  : 0;
+            colorSouth  = colorSouth  >= 0 && colorSouth  <= 31 ? colorSouth  : 0;
+            colorWest   = colorWest   >= 0 && colorWest   <= 31 ? colorWest   : 0;
+            colorEast   = colorEast   >= 0 && colorEast   <= 31 ? colorEast   : 0;
             colorsReaded = true;
             return this;
         }
