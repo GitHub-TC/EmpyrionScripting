@@ -315,14 +315,29 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
-                int? top = null, bottom = null, north = null, south = null, west = null, east = null;
-
                 if (string.IsNullOrEmpty(pos))
                 {
                     block.SetColorForWholeBlock(colorId);
                     return;
                 }
 
+                //pos.ToUpper()
+                //    .Split(',')
+                //    .Select(P => P.Trim())
+                //    .ForEach(P => { 
+                //            switch (P)
+                //            {
+                //                case "T": block.TopColor    = colorId; break;
+                //                case "B": block.BottomColor = colorId; break;
+                //                case "N": block.NorthColor  = colorId; break;
+                //                case "S": block.SouthColor  = colorId; break;
+                //                case "W": block.WestColor   = colorId; break;
+                //                case "E": block.EastColor   = colorId; break;
+                //            }
+                //        }
+                //    );
+
+                int? top = null, bottom = null, north = null, south = null, west = null, east = null;
                 pos.ToUpper()
                     .Split(',')
                     .Select(P => P.Trim())
@@ -340,6 +355,7 @@ namespace EmpyrionScripting.CustomHelpers
                     );
 
                 block.SetColors(top, bottom, north, south, west, east);
+
             }
             catch (Exception error)
             {

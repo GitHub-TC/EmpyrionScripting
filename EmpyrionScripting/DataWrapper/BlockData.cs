@@ -137,31 +137,43 @@ namespace EmpyrionScripting.DataWrapper
             _block?.SetColorForWholeBlock(texIdx);
         }
 
-        public int TopColor     { get => GetColor().colorTop;       set { if (TopColor      != value) _block?.SetColors(colorTop = value, BottomColor, NorthColor, SouthColor, WestColor, EastColor);    } }
-        public int BottomColor  { get => GetColor().colorBottom;    set { if (BottomColor   != value) _block?.SetColors(TopColor, colorBottom = value, NorthColor, SouthColor, WestColor, EastColor); } }
-        public int NorthColor   { get => GetColor().colorNorth;     set { if (NorthColor    != value) _block?.SetColors(TopColor, BottomColor, colorNorth = value, SouthColor, WestColor, EastColor);  } }
-        public int SouthColor   { get => GetColor().colorSouth;     set { if (SouthColor    != value) _block?.SetColors(TopColor, BottomColor, NorthColor, colorSouth = value, WestColor, EastColor);  } }
-        public int WestColor    { get => GetColor().colorWest;      set { if (WestColor     != value) _block?.SetColors(TopColor, BottomColor, NorthColor, SouthColor, colorWest = value, EastColor);   } }
-        public int EastColor    { get => GetColor().colorEast;      set { if (EastColor     != value) _block?.SetColors(TopColor, BottomColor, NorthColor, SouthColor, WestColor, colorEast = value);   } }
+        //public int TopColor     { get => GetColor().colorTop;       set { if (TopColor      != value) _block?.SetColors(colorTop = value, BottomColor, NorthColor, SouthColor, WestColor, EastColor); } }
+        //public int BottomColor  { get => GetColor().colorBottom;    set { if (BottomColor   != value) _block?.SetColors(TopColor, colorBottom = value, NorthColor, SouthColor, WestColor, EastColor); } }
+        //public int NorthColor   { get => GetColor().colorNorth;     set { if (NorthColor    != value) _block?.SetColors(TopColor, BottomColor, colorNorth = value, SouthColor, WestColor, EastColor); } }
+        //public int SouthColor   { get => GetColor().colorSouth;     set { if (SouthColor    != value) _block?.SetColors(TopColor, BottomColor, NorthColor, colorSouth = value, WestColor, EastColor); } }
+        //public int WestColor    { get => GetColor().colorWest;      set { if (WestColor     != value) _block?.SetColors(TopColor, BottomColor, NorthColor, SouthColor, colorWest = value, EastColor); } }
+        //public int EastColor    { get => GetColor().colorEast;      set { if (EastColor     != value) _block?.SetColors(TopColor, BottomColor, NorthColor, SouthColor, WestColor, colorEast = value); } }
 
-        //public int TopColor     { get => GetColor().colorTop;       set { if (TopColor      != value) _block?.SetColors(colorTop = value, null, null, null, null, null);    } }
-        //public int BottomColor  { get => GetColor().colorBottom;    set { if (BottomColor   != value) _block?.SetColors(null, colorBottom = value, null, null, null, null); } }
-        //public int NorthColor   { get => GetColor().colorNorth;     set { if (NorthColor    != value) _block?.SetColors(null, null, colorNorth = value, null, null, null);  } }
-        //public int SouthColor   { get => GetColor().colorSouth;     set { if (SouthColor    != value) _block?.SetColors(null, null, null, colorSouth = value, null, null);  } }
-        //public int WestColor    { get => GetColor().colorWest;      set { if (WestColor     != value) _block?.SetColors(null, null, null, null, colorWest = value, null);   } }
-        //public int EastColor    { get => GetColor().colorEast;      set { if (EastColor     != value) _block?.SetColors(null, null, null, null, null, colorEast = value);   } }
+        public int TopColor     { get => GetColor().colorTop;       set { if (TopColor      != value) _block?.SetColors(colorTop = value, null, null, null, null, null);    } }
+        public int BottomColor  { get => GetColor().colorBottom;    set { if (BottomColor   != value) _block?.SetColors(null, colorBottom = value, null, null, null, null); } }
+        public int NorthColor   { get => GetColor().colorNorth;     set { if (NorthColor    != value) _block?.SetColors(null, null, colorNorth = value, null, null, null);  } }
+        public int SouthColor   { get => GetColor().colorSouth;     set { if (SouthColor    != value) _block?.SetColors(null, null, null, colorSouth = value, null, null);  } }
+        public int WestColor    { get => GetColor().colorWest;      set { if (WestColor     != value) _block?.SetColors(null, null, null, null, colorWest = value, null);   } }
+        public int EastColor    { get => GetColor().colorEast;      set { if (EastColor     != value) _block?.SetColors(null, null, null, null, null, colorEast = value);   } }
+
         public void SetColors(int? top, int? bottom, int? north, int? south, int? west, int? east)
         {
             bool changed = false;
 
-            if (top     .HasValue && TopColor     != top      .Value) { changed = true; colorTop     = top.Value;   }
-            if (bottom  .HasValue && BottomColor  != bottom   .Value) { changed = true; colorBottom  = bottom.Value;}
-            if (north   .HasValue && NorthColor   != north    .Value) { changed = true; colorNorth   = north.Value; }
-            if (south   .HasValue && SouthColor   != south    .Value) { changed = true; colorSouth   = south.Value; }
-            if (west    .HasValue && WestColor    != west     .Value) { changed = true; colorWest    = west.Value;  }
-            if (east    .HasValue && EastColor    != east     .Value) { changed = true; colorEast    = east.Value;  }
+            if (top     .HasValue && TopColor     != top      .Value) { changed = true; }
+            if (bottom  .HasValue && BottomColor  != bottom   .Value) { changed = true; }
+            if (north   .HasValue && NorthColor   != north    .Value) { changed = true; }
+            if (south   .HasValue && SouthColor   != south    .Value) { changed = true; }
+            if (west    .HasValue && WestColor    != west     .Value) { changed = true; }
+            if (east    .HasValue && EastColor    != east     .Value) { changed = true; }
 
-            if(changed) _block?.SetColors(colorTop, colorBottom, colorNorth, colorSouth, colorWest, colorEast);
+            if (changed)
+            {
+                EmpyrionScripting.Log($"SetColors: T:{colorTop}->{top} B:{colorBottom}->{bottom} N:{colorNorth}->{north} S:{colorSouth}->{south} W:{colorWest}->{west} E:{colorEast}->{east}", EmpyrionNetAPIDefinitions.LogLevel.Debug);
+                _block?.SetColors(top, bottom, north, south, west, east);
+
+                if (top     .HasValue && TopColor     != top      .Value) { colorTop     = top.Value;   }
+                if (bottom  .HasValue && BottomColor  != bottom   .Value) { colorBottom  = bottom.Value;}
+                if (north   .HasValue && NorthColor   != north    .Value) { colorNorth   = north.Value; }
+                if (south   .HasValue && SouthColor   != south    .Value) { colorSouth   = south.Value; }
+                if (west    .HasValue && WestColor    != west     .Value) { colorWest    = west.Value;  }
+                if (east    .HasValue && EastColor    != east     .Value) { colorEast    = east.Value;  }
+            }
         }
 
         public void ChangeBlockType(int newType) => _block.Set(newType);
