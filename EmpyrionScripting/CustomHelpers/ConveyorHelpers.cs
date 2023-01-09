@@ -892,7 +892,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("recycle")]
         public static void RecycleHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length < 2 || arguments.Length > 3) throw new HandlebarsException("{{recycle entity container [CorePrefix]}} helper must have two to four argument: entity (container;container*;*;container) [CorePrefix] [RemoveItemsIds]");
+            if (arguments.Length < 2 || arguments.Length > 4) throw new HandlebarsException("{{recycle entity container [CorePrefix]}} helper must have two to four argument: entity (container;container*;*;container) [CorePrefix] [RemoveItemsIds]");
 
             var root = rootObject   as IScriptRootData;
             var E    = arguments[0] as IEntityData;
