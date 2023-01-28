@@ -1255,6 +1255,11 @@ namespace EmpyrionScripting.CustomHelpers
 
             var id = blockName != null && EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(blockName, out var mappedBlockId) ? mappedBlockId : blockId;
 
+            if (EmpyrionScripting.Configuration.Current?.DeconstructBlockSubstitution != null &&
+                EmpyrionScripting.Configuration.Current.DeconstructBlockSubstitution.TryGetValue(id, out var substituteTo)) id = substituteTo;
+
+            if (id == 0) return false;
+
             if (ressources.TryGetValue(id, out var count)) ressources[id] = count + 1;
             else                                           ressources.Add(id, 1);
 

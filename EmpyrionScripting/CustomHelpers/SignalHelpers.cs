@@ -1,4 +1,5 @@
-﻿using EmpyrionScripting.CsHelper;
+﻿using Eleon.Modding;
+using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
@@ -142,6 +143,8 @@ namespace EmpyrionScripting.CustomHelpers
 
             try
             {
+                if (EmpyrionScripting.ModApi.Application.Mode == ApplicationMode.SinglePlayer) return;
+
                 bool.TryParse(arguments[2]?.ToString(), out var state);
 
                 var uniqueSignalNames = structure.BlockSignals.Select(S => S.Name).GetUniqueNames(namesSearch).ToDictionary(N => N);
