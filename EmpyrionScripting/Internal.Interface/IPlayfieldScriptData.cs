@@ -4,14 +4,22 @@ using System.Collections.Concurrent;
 
 namespace EmpyrionScripting.Internal.Interface
 {
+    public interface IExclusiveAccess
+    {
+        string CommandId { get; }
+        string EntityName { get; }
+        int EntityId { get; }
+    }
+
     public interface IPlayfieldScriptData
     {
-        IEntity[] AllEntities { get; set; }
-        IEntity[] CurrentEntities { get; set; }
-        ConcurrentDictionary<int, IEventStore> EventStore { get; set; }
-        ConcurrentDictionary<string, object> PersistendData { get; set; }
-        IPlayfield Playfield { get; set; }
-        string PlayfieldName { get; set; }
+        IEntity[] AllEntities { get; }
+        IEntity[] CurrentEntities { get; }
+        ConcurrentDictionary<int, IEventStore> EventStore { get; }
+        ConcurrentDictionary<string, object> PersistendData { get; }
+        ConcurrentDictionary<int, IExclusiveAccess> EntityExclusiveAccess { get; }
+        IPlayfield Playfield { get; }
+        string PlayfieldName { get; }
         ConcurrentQueue<IItemMoveInfo> MoveLostItems { get; }
     }
 }

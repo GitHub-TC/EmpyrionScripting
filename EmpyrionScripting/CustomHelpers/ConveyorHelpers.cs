@@ -868,6 +868,13 @@ namespace EmpyrionScripting.CustomHelpers
                 // Eigene Struktur nicht "abbauen"
                 if (E.Id == root.E.Id) return;
 
+                var commandId = $"{root.ScriptId}-deconstruct";
+                if ((!root.GetPlayfieldScriptData().EntityExclusiveAccess.TryGetValue(E.Id, out var accessBy) || accessBy.CommandId != commandId) && !root.GetPlayfieldScriptData().EntityExclusiveAccess.TryAdd(E.Id, new ExclusiveAccess { CommandId = commandId, EntityName = root.E.Name, EntityId = root.E.Id }))
+                {
+                    if (accessBy.EntityId != root.E.Id) output.WriteLine($"In process by {accessBy.EntityName}");
+                    return;
+                }
+
                 var list = arguments.Get(3)?.ToString()
                     .Split(new[] { ',', ';' })
                     .Select(T => T.Trim())
@@ -879,9 +886,9 @@ namespace EmpyrionScripting.CustomHelpers
                     })
                     .ToArray();
 
-                ConvertBlocks(output, root, options, context as object, arguments,
+                if(!ConvertBlocks(output, root, options, context as object, arguments,
                     (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}", list,
-                    DeconstructBlock);
+                    DeconstructBlock)) root.GetPlayfieldScriptData().EntityExclusiveAccess.TryRemove(E.Id, out _);
             }
             catch (Exception error)
             {
@@ -902,9 +909,16 @@ namespace EmpyrionScripting.CustomHelpers
                 // Eigene Struktur nicht "abbauen"
                 if (E.Id == root.E.Id) return;
 
-                ConvertBlocks(output, root, options, context as object, arguments, 
+                var commandId = $"{root.ScriptId}-recycle";
+                if ((!root.GetPlayfieldScriptData().EntityExclusiveAccess.TryGetValue(E.Id, out var accessBy) || accessBy.CommandId != commandId) && !root.GetPlayfieldScriptData().EntityExclusiveAccess.TryAdd(E.Id, new ExclusiveAccess { CommandId = commandId, EntityName = root.E.Name, EntityId = root.E.Id }))
+                {
+                    if(accessBy.EntityId != root.E.Id) output.WriteLine($"In process by {accessBy.EntityName}");
+                    return;
+                }
+
+                if (!ConvertBlocks(output, root, options, context as object, arguments,
                     (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}", null,
-                    ExtractBlockToRecipe);
+                    ExtractBlockToRecipe)) root.GetPlayfieldScriptData().EntityExclusiveAccess.TryRemove(E.Id, out _);
             }
             catch (Exception error)
             {
@@ -912,7 +926,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        public static void ConvertBlocks(TextWriter output, IScriptRootData root, HelperOptions options, object context, object[] arguments, string coreName,
+        public static bool ConvertBlocks(TextWriter output, IScriptRootData root, HelperOptions options, object context, object[] arguments, string coreName,
             Tuple<int, int>[] list, Func<IEntityData, Dictionary<int, double>, int, bool> processBlock)
         { 
             var E    = arguments[0] as IEntityData;
@@ -935,7 +949,7 @@ namespace EmpyrionScripting.CustomHelpers
                 root.GetPersistendData().TryRemove(root.ScriptId, out _);
                 options.Inverse(output, context);
                 output.WriteLine($"No target container '{N}' found");
-                return;
+                return false;
             }
 
             if (directId != E.Id)
@@ -945,7 +959,7 @@ namespace EmpyrionScripting.CustomHelpers
                     root.GetPersistendData().TryRemove(root.ScriptId, out _);
                     options.Inverse(output, context);
                     output.WriteLine($"No core '{coreName}' found on {E.Id}");
-                    return;
+                    return false;
                 }
 
                 var corePos = corePosList.First();
@@ -957,7 +971,7 @@ namespace EmpyrionScripting.CustomHelpers
                     root.GetPersistendData().TryRemove(root.ScriptId, out _);
                     options.Inverse(output, context);
                     output.WriteLine($"No core '{coreName}' found on {E.Id} wrong type {coreBlockType}");
-                    return;
+                    return false;
                 }
             }
 
@@ -970,7 +984,7 @@ namespace EmpyrionScripting.CustomHelpers
                 root.GetPersistendData().TryRemove(root.ScriptId, out _);
                 options.Inverse(output, context);
                 if(firstTarget == null) output.WriteLine($"Containers '{N}' are locked");
-                return;
+                return false;
             }
 
             EmpyrionScripting.Log($"{root.E.Name}/{root.E.Id} Ressource to first conatiner: {firstTarget}", LogLevel.Message);
@@ -1059,6 +1073,8 @@ namespace EmpyrionScripting.CustomHelpers
             else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
 
             options.Template(output, processBlockData);
+
+            return processBlockData.CheckedBlocks < processBlockData.TotalBlocks;
         }
 
         private static string GetNextContainer(IScriptRootData root, List<string> uniqueNames, ref IContainer target, ref VectorInt3 targetPos)

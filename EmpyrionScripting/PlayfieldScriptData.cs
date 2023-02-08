@@ -7,6 +7,13 @@ using System.Collections.Concurrent;
 
 namespace EmpyrionScripting
 {
+    public class ExclusiveAccess : IExclusiveAccess
+    {
+        public string CommandId { get; set; }
+        public int EntityId { get; set; }
+        public string EntityName { get; set; }
+    }
+
     public class PlayfieldScriptData : IPlayfieldScriptData
     {
         public string PlayfieldName { get; set; }
@@ -20,6 +27,7 @@ namespace EmpyrionScripting
         public ConcurrentQueue<IItemMoveInfo> MoveLostItems { get; } = new ConcurrentQueue<IItemMoveInfo>();
 
         public ConcurrentDictionary<string, object> PersistendData { get; set; } = new ConcurrentDictionary<string, object>();
+        public ConcurrentDictionary<int, IExclusiveAccess> EntityExclusiveAccess { get; set; } = new ConcurrentDictionary<int, IExclusiveAccess>();
         public ScriptExecQueue ScriptExecQueue { get; set; }
 
         private ConcurrentDictionary<string, int> CycleCounterStore { get; set; } = new ConcurrentDictionary<string, int>();
