@@ -40,6 +40,10 @@ namespace EmpyrionScripting.CustomHelpers
 
         public static IOrderedEnumerable<object> OrderedList(IEnumerable<object> array, string orderedByFields)
         {
+            if(string.IsNullOrEmpty(orderedByFields))   return array.OrderBy          (x => x);
+            if(orderedByFields == "+")                  return array.OrderBy          (x => x);
+            if(orderedByFields == "-")                  return array.OrderByDescending(x => x);
+
             var orderBy = orderedByFields
                 .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(O => O.Trim())
@@ -81,19 +85,21 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("sortedeach")]
         public static void SortedEachHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{sortedeach array sortedBy [reverse]}} helper must have two argument: (array) (sortedBy) (true|false)");
+            if (arguments.Length < 1 || arguments.Length > 3) throw new HandlebarsException("{{sortedeach array [sortedBy]}} helper must have at least one argument: (array) [+/-sortedBy]");
 
             var root = rootObject as IScriptRootData;
 
             try
             {
                 var array   = ((IEnumerable)arguments[0]).OfType<object>();
-                var orderBy = arguments[1]?.ToString();
+                var orderBy = arguments.Get(1)?.ToString() ?? string.Empty;
                 if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
 
-                var orderedArray = array.Count() == 0 || string.IsNullOrEmpty(orderBy) 
+                if (!orderBy.StartsWith("+") && !orderBy.StartsWith("-")) orderBy = reverse ? $"-{orderBy}" : $"+{orderBy}";
+
+                var orderedArray = array.Count() == 0 
                     ? reverse ? array.OrderByDescending(d => d) : array.OrderBy(d => d)
-                    : OrderedList(array, (reverse ? '-' : '+') + orderBy);
+                    : OrderedList(array, orderBy);
 
                 if (orderedArray == null) options.Inverse(output, (object)context);
                 else                      orderedArray.ForEach(V => options.Template(output, V), () => root.TimeLimitReached);
@@ -107,19 +113,21 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("sort")]
         public static void SortHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{sort array sortedBy [reverse]}} helper must have two argument: (array) (sortedBy) (true|false)");
+            if (arguments.Length < 1 || arguments.Length > 3) throw new HandlebarsException("{{sort array sortedBy}} helper must have at least one argument: (array) [+/-sortedBy]");
 
             var root = rootObject as IScriptRootData;
 
             try
             {
                 var array   = ((IEnumerable)arguments[0]).OfType<object>();
-                var orderBy = arguments[1]?.ToString();
+                var orderBy = arguments.Get(1)?.ToString() ?? string.Empty;
                 if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
 
-                var orderedArray = array.Count() == 0 || string.IsNullOrEmpty(orderBy) 
+                if(!orderBy.StartsWith("+") && !orderBy.StartsWith("-")) orderBy = reverse ? $"-{orderBy}" : $"+{orderBy}";
+
+                var orderedArray = array.Count() == 0
                     ? null 
-                    : OrderedList(array, (reverse ? '-' : '+') + orderBy);
+                    : OrderedList(array, orderBy);
 
                 if (orderedArray == null) options.Inverse (output, (object)context);
                 else                      options.Template(output, orderedArray.ToArray());
@@ -133,17 +141,17 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("orderedeach")]
         public static void OrderedEachHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{orderedeach array '+/-sortedBy1,+/-sortedBy2,...'}} helper must have two argument: (array) (+/-sortedBy)");
+            if (arguments.Length < 1) throw new HandlebarsException("{{orderedeach array ['+/-sortedBy1,+/-sortedBy2,...']}} helper must have at least one argument: (array) [+/-sortedBy]");
 
             var root = rootObject as IScriptRootData;
 
             try
             {
                 var array   = ((IEnumerable)arguments[0]).OfType<object>();
-                var orderBy = arguments[1]?.ToString();
+                var orderBy = arguments.Get(1)?.ToString() ?? string.Empty;
                 if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
 
-                var orderedArray = array.Count() == 0 || string.IsNullOrEmpty(orderBy) 
+                var orderedArray = array.Count() == 0
                     ? null 
                     : OrderedList(array, orderBy);
 
@@ -159,17 +167,17 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("order")]
         public static void OrderHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{order array '+/-sortedBy1,+/-sortedBy2,...'}} helper must have two argument: (array) (+/-sortedBy)");
+            if (arguments.Length < 1) throw new HandlebarsException("{{order array ['+/-sortedBy1,+/-sortedBy2,...']}} helper must have at least one argument: (array) [+/-sortedBy]");
 
             var root = rootObject as IScriptRootData;
 
             try
             {
                 var array   = ((IEnumerable)arguments[0]).OfType<object>();
-                var orderBy = arguments[1]?.ToString();
+                var orderBy = arguments.Get(1)?.ToString() ?? string.Empty;
                 if (!bool.TryParse(arguments.Get(2)?.ToString(), out var reverse)) reverse = false;
 
-                var orderedArray = array.Count() == 0 || string.IsNullOrEmpty(orderBy) 
+                var orderedArray = array.Count() == 0
                     ? null 
                     : OrderedList(array, orderBy);
 

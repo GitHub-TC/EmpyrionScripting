@@ -580,19 +580,17 @@ Items habe folgende Basisdaten
 + {{steps start end \[step\] \[delay\]}}
   + Von (start) nach (end) mit optional einer Schrittweite von (step) und einer (delay)-Sekunden geänderten Zeitbasis
 
-+ {{sortedeach array sortedBy \[reverse\]}}
-  + Sortiert das Array nach (sortedBy) und iteriert über die einzelen Element
-  + (reverse) = true um die Sortierung umzukehren
++ {{sortedeach array sortedBy}}
+  + Sortiert das Array nach (+/-sortedBy) und iteriert über die einzelen Element
   
-+ {{sort array sortedBy \[reverse\]}}
-  + Sortiert das Array nach (sortedBy)
-  + (reverse) = true um die Sortierung umzukehren
++ {{sort array sortedBy}}
+  + Sortiert das Array nach (+/-sortedBy)
   
 + {{orderedeach array '+/-sortedBy1,+/-sortedBy2,...'}}
   + Sortiert das Array nach (sortedBy1) dann nach 'sortedBy2' usw. bei '+' aufsteigend, bei '-' absteigend nach dem jeweiligen Feld 
   + iteriert danach über jedes Element
   
-+ {{order array sortedBy \[reverse\]}}
++ {{order array '+/-sortedBy1,+/-sortedBy2,...'}}
   + Sortiert das Array nach (sortedBy1) dann nach 'sortedBy2' usw. bei '+' aufsteigend, bei '-' absteigend nach dem jeweiligen Feld 
   
 + {{split string separator \[removeemptyentries\] \[trimchars\]}}
@@ -1558,20 +1556,18 @@ DateTime format:
 + {{steps start end \[step\] \[delay\]}}
   + From (start) to (end) with optional (step)-width and (delay) extends the 1 second per 1 counter add
 
-+ {{sortedeach array sortedBy \[reverse\]}}
-  + sorts the array by (sortedBy) and iterates over the individual elements
-  + (reverse) = true to reverse the sort order
++ {{sortedeach array sortedBy}}
+  + Sorts the array by (+/-sortedBy) and iterates over the individual elements.
   
-+ {{sort array sortedBy \[reverse\]}}
-  + sorts the array by (sortedBy)
-  + (reverse) = true to reverse the sort order
-
++ {{sort array sortedBy}}
+  + Sorts the array by (+/-sortedBy)
+  
 + {{orderedeach array '+/-sortedBy1,+/-sortedBy2,...'}}
   + sorts the array by (sortedBy1) then by 'sortedBy2' etc. with '+' ascending, with '-' descending by the respective field. 
   + iterates over each element
   
-+ {{order array sortedBy \[reverse\]}}
-  + sorts the array by (sortedBy1) then by 'sortedBy2' etc. at '+' ascending, at '-' descending by the respective field 
++ {{order array '+/-sortedBy1,+/-sortedBy2,...'}}
+  + Sorts the array by (sortedBy1) then by 'sortedBy2' etc. with '+' ascending, with '-' descending by the respective field. 
 
 + {{random start end}}
    + Deliver a random value between (start) and (end) and submit to the block as {{this}}
