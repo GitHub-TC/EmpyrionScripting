@@ -769,6 +769,9 @@ Items habe folgende Basisdaten
  + 'toPos' und 'x y z' sind nur in Adminscripten erlaubt
 
 ## JSON
++ {{jsontodictionary string}}
+  + gibt eine Dictionary-Datenstruktur zurück, die sich aus dem JSON-'String' ergibt.
+
 + {{fromjson string}}
   + liefert eine aus dem JSON 'string' resultierende Datenstruktur
 
@@ -1761,6 +1764,9 @@ DateTime format:
  + 'toPos' and 'x y z' are only allowed in elevated scripts
 
 ## JSON
++ {{jsontodictionary string}}
+  + returns a dictionary data structure resulting from the JSON 'string'.
+
 + {{fromjson string}}
   + returns a data structure resulting from the JSON 'string'.
 

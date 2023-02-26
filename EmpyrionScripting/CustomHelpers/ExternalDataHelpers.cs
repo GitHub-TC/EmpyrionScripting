@@ -276,6 +276,24 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("jsontodictionary")]
+        public static void JsonToDictionary(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{jsontodictionary string}} helper must have at least one argument: (string)");
+
+            var data = arguments[0].ToString();
+
+            try
+            {
+                options.Template(output, JsonConvert.DeserializeObject<Dictionary<object, object>>(data));
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{jsontodictionary}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+
         [HandlebarTag("fromjson")]
         public static void FromJsonHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {
