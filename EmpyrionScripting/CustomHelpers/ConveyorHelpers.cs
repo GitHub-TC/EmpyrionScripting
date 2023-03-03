@@ -1209,6 +1209,8 @@ namespace EmpyrionScripting.CustomHelpers
                                     if (EmpyrionScripting.Configuration.Current?.DeconstructBlockSubstitution != null &&
                                         EmpyrionScripting.Configuration.Current.DeconstructBlockSubstitution.TryGetValue(blockType, out var substituteTo)) blockType = substituteTo;
 
+                                    if (blockType != 0 && EmpyrionScripting.Configuration.Current.WithinRemoveBlocks(blockType)) blockType = 0;
+
                                     if (blockType > 0 && N != null)
                                     {
                                         locked = locked ?? CreateWeakDeviceLock(root, root.GetCurrentPlayfield(), root.E.S.GetCurrent(), targetPos);
@@ -1273,6 +1275,8 @@ namespace EmpyrionScripting.CustomHelpers
 
             if (EmpyrionScripting.Configuration.Current?.DeconstructBlockSubstitution != null &&
                 EmpyrionScripting.Configuration.Current.DeconstructBlockSubstitution.TryGetValue(id, out var substituteTo)) id = substituteTo;
+
+            if (id != 0 && EmpyrionScripting.Configuration.Current.WithinRemoveBlocks(id)) id = 0;
 
             if (id == 0) return false;
 
