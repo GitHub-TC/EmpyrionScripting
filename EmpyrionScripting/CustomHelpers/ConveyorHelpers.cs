@@ -841,6 +841,7 @@ namespace EmpyrionScripting.CustomHelpers
         public class ProcessBlockData
         {
             public DateTime Started { get; set; }
+            public DateTime LastAccess { get; set; }
             public DateTime Finished { get; set; }
             public string Name { get; set; }
             public int Id { get; set; }
@@ -991,6 +992,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
                 Started     = DateTime.Now,
+                LastAccess  = DateTime.Now,
                 Name        = E.Name,
                 Id          = E.Id,
                 MinPos      = minPos,
@@ -1003,15 +1005,18 @@ namespace EmpyrionScripting.CustomHelpers
                                 (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
             }) as ProcessBlockData;
 
-            if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
+            if (processBlockData.CheckedBlocks < processBlockData.TotalBlocks)
+            {
                 var ressources = new Dictionary<int, double>();
 
-                lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (c, i) => processBlock(E, ressources, i));
+                lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (c, i) => processBlock(E, ressources, i));
 
                 var allToLostItemRecover = false;
                 var currentContainer = firstTarget;
 
                 var ressourcesWithStackLimit = new List<KeyValuePair<int, double>>();
+
+                if (ressources.Any()) processBlockData.LastAccess = DateTime.Now;
 
                 ressources.ForEach(r =>
                     {
@@ -1019,7 +1024,7 @@ namespace EmpyrionScripting.CustomHelpers
                         {
                             var stackSize = (int)EmpyrionScripting.ConfigEcfAccess.FindAttribute(r.Key, "StackSize");
                             var count = (int)r.Value;
-                            while(count > 0)
+                            while (count > 0)
                             {
                                 ressourcesWithStackLimit.Add(new KeyValuePair<int, double>(r.Key, Math.Min(count, stackSize)));
                                 count -= stackSize;
@@ -1043,7 +1048,7 @@ namespace EmpyrionScripting.CustomHelpers
                         currentContainer = GetNextContainer(root, uniqueNames, ref target, ref targetPos);
                         if (string.IsNullOrEmpty(currentContainer))
                         {
-                            if(currentContainer == null) EmpyrionScripting.Log($"{root.E.Name}/{root.E.Id} All Container full or blocked", LogLevel.Message);
+                            if (currentContainer == null) EmpyrionScripting.Log($"{root.E.Name}/{root.E.Id} All Container full or blocked", LogLevel.Message);
                             allToLostItemRecover = true;
                         }
                         else
@@ -1068,9 +1073,14 @@ namespace EmpyrionScripting.CustomHelpers
                     }
                 });
 
-                if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
+                if (processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
             }
-            else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
+            else if ((DateTime.Now - processBlockData.LastAccess).TotalMinutes > 5)
+            {
+                root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
+                options.Inverse(output, processBlockData);
+                return false;
+            }
 
             options.Template(output, processBlockData);
 
@@ -1152,6 +1162,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 var processBlockData = root.GetPersistendData().GetOrAdd(root.ScriptId + E.Id, K => new ProcessBlockData() {
                     Started     = DateTime.Now,
+                    LastAccess  = DateTime.Now,
                     Name        = E.Name,
                     Id          = E.Id,
                     MinPos      = minPos,
@@ -1164,11 +1175,16 @@ namespace EmpyrionScripting.CustomHelpers
                                     (Math.Abs(minPos.z) + Math.Abs(maxPos.z) + 1)
                 }) as ProcessBlockData;
 
-                if(processBlockData.CheckedBlocks < processBlockData.TotalBlocks){
-                    lock(processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list, (C, I) => C.AddItems(I, 1) > 0);
-                    if(processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
+                if (processBlockData.CheckedBlocks < processBlockData.TotalBlocks)
+                {
+                    lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list, (C, I) => C.AddItems(I, 1) > 0);
+                    if (processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
-                else if((DateTime.Now - processBlockData.Finished).TotalMinutes > 1) root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
+                else if ((DateTime.Now - processBlockData.LastAccess).TotalMinutes > 5)
+                {
+                    root.GetPersistendData().TryRemove(root.ScriptId + E.Id, out _);
+                    options.Inverse(output, processBlockData);
+                }
 
                 options.Template(output, processBlockData);
             }
