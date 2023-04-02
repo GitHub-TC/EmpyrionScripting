@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using EcfParser;
 using EmpyrionScripting;
+using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -76,9 +77,25 @@ namespace EmpyrionLCDInfo.UnitTests
             EmpyrionScripting.EmpyrionScripting.SaveGameModPath = string.Empty;
             var config = new ConfigEcfAccess();
             //config.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", null, null, null);
-            config.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", "Reforged Eden", @"C:\steamcmd\empyrion.server\Saves\Games\DefaultRE\Mods\EmpyrionScripting\NameIdMapping.json", null);
+            config.ReadConfigEcf(@"C:\steamcmd\empyrion\Content", "Reforged Eden Atlantis", @"C:\steamcmd\empyrion.server\Saves\Games\Reforged Eden Atlantis\Mods\EmpyrionScripting\NameIdMapping.json", null);
+
+            config.FlatConfigBlockByName.TryGetValue("HeavyWindowSConnect", out var block);
 
             int i = config.HarvestBlockData.Count;
+        }
+
+        [TestMethod]
+        public void ReadGameOptionsYaml()
+        {
+            EmpyrionScripting.EmpyrionScripting.SaveGameModPath = @"C:\steamcmd\empyrion.server\Saves\Games\Reforged Eden Atlantis\Mods\EmpyrionScripting";
+            EmpyrionScripting.EmpyrionScripting.ReadGameOptionsYaml();
+        }
+
+        [TestMethod]
+        public void ReadPlayfieldYaml()
+        {
+            EmpyrionScripting.EmpyrionScripting.SaveGameModPath = @"C:\steamcmd\empyrion.server\Saves\Games\Reforged Eden Atlantis\Mods\EmpyrionScripting";
+            var pf = PlayfieldData.ReadPlayfieldInfo("Haven");
         }
     }
 }

@@ -155,6 +155,7 @@ namespace EmpyrionScripting.DataWrapper
         public virtual bool DeviceLockAllowed => ((PlayfieldScriptData)GetPlayfieldScriptData()).DeviceLockAllowed(ScriptId);
 
         public IConfigEcfAccess ConfigEcfAccess => EmpyrionScripting.ConfigEcfAccess;
+        public IDictionary<string, object> GameOptionsYamlSettings => EmpyrionScripting.GameOptionsYamlSettings;
 
         public bool ScriptWithinMainThread { get; set; }
         public bool ScriptNeedsMainThread { get; set; }

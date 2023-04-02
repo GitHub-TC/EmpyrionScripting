@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using YamlDotNet.RepresentationModel;
 using static EmpyrionScripting.CsCompiler.CsCompiler;
 using static EmpyrionScripting.SaveGamesScripts;
 using StaticCsCompiler = EmpyrionScripting.CsCompiler;
@@ -47,6 +48,8 @@ namespace EmpyrionScripting
         public static ItemInfos ItemInfos { get; set; }
         public static string SaveGameModPath { get; set; }
         public static ConfigurationManager<Configuration> Configuration { get; set; } = new ConfigurationManager<Configuration>() { Current = new Configuration() };
+        public static Dictionary<string, object> GameOptionsYamlSettings { get; private set; } = new Dictionary<string, object>();
+
         public static Localization Localization { get; set; }
         public static IModApi ModApi { get; set; }
         public bool WithinCsCompiler { get; set; }
@@ -197,6 +200,38 @@ namespace EmpyrionScripting
 
             if(forceInit || Localization    == null) Localization = new Localization(ModApi.Application?.GetPathFor(AppFolder.Content), CurrentScenario);
             if(forceInit || ConfigEcfAccess == null) InitEcfConfigData();
+
+            try { ReadGameOptionsYaml(); } catch (Exception error) { ModApi.LogError($"ReadGameOptionsYaml: {error}");
+}
+        }
+
+        public static void ReadGameOptionsYaml() 
+        { 
+            var gameoptionsYaml = Path.Combine(SaveGameModPath, "..", "..", "gameoptions.yaml");
+            if (!File.Exists(gameoptionsYaml)) return;
+
+            using var input = new StringReader(File.ReadAllText(gameoptionsYaml));
+
+            var yaml = new YamlStream();
+            yaml.Load(input);
+
+            var root = (YamlMappingNode)yaml.Documents[0].RootNode;
+            var options = root.GetChild<YamlSequenceNode>("Options");
+
+            var searchForMode = ModApi?.Application?.Mode == ApplicationMode.SinglePlayer ? "SP" : "MP";
+
+            var ValidForNode = options?.Children.Where(n => n.ToString().Contains(searchForMode)).FirstOrDefault() as YamlMappingNode;
+            GameOptionsYamlSettings = ValidForNode?.Children
+                .Where(n => n.Key is YamlScalarNode && n.Value is YamlScalarNode)
+                .ToDictionary(n => n.Key.ToString(), n => GetTypedValue(n.Value.ToString()));
+        }
+
+        private static object GetTypedValue(string? value)
+        {
+            if(bool.TryParse(value, out var boolResult)) return boolResult;
+            if(int.TryParse(value, out var intResult))   return intResult;
+
+            return value;
         }
 
         private static string CurrentScenario
@@ -208,6 +243,7 @@ namespace EmpyrionScripting
             : Configuration.Current.OverrideScenarioPath;
 
         public PlayerCommandsDediHelper PlayerCommandsDediHelper { get; private set; }
+
         private static void InitEcfConfigData()
         {
             ConfigEcfAccess = new ConfigEcfAccess();

@@ -29,6 +29,7 @@ namespace EmpyrionScripting.Interface
         bool IsElevatedScript { get; }
         string Version { get; }
         IConfigEcfAccess ConfigEcfAccess { get; }
+        IDictionary<string, object> GameOptionsYamlSettings { get; }
         bool ScriptWithinMainThread { get; set; }
         bool ScriptNeedsMainThread { get; set; }
         bool ScriptNeedsDeviceLock { get; set; }

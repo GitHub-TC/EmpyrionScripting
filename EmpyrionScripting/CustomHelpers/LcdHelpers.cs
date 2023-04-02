@@ -6,10 +6,22 @@ using HandlebarsDotNet;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace EmpyrionScripting.CustomHelpers
 {
+    public static class LcdHelpersExtension
+    {
+        private static Regex colorChange = new Regex("(?<pre>.*)\\[c\\]\\[(?<color>[0-9a-fA-F]+)\\](?<post>.*)");
+
+        public static string FormatToHtml(this string yamlText)
+            => colorChange.Replace(yamlText, m => $"{m.Groups["pre"]}<color=#{m.Groups["color"]}>{m.Groups["post"]}").Replace("[-][/c]", "</color>")
+                    .Replace("[b]", "<b>").Replace("[/b]", "</b>")
+                    .Replace("[i]", "<i>").Replace("[/i]", "</i>")
+                    .Replace("[u]", "<u>").Replace("[/u]", "</u>");
+    }
+
     [HandlebarHelpers]
     public static class LcdHelpers
     {

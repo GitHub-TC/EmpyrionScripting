@@ -462,6 +462,9 @@ Items habe folgende Basisdaten
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
 
+* {{regex value regex}}
+    * Prüft den Wert 'value' mit dem regulären Ausdruck 'regex' bei Erfolg/Misserfolg wird das Ergebnis des Ausdrucks in den nächsten Abschnitt als '.' übergeben
+
 * {{#ok data}}
   * Block ausführen wenn (data) einen Wert (ungleich 'null') hat oder (data) gleich 'true' oder ungleich 0 ist
   * anderfalls wird der {{else}} Teil ausgeführt
@@ -1469,7 +1472,7 @@ Items have the following basic data
 * ItemId: The token-independent part of the Id (this is equivalent to the token item in Empyrion).
 * TokenId: The Id of the token if it is a token.
 
-### (test)
+## Conditions
 * {{#test Select Op Value}}
   * Op: eq is =
   * Op: neq is <> or !=
@@ -1481,6 +1484,9 @@ Items have the following basic data
     * Value: '1,2,3,42'
     * Value: '1-3,42'
     * Value: 'A,xyz,mag'
+
+* {{regex value regex}}
+    * Checks the value 'value' with the regular expression 'regex' on success/failure the result of the expression is passed to the next section as '.'.
 
 ## Items
 + {{configid name}}

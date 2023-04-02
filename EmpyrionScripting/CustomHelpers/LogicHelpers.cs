@@ -1,8 +1,10 @@
-﻿using HandlebarsDotNet;
+﻿using EmpyrionScripting.Interface;
+using HandlebarsDotNet;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace EmpyrionScripting.CustomHelpers
 {
@@ -140,6 +142,28 @@ namespace EmpyrionScripting.CustomHelpers
             var r = TypeDescriptor.GetConverter(left.GetType()).ConvertFromString(right.ToString());
             return ((IComparable)left).CompareTo((IComparable)r);
         }
+
+        [HandlebarTag("regex")]
+        public static void RegExBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{regex}} helper must have exactly two argument: (testvalue) (regexphrase)");
+
+            try
+            {
+                var value = arguments.Get(0)?.ToString();
+                var regex = new Regex(arguments.Get(1)?.ToString());
+
+                var match = regex.Match(value);
+
+                if (match.Success) options.Template(output, match);
+                else               options.Inverse(output, match);
+            }
+            catch (Exception error)
+            {
+                throw new HandlebarsException($"{{regex}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a} ")}]:{EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
 
     }
 }

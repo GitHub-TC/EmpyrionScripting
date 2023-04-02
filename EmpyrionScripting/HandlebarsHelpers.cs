@@ -22,28 +22,35 @@ namespace EmpyrionScripting
     {
         public static void ScanHandlebarHelpers()
         {
-            var helperTypes = typeof(EmpyrionScripting).Assembly.GetTypes()
-                .Where(T => T.GetCustomAttributes(typeof(HandlebarHelpersAttribute), true).Length > 0);
+            try
+            {
+                var helperTypes = typeof(EmpyrionScripting).Assembly.GetTypes()
+                    .Where(T => T.GetCustomAttributes(typeof(HandlebarHelpersAttribute), true).Length > 0);
 
-            helperTypes.ForEach(T =>
-                T.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public)
-                .ForEach(M =>
-                {
-                    try
+                helperTypes.ForEach(T =>
+                    T.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public)
+                    .ForEach(M =>
                     {
-                        if (Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute)) is HandlebarTagAttribute A)
-                            Handlebars.RegisterHelper(A.Tag, (HandlebarsHelper)Delegate.CreateDelegate(typeof(HandlebarsHelper), M));
-                    }
-                    catch { }
+                        try
+                        {
+                            if (Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute)) is HandlebarTagAttribute A)
+                                Handlebars.RegisterHelper(A.Tag, (HandlebarsHelper)Delegate.CreateDelegate(typeof(HandlebarsHelper), M));
+                        }
+                        catch { }
 
-                    try
-                    {
-                        if (Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute)) is HandlebarTagAttribute A)
-                            Handlebars.RegisterHelper(A.Tag, (HandlebarsBlockHelper)Delegate.CreateDelegate(typeof(HandlebarsBlockHelper), M));
-                    }
-                    catch { }
-                })
-            );
+                        try
+                        {
+                            if (Attribute.GetCustomAttribute(M, typeof(HandlebarTagAttribute)) is HandlebarTagAttribute A)
+                                Handlebars.RegisterHelper(A.Tag, (HandlebarsBlockHelper)Delegate.CreateDelegate(typeof(HandlebarsBlockHelper), M));
+                        }
+                        catch { }
+                    })
+                );
+            }
+            catch (ReflectionTypeLoadException error)
+            {
+                Console.WriteLine(error.Message + error.LoaderExceptions.Aggregate("\n", (e, s) => $"{s}{e}\n"));
+            }
         }
 
 

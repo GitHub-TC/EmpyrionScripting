@@ -120,17 +120,19 @@ namespace EmpyrionScripting.CustomHelpers
             var root = rootObject as IScriptRootData;
             try
             {
-                if      (arguments[0] is object[] arraydata){ if (int.TryParse(arguments[1]?.ToString(), out var index)) output.Write(arraydata.Skip(index).FirstOrDefault()); }
-                else if (arguments[0] is IList listdata)    { if (int.TryParse(arguments[1]?.ToString(), out var index)) output.Write(listdata[index]); }
+                if      (arguments[0] is GroupCollection collectiondata) { if (int.TryParse(arguments[1].ToString(), out var index)) output.Write(collectiondata[index]?.Value); else output.Write(collectiondata[$"{arguments[1]}"]?.Value); }
+                else if (arguments[0] is object[] arraydata)             { if (int.TryParse(arguments[1].ToString(), out var index)) output.Write(arraydata.Skip(index).FirstOrDefault()); }
+                else if (arguments[0] is IList listdata)                 { if (int.TryParse(arguments[1].ToString(), out var index)) output.Write(listdata[index]); }
+                else { 
+                    var dictionaryType = arguments[0]?.GetType();
+                    if (dictionaryType != null && dictionaryType.IsGenericType)
+                    {
+                        var tryGetValue = dictionaryType.GetMethod("TryGetValue");
+                        if (tryGetValue == null) return;
 
-                var dictionaryType = arguments[0]?.GetType();
-                if (dictionaryType != null && dictionaryType.IsGenericType)
-                {
-                    var tryGetValue = dictionaryType.GetMethod("TryGetValue");
-                    if (tryGetValue == null) return;
-
-                    object[] parameters = new object[] { arguments[1], null };
-                    if ((bool)tryGetValue.Invoke(arguments[0], parameters)) output.Write(parameters[1]);
+                        object[] parameters = new object[] { arguments[1], null };
+                        if ((bool)tryGetValue.Invoke(arguments[0], parameters)) output.Write(parameters[1]);
+                    }
                 }
             }
             catch (Exception error)
@@ -147,10 +149,11 @@ namespace EmpyrionScripting.CustomHelpers
             var root = rootObject as IScriptRootData;
             try
             {
-                int.TryParse(arguments[1]?.ToString(), out var index);
-                if      (arguments[0] is object[] arraydata)    options.Template(output, arraydata.Skip(index).FirstOrDefault());
-                else if (arguments[0] is IList    listdata)     options.Template(output, listdata[index]);
-                else{
+                if      (arguments[0] is GroupCollection collectiondata) { if (int.TryParse(arguments[1].ToString(), out var index)) options.Template(output, collectiondata[index]); else options.Template(output, collectiondata[$"{arguments[1]}"]); }
+                else if (arguments[0] is object[] arraydata)             { if (int.TryParse(arguments[1].ToString(), out var index)) options.Template(output, arraydata.Skip(index).FirstOrDefault()); }
+                else if (arguments[0] is IList    listdata)              { if (int.TryParse(arguments[1].ToString(), out var index)) options.Template(output, listdata[index]); }
+                else
+                {
                     var dictionaryType = arguments[0]?.GetType();
                     if (dictionaryType != null && dictionaryType.IsGenericType)
                     {

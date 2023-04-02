@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.RegularExpressions;
 using Eleon.Modding;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
@@ -723,6 +724,26 @@ namespace EmpyrionScripting.UnitTests
             Assert.AreEqual(
                 "3",
                 lcdMod.ExecuteHandlebarScript(pf, data, "{{set 'index' 2}}{{#split '1-2-3-4-5-6-7-8-9' '-'}}{{lookup . @root.Data.index}}{{/split}}")
+            );
+        }
+
+        [TestMethod]
+        public void TestMethodLookUpGroupCollention()
+        {
+            var lcdMod = new EmpyrionScripting();
+            var pf = new PlayfieldScriptData(lcdMod);
+
+            var dict = new ConcurrentDictionary<string, object>();
+            dict.TryAdd("collection", new Regex("(?<n>\\d+)").Match("Test123abc"));
+
+            var data = Substitute.For<IScriptRootData>();
+            data.GetPersistendData().ReturnsForAnyArgs(dict);
+            data.Data = dict;
+
+            data.CycleCounter.Returns(0);
+            Assert.AreEqual(
+                "123",
+                lcdMod.ExecuteHandlebarScript(pf, data, "{{lookup @root.Data.collection 'n'}}")
             );
         }
 
