@@ -799,6 +799,16 @@ Items habe folgende Basisdaten
 {{tojson object}}
   + erzeugt aus dem Objket 'object' einen JSON Datenstring
 
+## Fliegen
+Hinweis: Fliegen funktioniert nur wenn kein Pilot das Schiff steuert und die Triebwerke eingeschaltet sind
+
++ {{movestop}}
+    + Stoppt den Flug
++ {{move vektor3 | x y z}}
+    + Flugrichtung festlegen
++ {{moveforward speed}}
+    + Fluggeschwindigkeit festlegen
+
 ## Dialogfenster
 + {{dialog player|Id|SignalName title body}} 
   + Zeigt einen Dialog dem Spieler an (bei SignalName wenn eines dieser Signale ausgelöst wird): (player | playerId | SignalName) (title) (body) [ButtonTexts] [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
@@ -1814,6 +1824,16 @@ DateTime format:
 
 {{tojson object}}
   + creates a JSON data string from the object
+
+## Flying
+Note: Flying only works when there is no pilot controlling the ship and the engines are switched on.
+
++ {{movestop}}
+    + Stop flight
++ {{move vector3 | x y z}}
+    + Set flight direction
++ {{moveforward speed}}
+    + Set flight speed
 
 ## Dialog windows
 + {{dialog player|Id|SignalName title body}} 

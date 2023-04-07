@@ -63,6 +63,11 @@ namespace EmpyrionScripting.DataWrapper
         public float Distance { get; set; }
         public FactionData Faction => GetCurrent()?.Faction ?? new FactionData();
 
+        public void MoveForward(float speed) => GetCurrent()?.MoveForward(speed);
+        public void Move(Vector3 direction) => GetCurrent()?.Move(direction);
+        public void MoveStop() => GetCurrent()?.MoveStop();
+
+
         public int BelongsTo => GetCurrent()?.BelongsTo ?? 0;
         public int DockedTo { get { try { return GetCurrent().DockedTo; } catch { return 0; } } }
 

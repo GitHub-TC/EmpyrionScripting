@@ -180,5 +180,72 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("movestop")]
+        public static void MoveStopHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 0) throw new HandlebarsException("{{movestop}} have no arguments)");
+
+            try
+            {
+                var root = rootObject as IScriptRootData;
+                root.E.Move(Vector3.zero);
+                root.E.MoveForward(0);
+                root.E.MoveStop();
+                output.Write("movestop");
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, rootObject)) output.Write("{{movestop}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("move")]
+        public static void MoveHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1 && arguments.Length != 3) throw new HandlebarsException("{{move (vector3direction) | x y z}}");
+
+            try
+            {
+                Vector3 direction;
+
+                var root = rootObject as IScriptRootData;
+                if      (arguments[0] is Vector3    vector    ) direction = vector;
+                else if (arguments[0] is VectorInt3 vectorint3) direction = new Vector3(vectorint3.x, vectorint3.y, vectorint3.z);
+                else { 
+                    if (!float.TryParse(arguments[0]?.ToString(), out var x)) throw new HandlebarsException($"move argument (x) as float found {arguments[0]}");
+                    if (!float.TryParse(arguments[1]?.ToString(), out var y)) throw new HandlebarsException($"move argument (y) as float found {arguments[1]}");
+                    if (!float.TryParse(arguments[2]?.ToString(), out var z)) throw new HandlebarsException($"move argument (z) as float found {arguments[2]}");
+                    direction = new Vector3(x, y, z);
+                }
+
+                root.E.Move(direction);
+                output.Write($"move to {direction}");
+
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, rootObject)) output.Write("{{movestop}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("moveforward")]
+        public static void MoveForwardHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{moveforward have one argument (speed)");
+
+            try
+            {
+                var root = rootObject as IScriptRootData;
+                if(!float.TryParse(arguments[0]?.ToString(), out var speed)) throw new HandlebarsException($"moveforward have one argument (speed) as float found {arguments[0]}");
+                
+                root.E.MoveForward(speed);
+                output.Write($"moveforward with {speed}");
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, rootObject)) output.Write("{{moveforward}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
     }
 }

@@ -20,8 +20,13 @@ namespace EmpyrionScripting.Interface
         int BelongsTo { get; }
         int DockedTo { get; }
 
+        void MoveForward(float speed);
+        void Move(Vector3 direction);
+        void MoveStop();
+
         IEntity GetCurrent();
         IPlayfield GetCurrentPlayfield();
+
         IScriptInfo[] ScriptInfos { get; }
         bool IsElevated { get; }
     }
