@@ -15,14 +15,14 @@ namespace EmpyrionScripting
         public bool NeedsMainThread { get; set; }
         public bool NeedsDeviceLock { get; set; }
         public bool IsElevatedScript { get; set; }
+        public int TimeCriticalScriptExecutions { get; set; }
 
         public int RunningInstances => _RunningInstances;
         public int _RunningInstances;
 
         public int TimeLimitReached => _TimeLimitReached;
-
+        public int _TimeLimitReached;
         public ScriptLanguage ScriptLanguage { get; set; }
 
-        public int _TimeLimitReached;
     }
 }

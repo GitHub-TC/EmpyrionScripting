@@ -21,7 +21,7 @@ namespace EmpyrionScripting.Interface
         int DockedTo { get; }
 
         void MoveForward(float speed);
-        void Move(Vector3 direction);
+        void MoveTo(Vector3 direction);
         void MoveStop();
 
         IEntity GetCurrent();

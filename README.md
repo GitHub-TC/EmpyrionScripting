@@ -804,7 +804,7 @@ Hinweis: Fliegen funktioniert nur wenn kein Pilot das Schiff steuert und die Tri
 
 + {{movestop}}
     + Stoppt den Flug
-+ {{move vektor3 | x y z}}
++ {{moveto vektor3 | x y z}}
     + Flugrichtung festlegen
 + {{moveforward speed}}
     + Fluggeschwindigkeit festlegen
@@ -1830,7 +1830,7 @@ Note: Flying only works when there is no pilot controlling the ship and the engi
 
 + {{movestop}}
     + Stop flight
-+ {{move vector3 | x y z}}
++ {{moveto vector3 | x y z}}
     + Set flight direction
 + {{moveforward speed}}
     + Set flight speed

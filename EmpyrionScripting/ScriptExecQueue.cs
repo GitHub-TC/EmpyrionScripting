@@ -24,6 +24,7 @@ namespace EmpyrionScripting
 
         public DateTime LastIterationUpdate { get; set; }
 
+        public ConcurrentDictionary<string, IScriptRootData> TimeCriticalExec { get; } = new ConcurrentDictionary<string, IScriptRootData>();
         public ConcurrentDictionary<string, IScriptRootData> WaitForExec { get; } = new ConcurrentDictionary<string, IScriptRootData>();
         public ConcurrentQueue<string>                       ExecQueue { get; private set; } = new ConcurrentQueue<string>();
 
@@ -90,7 +91,9 @@ namespace EmpyrionScripting
             var timeLimitBackgroundReached = new Func<bool>(() => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopBackgroundTimeLimiterMS);
             TimeLimitSyncReached           = new Func<bool>(() => scriptLoopTimeLimiterStopwatch.ElapsedMilliseconds > EmpyrionScripting.Configuration.Current.ScriptLoopSyncTimeLimiterMS);
 
-            Log($"ExecNext: {WaitForExec.Count} -> {ExecQueue.Count}", LogLevel.Debug);
+            Log($"ExecNext: {WaitForExec.Count} -> {ExecQueue.Count} TimeCriticalScript:{TimeCriticalExec.Count}", LogLevel.Debug);
+
+            TimeCriticalExec.ForEach(t => ExecTimeCritical(t.Value));
 
             for (int i = maxCount - 1; i >= 0; i--)
             {
@@ -179,6 +182,12 @@ namespace EmpyrionScripting
             finally { WaitForExec.TryRemove(data.ScriptId, out _); }
         }
 
+        private void ExecTimeCritical(IScriptRootData data)
+        {
+            try { ExecScript(data); }
+            catch (Exception error) { Log($"ExecTimeCritical: {data.ScriptId}:{error}", LogLevel.Debug); }
+        }
+
         private void ExecScript(IScriptRootData data)
         {
             if (data.E.EntityType == EntityType.Proxy || data.E.EntityType == EntityType.Unknown) return;
@@ -202,8 +211,12 @@ namespace EmpyrionScripting
                 ProcessScript(data);
                 Interlocked.Decrement(ref info._RunningInstances);
 
-                info.NeedsMainThread = data.ScriptNeedsMainThread;
-                info.NeedsDeviceLock = data.ScriptNeedsDeviceLock;
+                if (data.TimeCriticalScript) TimeCriticalExec.TryAdd   (data.ScriptId, data);
+                else                         TimeCriticalExec.TryRemove(data.ScriptId, out var _);
+
+                if (data.TimeCriticalScript) info.TimeCriticalScriptExecutions++;
+                info.NeedsMainThread    = data.ScriptNeedsMainThread;
+                info.NeedsDeviceLock    = data.ScriptNeedsDeviceLock;
                 ScriptNeedsMainThread.TryUpdate(data.ScriptId, data.ScriptNeedsMainThread, false);
                 ScriptNeedsDeviceLock.TryUpdate(data.ScriptId, data.ScriptNeedsDeviceLock, false);
 

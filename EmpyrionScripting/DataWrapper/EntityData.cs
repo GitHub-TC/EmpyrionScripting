@@ -63,10 +63,39 @@ namespace EmpyrionScripting.DataWrapper
         public float Distance { get; set; }
         public FactionData Faction => GetCurrent()?.Faction ?? new FactionData();
 
-        public void MoveForward(float speed) => GetCurrent()?.MoveForward(speed);
-        public void Move(Vector3 direction) => GetCurrent()?.Move(direction);
-        public void MoveStop() => GetCurrent()?.MoveStop();
+        public void MoveForward(float speed)
+        {
+            if (pfScriptData.PersistendData.TryGetValue($"MoveForward{Id}", out var currentSpeed) && (float)currentSpeed == speed) return;
+            pfScriptData.PersistendData.AddOrUpdate($"MoveForward{Id}", speed, (k, d) => speed);
+            pfScriptData.PersistendData.TryRemove($"MoveStop{Id}", out _);
 
+            GetCurrent()?.MoveForward(speed);
+        }
+
+        public void MoveTo(Vector3 direction)
+        {
+            if (pfScriptData.PersistendData.TryGetValue($"MoveTo{Id}", out var currentDirection) && (Vector3)currentDirection == direction) return;
+            pfScriptData.PersistendData.AddOrUpdate($"MoveTo{Id}", direction, (k,d) => direction);
+            pfScriptData.PersistendData.TryRemove($"MoveStop{Id}", out _);
+
+            GetCurrent()?.Move(direction);
+        }
+
+        public void MoveStop()
+        {
+            if (pfScriptData.PersistendData.TryGetValue($"MoveStop{Id}", out _)) return;
+            pfScriptData.PersistendData.TryAdd($"MoveStop{Id}", Id);
+            pfScriptData.PersistendData.TryRemove($"MoveForward{Id}", out _);
+            pfScriptData.PersistendData.TryRemove($"MoveTo{Id}", out _);
+
+            var e = GetCurrent();
+            if(e == null) return;
+
+            e.MoveForward(0);
+            e.Move(Vector3.zero);
+            e.MoveStop();
+
+        }
 
         public int BelongsTo => GetCurrent()?.BelongsTo ?? 0;
         public int DockedTo { get { try { return GetCurrent().DockedTo; } catch { return 0; } } }
@@ -89,9 +118,7 @@ namespace EmpyrionScripting.DataWrapper
         public IScriptInfo[] ScriptInfos
         {
             get {
-                PlayfieldScriptData pfScriptData = null;
-                var pfName = GetCurrentPlayfield()?.Name;
-                if (string.IsNullOrEmpty(pfName) || EmpyrionScripting.EmpyrionScriptingInstance?.PlayfieldData.TryGetValue(pfName, out pfScriptData) == false) return Array.Empty<IScriptInfo>();
+                if(pfScriptData == null) return Array.Empty<IScriptInfo>();
 
                 var entityId = GetCurrent()?.Id;
                 if (entityId == 0) return Array.Empty<IScriptInfo>();
@@ -102,5 +129,19 @@ namespace EmpyrionScripting.DataWrapper
                     .ToArray();
             }
         }
+
+        PlayfieldScriptData pfScriptData
+        {
+            get
+            {
+                if(_pfScriptData != null) return _pfScriptData;
+
+                var pfName = GetCurrentPlayfield()?.Name;
+                return string.IsNullOrEmpty(pfName) || EmpyrionScripting.EmpyrionScriptingInstance?.PlayfieldData.TryGetValue(pfName, out _pfScriptData) == false
+                    ? null
+                    : _pfScriptData;
+            }
+        }
+        PlayfieldScriptData _pfScriptData;
     }
 }

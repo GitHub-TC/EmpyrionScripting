@@ -157,6 +157,8 @@ namespace EmpyrionScripting.DataWrapper
         public IConfigEcfAccess ConfigEcfAccess => EmpyrionScripting.ConfigEcfAccess;
         public IDictionary<string, object> GameOptionsYamlSettings => EmpyrionScripting.GameOptionsYamlSettings;
 
+        public bool TimeCriticalScript { get; set; }
+
         public bool ScriptWithinMainThread { get; set; }
         public bool ScriptNeedsMainThread { get; set; }
         public bool ScriptNeedsDeviceLock { get; set; }

@@ -30,6 +30,7 @@ namespace EmpyrionScripting.Interface
         string Version { get; }
         IConfigEcfAccess ConfigEcfAccess { get; }
         IDictionary<string, object> GameOptionsYamlSettings { get; }
+        bool TimeCriticalScript { get; set; }
         bool ScriptWithinMainThread { get; set; }
         bool ScriptNeedsMainThread { get; set; }
         bool ScriptNeedsDeviceLock { get; set; }

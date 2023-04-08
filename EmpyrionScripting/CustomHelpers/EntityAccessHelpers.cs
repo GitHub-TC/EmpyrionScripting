@@ -188,10 +188,10 @@ namespace EmpyrionScripting.CustomHelpers
             try
             {
                 var root = rootObject as IScriptRootData;
-                root.E.Move(Vector3.zero);
-                root.E.MoveForward(0);
                 root.E.MoveStop();
                 output.Write("movestop");
+
+                root.TimeCriticalScript = false;
             }
             catch (Exception error)
             {
@@ -199,10 +199,10 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        [HandlebarTag("move")]
-        public static void MoveHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        [HandlebarTag("moveto")]
+        public static void MoveToHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 1 && arguments.Length != 3) throw new HandlebarsException("{{move (vector3direction) | x y z}}");
+            if (arguments.Length != 1 && arguments.Length != 3) throw new HandlebarsException("{{moveto (vector3direction) | x y z}}");
 
             try
             {
@@ -212,19 +212,20 @@ namespace EmpyrionScripting.CustomHelpers
                 if      (arguments[0] is Vector3    vector    ) direction = vector;
                 else if (arguments[0] is VectorInt3 vectorint3) direction = new Vector3(vectorint3.x, vectorint3.y, vectorint3.z);
                 else { 
-                    if (!float.TryParse(arguments[0]?.ToString(), out var x)) throw new HandlebarsException($"move argument (x) as float found {arguments[0]}");
-                    if (!float.TryParse(arguments[1]?.ToString(), out var y)) throw new HandlebarsException($"move argument (y) as float found {arguments[1]}");
-                    if (!float.TryParse(arguments[2]?.ToString(), out var z)) throw new HandlebarsException($"move argument (z) as float found {arguments[2]}");
+                    if (!float.TryParse(arguments[0]?.ToString(), out var x)) throw new HandlebarsException($"moveto argument (x) as float found {arguments[0]}");
+                    if (!float.TryParse(arguments[1]?.ToString(), out var y)) throw new HandlebarsException($"moveto argument (y) as float found {arguments[1]}");
+                    if (!float.TryParse(arguments[2]?.ToString(), out var z)) throw new HandlebarsException($"moveto argument (z) as float found {arguments[2]}");
                     direction = new Vector3(x, y, z);
                 }
 
-                root.E.Move(direction);
+                root.E.MoveTo(direction);
                 output.Write($"move to {direction}");
 
+                root.TimeCriticalScript = true;
             }
             catch (Exception error)
             {
-                if (!CsScriptFunctions.FunctionNeedsMainThread(error, rootObject)) output.Write("{{movestop}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, rootObject)) output.Write("{{moveto}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -240,6 +241,8 @@ namespace EmpyrionScripting.CustomHelpers
                 
                 root.E.MoveForward(speed);
                 output.Write($"moveforward with {speed}");
+
+                root.TimeCriticalScript = true;
             }
             catch (Exception error)
             {
