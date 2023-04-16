@@ -37,6 +37,8 @@ namespace EmpyrionScripting
 
         public void ReadConfigEcf(string contentPath, string activeScenario, string blockMappingFile, IModApi modApi)
         {
+            Log($"EmpyrionScripting ReadConfigEcf: ContentPath:{contentPath} Scenario:{activeScenario}", LogLevel.Message);
+
             ContentPath = contentPath;
             ScenarioContentPath = string.IsNullOrEmpty(activeScenario) ? null : Path.Combine(contentPath, "Scenarios", activeScenario, "Content");
 

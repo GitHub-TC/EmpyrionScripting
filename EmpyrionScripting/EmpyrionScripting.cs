@@ -152,9 +152,16 @@ namespace EmpyrionScripting
 
         private void Application_GameEntered(bool hasEntered)
         {
-            ModApi.Log($"Application_GameEntered {hasEntered}");
-            if (hasEntered) InitGameDependedData(false);
-            ModApi.Log("Application_GameEntered init finish");
+            try 
+            { 
+                ModApi.Log($"Application_GameEntered {hasEntered}");
+                if (hasEntered) InitGameDependedData(false);
+                ModApi.Log("Application_GameEntered init finish");
+            }
+            catch (Exception error)
+            {
+                ModApi.LogError($"Application_GameEntered: {error}");
+            }
         }
 
         private void CheckAddOnAssemblies()
@@ -327,34 +334,41 @@ namespace EmpyrionScripting
 
         private void Application_OnPlayfieldLoaded(IPlayfield playfield)
         {
-            PlayfieldScriptData data = null;
-
-            InitGameDependedData(ModApi.Application.Mode == ApplicationMode.SinglePlayer);
-
-            if (!PlayfieldData.TryAdd(playfield.Name, data = new PlayfieldScriptData(this)
+            try
             {
-                PlayfieldName   = playfield.Name,
-                Playfield       = playfield,
-            })) Log($"PlayfieldData.TryAdd failed {playfield.Name}", LogLevel.Error);
+                PlayfieldScriptData data = null;
 
-            UpdateScriptingModInfoData();
+                InitGameDependedData(ModApi.Application.Mode == ApplicationMode.SinglePlayer);
 
-            ModApi.Log($"StartScripts for {playfield.Name} pending");
-            TaskTools.Delay(Configuration.Current.DelayStartForNSecondsOnPlayfieldLoad, () => {
-                ModApi.Log($"StartScripts for {playfield.Name}");
-                data.PauseScripts = false;
-
-                if (ModApi.Application.Mode == ApplicationMode.SinglePlayer)
+                if (!PlayfieldData.TryAdd(playfield.Name, data = new PlayfieldScriptData(this)
                 {
-                    ModApi.Log(playfield.Entities?.Aggregate($"Player:{playfield.Players.FirstOrDefault().Value?.Name} PlayerDriving:{playfield.Players.FirstOrDefault().Value?.DrivingEntity?.Name}", (L, E) => L + $" {E.Key}:{E.Value.Name}"));
-                    
-                    data.AddEntity(playfield.Players.FirstOrDefault().Value?.DrivingEntity);
-                    playfield.Entities?.ForEach(E => data.AddEntity(E.Value));
-                }
-            });
+                    PlayfieldName   = playfield.Name,
+                    Playfield       = playfield,
+                })) Log($"PlayfieldData.TryAdd failed {playfield.Name}", LogLevel.Error);
 
-            data.Playfield.OnEntityLoaded   += data.Playfield_OnEntityLoaded;
-            data.Playfield.OnEntityUnloaded += data.Playfield_OnEntityUnloaded;
+                UpdateScriptingModInfoData();
+
+                ModApi.Log($"StartScripts for {playfield.Name} pending");
+                TaskTools.Delay(Configuration.Current.DelayStartForNSecondsOnPlayfieldLoad, () => {
+                    ModApi.Log($"StartScripts for {playfield.Name}");
+                    data.PauseScripts = false;
+
+                    if (ModApi.Application.Mode == ApplicationMode.SinglePlayer)
+                    {
+                        ModApi.Log(playfield.Entities?.Aggregate($"Player:{playfield.Players.FirstOrDefault().Value?.Name} PlayerDriving:{playfield.Players.FirstOrDefault().Value?.DrivingEntity?.Name}", (L, E) => L + $" {E.Key}:{E.Value.Name}"));
+                    
+                        data.AddEntity(playfield.Players.FirstOrDefault().Value?.DrivingEntity);
+                        playfield.Entities?.ForEach(E => data.AddEntity(E.Value));
+                    }
+                });
+
+                data.Playfield.OnEntityLoaded   += data.Playfield_OnEntityLoaded;
+                data.Playfield.OnEntityUnloaded += data.Playfield_OnEntityUnloaded;
+            }
+            catch (Exception error)
+            {
+                ModApi.LogError($"Application_OnPlayfieldLoaded: {error}");
+            }
         }
 
         private void UpdateScriptingModInfoData()
@@ -387,24 +401,31 @@ namespace EmpyrionScripting
 
         private void Application_OnPlayfieldUnloading(IPlayfield playfield)
         {
-            ScriptingModScriptsInfoData.TryRemove(playfield.Name, out _);
+            try
+            {
+                ScriptingModScriptsInfoData.TryRemove(playfield.Name, out _);
 
-            if(!PlayfieldData.TryRemove(playfield.Name, out var data)) return;
+                if(!PlayfieldData.TryRemove(playfield.Name, out var data)) return;
 
-            data.Playfield.OnEntityLoaded   -= data.Playfield_OnEntityLoaded;
-            data.Playfield.OnEntityUnloaded -= data.Playfield_OnEntityUnloaded;
+                data.Playfield.OnEntityLoaded   -= data.Playfield_OnEntityLoaded;
+                data.Playfield.OnEntityUnloaded -= data.Playfield_OnEntityUnloaded;
 
-            ModApi.Log($"PauseScripts for {playfield.Name} {(data.PauseScripts ? "always stopped" : "scripts running")}");
-            data.PauseScripts = true;
+                ModApi.Log($"PauseScripts for {playfield.Name} {(data.PauseScripts ? "always stopped" : "scripts running")}");
+                data.PauseScripts = true;
 
-            DisplayScriptInfos();
-            data.ScriptExecQueue?.Clear();
-            data.LcdCompileCache?.Clear();
-            data.PersistendData?.Clear();
+                DisplayScriptInfos();
+                data.ScriptExecQueue?.Clear();
+                data.LcdCompileCache?.Clear();
+                data.PersistendData?.Clear();
 
-            var stores = data.EventStore?.Values.ToArray();
-            data.EventStore?.Clear();
-            stores?.ForEach(S => ((EventStore)S).Dispose());
+                var stores = data.EventStore?.Values.ToArray();
+                data.EventStore?.Clear();
+                stores?.ForEach(S => ((EventStore)S).Dispose());
+            }
+            catch (Exception error)
+            {
+                ModApi.LogError($"Application_OnPlayfieldUnloading: {error}");
+            }
         }
 
         public void StartAllScriptsForPlayfieldServer()
