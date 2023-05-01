@@ -233,10 +233,10 @@ namespace EmpyrionScripting
                 .ToDictionary(n => n.Key.ToString(), n => GetTypedValue(n.Value.ToString()));
         }
 
-        private static object GetTypedValue(string? value)
+        private static object GetTypedValue(string value)
         {
             if(bool.TryParse(value, out var boolResult)) return boolResult;
-            if(int.TryParse(value, out var intResult))   return intResult;
+            if(int .TryParse(value, out var intResult )) return intResult;
 
             return value;
         }

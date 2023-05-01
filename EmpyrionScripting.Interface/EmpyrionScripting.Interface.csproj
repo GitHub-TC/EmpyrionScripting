@@ -79,6 +79,7 @@
     <Compile Include="ILimitedPlayerData.cs" />
     <Compile Include="IPlayerData.cs" />
     <Compile Include="IPlayfieldData.cs" />
+    <Compile Include="IPlayfieldDetails.cs" />
     <Compile Include="IScriptInfo.cs" />
     <Compile Include="IScriptModData.cs" />
     <Compile Include="IScriptSaveGameRootData.cs" />

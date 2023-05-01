@@ -9,14 +9,15 @@ using EmpyrionScripting.CustomHelpers;
 
 namespace EmpyrionScripting.DataWrapper
 {
-    public class PlayfieldDetails
+    public class PlayfieldDetails : IPlayfieldDetails
     {
         public string PlayfieldType { get; set; }
         public string PlanetType { get; set; }
         public int PlanetSize { get; set; }
         public double PlanetAxis { get; set; }
-        public string Description { 
-            get => _Description; 
+        public string Description
+        {
+            get => _Description;
             set => _Description = value?.FormatToHtml();
         }
         string _Description;
@@ -56,7 +57,7 @@ namespace EmpyrionScripting.DataWrapper
         public string PlanetClass => playfield.PlanetClass;
         public bool IsPvP => playfield.IsPvP;
 
-        public PlayfieldDetails Details => playfieldInfos.GetOrAdd(Name, ReadPlayfieldInfo);
+        public IPlayfieldDetails Details => playfieldInfos.GetOrAdd(Name, ReadPlayfieldInfo);
 
         public static PlayfieldDetails ReadPlayfieldInfo(string playfieldName)
         {
