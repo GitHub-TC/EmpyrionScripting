@@ -13,7 +13,7 @@
         string PlayfieldType { get; }
         double Radiation { get; }
         int[] TemperatureMinMax { get; }
-        int TemperatureDay { get; set; }
+        int TemperatureDay { get; }
         int TemperatureMin { get; }
         int TemperatureMax { get; }
     }
