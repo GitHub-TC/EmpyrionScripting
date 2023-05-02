@@ -24,6 +24,9 @@ namespace EmpyrionScripting.DataWrapper
 
         public double Gravity { get; set; }
         public int[] TemperatureMinMax { get; set; }
+        public int TemperatureDay { get; set; }
+        public int TemperatureMin => TemperatureMinMax == null || TemperatureMinMax.Length == 0 ? TemperatureDay : TemperatureMinMax.FirstOrDefault();
+        public int TemperatureMax => TemperatureMinMax == null || TemperatureMinMax.Length == 0 ? TemperatureDay : TemperatureMinMax.LastOrDefault();
         public bool AtmosphereBreathable { get; set; }
         public double AtmosphereO2 { get; set; }
         public double AtmosphereDensity { get; set; }
