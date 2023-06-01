@@ -679,6 +679,24 @@ Items habe folgende Basisdaten
 + {{loop array/dictionary}}
   + Iteriert über die einzelenen Elemente des Arrays oder Dictionaries
 
++ {{createdictionary}}
+  + Erzeugt ein Dictionary welches mit 'addkeyvalue' befüllt werden kann
+
++ {{set dictionary key value}} | {{setblock dictionary key}}
+  + Fügt Key/Value dem Dictionary hinzu
+
++ {{removekey dictionary key}}
+  + Löscht den Eintrag key aus dem Dictionary
+
++ {{createarray}}
+  + Erzeugt ein Array welches mit 'additem' befüllt werden kann
+
++ {{set array value}} | {{setblock array}}
+  + Fügt value dem Array hinzu
+
++ {{removeitem array value}}
+  + Löscht den Eintrag value aus dem Array
+
 ## Block
 + {{block structure x y z}}
   + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
@@ -708,6 +726,9 @@ Items habe folgende Basisdaten
 + {{distance (lVector) (rVector) [format]}}
   + Abstand zwischen (lVector) und (rVector)
   + Optional ein format
+
++ {{vector x y z}}
+  + Erzeugt einen Vektor aus x y z
 
 + {{min (lValue) (rValue)}}
   + Liefert den kleineren Wert der beiden
@@ -1709,6 +1730,25 @@ DateTime format:
   + Distance between (lVector) and (rVector)
   + Optional a format
 
+### (data)
++ {{createdictionary}}
+  + Creates a dictionary which can be filled with 'addkeyvalue'.
+
++ {{set dictionary key value}} | {{setblock dictionary key}}
+  + Adds/Update key/value to the dictionary
+
++ {{removekey dictionary key}}
+  + Deletes the entry key from the dictionary
+
++ {{createarray}}
+  + Creates an array which can be filled with 'additem'.
+
++ {{set array value}} | {{setblock array}}
+  + Adds value to the array
+
++ {{removeitem array value}}
+  + Deletes the entry value from the array
+
 ### (blocks)
 + {{block structure x y z}}
 
@@ -1804,6 +1844,9 @@ DateTime format:
     Note: This is only possible if the playfield has not been changed or a logout has not taken place.
 
 ## Positions (structure and world)
++ {{vector x y z}}
+  + Creates a vector from x y z
+
 + {{structtoglobalpos structure (vector | x y z)}}
   + Returns the world coorinates of structurepos structure (vector | x y z)
 

@@ -228,6 +228,17 @@ WHERE ((Entities.facgroup = 1 AND Entities.facid = @FactionId) OR (Entities.facg
                     }
                 },
 
+                {"Bookmarks", new DBQuery {CacheQueryForSeconds = 60, Description = "Provides the Bookmarks of the player and the faction", Query =
+@"
+SELECT * FROM Bookmarks
+JOIN Entities ON Bookmarks.entityid = Entities.entityid
+JOIN Playfields ON Bookmarks.pfid = Playfields.pfid
+JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE ((Bookmarks.facgroup = 1 AND Bookmarks.facid = @FactionId) OR (Bookmarks.facgroup = 1 AND Bookmarks.facid = @PlayerId) OR (Bookmarks.facgroup = 0 AND Bookmarks.facid = @FactionId)) {additionalWhereAnd}
+"
+                    }
+                },
+
             }
         };
     }

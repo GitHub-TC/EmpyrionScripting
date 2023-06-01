@@ -83,12 +83,14 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("set")]
         public static void SetHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{set key data}} helper must have two argument: (key) (data)");
+            if (arguments.Length != 2 && arguments.Length != 3) throw new HandlebarsException("{{set key data}} helper must have two argument: (key) (data) | (array) (value) | (dictionary) (key) (value)");
 
             var root = rootObject as IScriptRootData;
             try
             {
-                root.Data.AddOrUpdate(arguments[0]?.ToString(), arguments[1], (S, O) => arguments[1]);
+                if      (arguments[0] is ConcurrentDictionary<string, object> dictionary) dictionary.AddOrUpdate(arguments[1].ToString(), arguments[2], (k, o) => arguments[2]);
+                else if (arguments[0] is List<object>                         list      ) list.Add(arguments[1]);
+                else root.Data.AddOrUpdate(arguments[0]?.ToString(), arguments[1], (S, O) => arguments[1]);
             }
             catch (Exception error)
             {
@@ -109,6 +111,68 @@ namespace EmpyrionScripting.CustomHelpers
             catch (Exception error)
             {
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{setcache}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("createdictionary")]
+        public static void CreateDictionaryHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 0) throw new HandlebarsException("{{createdictionary}} helper must have none argument");
+
+            try
+            {
+                options.Template(output, new ConcurrentDictionary<string, object>());
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{createdictionary}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("removekey")]
+        public static void RremoveKeyValueHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 3) throw new HandlebarsException("{{removekey}} helper must have three argument: dictionary key value");
+
+            try
+            {
+                var dictionary = arguments[0] as Dictionary<string, object>;
+                dictionary.Remove(arguments[1].ToString());
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, rootObject)) output.Write("{{removekey}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("createarray")]
+        public static void CreateArrayHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 0) throw new HandlebarsException("{{createarray}} helper must have none argument");
+
+            try
+            {
+                options.Template(output, new List<object>());
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{createarray}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("removeitem")]
+        public static void RemoveItemHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{removeitem}} helper must have three argument: list value");
+
+            try
+            {
+                var list = arguments[0] as List<object>;
+                list.Remove(arguments[1]);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, rootObject)) output.Write("{{aremoveitemdditem}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
@@ -219,7 +283,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("setblock")]
         public static void SetBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 1) throw new HandlebarsException("{{setblock key}} helper must have one argument: (key)");
+            if (arguments.Length != 1 && arguments.Length != 2) throw new HandlebarsException("{{setblock key}} helper must have one argument: (key|array) | (dictionary) (key)");
 
             var root = rootObject as IScriptRootData;
             try
@@ -227,7 +291,9 @@ namespace EmpyrionScripting.CustomHelpers
                 var data = new StringWriter();
                 options.Template(data, context as object);
 
-                root.Data.AddOrUpdate(arguments[0]?.ToString(), data.ToString(), (S, O) => data.ToString());
+                if      (arguments[0] is ConcurrentDictionary<string, object> dictionary) dictionary.AddOrUpdate(arguments[1].ToString(), data.ToString(), (k, o) => data.ToString());
+                else if (arguments[0] is List<object>                         list      ) list.Add(data.ToString());
+                else root.Data.AddOrUpdate(arguments[0]?.ToString(), data.ToString(), (S, O) => data.ToString());
             }
             catch (Exception error)
             {

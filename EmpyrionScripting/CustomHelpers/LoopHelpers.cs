@@ -5,6 +5,7 @@ using HandlebarsDotNet;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -44,22 +45,36 @@ namespace EmpyrionScripting.CustomHelpers
             if(orderedByFields == "+")                  return array.OrderBy          (x => x);
             if(orderedByFields == "-")                  return array.OrderByDescending(x => x);
 
+            var isDictionary = array.FirstOrDefault() is IDictionary;
+
             var orderBy = orderedByFields
                 .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(O => O.Trim())
-                .Select(O => new { Ascending = O.StartsWith("+"), Property = array.First().GetType().GetProperty(O.Substring(1)) })
-                .Where(P => P.Property != null)
+                .Select(O => new { Ascending = O.StartsWith("+"), Name = O.Substring(1), Property = isDictionary ? null : array.First().GetType().GetProperty(O.Substring(1)) })
+                .Where(P => isDictionary || P.Property != null)
                 .ToArray();
 
             return orderBy.Length == 0 || !array.Any()
                 ? null
                 : orderBy.Skip(1).Aggregate(
                     orderBy[0].Ascending
-                        ? array.OrderBy          (V => orderBy[0].Property.GetValue(V))
-                        : array.OrderByDescending(V => orderBy[0].Property.GetValue(V)),
+                        ? array.OrderBy          (V => isDictionary ? GetNativeValue(((IDictionary<string, object>)V)[orderBy[0].Name]) : orderBy[0].Property.GetValue(V))
+                        : array.OrderByDescending(V => isDictionary ? GetNativeValue(((IDictionary<string, object>)V)[orderBy[0].Name]) : orderBy[0].Property.GetValue(V)),
                     (L, O) => O.Ascending
-                        ? L.ThenBy             (V => O.Property.GetValue(V))
-                        : L.ThenByDescending   (V => O.Property.GetValue(V)));
+                        ? L.ThenBy             (V => isDictionary ? GetNativeValue(((IDictionary<string, object>)V)[O.Name]) : O.Property.GetValue(V))
+                        : L.ThenByDescending   (V => isDictionary ? GetNativeValue(((IDictionary<string, object>)V)[O.Name]) : O.Property.GetValue(V)));
+        }
+
+        public static object GetNativeValue(object v)
+        {
+            if (!(v is string vs)) return v;
+
+            if (bool  .TryParse(vs, out var b                                                  )) return b;
+            if (int   .TryParse(vs, NumberStyles.Integer, null, out var i                      )) return i;
+            if (double.TryParse(vs, NumberStyles.Float, CultureInfo.CurrentCulture, out var fc )) return fc;
+            if (double.TryParse(vs, NumberStyles.Float, CultureInfo.InvariantCulture, out var f)) return f;
+
+            return v;
         }
 
         [HandlebarTag("loop")]
@@ -97,9 +112,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 if (!orderBy.StartsWith("+") && !orderBy.StartsWith("-")) orderBy = reverse ? $"-{orderBy}" : $"+{orderBy}";
 
-                var orderedArray = array.Count() == 0 
-                    ? reverse ? array.OrderByDescending(d => d) : array.OrderBy(d => d)
-                    : OrderedList(array, orderBy);
+                var orderedArray = array.Count() == 0 ? null : OrderedList(array, orderBy);
 
                 if (orderedArray == null) options.Inverse(output, (object)context);
                 else                      orderedArray.ForEach(V => options.Template(output, V), () => root.TimeLimitReached);

@@ -10,6 +10,25 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class MathHelpers
     {
+        [HandlebarTag("vector")]
+        public static void VectorBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 3) throw new HandlebarsException("{{vector}} helper must have exactly three arguments: (x) (y) (z)");
+
+            try
+            {
+                float.TryParse(arguments[0]?.ToString(), out float x);
+                float.TryParse(arguments[1]?.ToString(), out float y);
+                float.TryParse(arguments[2]?.ToString(), out float z);
+
+                options.Template(output, new Vector3(x, y, z));
+            }
+            catch (Exception error)
+            {
+                throw new HandlebarsException($"{{vector}} [{arguments?.Aggregate(string.Empty, (s, a) => s + $"{a}")}]:{EmpyrionScripting.ErrorFilter(error)}");
+            }
+        }
+
         [HandlebarTag("math")]
         public static void MathBlockHelper(TextWriter output, object root, HelperOptions options, dynamic context, object[] arguments)
         {

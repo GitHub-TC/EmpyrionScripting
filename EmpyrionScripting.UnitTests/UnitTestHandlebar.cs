@@ -761,6 +761,21 @@ namespace EmpyrionScripting.UnitTests
         }
 
         [TestMethod]
+        public void OrderedArrayTestDictionary()
+        {
+            var array = new List<Dictionary<string, object>>();
+
+            array.Add(new Dictionary<string, object> { { "X", 1 }, { "Y", "2856,32" }, { "Z", "2856,32" } });
+            array.Add(new Dictionary<string, object> { { "X", 3 }, { "Y", "3856,32" }, { "Z", "3856,32" } });
+            array.Add(new Dictionary<string, object> { { "X", 4 }, { "Y", " 856,32" }, { "Z", "856,32" } });
+            array.Add(new Dictionary<string, object> { { "X", 2 }, { "Y", "1856,32" }, { "Z", "1856,32" } });
+
+            Assert.AreEqual("1234", LoopHelpers.OrderedList(array, "+X").Aggregate("", (S, E) => S + ((Dictionary<string, object>)E)["X"]));
+            Assert.AreEqual("4213", LoopHelpers.OrderedList(array, "+Y").Aggregate("", (S, E) => S + ((Dictionary<string, object>)E)["X"]));
+            Assert.AreEqual("2134", LoopHelpers.OrderedList(array, "+Z").Aggregate("", (S, E) => S + ((Dictionary<string, object>)E)["X"]));
+        }
+
+        [TestMethod]
         public void TestMethodObjectBlocksHelper()
         {
             var lcdMod = new EmpyrionScripting();
