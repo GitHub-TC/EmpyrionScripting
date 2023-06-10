@@ -44,6 +44,11 @@ Beginners guide (english):
 * https://steamcommunity.com/workshop/filedetails/discussion/1751409371/3191368095147121750/
 * https://youtu.be/IjJTNp_ZYUI
 
+## Tutorials
+* Workshop von Sephrajin: DSEV LCD Script Tutorial, https://steamcommunity.com/sharedfiles/filedetails/?id=2863240303
+* Workshop von Noob: Scripting Tutorial Ship, https://steamcommunity.com/sharedfiles/filedetails/?id=2817433272
+* Workshop von ASTIC, Vega AI, https://steamcommunity.com/sharedfiles/filedetails/?id=2227639387
+
 ## Beispiele
 Allgemein: 
 Benötigt werden mindestens 2 LCD und mindestens 1 Container
@@ -1098,6 +1103,11 @@ YouTube video;
 Beginners guide (english):
 * https://steamcommunity.com/workshop/filedetails/discussion/1751409371/3191368095147121750/
 * https://youtu.be/IjJTNp_ZYUI
+
+## Tutorials
+* Workshop von Sephrajin: DSEV LCD Script Tutorial, https://steamcommunity.com/sharedfiles/filedetails/?id=2863240303
+* Workshop von Noob: Scripting Tutorial Ship, https://steamcommunity.com/sharedfiles/filedetails/?id=2817433272
+* Workshop von ASTIC, Vega AI, https://steamcommunity.com/sharedfiles/filedetails/?id=2227639387
 
 ## Examples
 General:
