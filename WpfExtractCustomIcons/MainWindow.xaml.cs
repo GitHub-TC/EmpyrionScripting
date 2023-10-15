@@ -16,7 +16,6 @@ namespace WpfExtractCustomIcons
         public static int TokenIdSeperator = 100000;
 
         public IReadOnlyDictionary<string, int> BlockIdMapping { get; set; }
-        public EcfFile BlocksConfig_Example_Ecf { get; private set; }
         public EcfFile BlocksConfig_Ecf { get; private set; }
         public EcfFile ItemsConfig_Ecf { get; private set; }
         public EcfFile TokenConfig_Ecf { get; private set; }
@@ -32,7 +31,6 @@ namespace WpfExtractCustomIcons
 
             Directory.CreateDirectory(ExtractToFolder.Text);
 
-            BlocksConfig_Example_Ecf = ReadEcf("Config_Example.ecf", true, B => { });
             BlocksConfig_Ecf = ReadEcf("BlocksConfig.ecf", true, B => { });
             ItemsConfig_Ecf  = ReadEcf("ItemsConfig.ecf", true, B => { });
             TokenConfig_Ecf  = ReadEcf("TokenConfig.ecf", false, B => {
@@ -40,7 +38,6 @@ namespace WpfExtractCustomIcons
                 if (idAttr != null && idAttr?.Value is int id) B.Values["Id"] = id * TokenIdSeperator;
             });
 
-            BlocksConfig_Example_Ecf.Blocks?.ForEach(B => CheckCustomIcon(B, BlocksConfig_Example_Ecf.Blocks));
             BlocksConfig_Ecf.Blocks?.ForEach(B => CheckCustomIcon(B, BlocksConfig_Ecf.Blocks));
             ItemsConfig_Ecf.Blocks?.ForEach(B => CheckCustomIcon(B, ItemsConfig_Ecf.Blocks));
             TokenConfig_Ecf.Blocks?.ForEach(B => CheckCustomIcon(B, TokenConfig_Ecf.Blocks));
