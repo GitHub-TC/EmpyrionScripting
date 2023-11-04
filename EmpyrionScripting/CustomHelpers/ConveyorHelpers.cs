@@ -657,6 +657,8 @@ namespace EmpyrionScripting.CustomHelpers
                     if (salary < amount)
                     {
                         output.WriteLine($"Not enougth salary for gardener: {amount} of {(root.ConfigEcfAccess.IdBlockMapping.TryGetValue(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, out var salaryItemName) ? salaryItemName : EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId.ToString())}");
+                        options.Inverse(output, harvestInfo);
+                        
                         return;
                     }
 
@@ -674,7 +676,11 @@ namespace EmpyrionScripting.CustomHelpers
                     var opCount   = op == GardenerOperation.Harvest ? harvestInfo.DropOnHarvestCount : 1;
                     var opChildId = op == GardenerOperation.Harvest ? harvestInfo.ChildOnHarvestId   : 0;
 
-                    if (opId != 0 && opCount !=  0)
+                    if (opId == 0)
+                    {
+                        if(opCount != 0) options.Inverse(output, harvestInfo);
+                    }
+                    else if (opCount != 0)
                     {
                         var count = container.AddItems(opId, opCount);
                         if (count > 0)
