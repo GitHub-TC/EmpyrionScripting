@@ -82,6 +82,26 @@ namespace EmpyrionScripting
                 Log($"EmpyrionScripting Configuration_Ecf: write id name mapping to '{nameIdMappingFile}' : {error}", LogLevel.Error);
             }
 
+            var idIconMappingFile = Path.Combine(EmpyrionScripting.SaveGameModPath, "IdIconMapping.json");
+            try
+            {
+                if (!File.Exists(idIconMappingFile) || (DateTime.Now - File.GetLastWriteTime(idIconMappingFile)) > new TimeSpan(1, 0, 0))
+                {
+                    var map = FlatConfigBlockById.ToDictionary(block => block.Key, block => (string)(block.Value.Values?.FirstOrDefault(attr => attr.Key == "CustomIcon").Value ?? block.Value.Values?.FirstOrDefault(attr => attr.Key == "Name").Value));
+
+                    TokenById.ToDictionary(block => block.Key * ItemTokenAccess.TokenIdSeperator, block => CustomHelpers.LcdHelpersExtension.FormatToPlainText((string)(block.Value.Values?.FirstOrDefault(attr => attr.Key == "CustomIcon").Value ?? block.Value.Values?.FirstOrDefault(attr => attr.Key == "Name").Value ?? string.Empty)))
+                        .ForEach(t => { 
+                            if(!map.ContainsKey(t.Key)) map.Add(t.Key, t.Value);
+                        });
+
+                    File.WriteAllText(idIconMappingFile, Newtonsoft.Json.JsonConvert.SerializeObject(map, Newtonsoft.Json.Formatting.Indented));
+                }
+            }
+            catch (Exception error)
+            {
+                Log($"EmpyrionScripting Configuration_Ecf: write id icon mapping to '{idIconMappingFile}' : {error}", LogLevel.Error);
+            }
+
             Log($"EmpyrionScripting Configuration_Ecf: #{Configuration_Ecf?.Blocks?.Count} BlockById: #{ConfigBlockById?.Count} BlockByName: #{ConfigBlockByName?.Count} ParentBlockNames: #{ParentBlockName.Count} BlockIdMapping:[{BlockIdMapping?.Count}] {blockMappingFile} takes:{timer.Elapsed}", LogLevel.Message);
         }
 

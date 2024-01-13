@@ -20,6 +20,12 @@ namespace EmpyrionScripting.CustomHelpers
                     .Replace("[b]", "<b>").Replace("[/b]", "</b>")
                     .Replace("[i]", "<i>").Replace("[/i]", "</i>")
                     .Replace("[u]", "<u>").Replace("[/u]", "</u>");
+
+        public static string FormatToPlainText(this string yamlText)
+            => colorChange.Replace(yamlText, m => $"{m.Groups["pre"]}<color=#{m.Groups["color"]}>{m.Groups["post"]}").Replace("[-][/c]", "")
+                    .Replace("[b]", "").Replace("[/b]", "")
+                    .Replace("[i]", "").Replace("[/i]", "")
+                    .Replace("[u]", "").Replace("[/u]", "");
     }
 
     [HandlebarHelpers]
