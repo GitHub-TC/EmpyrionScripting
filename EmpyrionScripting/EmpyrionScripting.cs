@@ -250,6 +250,7 @@ namespace EmpyrionScripting
             : Configuration.Current.OverrideScenarioPath;
 
         public PlayerCommandsDediHelper PlayerCommandsDediHelper { get; private set; }
+        public int GameUpdateCounter;
 
         private static void InitEcfConfigData()
         {
@@ -1023,6 +1024,10 @@ namespace EmpyrionScripting
             DediLegacyMod?.Game_Update();
 
             if (PlayfieldData == null) return;
+
+            GameUpdateCounter++;
+            if (GameUpdateCounter < Configuration.Current.UseEveryNthGameUpdateCycle) return;
+            GameUpdateCounter = 0;
 
             try
             {

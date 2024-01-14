@@ -40,13 +40,14 @@ namespace EmpyrionScripting
         public int InGameScriptsIntervallMS { get; set; } = 1000;
         public int DeviceLockOnlyAllowedEveryXCycles { get; set; } = 10;
         public int SaveGameScriptsIntervallMS { get; set; } = 10000;
+        public int UseEveryNthGameUpdateCycle { get; set; } = 10;
         public bool ScriptTracking { get; set; }
         public float EntityAccessMaxDistance { get; set; } = 500;
         public int DelayStartForNSecondsOnPlayfieldLoad { get; set; } = 30;
         [JsonConverter(typeof(StringEnumConverter))]
         public ExecMethod ExecMethod { get; set; } = ExecMethod.ThreadPool;
         public int ScriptsSyncExecution { get; set; } = 2;
-        public int ScriptsParallelExecution { get; set; } = 4;
+        public int ScriptsParallelExecution { get; set; } = 2;
         public long ScriptLoopSyncTimeLimiterMS { get; set; } = 200;
         public long ScriptLoopBackgroundTimeLimiterMS { get; set; } = 2000;
         public bool ScriptTrackingError { get; set; }
