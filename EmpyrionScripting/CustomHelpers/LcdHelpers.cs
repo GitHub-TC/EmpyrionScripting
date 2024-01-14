@@ -22,7 +22,8 @@ namespace EmpyrionScripting.CustomHelpers
                     .Replace("[u]", "<u>").Replace("[/u]", "</u>");
 
         public static string FormatToPlainText(this string yamlText)
-            => colorChange.Replace(yamlText, m => $"{m.Groups["pre"]}<color=#{m.Groups["color"]}>{m.Groups["post"]}").Replace("[-][/c]", "")
+            => colorChange.Replace(yamlText, m => $"{m.Groups["pre"]}{m.Groups["post"]}")
+                    .Replace("[-]", "").Replace("[/c]", "")
                     .Replace("[b]", "").Replace("[/b]", "")
                     .Replace("[i]", "").Replace("[/i]", "")
                     .Replace("[u]", "").Replace("[/u]", "");

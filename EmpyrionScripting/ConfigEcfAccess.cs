@@ -74,7 +74,16 @@ namespace EmpyrionScripting
             {
                 if (!File.Exists(nameIdMappingFile) || (DateTime.Now - File.GetLastWriteTime(nameIdMappingFile)) > new TimeSpan(1, 0, 0))
                 {
-                    File.WriteAllText(nameIdMappingFile, Newtonsoft.Json.JsonConvert.SerializeObject(BlockIdMapping, Newtonsoft.Json.Formatting.Indented));
+                    var map = BlockIdMapping.ToDictionary(b => b.Key, b => b.Value);
+
+                    TokenById
+                        .ForEach(block => {
+                            var id   = block.Key * ItemTokenAccess.TokenIdSeperator;
+                            var name = CustomHelpers.LcdHelpersExtension.FormatToPlainText((string)(block.Value.Values?.FirstOrDefault(attr => attr.Key == "Name").Value ?? string.Empty));
+                            if (!map.ContainsKey(name)) map.Add(name, id);
+                        });
+
+                    File.WriteAllText(nameIdMappingFile, Newtonsoft.Json.JsonConvert.SerializeObject(map, Newtonsoft.Json.Formatting.Indented));
                 }
             }
             catch (Exception error)
@@ -89,9 +98,11 @@ namespace EmpyrionScripting
                 {
                     var map = FlatConfigBlockById.ToDictionary(block => block.Key, block => (string)(block.Value.Values?.FirstOrDefault(attr => attr.Key == "CustomIcon").Value ?? block.Value.Values?.FirstOrDefault(attr => attr.Key == "Name").Value));
 
-                    TokenById.ToDictionary(block => block.Key * ItemTokenAccess.TokenIdSeperator, block => CustomHelpers.LcdHelpersExtension.FormatToPlainText((string)(block.Value.Values?.FirstOrDefault(attr => attr.Key == "CustomIcon").Value ?? block.Value.Values?.FirstOrDefault(attr => attr.Key == "Name").Value ?? string.Empty)))
-                        .ForEach(t => { 
-                            if(!map.ContainsKey(t.Key)) map.Add(t.Key, t.Value);
+                    TokenById
+                        .ForEach(block => {
+                            var id   = block.Key * ItemTokenAccess.TokenIdSeperator;
+                            var name = CustomHelpers.LcdHelpersExtension.FormatToPlainText((string)(block.Value.Values?.FirstOrDefault(attr => attr.Key == "CustomIcon").Value ?? block.Value.Values?.FirstOrDefault(attr => attr.Key == "Name").Value ?? string.Empty));
+                            if (!map.ContainsKey(id)) map.Add(id, name);
                         });
 
                     File.WriteAllText(idIconMappingFile, Newtonsoft.Json.JsonConvert.SerializeObject(map, Newtonsoft.Json.Formatting.Indented));
