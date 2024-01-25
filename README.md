@@ -595,6 +595,9 @@ Items habe folgende Basisdaten
     das Sprachkürzel kann hier, aus der ersten Zeile, entnommen werden \[ESG\]\\Content\\Extras\\Localization.csv
     wird sonst aus dem CultureInfo LCD genommen
 
+* {{#id idName}}
+  * Wandelte den symbolischen Id Namen in die aktuelle ID um
+
 + {{datetime}} = Datum und Uhrzeit anzeigen
 + {{datetime 'format'}} = gemäß dem 'format' ausgeben
 + {{datetime 'format' '+5'}} = N Stunden addieren
@@ -1581,6 +1584,9 @@ Items have the following basic data
   * Language: English,Deutsch,Français,Italiano,Spanish,...
     look at \[ESG\]\\Content\\Extras\\Localization.csv at the first line
     from default it's get from the CultureInfo lcd.
+
+* {{#id idName}}
+  * Converted the symbolic id name to the current id
 
 ### (datetime)
 + {{datetime}} = Display the Datetime

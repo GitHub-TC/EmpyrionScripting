@@ -37,6 +37,24 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("id")]
+        public static void IdNHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{idname}} helper must have one argument: (idname)");
+
+            var root = rootObject as IScriptRootData;
+            var data = arguments[0]?.ToString();
+
+            try
+            {
+                output.Write(EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(data, out var id) ? id : 0);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{id}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("format")]
         public static void FormatHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
