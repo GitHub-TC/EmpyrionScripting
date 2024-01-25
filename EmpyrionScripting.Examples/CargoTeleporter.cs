@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
