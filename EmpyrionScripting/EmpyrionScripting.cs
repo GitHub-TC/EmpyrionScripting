@@ -308,6 +308,18 @@ namespace EmpyrionScripting
                 IdBlockMapping = ConfigEcfAccess.IdBlockMapping
             };
 
+            Configuration.Current.StructureTank.ForEach(tank => {
+                var keyName = tank.Key switch
+                {
+                    StructureTankType.Oxygen   => "Oxygen",
+                    StructureTankType.Fuel     => "Fuel",
+                    StructureTankType.Pentaxid => "Pentaxid",
+                    _                          => "?",
+                };
+
+                if(!Configuration.Current.Ids.ContainsKey(keyName)) Configuration.Current.Ids[keyName] = tank.Value.Aggregate("", (s, i) => $"{s},{i.ItemName}") + ",";
+            });
+
             lists.ProcessLists(Configuration.Current.Ids);
 
             Configuration.Current.StructureTank.ForEach(tank => ItemNameId.ProcessAllowedItemsMapping(tank.Value, ConfigEcfAccess.BlockIdMapping));

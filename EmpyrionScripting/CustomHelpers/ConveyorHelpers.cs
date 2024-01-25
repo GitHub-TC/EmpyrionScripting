@@ -842,9 +842,13 @@ namespace EmpyrionScripting.CustomHelpers
                 _                           => null,
             };
 
-            if (specialTransfer == null || !specialTransfer.AllowedItem(item.Id)) return ItemMoveInfo.Empty;
+            if (specialTransfer == null || !specialTransfer.AllowedItem(item.Id))
+            {
+                Log($"Fill not allowed: #{item.Id} in {((StructureTank) specialTransfer).AllowedItems.Aggregate("", (s, i) => $"{s},{i.Key}")}", LogLevel.Debug);
+                return ItemMoveInfo.Empty;
+            }
 
-            Log($"Fill Total: #{item.Source.Count}", LogLevel.Debug);
+            Log($"Fill Total [{type}]: {item.Id} #{item.Source.Count}", LogLevel.Debug);
 
             var moveInfos = new List<IItemMoveInfo>();
 
