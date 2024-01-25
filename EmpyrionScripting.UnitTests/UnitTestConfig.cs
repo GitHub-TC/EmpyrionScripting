@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using EcfParser;
 using EmpyrionScripting;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 
 namespace EmpyrionLCDInfo.UnitTests
 {

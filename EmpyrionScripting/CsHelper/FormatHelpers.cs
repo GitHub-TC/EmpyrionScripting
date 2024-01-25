@@ -1,5 +1,4 @@
-﻿using EmpyrionScripting.CustomHelpers;
-using System;
+﻿using System;
 using System.Linq;
 
 namespace EmpyrionScripting.CsHelper

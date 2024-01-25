@@ -5,7 +5,6 @@ using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using UnityEngine;

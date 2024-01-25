@@ -310,6 +310,15 @@ namespace EmpyrionScripting
 
             lists.ProcessLists(Configuration.Current.Ids);
 
+            Configuration.Current.StructureTank.ForEach(tank => ItemNameId.ProcessAllowedItemsMapping(tank.Value, ConfigEcfAccess.BlockIdMapping));
+            if (ConfigEcfAccess.BlockIdMapping.TryGetValue(Configuration.Current.GardenerSalary.ItemName, out var id)) Configuration.Current.GardenerSalary.ItemId = id;
+
+            ItemNameId.ProcessAllowedItemsMapping(Configuration.Current.DeconstructBlockSubstitutions, ConfigEcfAccess.BlockIdMapping);
+            Configuration.Current.DeconstructBlockSubstitution = Configuration.Current.DeconstructBlockSubstitutions.ToDictionary(i => i.ItemId, i => i.Amount);
+
+            ItemNameId.ProcessAllowedItemsMapping(Configuration.Current.HarvestCores, ConfigEcfAccess.BlockIdMapping);
+            Configuration.Current.HarvestCoreTypes = Configuration.Current.HarvestCores.Select(i => i.ItemId).ToArray();
+
             Configuration.Current.MappedIds = lists.MappedIds;
             Configuration.Current.NamedIds  = lists.NamedIds;
 

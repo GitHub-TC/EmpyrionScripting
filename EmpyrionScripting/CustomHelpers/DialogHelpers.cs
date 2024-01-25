@@ -1,5 +1,4 @@
-﻿using EmpyrionNetAPITools.Extensions;
-using EmpyrionScripting.CsHelper;
+﻿using EmpyrionScripting.CsHelper;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using HandlebarsDotNet;

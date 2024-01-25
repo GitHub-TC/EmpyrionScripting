@@ -1,8 +1,5 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.Interface;
-using JetBrains.Annotations;
-using System;
-using UnityEngine;
 
 namespace EmpyrionScripting.DataWrapper
 {

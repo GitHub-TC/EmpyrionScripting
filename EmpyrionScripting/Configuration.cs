@@ -1,24 +1,45 @@
-﻿using Eleon.Modding;
-using EmpyrionNetAPIDefinitions;
+﻿using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.Interface;
-using Humanizer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
-using YamlDotNet.Core.Tokens;
-using static Humanizer.In;
 
 namespace EmpyrionScripting
 {
-    public class AllowedItem
+    public interface IItemNameId
     {
-        public AllowedItem(int itemId, int amount)
+        int ItemId { get; set; }
+        string ItemName { get; set; }
+    }
+
+    public class ItemNameId : IItemNameId
+    {
+        public ItemNameId(string itemName)
         {
-            ItemId = itemId;
-            Amount = amount;
+            ItemName = itemName;
         }
 
+        public string ItemName { get; set; }
+        [JsonIgnore]
+        public int ItemId { get; set; }
+
+        public static void ProcessAllowedItemsMapping(IEnumerable<IItemNameId> items, IReadOnlyDictionary<string, int> nameIdMapping)
+        {
+            items.ForEach(i => { if (nameIdMapping.TryGetValue(i.ItemName, out var id)) i.ItemId = id; });
+        }
+    }
+
+    public class AllowedItem : IItemNameId
+    {
+        public AllowedItem(string itemName, int amount)
+        {
+            ItemName = itemName;
+            Amount   = amount;
+        }
+
+        public string ItemName { get; set; }
+        [JsonIgnore]
         public int ItemId { get; set; }
         public int Amount { get; set; }
     }
@@ -57,8 +78,18 @@ namespace EmpyrionScripting
         public string OverrideScenarioPath { get; set; }
         public string[] AddOnAssemblies { get; set; } = new string[] { };
 
-        public AllowedItem GardenerSalary { get; set; } = new AllowedItem(4344, 10); // Money Card
+        public AllowedItem GardenerSalary { get; set; } = new AllowedItem("MoneyCard", 10); // Money Card
+
+        [JsonIgnore]
         public Dictionary<int, int> DeconstructBlockSubstitution { get; set; } = new Dictionary<int, int>() { [331] = 0, [541] = 0, [542] = 0, [543] = 0, [544] = 0, [1254] = 0 };
+        public AllowedItem[] DeconstructBlockSubstitutions { get; set; } = new[] { 
+            new AllowedItem("ContainerUltraRare"     , 0), 
+            new AllowedItem("AlienContainer"         , 0), 
+            new AllowedItem("AlienContainerRare"     , 0), 
+            new AllowedItem("AlienContainerVeryRare" , 0), 
+            new AllowedItem("AlienContainerUltraRare", 0),
+            new AllowedItem("AlienDeviceBlocks"      , 0)
+        };
 
         const string RemoveBlocksId = "RemoveBlocks";
 
@@ -116,14 +147,17 @@ namespace EmpyrionScripting
 
         public Dictionary<StructureTankType, AllowedItem[]> StructureTank { get; set; } = new Dictionary<StructureTankType, AllowedItem[]>()
         {
-            [StructureTankType.Oxygen] = new[] { new AllowedItem(4176, 250) },
-            [StructureTankType.Fuel] = new[] { new AllowedItem(4421, 300), new AllowedItem(4335, 150), new AllowedItem(4314, 30) },
-            [StructureTankType.Pentaxid] = new[] { new AllowedItem(4342, 1) }
+            [StructureTankType.Oxygen  ] = new[] { new AllowedItem("OxygenBottleLarge", 250) },
+            [StructureTankType.Fuel    ] = new[] { new AllowedItem("FusionCell", 300), new AllowedItem("EnergyCellLarge", 150), new AllowedItem("EnergyCell", 30) },
+            [StructureTankType.Pentaxid] = new[] { new AllowedItem("PentaxidCrystal", 1) }
         };
         public string NumberSpaceReplace { get; set; } = " "; // eigentlich :-( funktioniert aber leider nicht mehr "\u2007\u2009";
         public string BarStandardValueSign { get; set; } = "\u2588";
         public string BarStandardSpaceSign { get; set; } = "\u2591";
+
+        [JsonIgnore]
         public int[] HarvestCoreTypes { get; set; } = new[] { 558 };
+        public ItemNameId[] HarvestCores { get; set; } = new[] {  new ItemNameId("Core") };
 
         public string[] ElevatedGroups { get; set; } = new[] {
                 "Admin",

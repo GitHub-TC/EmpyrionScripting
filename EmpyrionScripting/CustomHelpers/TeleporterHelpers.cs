@@ -1,6 +1,5 @@
 ﻿using Eleon.Modding;
 using EmpyrionScripting.CsHelper;
-using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
 using HandlebarsDotNet;

@@ -4,7 +4,6 @@ using EmpyrionScripting.Interface;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static System.Collections.Specialized.BitVector32;
 
 namespace EmpyrionScripting.DataWrapper
 {
