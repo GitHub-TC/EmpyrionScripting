@@ -37,10 +37,10 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
-        [HandlebarTag("id")]
+        [HandlebarTag("toid")]
         public static void IdNHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 1) throw new HandlebarsException("{{idname}} helper must have one argument: (idname)");
+            if (arguments.Length != 1) throw new HandlebarsException("{{toid}} helper must have one argument: (idname)");
 
             var root = rootObject as IScriptRootData;
             var data = arguments[0]?.ToString();
@@ -51,7 +51,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{id}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{toid}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
