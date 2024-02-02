@@ -1053,6 +1053,20 @@ Scripte mit 0 oder ohne Nummer werden nur ausgeführt wenn das LCD eingeschaltet
 Wenn die Struktur ausgeschaltet ist oder keinen Strom hat werden keine InGameScripte von ihr ausgeführt.
 Somit verbrauchen "alte" oder nicht mehr benutze Strukturen auch keine Leistung der Scriptengine.
 
+## Ausführung und Leistung der Scripts einstellen
++ "InGameScriptsIntervallMS": 2000,
+  In welchen Intervallen wird die Scriptausführung im Hintergrund gestartet
++ "DeviceLockOnlyAllowedEveryXCycles": 10,
+  Scripte welche ein "DeviceLock" benötigen werden nur alle X Zyklen ausgeführt
++ "SaveGameScriptsIntervallMS": 10000,
+  In welchen Intervallen wird die Scriptausführung der Savegamescripte im Hintergrund gestartet
++ "UseEveryNthGameUpdateCycle": 10,
+  Nur jeder N te GameUpdate Aufruf wird für die Scriptausführung benutzt
++ "ScriptsSyncExecution": 2,
+  Wie viele Scripte werden pro Zyklus im GameUpdate ausgeführt
++ "ScriptsParallelExecution": 2,
+  Wie viele Scripte werden pro Zyklus in der Hintergrundverarbeitung ausgeführt
+
 ### Whats next?
 
 
@@ -2101,6 +2115,20 @@ Scripts with 0 or no number will only be executed if the LCD is on.
 ## General
 If the structure is turned off or has no power, no ingame scripts will be executed from it.
 So "old" or no longer used structures do not consume any power of the script engine.
+
+## Set execution and performance of the scripts
++ "InGameScriptsIntervallMS": 2000,
+  At what intervals is the script execution started in the background
++ "DeviceLockOnlyAllowedEveryXCycles": 10,
+  Scripts that require a "DeviceLock" are only executed every X cycles
++ "SaveGameScriptsIntervallMS": 10000,
+  At what intervals is the script execution of the savegamescripts started in the background
++ "UseEveryNthGameUpdateCycle": 10,
+  Only every Nth GameUpdate call is used for script execution
++ "ScriptsSyncExecution": 2,
+  How many scripts are executed per cycle in the GameUpdate
++ "ScriptsParallelExecution": 2,
+  How many scripts are executed per cycle in background processing
 
 ### Whats next?
 
