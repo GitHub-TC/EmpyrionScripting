@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionNetAPIDefinitions;
 using EmpyrionScripting.DataWrapper;
 using EmpyrionScripting.Interface;
 using EmpyrionScripting.Internal.Interface;
@@ -50,9 +51,18 @@ namespace EmpyrionScripting
         public void RemoveEntity(IEntity entity)
         {
             if (EventStore.TryRemove(entity.Id, out var store)) ((EventStore)store).Dispose();
+
+            EmpyrionScripting.Log($"RemoveEntity: {PlayfieldName}:[{entity.Id}] {entity.Name}", LogLevel.Debug);
         }
 
-        public IEventStore AddEntity(IEntity entity) => entity == null ? null : EventStore.AddOrUpdate(entity.Id, id => new EventStore(entity), (id, store) => store);
+        public IEventStore AddEntity(IEntity entity)
+        {
+            if(entity == null) return null;
+
+            EmpyrionScripting.Log($"AddEntity: {PlayfieldName}:[{entity.Id}] {entity.Name}", LogLevel.Debug);
+
+            return EventStore.AddOrUpdate(entity.Id, id => new EventStore(entity), (id, store) => store);
+        }
     }
 
 }
