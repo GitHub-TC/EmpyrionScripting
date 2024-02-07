@@ -308,6 +308,8 @@ namespace EmpyrionScripting
                 IdBlockMapping = ConfigEcfAccess.IdBlockMapping
             };
 
+            Configuration.Current.StructureTank.ForEach(tank => ItemNameId.ProcessAllowedItemsMapping(tank.Value, ConfigEcfAccess.BlockIdMapping));
+
             Configuration.Current.StructureTank.ForEach(tank => {
                 var keyName = tank.Key switch
                 {
@@ -317,12 +319,11 @@ namespace EmpyrionScripting
                     _                          => "?",
                 };
 
-                if(!Configuration.Current.Ids.ContainsKey(keyName)) Configuration.Current.Ids[keyName] = tank.Value.Aggregate("", (s, i) => $"{s},{i.ItemName}") + ",";
+                if(!Configuration.Current.Ids.ContainsKey(keyName)) Configuration.Current.Ids[keyName] = tank.Value.Aggregate("", (s, i) => i.ItemId > 0 ? $"{s},{i.ItemName}" : s) + ",";
             });
 
             lists.ProcessLists(Configuration.Current.Ids);
 
-            Configuration.Current.StructureTank.ForEach(tank => ItemNameId.ProcessAllowedItemsMapping(tank.Value, ConfigEcfAccess.BlockIdMapping));
             if (ConfigEcfAccess.BlockIdMapping.TryGetValue(Configuration.Current.GardenerSalary.ItemName, out var id)) Configuration.Current.GardenerSalary.ItemId = id;
 
             ItemNameId.ProcessAllowedItemsMapping(Configuration.Current.DeconstructBlockSubstitutions, ConfigEcfAccess.BlockIdMapping);
