@@ -472,11 +472,11 @@ Items habe folgende Basisdaten
     * Prüft den Wert 'value' mit dem regulären Ausdruck 'regex' bei Erfolg/Misserfolg wird das Ergebnis des Ausdrucks in den nächsten Abschnitt als '.' übergeben
 
 * {{#ok data}}
-  * Block ausführen wenn (data) einen Wert (ungleich 'null') hat oder (data) gleich 'true' oder ungleich 0 ist
+  * Block ausführen wenn (data) einen Wert (ungleich '') hat oder (data) gleich 'true' oder ungleich 0 ist
   * anderfalls wird der {{else}} Teil ausgeführt
 
 * {{#if data}}
-  * Block ausführen wenn (data) einen Wert ungleich 'null' oder 0 hat
+  * Block ausführen wenn (data) einen Wert ungleich '' oder (data) gleich 'true' oder ungleich 0 ist
   * anderfalls wird der {{else}} Teil ausgeführt
 
 * {{not data}}
@@ -1569,11 +1569,11 @@ Items have the following basic data
 
 ### Logiccheck
 * {{#ok data}}
-   * Execute block if (data) has a value (not equal to 'zero') or (data) is equal to 'true' or not equal to 0
+   * Execute block if (data) has a value (not equal to '') or (data) is equal to 'true' or not equal to 0
    * otherwise the {{else}} part is executed
 
 * {{#if data}}
-   * Execute block if (data) has a value not equal to 'zero' or 0
+   * Execute block if (data) has a value not equal to '' or 0 (data) or is equal to 'true'
    * otherwise the {{else}} part is executed
 
 * {{not data}}
