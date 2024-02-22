@@ -137,9 +137,9 @@ namespace EmpyrionScripting
                           int pickupTargetId = 0;
                           var withPickupTarget = B.Value.Values.TryGetValue("PickupTarget", out var pickupTarget) && BlockIdMapping.TryGetValue(pickupTarget.ToString(), out pickupTargetId);
 
-                          var childDropOnHarvest = B.Value.Childs.FirstOrDefault(c => c.Key == "Child DropOnHarvest");
-                          var dropOnHarvestItem  = childDropOnHarvest.Value?.Attr.FirstOrDefault(a => a.Name == "Item").Value?.ToString() ?? string.Empty;
-                          var dropOnHarvestCount = int.TryParse(childDropOnHarvest.Value?.Attr.FirstOrDefault(a => a.Name == "Count")?.Value?.ToString(), out var count) ? count : 0;
+                          var childDropOnHarvest = B.Value.Childs?.FirstOrDefault(c => c.Key == "Child DropOnHarvest");
+                          var dropOnHarvestItem  = childDropOnHarvest?.Value?.Attr.FirstOrDefault(a => a.Name == "Item").Value?.ToString() ?? string.Empty;
+                          var dropOnHarvestCount = int.TryParse(childDropOnHarvest?.Value?.Attr.FirstOrDefault(a => a.Name == "Count")?.Value?.ToString(), out var count) ? count : 0;
 
                           var childCropsGrown   = B.Value.Childs?.FirstOrDefault(c => c.Key == "Child CropsGrown").Value?.Attr;
                           var childOnHarvest    = childCropsGrown?.FirstOrDefault(a => a.Name == "OnHarvest")?.Value?.ToString() ?? string.Empty;

@@ -80,6 +80,9 @@ namespace EmpyrionScripting
         public string[] AddOnAssemblies { get; set; } = new string[] { };
 
         public AllowedItem GardenerSalary { get; set; } = new AllowedItem("MoneyCard", 10); // Money Card
+        public AllowedItem DeconstructSalary { get; set; } = new AllowedItem("MoneyCard", 10); // Money Card
+        public AllowedItem RecycleSalary { get; set; } = new AllowedItem("MoneyCard", 20); // Money Card
+        public int AmountPerNumberOfBlocks { get; set; } = 10;
 
         [JsonIgnore]
         public Dictionary<int, int> DeconstructBlockSubstitution { get; set; } = new Dictionary<int, int>() { [331] = 0, [541] = 0, [542] = 0, [543] = 0, [544] = 0, [1254] = 0 };

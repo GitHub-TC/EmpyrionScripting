@@ -148,7 +148,7 @@ namespace EmpyrionScripting.CustomHelpers
                 {
                     List<VectorInt3> blockPos = new List<VectorInt3>();
 
-                    lock (processBlockData) ProcessBlockPart(output, root, structure.GetCurrent(), processBlockData, null, VectorInt3.Undef, null, -1, null, (c, i) =>
+                    lock (processBlockData) ProcessBlockPart(output, root, structure.GetCurrent(), processBlockData, null, VectorInt3.Undef, null, -1, int.MaxValue, null, (c, i) =>
                     {
                         blockPos.Add(new VectorInt3(processBlockData.X, processBlockData.Y, processBlockData.Z));
                         return false;

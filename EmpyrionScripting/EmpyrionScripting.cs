@@ -324,7 +324,9 @@ namespace EmpyrionScripting
 
             lists.ProcessLists(Configuration.Current.Ids);
 
-            if (ConfigEcfAccess.BlockIdMapping.TryGetValue(Configuration.Current.GardenerSalary.ItemName, out var id)) Configuration.Current.GardenerSalary.ItemId = id;
+            if (ConfigEcfAccess.BlockIdMapping.TryGetValue(Configuration.Current.GardenerSalary     .ItemName, out var id)) Configuration.Current.GardenerSalary    .ItemId = id;
+            if (ConfigEcfAccess.BlockIdMapping.TryGetValue(Configuration.Current.DeconstructSalary  .ItemName, out     id)) Configuration.Current.DeconstructSalary .ItemId = id;
+            if (ConfigEcfAccess.BlockIdMapping.TryGetValue(Configuration.Current.RecycleSalary      .ItemName, out     id)) Configuration.Current.RecycleSalary     .ItemId = id;
 
             ItemNameId.ProcessAllowedItemsMapping(Configuration.Current.DeconstructBlockSubstitutions, ConfigEcfAccess.BlockIdMapping);
             Configuration.Current.DeconstructBlockSubstitution = Configuration.Current.DeconstructBlockSubstitutions.ToDictionary(i => i.ItemId, i => i.Amount);

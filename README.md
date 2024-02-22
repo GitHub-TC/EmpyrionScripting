@@ -521,11 +521,13 @@ Items habe folgende Basisdaten
   + Baut die Struktur 'entity' ab und befördert die Teile in den Container mit dem Namen welcher mit 'container' angegben wird
   + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
   + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
+  + Die Kosten pro 'AmountPerNumberOfBlocks' kann per 'DeconstructSalary' in der Konfigurationsdatei konfiguriert werden. Standard: pro 10 Blöcke werden 100 Geldkarten fällig
 
 + {{recycle entity container \[CorePrefix\]}}
   + Baut die Struktur 'entity' ab und befördert die Rohstoffe (der bekannten Rezepten) in den Container mit dem Namen welcher mit 'container' angegben wird
   + Hinweis: Der Kern der Struktur muss 'Core-Recycle-ID' (wobei ID für die Id der Struktur steht) heißen
   + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
+  + Die Kosten pro 'AmountPerNumberOfBlocks' kann per 'RecycleSalary' in der Konfigurationsdatei konfiguriert werden. Standard: pro 10 Blöcke werden 200 Geldkarten fällig
 
 + {{harvest structure block's target gx gy gz \[removeDeadPlants\]}}
   + Mit dem Befehl können Pflanzen geernet werden. Dazu ist ein "Gärtner" (NPC Crew) und Geld (als Bezahlung) im Kühlschrank notwendig. 
@@ -1857,12 +1859,14 @@ DateTime format:
    + Deconstruct the entity 'entity' and moves parts to container named as 'container''
    + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
    + With the configuration setting DeconstructBlockSubstitution a replacement (by another block type) / deletion (by 0) of block types can be defined
+   + The costs per 'AmountPerNumberOfBlocks' can be configured via 'DeconstructSalary' in the configuration file. Default: 100 money cards are due per 10 blocks
 
 + {{recycle entity container \[CorePrefix\]}}
    + Dismantles the 'entity' structure and transports the raw materials (of the known recipes) into the container with the name given by 'container'
    + Note: The core of the structure must be called 'Core-Recycle-ID' (where ID stands for the ID of the structure)
    + With the configuration setting DeconstructBlockSubstitution, a replacement (by another block type) / deletion (by 0) of block types can be defined
-    
+   + The costs per 'AmountPerNumberOfBlocks' can be configured via 'RecycleSalary' in the configuration file. Standard: 200 money cards are due per 10 blocks    
+
 + {{harvest structure block's target gx gy gz \[removeDeadPlants\]}}
   + The command can be used to mine plants. This requires a "gardener" (NPC crew) and money (as payment) in the refrigerator. 
     If desired, the dead plants can also be disposed of. However, this costs 100 times the price

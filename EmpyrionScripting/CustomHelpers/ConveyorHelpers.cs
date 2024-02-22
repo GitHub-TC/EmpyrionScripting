@@ -711,7 +711,7 @@ namespace EmpyrionScripting.CustomHelpers
                     var salary = container.GetTotalItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId);
                     if (salary < amount)
                     {
-                        output.WriteLine($"Not enougth salary for gardener: {amount} of {(root.ConfigEcfAccess.IdBlockMapping.TryGetValue(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, out var salaryItemName) ? salaryItemName : EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId.ToString())}");
+                        output.WriteLine($"Not enougth salary for gardener: {amount} of {EmpyrionScripting.Configuration.Current.GardenerSalary.ItemName}");
                         options.Inverse(output, harvestInfo);
                         
                         return;
@@ -952,8 +952,8 @@ namespace EmpyrionScripting.CustomHelpers
                     })
                     .ToArray();
 
-                if(!ConvertBlocks(output, root, options, context as object, arguments,
-                    (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}", list,
+                if(!ConvertBlocks("deconstruct", output, root, options, context as object, arguments,
+                    (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}", list, EmpyrionScripting.Configuration.Current.DeconstructSalary,
                     DeconstructBlock)) root.GetPlayfieldScriptData().EntityExclusiveAccess.TryRemove(E.Id, out _);
             }
             catch (Exception error)
@@ -982,23 +982,23 @@ namespace EmpyrionScripting.CustomHelpers
                     return;
                 }
 
-                if (!ConvertBlocks(output, root, options, context as object, arguments,
-                    (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}", null,
+                if (!ConvertBlocks("recycle", output, root, options, context as object, arguments,
+                    (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}", null, EmpyrionScripting.Configuration.Current.RecycleSalary,
                     ExtractBlockToRecipe)) root.GetPlayfieldScriptData().EntityExclusiveAccess.TryRemove(E.Id, out _);
             }
             catch (Exception error)
             {
-                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{deconstruct}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{recycle}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
-        public static bool ConvertBlocks(TextWriter output, IScriptRootData root, HelperOptions options, object context, object[] arguments, string coreName,
-            Tuple<int, int>[] list, Func<IEntityData, Dictionary<int, double>, int, bool> processBlock)
+        public static bool ConvertBlocks(string operationDescription,TextWriter output, IScriptRootData root, HelperOptions options, object context, object[] arguments, string coreName,
+            Tuple<int, int>[] list, AllowedItem salary, Func<IEntityData, Dictionary<int, double>, int, bool> processBlock)
         { 
             var E    = arguments[0] as IEntityData;
             var N    = arguments[1]?.ToString();
 
-            var minPos = E.S.GetCurrent().MinPos;
+            var minPos      = E.S.GetCurrent().MinPos;
             var maxPos      = E.S.GetCurrent().MaxPos;
             var S           = E.S.GetCurrent();
             var corePosList = E.S.GetCurrent().GetDevicePositions(coreName);
@@ -1041,16 +1041,35 @@ namespace EmpyrionScripting.CustomHelpers
                 }
             }
 
-            IContainer target = null;
+            IContainer target    = null;
             VectorInt3 targetPos = VectorInt3.Undef;
 
             var firstTarget = GetNextContainer(root, uniqueNames, ref target, ref targetPos);
-            if (string.IsNullOrEmpty(firstTarget))
+            if (string.IsNullOrEmpty(firstTarget) || firstTarget == null)
             {
                 root.GetPersistendData().TryRemove(root.ScriptId, out _);
-                options.Inverse(output, context);
-                if(firstTarget == null) output.WriteLine($"Containers '{N}' are locked");
+                if (root.DeviceLockAllowed)
+                {
+                    options.Inverse(output, context);
+                    output.WriteLine($"Containers '{firstTarget}' of '{N}' are locked or not exists");
+                }
                 return false;
+            }
+
+            IContainer salaryTarget = null;
+            var        salaryCount  = 0;
+
+            if (salary.ItemId != 0)
+            {
+                salaryTarget = root.E.S.GetCurrent()?.GetDevice<IContainer>(firstTarget);
+                salaryCount  = salaryTarget?.GetTotalItems(salary.ItemId) ?? 0;
+                if (salaryCount < salary.Amount)
+                {
+                    root.GetPersistendData().TryRemove(root.ScriptId, out _);
+                    options.Inverse(output, context);
+                    output.WriteLine($"Not enougth salary for {operationDescription} in '{firstTarget}': {salaryCount} of {salary.ItemName}[{salary.ItemId}] costs: {salary.Amount} per {EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks} blocks");
+                    return false;
+                }
             }
 
             EmpyrionScripting.Log($"{root.E.Name}/{root.E.Id} Ressource to first conatiner: {firstTarget}", LogLevel.Message);
@@ -1073,8 +1092,15 @@ namespace EmpyrionScripting.CustomHelpers
             if (processBlockData.CheckedBlocks < processBlockData.TotalBlocks)
             {
                 var ressources = new Dictionary<int, double>();
+                var processedBlocks = 0;
 
-                lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, target, targetPos, N, 0, list, (c, i) => processBlock(E, ressources, i));
+                lock (processBlockData) processedBlocks = ProcessBlockPart(
+                    output, root, S, processBlockData, target, targetPos, N, 0, 
+                    salary.ItemId == 0 ? int.MaxValue : (salaryCount / salary.Amount) * EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks, 
+                    list, 
+                    (c, i) => processBlock(E, ressources, i));
+
+                if(salary.ItemId != 0 && processedBlocks > 0) salaryTarget.RemoveItems(salary.ItemId, ((processedBlocks / EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks) + 1) * salary.Amount);
 
                 var allToLostItemRecover = false;
                 var currentContainer = firstTarget;
@@ -1154,6 +1180,8 @@ namespace EmpyrionScripting.CustomHelpers
 
         private static string GetNextContainer(IScriptRootData root, List<string> uniqueNames, ref IContainer target, ref VectorInt3 targetPos)
         {
+            var needsMainThread = root.ScriptNeedsMainThread;
+
             while (uniqueNames.Any())
             {
                 var currentTarget = uniqueNames.First();
@@ -1170,7 +1198,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                         if (locking.Exit)
                         {
-                            //EmpyrionScripting.Log($"GetNextContainer:{currentTarget} at pos {targetPos} -> Exit", LogLevel.Debug);
+                            EmpyrionScripting.Log($"GetNextContainer:{currentTarget} at pos {targetPos} -> Exit DeviceLockAllowed:{root.DeviceLockAllowed} TimeLimitReached:{root.TimeLimitReached} ScriptNeedsMainThread:{needsMainThread}->{root.ScriptNeedsMainThread}", LogLevel.Debug);
                             return string.Empty;
                         }
 
@@ -1184,6 +1212,7 @@ namespace EmpyrionScripting.CustomHelpers
                             EmpyrionScripting.Log($"GetNextContainer: {currentTarget} at pos {targetPos} -> no free container", LogLevel.Debug);
                         }
                     }
+                    else EmpyrionScripting.Log($"GetNextContainer: target not found {currentTarget} at pos {targetPos} -> no free container", LogLevel.Debug);
                 }
                 catch (Exception error)
                 {
@@ -1242,7 +1271,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 if (processBlockData.CheckedBlocks < processBlockData.TotalBlocks)
                 {
-                    lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, list, (C, I) => C.AddItems(I, 1) > 0);
+                    lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, int.MaxValue, list, (C, I) => C.AddItems(I, 1) > 0);
                     if (processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if ((DateTime.Now - processBlockData.LastAccess).TotalMinutes > 5)
@@ -1260,11 +1289,13 @@ namespace EmpyrionScripting.CustomHelpers
         }
 
 
-        public static void ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData,
-            IContainer target, VectorInt3 targetPos, string N, int replaceId, Tuple<int, int>[] list,
+        public static int ProcessBlockPart(TextWriter output, IScriptRootData root, IStructure S, ProcessBlockData processBlockData,
+            IContainer target, VectorInt3 targetPos, string N, int replaceId, int maxProcessedBlocks, Tuple<int, int>[] list,
             Func<IContainer, int, bool> processBlock)
         {
             IDeviceLock locked = null;
+
+            var processedBlocks = 0;
 
             try
             {
@@ -1299,14 +1330,14 @@ namespace EmpyrionScripting.CustomHelpers
                                         {
                                             processBlockData.CheckedBlocks--;
                                             output.WriteLine($"Container '{N}' is locked");
-                                            return;
+                                            return processedBlocks;
                                         }
 
                                         if (processBlock(target, blockType))
                                         {
                                             processBlockData.CheckedBlocks--;
                                             output.WriteLine($"Container '{N}' is full");
-                                            return;
+                                            return processedBlocks;
                                         }
                                     }
                                     else if(N == null)
@@ -1314,17 +1345,20 @@ namespace EmpyrionScripting.CustomHelpers
                                         if (processBlock(target, blockType))
                                         {
                                             processBlockData.CheckedBlocks--;
-                                            return;
+                                            return processedBlocks;
                                         }
                                     }
 
                                     if (replaceId >= 0) block.ParentBlock.Set(replaceId);
                                     processBlockData.RemovedBlocks++;
 
+                                    processedBlocks++;
+                                    if (processedBlocks == maxProcessedBlocks) return processedBlocks;
+
                                     if (processBlockData.RemovedBlocks % EmpyrionScripting.Configuration.Current.ProcessMaxBlocksPerCycle == 0 || root.TimeLimitReached)
                                     {
                                         processBlockData.Z++;
-                                        return;
+                                        return processedBlocks;
                                     }
                                 }
                             }
@@ -1338,6 +1372,8 @@ namespace EmpyrionScripting.CustomHelpers
             {
                 locked?.Dispose();
             }
+
+            return processedBlocks;
         }
 
         private static bool DeconstructBlock(IEntityData E, Dictionary<int, double> ressources, int blockId)
