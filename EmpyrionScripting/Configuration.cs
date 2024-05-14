@@ -210,7 +210,7 @@ SELECT * FROM DiscoveredPOIs
 JOIN Entities ON DiscoveredPOIs.poiid = Entities.entityid
 JOIN Playfields ON Entities.pfid = Playfields.pfid
 JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (Entities.isremoved = 0 AND ((DiscoveredPOIs.facgroup = 1 AND DiscoveredPOIs.facid = 100) OR (DiscoveredPOIs.facgroup = 0 AND DiscoveredPOIs.facid = 100))) {additionalWhereAnd}
+WHERE (Entities.isremoved = 0 AND ((DiscoveredPOIs.facgroup = 1 AND DiscoveredPOIs.facid = @FactionId) OR (DiscoveredPOIs.facgroup = 0 AND DiscoveredPOIs.facid = @FactionId))) {additionalWhereAnd}
 "
                     }
                 },
