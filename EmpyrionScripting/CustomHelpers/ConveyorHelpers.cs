@@ -1056,13 +1056,12 @@ namespace EmpyrionScripting.CustomHelpers
                 return false;
             }
 
-            IContainer salaryTarget = null;
+            IContainer salaryTarget = target;
             var        salaryCount  = 0;
 
             if (salary.ItemId != 0)
             {
-                salaryTarget = root.E.S.GetCurrent()?.GetDevice<IContainer>(firstTarget);
-                salaryCount  = salaryTarget?.GetTotalItems(salary.ItemId) ?? 0;
+                salaryCount = salaryTarget.GetTotalItems(salary.ItemId);
                 if (salaryCount < salary.Amount)
                 {
                     root.GetPersistendData().TryRemove(root.ScriptId, out _);
@@ -1100,7 +1099,12 @@ namespace EmpyrionScripting.CustomHelpers
                     list, 
                     (c, i) => processBlock(E, ressources, i));
 
-                if(salary.ItemId != 0 && processedBlocks > 0) salaryTarget.RemoveItems(salary.ItemId, ((processedBlocks / EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks) + 1) * salary.Amount);
+                if (salary.ItemId != 0 && processedBlocks > 0)
+                {
+                    var neededSalary = ((processedBlocks / EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks) + 1) * salary.Amount;
+                    var notEnoughSalary = salaryTarget.RemoveItems(salary.ItemId, neededSalary);
+                    if(notEnoughSalary > 0) EmpyrionScripting.Log($"NotEnoughSalary: {root.E.Name}/{root.E.Id} #{notEnoughSalary} needed {neededSalary}", LogLevel.Message);
+                }
 
                 var allToLostItemRecover = false;
                 var currentContainer = firstTarget;
