@@ -308,7 +308,7 @@ namespace EmpyrionScripting
                 IdBlockMapping = ConfigEcfAccess.IdBlockMapping
             };
 
-            Configuration.Current.StructureTank.ForEach(tank => ItemNameId.ProcessAllowedItemsMapping(tank.Value, ConfigEcfAccess.BlockIdMapping));
+            Configuration.Current.StructureTank.Where(tank => tank.Value != null).ForEach(tank => ItemNameId.ProcessAllowedItemsMapping(tank.Value, ConfigEcfAccess.BlockIdMapping));
 
             Configuration.Current.StructureTank.ForEach(tank => {
                 var keyName = tank.Key switch

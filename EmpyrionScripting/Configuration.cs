@@ -27,7 +27,7 @@ namespace EmpyrionScripting
         public static void ProcessAllowedItemsMapping(IEnumerable<IItemNameId> items, IReadOnlyDictionary<string, int> nameIdMapping)
         {
             var notFound = -1;
-            items.ForEach(i => { i.ItemId = nameIdMapping.TryGetValue(i.ItemName, out var id) ? id : notFound--; });
+            items.ForEach(i => { i.ItemId = !string.IsNullOrEmpty(i.ItemName) && nameIdMapping.TryGetValue(i.ItemName, out var id) ? id : notFound--; });
         }
     }
 
