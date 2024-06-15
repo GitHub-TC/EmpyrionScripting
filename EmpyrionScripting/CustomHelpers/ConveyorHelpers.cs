@@ -1059,7 +1059,7 @@ namespace EmpyrionScripting.CustomHelpers
             IContainer salaryTarget = target;
             var        salaryCount  = 0;
 
-            if (salary.ItemId != 0)
+            if (salary.ItemId != 0 && salary.Amount > 0)
             {
                 salaryCount = salaryTarget.GetTotalItems(salary.ItemId);
                 if (salaryCount < salary.Amount)
@@ -1095,11 +1095,11 @@ namespace EmpyrionScripting.CustomHelpers
 
                 lock (processBlockData) processedBlocks = ProcessBlockPart(
                     output, root, S, processBlockData, target, targetPos, N, 0, 
-                    salary.ItemId == 0 ? int.MaxValue : (salaryCount / salary.Amount) * EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks, 
+                    salary.ItemId == 0 || salary.Amount > 0 ? int.MaxValue : (salaryCount / salary.Amount) * EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks, 
                     list, 
                     (c, i) => processBlock(E, ressources, i));
 
-                if (salary.ItemId != 0 && processedBlocks > 0)
+                if (salary.ItemId != 0 && salary.Amount > 0 && processedBlocks > 0)
                 {
                     var neededSalary = ((processedBlocks / EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks) + 1) * salary.Amount;
                     var notEnoughSalary = salaryTarget.RemoveItems(salary.ItemId, neededSalary);
