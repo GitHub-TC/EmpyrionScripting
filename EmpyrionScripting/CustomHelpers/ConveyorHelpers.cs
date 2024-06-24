@@ -1095,7 +1095,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 lock (processBlockData) processedBlocks = ProcessBlockPart(
                     output, root, S, processBlockData, target, targetPos, N, 0, 
-                    salary.ItemId == 0 || salary.Amount > 0 ? int.MaxValue : (salaryCount / salary.Amount) * EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks, 
+                    salary.ItemId == 0 || salary.Amount == 0 ? int.MaxValue : (salaryCount / salary.Amount) * EmpyrionScripting.Configuration.Current.AmountPerNumberOfBlocks, 
                     list, 
                     (c, i) => processBlock(E, ressources, i));
 
