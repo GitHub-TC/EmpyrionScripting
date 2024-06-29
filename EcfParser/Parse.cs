@@ -10,6 +10,8 @@ namespace EcfParser
 
     public static class Parse
     {
+        public static Action<string> Log { get; set; }
+
         public static EcfFile Deserialize(params string[] lines)
         {
             var result = new EcfFile();
@@ -138,28 +140,35 @@ namespace EcfParser
                 }
                 else
                 {
-                    var attr = ReadAttribute(currentLine);
-                    if(attr != null)
+                    try
                     {
-                        if (block.Attr      == null) block.Attr      = new List<EcfAttribute>();
-                        if (block.Values    == null) block.Values    = new Dictionary<string, object>();
-                        if (block.EcfValues == null) block.EcfValues = new Dictionary<string, EcfAttribute>();
-                        block.Attr.Add(attr);
-                        if (attr.Name != null && !block.EcfValues.ContainsKey(attr.Name))
+                        var attr = ReadAttribute(currentLine);
+                        if(attr != null)
                         {
-                            block.Values   .Add(attr.Name, attr.Value);
-                            block.EcfValues.Add(attr.Name, attr);
-                        }
+                            if (block.Attr      == null) block.Attr      = new List<EcfAttribute>();
+                            if (block.Values    == null) block.Values    = new Dictionary<string, object>();
+                            if (block.EcfValues == null) block.EcfValues = new Dictionary<string, EcfAttribute>();
+                            block.Attr.Add(attr);
+                            if (attr.Name != null && !block.EcfValues.ContainsKey(attr.Name))
+                            {
+                                block.Values   .Add(attr.Name, attr.Value);
+                                block.EcfValues.Add(attr.Name, attr);
+                            }
 
-                        if (firstLine)
-                        {
-                            attr.AddOns?.ToList().ForEach(A => {
-                                block.Values.Add(A.Key, A.Value);
-                                block.EcfValues.Add(A.Key, new EcfAttribute() { Name = A.Key, Value = A.Value });
-                            });
-                        }
+                            if (firstLine)
+                            {
+                                attr.AddOns?.ToList().ForEach(A => {
+                                    block.Values.Add(A.Key, A.Value);
+                                    block.EcfValues.Add(A.Key, new EcfAttribute() { Name = A.Key, Value = A.Value });
+                                });
+                            }
 
-                        firstLine = false;
+                            firstLine = false;
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        Log?.Invoke($"ReadAttribute: {currentLine} => {error}");
                     }
                 }
 

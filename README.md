@@ -818,6 +818,25 @@ Items habe folgende Basisdaten
 + {{globaltostructpos structure (vector | x y z)}}
   + Liefert die Position (vector | x y z) der Weltkoordinaten aus sicht der Struktur
 
+## Chat
++ {{chatbysignal SignalName sender}}message{{/chatbysignal}}
+  + Sendet die Chatmeldung "message" an den Spieler welcher das Signal auslöst. In dem Block steht der Spieler Mit Id und Namen zur Verfügung
+
++ {{char sender text}}
+  + Sendet eine Chatmeldung an den Inhaber der Stuktur (Fraktion oder Spieler) mit dem Text 'text' und dem Absender 'sender'
+
+## Chat (Admin only)
++ {{chatglobal sender text}}
+  + Sendet eine globale Chatmeldung mit dem Text 'text' und dem Absender 'sender'
+
++ {{chatserver sender text}}
+  + Sendet eine server Chatmeldung mit dem Text 'text' und dem Absender 'sender'
+
++ {chatplayer playerId sender text}}
+  + Sendet eine private Chatmeldung an dem Spieler 'playerId' mit dem Text 'text' und dem Absender 'sender'
+
++ {{chatfaction factionId sender text}}
+  + Sendet eine fraktions Chatmeldung an die Fraktion 'facrionId' mit dem Text 'text' und dem Absender 'sender'
 
 ## Teleport
 + {{teleportplayer player (device | toPos | x y z)}}
@@ -1069,8 +1088,20 @@ Somit verbrauchen "alte" oder nicht mehr benutze Strukturen auch keine Leistung 
   Nur jeder N te GameUpdate Aufruf wird für die Scriptausführung benutzt
 + "ScriptsSyncExecution": 2,
   Wie viele Scripte werden pro Zyklus im GameUpdate ausgeführt
-+ "ScriptsParallelExecution": 2,
++ "ScriptsParallelExecution": 4,
   Wie viele Scripte werden pro Zyklus in der Hintergrundverarbeitung ausgeführt
+
+
+## Hint: ...\Saves\Games\[Savegamename]\Mods\EmpyrionScripting\Configuration.json
+```
+"SaveGameScriptsIntervallMS": 10000,
+"ScriptsSyncExecution": 2,
+"ScriptsParallelExecution": 4,
+...
+"ProcessMaxBlocksPerCycle": 200,
+```
+Are set VERY conservatively by default so as not to put the server (and the game) under load.
+Double the values (SaveGameScriptsIntervallMS must lower) and the scripts will run more "smoothly", but there may be micro-jerks in the game.
 
 ### Whats next?
 
@@ -1896,6 +1927,26 @@ DateTime format:
 + {{globaltostructpos structure (vector | x y z)}}
   + Returns the position (vector | x y z) of the world coordinates from the point of view of the structure
 
+## Chat
++ {{chatbysignal SignalName sender}}message{{/chatbysignal}}
+  + Sends the chat message to the player who triggers the signal. In the block, the player is available with Id and name
+
++ {{char sender text}}
+  + Sends a chat message to the owner of the structure (faction or player) with the text 'text' and the sender 'sender'
+
+## Chat (Admin only)
++ {{chatglobal sender text}}
+  + Sends a global chat message with the text 'text' and the sender 'sender'
+
++ {{chatserver sender text}}
+  + Sends a server chat message with the text 'text' and the sender 'sender'
+
++ {chatplayer playerId sender text}}
+  + Sends a private chat message to the player 'playerId' with the text 'text' and the sender 'sender'
+
++ {{chatfaction factionId sender text}}
+  + Sends a faction chat message to the faction 'facrionId' with the text 'text' and the sender 'sender'
+
 ## Teleport
 + {{teleportplayer player (device | toPos | x y z)}}
  + Teleports the player to the device/block of the structure.
@@ -2140,6 +2191,17 @@ So "old" or no longer used structures do not consume any power of the script eng
   How many scripts are executed per cycle in the GameUpdate
 + "ScriptsParallelExecution": 2,
   How many scripts are executed per cycle in background processing
+
+## Hint: ...\Saves\Games\[Savegamename]\Mods\EmpyrionScripting\Configuration.json
+```
+"SaveGameScriptsIntervallMS": 10000,
+"ScriptsSyncExecution": 2,
+"ScriptsParallelExecution": 4,
+...
+"ProcessMaxBlocksPerCycle": 200,
+```
+Are set VERY conservatively by default so as not to put the server (and the game) under load.
+Double the values (SaveGameScriptsIntervallMS must lower) and the scripts will run more "smoothly", but there may be micro-jerks in the game.
 
 ### Whats next?
 

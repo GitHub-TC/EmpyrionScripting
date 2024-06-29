@@ -290,6 +290,7 @@ namespace EmpyrionScripting
         private EcfFile ReadEcf(string filename, bool withIdMapping, Action<EcfBlock> mapId)
         {
             var result = new EcfFile();
+            Parse.Log = errorMsg => Log($"{filename}:{errorMsg}", LogLevel.Error);
             try
             {
                 var fullFilename = GetConfigurationFile(filename);
