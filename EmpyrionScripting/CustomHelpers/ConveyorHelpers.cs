@@ -942,8 +942,9 @@ namespace EmpyrionScripting.CustomHelpers
                 }
 
                 var list = arguments.Get(3)?.ToString()
-                    .Split(new[] { ',', ';' })
+                    .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(T => T.Trim())
+                    .Where(T => !string.IsNullOrEmpty(T))
                     .Select(T => {
                         var delimiter = T.IndexOf('-', 1);
                         return delimiter > 0
