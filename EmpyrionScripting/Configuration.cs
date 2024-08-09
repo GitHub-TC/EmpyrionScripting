@@ -199,7 +199,7 @@ SELECT * FROM Structures
 JOIN Entities ON Structures.entityid = Entities.entityid
 JOIN Playfields ON Entities.pfid = Playfields.pfid
 JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (isremoved = 0 AND ((facgroup = 1 AND facid = @FactionId) OR (facgroup = 1 AND facid = @PlayerId) OR (facgroup = 0 AND facid = @FactionId))) {additionalWhereAnd}
+WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId)) {additionalWhereAnd}
 "
                     }
                 },
@@ -210,7 +210,7 @@ SELECT * FROM DiscoveredPOIs
 JOIN Entities ON DiscoveredPOIs.poiid = Entities.entityid
 JOIN Playfields ON Entities.pfid = Playfields.pfid
 JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (Entities.isremoved = 0 AND ((DiscoveredPOIs.facgroup = 1 AND DiscoveredPOIs.facid = @FactionId) OR (DiscoveredPOIs.facgroup = 0 AND DiscoveredPOIs.facid = @FactionId))) {additionalWhereAnd}
+WHERE (Entities.isremoved = 0 AND (DiscoveredPOIs.facgroup = 0 OR DiscoveredPOIs.facgroup = 1) AND (DiscoveredPOIs.facid = @PlayerId OR DiscoveredPOIs.facid = @FactionId)) {additionalWhereAnd}
 "
                     }
                 },
@@ -221,12 +221,25 @@ SELECT * FROM TerrainPlaceables
 JOIN Entities ON TerrainPlaceables.entityid = Entities.entityid
 JOIN Playfields ON TerrainPlaceables.pfid = Playfields.pfid
 JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (isremoved = 0 AND ((facgroup = 1 AND facid = @FactionId) OR (facgroup = 1 AND facid = @PlayerId) OR (facgroup = 0 AND facid = @FactionId))) {additionalWhereAnd}
+WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId OR TerrainPlaceables.entityid = @PlayerId OR TerrainPlaceables.entityid = @FactionId)) {additionalWhereAnd}
 "
                     }
                 },
 
-                {"Playfields", new DBQuery {CacheQueryForSeconds = 300, Description = "Provides the data of the discovered Playfields of the player and the faction", Query =
+                {"TerrainPlaceablesRes", new DBQuery {CacheQueryForSeconds = 600, Description = "Provides the data of the TerrainPlaceables of the player and the faction with resource type", Query =
+@"
+SELECT * FROM TerrainPlaceables
+JOIN PlayfieldResources ON (PlayfieldResources.pfid = TerrainPlaceables.pfid AND abs(PlayfieldResources.blockx - TerrainPlaceables.blockx) <= 20 AND abs(TerrainPlaceables.blockz - PlayfieldResources.blockz) <= 20)
+JOIN Entities ON TerrainPlaceables.entityid = Entities.entityid
+JOIN Playfields ON TerrainPlaceables.pfid = Playfields.pfid
+JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId OR TerrainPlaceables.entityid = @PlayerId OR TerrainPlaceables.entityid = @FactionId)) {additionalWhereAnd}
+"
+                    }
+                },
+
+                {
+                "Playfields", new DBQuery {CacheQueryForSeconds = 300, Description = "Provides the data of the discovered Playfields of the player and the faction", Query =
 @"
 SELECT * FROM Playfields
 LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
@@ -234,7 +247,7 @@ JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
 WHERE playfields.ssid IN (
 SELECT ssid FROM Playfields
 LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-WHERE (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId)
+WHERE (DiscoveredPlayfields.facgroup = 0 OR DiscoveredPlayfields.facgroup = 1) AND (DiscoveredPlayfields.facid = @PlayerId OR DiscoveredPlayfields.facid = @FactionId)
 GROUP BY playfields.ssid
 ) {additionalWhereAnd}
 "
@@ -250,7 +263,7 @@ JOIN PlayfieldResources ON PlayfieldResources.pfid = Playfields.pfid
 WHERE playfields.ssid IN (
 SELECT ssid FROM Playfields
 LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-WHERE (DiscoveredPlayfields.facgroup = 0 AND DiscoveredPlayfields.facid = @FactionId) OR (DiscoveredPlayfields.facgroup = 1 AND DiscoveredPlayfields.facid = @PlayerId)
+WHERE (DiscoveredPlayfields.facgroup = 0 OR DiscoveredPlayfields.facgroup = 1) AND (DiscoveredPlayfields.facid = @PlayerId OR DiscoveredPlayfields.facid = @FactionId)
 GROUP BY playfields.ssid
 ) {additionalWhereAnd}
 "
@@ -263,7 +276,7 @@ SELECT * FROM PlayerData
 JOIN Entities ON Entities.entityid = PlayerData.entityid
 JOIN Playfields ON Playfields.pfid = PlayerData.pfid
 JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE ((Entities.facgroup = 1 AND Entities.facid = @FactionId) OR (Entities.facgroup = 1 AND Entities.facid = @PlayerId) OR (Entities.facgroup = 0 AND Entities.facid = @FactionId)) {additionalWhereAnd}
+WHERE ((Entities.facgroup = 0 OR Entities.facgroup = 1 OR facgroup = 0 OR facgroup = 1) AND (Entities.facid = @PlayerId OR facid = @PlayerId OR Entities.facid = @FactionId OR facid = @FactionId)) {additionalWhereAnd}
 "
                     }
                 },
@@ -274,7 +287,7 @@ SELECT * FROM Bookmarks
 JOIN Entities ON Bookmarks.entityid = Entities.entityid
 JOIN Playfields ON Bookmarks.pfid = Playfields.pfid
 JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE ((Bookmarks.facgroup = 1 AND Bookmarks.facid = @FactionId) OR (Bookmarks.facgroup = 1 AND Bookmarks.facid = @PlayerId) OR (Bookmarks.facgroup = 0 AND Bookmarks.facid = @FactionId)) {additionalWhereAnd}
+WHERE ((Bookmarks.facgroup = 0 OR Bookmarks.facgroup = 1) AND (Bookmarks.facid = @PlayerId OR Bookmarks.facid = @FactionId)) {additionalWhereAnd}
 "
                     }
                 },

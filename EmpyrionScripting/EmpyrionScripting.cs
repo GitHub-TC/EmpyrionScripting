@@ -345,7 +345,7 @@ namespace EmpyrionScripting
         {
             ModApi.Log("Mod exited:Shutdown");
 
-            try{ StopScriptsEvent.Invoke(this, EventArgs.Empty);}
+            try{ StopScriptsEvent?.Invoke(this, EventArgs.Empty);}
             catch (Exception error) { ModApi.Log($"StopScriptsEvent:{error}"); }
 
             ModApi.Log("Mod exited:Shutdown finished");
