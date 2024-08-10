@@ -12,7 +12,9 @@ namespace EmpyrionScripting.DataWrapper
         }
         public ScriptSaveGameRootData(ScriptSaveGameRootData data) : base(data)
         {
-            ScriptPath = data.ScriptPath;
+            MainMethod     = data.MainMethod;
+            ModApi         = data.ModApi;
+            ScriptPath     = data.ScriptPath;
             MainScriptPath = data.MainScriptPath;
         }
         public ScriptSaveGameRootData(
