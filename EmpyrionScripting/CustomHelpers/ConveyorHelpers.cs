@@ -941,20 +941,8 @@ namespace EmpyrionScripting.CustomHelpers
                     return;
                 }
 
-                var list = arguments.Get(3)?.ToString()
-                    .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(T => T.Trim())
-                    .Where(T => !string.IsNullOrEmpty(T))
-                    .Select(T => {
-                        var delimiter = T.IndexOf('-', 1);
-                        return delimiter > 0
-                            ? new Tuple<int, int>(int.TryParse(T.Substring(0, delimiter), out var l1) ? l1 : 0, int.TryParse(T.Substring(delimiter + 1), out var r1) ? r1 : 0)
-                            : new Tuple<int, int>(int.TryParse(T, out var l2) ? l2 : 0, int.TryParse(T, out var r2) ? r2 : 0);
-                    })
-                    .ToArray();
-
                 if(!ConvertBlocks("deconstruct", output, root, options, context as object, arguments,
-                    (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}", list, EmpyrionScripting.Configuration.Current.DeconstructSalary,
+                    (arguments.Get(2)?.ToString() ?? "Core-Destruct") + $"-{E.Id}", RemoveItemIds(3, arguments), EmpyrionScripting.Configuration.Current.DeconstructSalary,
                     DeconstructBlock)) root.GetPlayfieldScriptData().EntityExclusiveAccess.TryRemove(E.Id, out _);
             }
             catch (Exception error)
@@ -979,12 +967,12 @@ namespace EmpyrionScripting.CustomHelpers
                 var commandId = $"{root.ScriptId}-recycle";
                 if ((!root.GetPlayfieldScriptData().EntityExclusiveAccess.TryGetValue(E.Id, out var accessBy) || accessBy.CommandId != commandId) && !root.GetPlayfieldScriptData().EntityExclusiveAccess.TryAdd(E.Id, new ExclusiveAccess { CommandId = commandId, EntityName = root.E.Name, EntityId = root.E.Id }))
                 {
-                    if(accessBy.EntityId != root.E.Id) output.WriteLine($"In process by {accessBy.EntityName}");
+                    if (accessBy.EntityId != root.E.Id) output.WriteLine($"In process by {accessBy.EntityName}");
                     return;
                 }
 
                 if (!ConvertBlocks("recycle", output, root, options, context as object, arguments,
-                    (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}", null, EmpyrionScripting.Configuration.Current.RecycleSalary,
+                    (arguments.Get(2)?.ToString() ?? "Core-Recycle") + $"-{E.Id}", RemoveItemIds(3, arguments), EmpyrionScripting.Configuration.Current.RecycleSalary,
                     ExtractBlockToRecipe)) root.GetPlayfieldScriptData().EntityExclusiveAccess.TryRemove(E.Id, out _);
             }
             catch (Exception error)
@@ -992,6 +980,20 @@ namespace EmpyrionScripting.CustomHelpers
                 if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{recycle}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
+
+        private static Tuple<int, int>[] RemoveItemIds(int parameterIndex, object[] arguments)
+            => arguments.Get(parameterIndex)?.ToString()
+                .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(T => T.Trim())
+                .Where(T => !string.IsNullOrEmpty(T))
+                .Select(T =>
+                {
+                    var delimiter = T.IndexOf('-', 1);
+                    return delimiter > 0
+                        ? new Tuple<int, int>(int.TryParse(T.Substring(0, delimiter), out var l1) ? l1 : 0, int.TryParse(T.Substring(delimiter + 1), out var r1) ? r1 : 0)
+                        : new Tuple<int, int>(int.TryParse(T, out var l2) ? l2 : 0, int.TryParse(T, out var r2) ? r2 : 0);
+                })
+                .ToArray();
 
         public static bool ConvertBlocks(string operationDescription,TextWriter output, IScriptRootData root, HelperOptions options, object context, object[] arguments, string coreName,
             Tuple<int, int>[] list, AllowedItem salary, Func<IEntityData, Dictionary<int, double>, int, bool> processBlock)
@@ -1243,16 +1245,6 @@ namespace EmpyrionScripting.CustomHelpers
                 var minPos      = E.S.GetCurrent().MinPos;
                 var maxPos      = E.S.GetCurrent().MaxPos;
                 var S           = E.S.GetCurrent();
-                var list        = arguments.Get(1)?.ToString()
-                                    .Split(new []{ ',', ';' })
-                                    .Select(T => T.Trim())
-                                    .Select(T => { 
-                                        var delimiter = T.IndexOf('-', 1); 
-                                        return delimiter > 0 
-                                            ? new Tuple<int,int>(int.TryParse(T.Substring(0, delimiter), out var l1) ? l1 : 0, int.TryParse(T.Substring(delimiter + 1), out var r1) ? r1 : 0)
-                                            : new Tuple<int,int>(int.TryParse(T, out var l2) ? l2 : 0, int.TryParse(T, out var r2) ? r2 : 0); 
-                                    })
-                                    .ToArray();
                 int.TryParse(arguments.Get(2)?.ToString(), out var replaceId);
 
                 // Empyrion hat einen "komischen" y-offest von 128
@@ -1276,7 +1268,7 @@ namespace EmpyrionScripting.CustomHelpers
 
                 if (processBlockData.CheckedBlocks < processBlockData.TotalBlocks)
                 {
-                    lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, int.MaxValue, list, (C, I) => C.AddItems(I, 1) > 0);
+                    lock (processBlockData) ProcessBlockPart(output, root, S, processBlockData, null, VectorInt3.Undef, null, replaceId, int.MaxValue, RemoveItemIds(1, arguments), (C, I) => C.AddItems(I, 1) > 0);
                     if (processBlockData.CheckedBlocks == processBlockData.TotalBlocks) processBlockData.Finished = DateTime.Now;
                 }
                 else if ((DateTime.Now - processBlockData.LastAccess).TotalMinutes > 5)
