@@ -25,6 +25,7 @@ namespace EmpyrionScripting.Interface
         List<string> LcdTargets { get; set; }
         IPlayfieldData P { get; set; }
         string ScriptId { get; set; }
+        ulong GameTicks { get; }
         int CycleCounter { get; }
         bool IsElevatedScript { get; }
         string Version { get; }

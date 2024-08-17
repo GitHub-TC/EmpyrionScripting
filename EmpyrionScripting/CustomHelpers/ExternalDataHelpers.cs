@@ -20,11 +20,26 @@ namespace EmpyrionScripting.CustomHelpers
     [HandlebarHelpers]
     public static class ExternalDataHelpers
     {
+        [HandlebarTag("gameticks")]
+        public static void DateTimeHelper(TextWriter output, object rootObject, object[] arguments)
+        {
+            var root = rootObject as IScriptRootData;
+
+            try
+            {
+                output.Write(root.GameTicks);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{gameticks}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("datetime")]
         public static void DateTimeHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
             var format = arguments.Length > 0 ? arguments[0]?.ToString() : null;
-            var add    = arguments.Length > 1 ? arguments[1]?.ToString() : null;
+            var add = arguments.Length > 1 ? arguments[1]?.ToString() : null;
 
             var root = rootObject as IScriptRootData;
 
@@ -34,8 +49,8 @@ namespace EmpyrionScripting.CustomHelpers
                         ? DateTime.UtcNow.AddHours(root.CultureInfo.UTCplusTimezone)
                         : DateTime.UtcNow.AddHours(int.Parse(add));
 
-                if (string.IsNullOrEmpty(format)) output.Write(current.ToString(        root.CultureInfo.CultureInfo));
-                else                              output.Write(current.ToString(format, root.CultureInfo.CultureInfo));
+                if (string.IsNullOrEmpty(format)) output.Write(current.ToString(root.CultureInfo.CultureInfo));
+                else output.Write(current.ToString(format, root.CultureInfo.CultureInfo));
             }
             catch (Exception error)
             {

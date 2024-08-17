@@ -755,7 +755,11 @@ Items habe folgende Basisdaten
 
 + {{abs (value)}}
   + Liefert den absoluten Wert
-  
+
++ {{gameticks}}
+  + Aktuelle Spielzeit in Ticks (20 Ticks sind eine Echtzeitsekunde)
+
+ 
 ## LCD
 + {{gettext lcddevice}}
   + Liefert den Text des LCD (lcddevice)
@@ -1822,6 +1826,9 @@ DateTime format:
   + Distance between (lVector) and (rVector)
   + Optional a format
 
++ {{gameticks}}
+  + Get current game run time as ticks (20 ticks is one real-time second)
+  
 ### (data)
 + {{createdictionary}}
   + Creates a dictionary which can be filled with 'addkeyvalue'.

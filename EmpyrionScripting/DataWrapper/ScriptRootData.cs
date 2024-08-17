@@ -150,6 +150,8 @@ namespace EmpyrionScripting.DataWrapper
         public string Error { get; set; }
         public string ScriptId { get; set; }
 
+        public ulong GameTicks => EmpyrionScripting.ModApi.Application.GameTicks;
+
         public int CycleCounter => ((PlayfieldScriptData)GetPlayfieldScriptData()).CycleCounter(ScriptId);
         public virtual bool DeviceLockAllowed => ((PlayfieldScriptData)GetPlayfieldScriptData()).DeviceLockAllowed(ScriptId);
 
