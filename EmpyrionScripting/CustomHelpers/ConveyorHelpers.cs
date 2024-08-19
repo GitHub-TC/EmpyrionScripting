@@ -284,7 +284,6 @@ namespace EmpyrionScripting.CustomHelpers
                          ItemMoveInfo currentMoveInfo = null;
 
                          if (count > 0) uniqueNames
-                                     .Where(N => N != S.CustomName)
                                      .ForEach(N => {
                                          var startCount = count;
                                          count = MoveItem(root, S, N, structure, count, maxLimit);
@@ -510,6 +509,12 @@ namespace EmpyrionScripting.CustomHelpers
                 return count;
             }
 
+            if (target == S.Container)
+            {
+                Log($"TargetEqual: {S.Id} #{S.Count} => {N}", LogLevel.Debug);
+                return count;
+            }
+
             if (!targetStructure.ContainerSource.TryGetValue(N, out var targetData))
             {
                 Log($"TargetDataNoFound: {S.Id} #{S.Count} => {N}", LogLevel.Debug);
@@ -530,17 +535,24 @@ namespace EmpyrionScripting.CustomHelpers
             if (S.IsToken)
             {
                 var itemList = target.GetContent();
-                if(itemList.Count < 64)
+                if (itemList.Count < 64)
                 {
+                    Log($"AddToken: {S.ItemId} #{tryMoveCount} {S.Ammo} {S.Decay}", LogLevel.Debug);
+
                     itemList.Add(new ItemStack(S.ItemId, tryMoveCount) { ammo = S.Ammo, decay = S.Decay });
                     target.SetContent(itemList.UniqueSlots());
                     return 0;
                 }
                 return tryMoveCount;
             }
-            else return maxLimit.HasValue
-                ? target.AddItems(S.Id, tryMoveCount) + (count - tryMoveCount)
-                : target.AddItems(S.Id, tryMoveCount);
+            else
+            {
+                Log($"AddItems: {S.ItemId} WithLimit:{maxLimit} #{tryMoveCount} {count}", LogLevel.Debug);
+
+                return maxLimit.HasValue
+                    ? target.AddItems(S.Id, tryMoveCount) + (count - tryMoveCount)
+                    : target.AddItems(S.Id, tryMoveCount);
+            }
         }
 
         enum GardenerOperation
