@@ -43,6 +43,8 @@ namespace EmpyrionScripting
         [JsonIgnore]
         public int ItemId { get; set; }
         public int Amount { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string EcfAmountTag { get; set; }
     }
 
     public enum ExecMethod
@@ -151,8 +153,8 @@ namespace EmpyrionScripting
 
         public Dictionary<StructureTankType, AllowedItem[]> StructureTank { get; set; } = new Dictionary<StructureTankType, AllowedItem[]>()
         {
-            [StructureTankType.Oxygen  ] = new[] { new AllowedItem("OxygenBottleLarge", 250) },
-            [StructureTankType.Fuel    ] = new[] { new AllowedItem("FusionCell", 300), new AllowedItem("EnergyCellLarge", 150), new AllowedItem("EnergyCell", 30) },
+            [StructureTankType.Oxygen  ] = new[] { new AllowedItem("OxygenBottleLarge", 250) { EcfAmountTag = "O2Value" } },
+            [StructureTankType.Fuel    ] = new[] { new AllowedItem("FusionCell", 300) { EcfAmountTag = "FuelValue" }, new AllowedItem("EnergyCellLarge", 150) { EcfAmountTag = "FuelValue" }, new AllowedItem("EnergyCell", 30) { EcfAmountTag = "FuelValue" } },
             [StructureTankType.Pentaxid] = new[] { new AllowedItem("PentaxidCrystal", 1) }
         };
         public string NumberSpaceReplace { get; set; } = " "; // eigentlich :-( funktioniert aber leider nicht mehr "\u2007\u2009";

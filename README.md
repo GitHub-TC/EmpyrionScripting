@@ -1097,6 +1097,36 @@ mit einer Priorität >= 1 unabhängig davon laufen ob das ScriptLCD ausgeschalte
 Scripte mit 0 oder ohne Nummer werden nur ausgeführt wenn das LCD eingeschaltet ist. 
 (Hinweis: man kann die Schriftfarbe (bei Projektoren) auf transparent setzen um es "unsichtbar" zu machen)
 
+## Automatische Amount Anpassungen
+Für Fuel, O2,... kann es sinvoll sein die aktuellen Werte aus der Ecf-Konfiguration (des Szenarios) zu verwenden
+Hierfür kann der Eintrag "EcfAmountTag" angegeben werden. Der Wert für "Amount" wird dann automatisch aus dem Item mit dem Wert des Tags ermittelt.
+Soll der Wert nicht automatisch ermittelt werden kann EcfAmountTag:"" angegeben werden.
+
+Beispiele für eine automatische Ermittlung
+```
+{
+    "ItemName": "EnergyCellLarge",
+    "Amount": 250,
+    "EcfAmountTag": "FuelValue"
+}
+...
+{
+  "ItemName": "OxygenBottleLarge",
+  "Amount": 250,
+  "EcfAmountTag": "O2Value"
+}
+```
+
+keine automatische Ermittung
+```
+{
+    "ItemName": "EnergyCellLarge",
+    "Amount": 250,
+    "EcfAmountTag": ""
+}
+```
+
+
 ## Allgemeines
 Wenn die Struktur ausgeschaltet ist oder keinen Strom hat werden keine InGameScripte von ihr ausgeführt.
 Somit verbrauchen "alte" oder nicht mehr benutze Strukturen auch keine Leistung der Scriptengine.
@@ -2220,6 +2250,35 @@ with a priority >= 1 will run regardless if the ScriptLCD is switched off.
 
 Scripts with 0 or no number will only be executed if the LCD is on. 
 (Note: you can set the font color (for projectors) to transparent to make it "invisible")
+
+## Automatic Amount Adjustments
+For Fuel, O2,... it can be useful to use the current values from the Ecf configuration (of the scenario)
+The “EcfAmountTag” entry can be specified for this purpose. The value for “Amount” is then automatically determined from the item with the value of the tag.
+If the value is not to be determined automatically, “EcfAmountTag:”” can be specified.
+
+Examples of automatic determination
+```
+{
+    “ItemName": ‘EnergyCellLarge’,
+    “Amount": 250,
+    “EcfAmountTag": ”FuelValue”
+}
+...
+{
+  “ItemName": ‘OxygenBottleLarge’,
+  “Amount": 250,
+  “EcfAmountTag": ”O2Value”
+}
+```
+
+no automatic determination
+```
+{
+    “ItemName": ‘EnergyCellLarge’,
+    “Amount": 250,
+    “EcfAmountTag": ””
+}
+```
 
 ## General
 If the structure is turned off or has no power, no ingame scripts will be executed from it.
