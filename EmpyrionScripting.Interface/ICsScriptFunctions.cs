@@ -38,5 +38,7 @@ namespace EmpyrionScripting.Interface
         Dictionary<int, double> ResourcesForBlockById(int id);
         bool ShowDialog(int playerId, DialogConfig dialogConfig, DialogActionHandler actionHandler, int customValue);
         bool ShowDialog(string signalNames, DialogConfig dialogConfig, DialogActionHandler actionHandler, int customValue);
+        string ToId(string names);
+        string ToName(string ids);
     }
 }

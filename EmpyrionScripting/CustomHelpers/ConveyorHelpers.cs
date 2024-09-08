@@ -791,7 +791,7 @@ namespace EmpyrionScripting.CustomHelpers
                             });
                         }
 
-                        Log($"{structure.E.Name}/{structure.E.Id} PickupPlants:[{op}] x:{block.Position.x} y:{block.Position.y} z:{block.Position.z} ID:{block.Id} -> {opChildId}", LogLevel.Message);
+                        Log($"{structure.E.Name}/{structure.E.Id} PickupPlants:[{op}->{opId}] x:{block.Position.x} y:{block.Position.y} z:{block.Position.z} ID:{block.Id} -> {opChildId}", LogLevel.Message);
 
                         container.RemoveItems(EmpyrionScripting.Configuration.Current.GardenerSalary.ItemId, amount);
                         block.ChangeBlockType(opChildId);

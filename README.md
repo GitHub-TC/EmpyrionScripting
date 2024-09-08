@@ -600,8 +600,11 @@ Items habe folgende Basisdaten
     das Sprachkürzel kann hier, aus der ersten Zeile, entnommen werden \[ESG\]\\Content\\Extras\\Localization.csv
     wird sonst aus dem CultureInfo LCD genommen
 
-* {{#toid idName}}
-  * Wandelte den symbolischen Id Namen in die aktuelle ID um
+* {{#toid Name[;Name2;...]}}
+  * Wandelte die symbolischen Namen in die aktuelle IDs um
+
+* {{#toname id[;id2;...]}}
+  * Wandelte die IDs in symbolischen Namen um
 
 + {{datetime}} = Datum und Uhrzeit anzeigen
 + {{datetime 'format'}} = gemäß dem 'format' ausgeben
@@ -1693,8 +1696,11 @@ Items have the following basic data
     look at \[ESG\]\\Content\\Extras\\Localization.csv at the first line
     from default it's get from the CultureInfo lcd.
 
-* {{#toid idName}}
-  * Converted the symbolic id name to the current id
+* {{#toid Name[;Name2;...]}}
+  * Converted the symbolic names to the current ids
+
+* {{#toname id[;id2;...]}}
+  * Converted the ids to the symbolic names
 
 ### (datetime)
 + {{datetime}} = Display the Datetime

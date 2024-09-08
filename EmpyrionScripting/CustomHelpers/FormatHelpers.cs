@@ -40,14 +40,42 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("toid")]
         public static void IdNHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 1) throw new HandlebarsException("{{toid}} helper must have one argument: (idname)");
+            if (arguments.Length != 1) throw new HandlebarsException("{{toid}} helper must have one argument: (name[;name2;...])");
 
             var root = rootObject as IScriptRootData;
             var data = arguments[0]?.ToString();
 
             try
             {
-                output.Write(EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(data, out var id) ? id : 0);
+                var idList = data.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(I => EmpyrionScripting.ConfigEcfAccess.BlockIdMapping.TryGetValue(I.Trim(), out var id) ? id : 0)
+                            .Where(I => I != 0)
+                            .ToArray();
+
+                output.Write(idList.Aggregate((string)null, (n, i) => n == null ? i.ToString() : $"{n};{i}"));
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{toid}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
+        [HandlebarTag("toname")]
+        public static void NIdHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{toname}} helper must have one argument: (id[;id2;...])");
+
+            var root = rootObject as IScriptRootData;
+            var data = arguments[0]?.ToString();
+
+            try
+            {
+                var idList = data.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(I => int.TryParse(I, out var id) ? EmpyrionScripting.ConfigEcfAccess.IdBlockMapping.TryGetValue(id, out var name) ? name : null : null)
+                            .Where(I => !string.IsNullOrEmpty(I))
+                            .ToArray();
+
+                output.Write(idList.Aggregate((string)null, (n, i) => n == null ? i.ToString() : $"{n};{i}"));
             }
             catch (Exception error)
             {
