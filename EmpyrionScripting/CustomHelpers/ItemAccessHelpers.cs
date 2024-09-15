@@ -246,5 +246,42 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("orderbylist")]
+        public static void OrderByListBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2) throw new HandlebarsException("{{itemlist list ids}} helper must have exactly two argument: (list) (id1;id2;id3)");
+
+            var root = rootObject as IScriptRootData;
+            var items = arguments[0] as ItemsData[];
+            var idsList = (arguments[1] as string)
+                            .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(I => I.Trim())
+                            .Where(I => !string.IsNullOrEmpty(I))
+                            .ToArray();
+
+            try
+            {
+                var ids = new List<int>();
+
+                idsList.ForEach(I => {
+                    var delimiter = I.IndexOf('-', I.StartsWith("-") ? 1 : 0);
+                    if (delimiter > 0)
+                    {
+                        if (int.TryParse(I.Substring(0, delimiter), out int fromId) && int.TryParse(I.Substring(delimiter + 1), out var toId)) ids.AddRange(Enumerable.Range(fromId, toId - fromId + 1));
+                    }
+                    else if (int.TryParse(I, out var id)) ids.Add(id);
+                });
+
+                if (root.TimeLimitReached) return;
+
+                if (items.Length > 0) options.Template(output, items.OrderBy(I => { var index = ids.IndexOf(I.Id); return index == -1 ? I.Id + 1000000 : index; }).ToArray());
+                else                  options.Inverse(output, context as object);
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{itemlist}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
     }
 }

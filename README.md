@@ -494,6 +494,9 @@ Items habe folgende Basisdaten
   * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
     Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
 
++ {{#orderbylist list 'id1;id2;id3,...'}}
+  + Liste (list) von Items an Hand der Idliste sortieren. Items welche nicht in der Liste sind werden ans Ende sortiert
+
 + {{configid name}}
   + Liest aus Konfiguration des Block/Items 'name' das Attribut 'id'
 
@@ -1689,6 +1692,9 @@ Items have the following basic data
 
 * {{#itemlist list 'id1;id2;id3'}}
   * Itemlist the the selected items (ids) even if they don't in the list (list)
+
++ {{#orderbylist list 'id1;id2;id3,...'}}
+  + sort list of items based on the idlist. Items that are not in the list are sorted to the end
 
 ### (i18n)
 * {{#i18n Select \['Language'\]}}
