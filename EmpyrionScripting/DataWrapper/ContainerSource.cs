@@ -11,5 +11,6 @@ namespace EmpyrionScripting.DataWrapper
         public VectorInt3 Position { get; set; }
         public float VolumeCapacity => Container.VolumeCapacity;
         public float DecayFactor => Container.DecayFactor;
+        public int MaxSlots { get; set; }
     }
 }

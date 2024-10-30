@@ -191,5 +191,6 @@ namespace EmpyrionScripting.DataWrapper
             catch { return false; }
         }
 
+        public int GetMaxSlots(int blockType) => StructureData.GetMaxSlots(blockType);
     }
 }

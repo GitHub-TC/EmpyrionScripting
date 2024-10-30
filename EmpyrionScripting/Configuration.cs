@@ -3,6 +3,7 @@ using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.Interface;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System;
 using System.Collections.Generic;
 
 namespace EmpyrionScripting
@@ -178,6 +179,13 @@ namespace EmpyrionScripting
                 "UCH",
                 "Trader",
                 "Civilian",
+        };
+
+        public Dictionary<int, int> LootListToSlotCount { get; set; } = new Dictionary<int, int> {
+            { 48, 128 },
+            { 66, 128 },
+            { 67, 64 },
+            { 300, 128 },
         };
 
         public AllDBQueries DBQueries { get; set; } = new AllDBQueries {

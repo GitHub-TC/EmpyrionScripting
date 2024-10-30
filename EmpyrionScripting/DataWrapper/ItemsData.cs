@@ -22,6 +22,7 @@ namespace EmpyrionScripting.DataWrapper
         public int Count { get; set; }
         public int Ammo { get; set; }
         public int Decay { get; set; }
+        public int MaxSlots { get; set; }
     }
 
     public class ItemsData : ItemBase, IItemsData

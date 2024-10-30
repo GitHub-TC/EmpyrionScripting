@@ -313,7 +313,7 @@ namespace EmpyrionScripting.CustomHelpers
                              if (S.IsToken)
                              {
                                  var containerItems = S.Container.GetContent();
-                                 if (containerItems.Count < 64)
+                                 if (containerItems.Count < S.MaxSlots)
                                  {
                                      containerItems.Add(new ItemStack(S.ItemId, count) { ammo = S.Ammo, decay = S.Decay });
                                      S.Container.SetContent(containerItems.UniqueSlots());
@@ -442,7 +442,11 @@ namespace EmpyrionScripting.CustomHelpers
                     {
                         var content = targetContainer.GetContent();
 
-                        if (content.Count < 64)
+                        int blockType = 0;
+                        targetStructure.GetBlock(targetPos)?.Get(out blockType, out var blockShape, out var blockRotation, out var blockActive);
+                        var maxSlots = StructureData.GetMaxSlots(blockType);
+
+                        if (content.Count < maxSlots)
                         {
                             content.Add(new ItemStack(restore.ItemId, restore.Count) { ammo = restore.Ammo, decay = restore.Decay});
                             targetContainer.SetContent(content.UniqueSlots());
@@ -535,7 +539,12 @@ namespace EmpyrionScripting.CustomHelpers
             if (S.IsToken)
             {
                 var itemList = target.GetContent();
-                if (itemList.Count < 64)
+
+                int blockType = 0;
+                targetStructure.GetCurrent().GetBlock(targetData.Position)?.Get(out blockType, out var blockShape, out var blockRotation, out var blockActive);
+                var maxSlots = StructureData.GetMaxSlots(blockType);
+
+                if (itemList.Count < maxSlots)
                 {
                     Log($"AddToken: {S.ItemId} #{tryMoveCount} {S.Ammo} {S.Decay}", LogLevel.Debug);
 

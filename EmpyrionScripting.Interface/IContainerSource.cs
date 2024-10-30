@@ -10,5 +10,6 @@ namespace EmpyrionScripting.Interface
         VectorInt3 Position { get; set; }
         float VolumeCapacity { get; }
         float DecayFactor { get; }
+        int MaxSlots { get; set; }
     }
 }

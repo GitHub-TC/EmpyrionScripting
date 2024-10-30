@@ -24,6 +24,7 @@ namespace EmpyrionScripting.Interface
         Dictionary<string, string> NamedIds { get; }
         List<string> LcdTargets { get; set; }
         IPlayfieldData P { get; set; }
+        int GetMaxSlots(int blockType);
         string ScriptId { get; set; }
         ulong GameTicks { get; }
         int CycleCounter { get; }

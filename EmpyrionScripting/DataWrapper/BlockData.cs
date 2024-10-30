@@ -91,6 +91,8 @@ namespace EmpyrionScripting.DataWrapper
         public int Shape    { get => GetData().blockShape;          set { if((_entity.IsElevated || !IsDamaged) && Shape      != value) _block?.Set(null, value, null, null); } }
         public int Rotation { get => GetData().blockRotation;       set { if((_entity.IsElevated || !IsDamaged) && Rotation   != value) _block?.Set(null, null, value, null); } }
 
+        public int MaxSlots => StructureData.GetMaxSlots(Id);
+
         public void SetTextureForWholeBlock(int texIdx)
         {
             if (Top == texIdx && Bottom == texIdx && North == texIdx && South == texIdx && West == texIdx && East == texIdx) return;

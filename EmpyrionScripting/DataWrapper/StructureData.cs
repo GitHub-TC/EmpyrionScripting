@@ -1,4 +1,5 @@
 ﻿using Eleon.Modding;
+using EmpyrionScripting.CustomHelpers;
 using EmpyrionScripting.Interface;
 using System;
 using System.Collections.Concurrent;
@@ -96,13 +97,15 @@ namespace EmpyrionScripting.DataWrapper
                         var block = structure.GetBlock(P);
                         if (container == null || block == null) return;
 
-                        containerSource.TryAdd(block.CustomName, new ContainerSource() { E = E, Container = container, CustomName = block.CustomName, Position = P });
+                        block.Get(out var blockType, out var blockShape, out var blockRotation, out var blockActive);
+
+                        containerSource.TryAdd(block.CustomName, new ContainerSource() { E = E, Container = container, CustomName = block.CustomName, Position = P, MaxSlots = GetMaxSlots(blockType)});
 
                         container.GetContent()
                             .ForEach(I =>
                             {
                                 EmpyrionScripting.ItemInfos.ItemInfo.TryGetValue(I.id, out ItemInfo details);
-                                IItemsSource source = new ItemsSource() { E = E, Id = I.CreateId(), Count = I.count, Ammo = I.ammo, Decay = I.decay, Container = container, CustomName = block.CustomName, Position = P };
+                                IItemsSource source = new ItemsSource() { E = E, Id = I.CreateId(), Count = I.count, Ammo = I.ammo, Decay = I.decay, Container = container, CustomName = block.CustomName, Position = P, MaxSlots = GetMaxSlots(blockType) };
                                 allItems.AddOrUpdate(I.id,
                                 new ItemsData()
                                 {
@@ -120,6 +123,13 @@ namespace EmpyrionScripting.DataWrapper
             });
 
             return new Tuple<ItemsData[], ConcurrentDictionary<string, IContainerSource>>(allItems.Values.OrderBy(I => I.Id).ToArray(), containerSource);
+        }
+
+        public static int GetMaxSlots(int blockType)
+        {
+            if (blockType == 0 || !int.TryParse(EmpyrionScripting.ConfigEcfAccess.FindAttribute(blockType, "LootList")?.ToString(), out var lootList) || lootList == 0) return 64;
+
+            return EmpyrionScripting.Configuration.Current.LootListToSlotCount.TryGetValue(lootList, out var slots) ? slots : 64;
         }
 
         virtual public IStructure GetCurrent() => _s.Value.TryGetTarget(out var s) ? s : null;
