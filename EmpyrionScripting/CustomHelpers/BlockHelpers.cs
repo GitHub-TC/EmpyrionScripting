@@ -138,7 +138,7 @@ namespace EmpyrionScripting.CustomHelpers
                     MinPos      = minPos,
                     MaxPos      = maxPos,
                     X           = minPos.x,
-                    Y           = minPos.y,
+                    Y           = maxPos.y,
                     Z           = minPos.z,
                     TotalBlocks = (maxPos.x - minPos.x + 1) * (maxPos.y - minPos.y + 1) * (maxPos.z - minPos.z + 1)
                 }) as ProcessBlockData;

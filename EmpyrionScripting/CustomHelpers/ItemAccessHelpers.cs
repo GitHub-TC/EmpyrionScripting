@@ -249,7 +249,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("orderbylist")]
         public static void OrderByListBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 2) throw new HandlebarsException("{{itemlist list ids}} helper must have exactly two argument: (list) (id1;id2;id3)");
+            if (arguments.Length != 2) throw new HandlebarsException("{{orderbylist list ids}} helper must have exactly two argument: (list) (id1;id2;id3)");
 
             var root = rootObject as IScriptRootData;
             var items = arguments[0] as ItemsData[];
@@ -279,7 +279,7 @@ namespace EmpyrionScripting.CustomHelpers
             }
             catch (Exception error)
             {
-                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{itemlist}} error " + EmpyrionScripting.ErrorFilter(error));
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{orderbylist}} error " + EmpyrionScripting.ErrorFilter(error));
             }
         }
 
