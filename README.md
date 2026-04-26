@@ -1,2176 +1,1084 @@
 ﻿# Empyrion Scripting
-[English part of this ReadMe.md](#English-Version)
+
+[English version below](#-english-version) | [Workshop Demo](https://steamcommunity.com/workshop/filedetails/?id=1751409371) | [Releases](https://github.com/GitHub-TC/EmpyrionScripting/releases)
+
+![Demo Ship Screen](Screenshots/DemoShipScreen.png)
+
+---
+
+# 🇩🇪 Deutsch
+
+## Inhaltsverzeichnis
+
+- [Was ist EmpyrionScripting?](#was-ist-empyrionscripting)
+- [🚀 Quickstart: Dein erstes Script in 5 Minuten](#-quickstart-dein-erstes-script-in-5-minuten)
+- [Installation](#installation)
+- [Grundkonzepte](#grundkonzepte)
+- [Sprache & Zeitzone](#sprache--zeitzone)
+- [Inventar & Container](#inventar--container)
+- [Items filtern & suchen](#items-filtern--suchen)
+- [Bedingungen & Logik](#bedingungen--logik)
+- [Anzeige-Features](#anzeige-features)
+- [Berechnungen](#berechnungen)
+- [Automatisierung: Verschieben & Befüllen](#automatisierung-verschieben--befüllen)
+- [Lichter steuern](#lichter-steuern)
+- [Geräte steuern](#geräte-steuern)
+- [Signale](#signale)
+- [Teleporter-Steuerung](#teleporter-steuerung)
+- [Chat & Teleport](#chat--teleport)
+- [Dialoge](#dialoge)
+- [JSON & Datenstrukturen](#json--datenstrukturen)
+- [Fliegen](#fliegen)
+- [Datenbankzugriff](#datenbankzugriff)
+- [Externe Daten (AddOn DLLs)](#externe-daten-addon-dlls)
+- [SaveGame-Scripte](#savegame-scripte)
+- [Elevated Scripte](#elevated-scripte)
+- [Script-Priorisierung](#script-priorisierung)
+- [C# Scripting Interface](#c-scripting-interface)
+- [Konfiguration & Performance](#konfiguration--performance)
+- [Vordefinierte ID-Listen](#vordefinierte-id-listen)
+- [Erz- und Barren-IDs](#erz--und-barren-ids)
+
+---
+
+## Was ist EmpyrionScripting?
+
+EmpyrionScripting ist eine Mod für **Empyrion: Galactic Survival**, die es ermöglicht, Echtzeit-Spielinformationen dynamisch auf LCD-Bildschirmen in Schiffen und Basen anzuzeigen. Das System nutzt die [Handlebars](http://handlebarsjs.com/)-Template-Sprache.
+
+**Was ist möglich?**
+
+- 📦 Inventar aller Container live anzeigen
+- ⚠️ Warnungen anzeigen wenn Ressourcen ausgehen
+- 💡 Lichter automatisch ein-/ausschalten
+- 🔄 Items zwischen Containern automatisch verschieben
+- ⛽ Treibstoff- und O2-Tanks automatisch befüllen
+- 📡 Signale auslösen und überwachen
+- 💬 Chat-Nachrichten senden
+- 🤖 Autonomes Fliegen (ohne Pilot)
+- Und vieles mehr…
+
+**Tutorials & Videos:**
+
+| Link | Beschreibung |
+|------|-------------|
+| [YouTube (Olly)](https://youtu.be/8nEpEygHBu8) | Einführungsvideo |
+| [YouTube](https://youtu.be/8MzjdeYlzPU) | Tutorial 2 |
+| [YouTube](https://youtu.be/gPp5CGJusr4) | Tutorial 3 |
+| [YouTube (A11)](https://youtu.be/hxvKs5U1I6I) | Änderungen in A11 |
+| [YouTube](https://youtu.be/V1w2A3LAZCs) | Tutorial 5 |
+| [YouTube](https://youtu.be/O89NQJjbQuw) | Tutorial 6 |
+| [YouTube](https://youtu.be/IbVuzFf_ywI) | Tutorial 7 |
+| [Workshop Sephrajin](https://steamcommunity.com/sharedfiles/filedetails/?id=2863240303) | DSEV LCD Script Tutorial |
+| [Workshop Noob](https://steamcommunity.com/sharedfiles/filedetails/?id=2817433272) | Scripting Tutorial Ship |
+| [Workshop ASTIC](https://steamcommunity.com/sharedfiles/filedetails/?id=2227639387) | Vega AI Beispielschiff |
+| [Beginners Guide](https://steamcommunity.com/workshop/filedetails/discussion/1751409371/3191368095147121750/) | Einsteiger-Anleitung (englisch) |
+
+---
+
+## 🚀 Quickstart: Dein erstes Script in 5 Minuten
+
+### Schritt 1: Mod installieren
+
+1. [EmpyrionScripting.zip](https://github.com/GitHub-TC/EmpyrionScripting/releases) herunterladen
+2. ZIP in das Verzeichnis `[Empyrion]\Content\Mods\` entpacken
+3. **Wichtig für Singleplayer:** Das Spiel **ohne EAC** starten (im Steam-Launcher „Start without EAC" wählen)
+
+### Schritt 2: LCD-Bildschirme vorbereiten
+
+Du benötigst **mindestens 2 LCD-Bildschirme** auf deinem Schiff oder deiner Basis:
+
+| LCD | Name im Control Panel | Zweck |
+|-----|----------------------|-------|
+| **Script-LCD** (Eingabe) | Muss mit `Script:` beginnen, z.B. `Script:MeinScript` | Enthält den Script-Code |
+| **Ausgabe-LCD** (Anzeige) | Beliebiger eindeutiger Name, z.B. `LCD Inventar` | Zeigt das Ergebnis an |
+
+> 💡 **Tipp:** Das Script-LCD kann unsichtbar gemacht werden (Schriftfarbe auf transparent setzen). Es muss nicht sichtbar sein.
+
+### Schritt 3: Script schreiben
+
+Öffne das **Script-LCD** (Rechtsklick → Manage → Text) und gib ein:
+
+```
+Targets:LCD Inventar
+=== Mein Inventar ===
+{{#items E.S 'Mein Container'}}
+{{Count}}x {{i18n Key}}
+{{/items}}
+```
+
+| Element | Bedeutung |
+|---------|-----------|
+| `Targets:LCD Inventar` | Ergebnis wird auf dem LCD „LCD Inventar" angezeigt |
+| `{{#items E.S 'Mein Container'}}` | Liest Inhalt des Containers „Mein Container" |
+| `{{Count}}x {{i18n Key}}` | Gibt Anzahl und lokalisierten Item-Namen aus |
+| `{{/items}}` | Ende des Blocks |
+
+### Schritt 4: Container benennen
+
+Klicke auf den Container im Control Panel und gib ihm den exakten Namen `Mein Container`.
+
+### Schritt 5: Fertig!
+
+Das Ausgabe-LCD „LCD Inventar" zeigt nun automatisch den Inhalt des Containers und aktualisiert sich periodisch.
+
+### Häufige Anfängerfehler
+
+| Problem | Lösung |
+|---------|--------|
+| LCD zeigt nichts | Script-LCD-Name muss mit `Script:` beginnen |
+| Container nicht gefunden | Name muss **exakt** übereinstimmen (Groß-/Kleinschreibung!) |
+| Kein Update | Struktur braucht Strom und muss eingeschaltet sein |
+| Alter Inhalt | Script-LCD muss eingeschaltet sein (oder Priorität ≥ 1 verwenden) |
+
+### Komplettbeispiel: Erz-Inventar auf einer Basis
+
+**Vorbereitung:**
+- Container benennen: `Erzlager`
+- Script-LCD benennen: `Script:ErzAnzeige`
+- Ausgabe-LCD benennen: `LCD Erze`
+
+**Script-Inhalt (ins Script-LCD):**
+
+```
+Targets:LCD Erze
+=== Erze im Lager ===
+{{#items E.S 'Erzlager'}}
+{{Count}}x {{i18n Key}}
+{{/items}}
+```
+
+---
 
 ## Installation
-1. Downloade die EmpyrionScripting.zip Datei vom aktuellen https://github.com/GitHub-TC/EmpyrionScripting/releases
-1. UnZip die Datei in dem Verzeichnis Content\\Mods directory
 
-#### Installation für SinglePlayer
-1. Downloade die EmpyrionScripting.zip Datei vom aktuellen https://github.com/GitHub-TC/EmpyrionScripting/releases
-1. UnZip die Datei in dem Verzeichnis Content\\Mods directory
-1. Das Spiel MUSS dann ohne EAC gestartet werden damit die Mods geladen werden
+### Multiplayer / Dedicated Server
 
-### Wofür dient diese MOD?
-![](Screenshots/DemoShipScreen.png)
+1. [EmpyrionScripting.zip](https://github.com/GitHub-TC/EmpyrionScripting/releases) herunterladen
+2. ZIP in das Verzeichnis `[Empyrion]\Content\Mods\` entpacken
 
-Echte Spielinhalte direkt auf einem LCD ausgeben
+### Singleplayer
 
-Eine dem Struktur 'LCDInfo-Demo' findest du im workshop
-https://steamcommunity.com/workshop/filedetails/?id=1751409371
+1. [EmpyrionScripting.zip](https://github.com/GitHub-TC/EmpyrionScripting/releases) herunterladen
+2. ZIP in das Verzeichnis `[Empyrion]\Content\Mods\` entpacken
+3. Spiel **ohne EAC** starten (Steam-Launcher)
 
-#### Hilfe
-![](Screenshots/RedAlert.png)
-![](Screenshots/LCD1.png)
+---
 
-YouTube video;
-* https://youtu.be/8nEpEygHBu8 (danke an Olly :-) )
-* https://youtu.be/8MzjdeYlzPU
-* https://youtu.be/gPp5CGJusr4
-* https://youtu.be/9601vpeLJAI
-* https://youtu.be/V1w2A3LAZCs
-* https://youtu.be/O89NQJjbQuw
-* https://youtu.be/uTgXwrlCfNQ
-* https://youtu.be/qhYmJWHk8ec
-* https://youtu.be/IbVuzFf_ywI
+## Grundkonzepte
 
-* https://youtu.be/XzYKNevK0bs
-* https://youtu.be/SOnZ_mzytA4
-* https://youtu.be/oDOSbllwqSw
-* https://youtu.be/qhOnj2D3ejo
+### Script-LCD und Ausgabe-LCD
 
-* Änderungen mit der A11: https://youtu.be/hxvKs5U1I6I
+Das System trennt Logik (Script-LCD) und Anzeige (Ausgabe-LCD):
 
-Beginners guide (english):
-* https://steamcommunity.com/workshop/filedetails/discussion/1751409371/3191368095147121750/
-* https://youtu.be/IjJTNp_ZYUI
+- **Script-LCD:** Name beginnt zwingend mit `Script:`. Enthält den Handlebars-Template-Code.
+- **Ausgabe-LCD:** Beliebiger Name. Wird in `Targets:` referenziert.
 
-## Tutorials
-* Workshop von Sephrajin: DSEV LCD Script Tutorial, https://steamcommunity.com/sharedfiles/filedetails/?id=2863240303
-* Workshop von Noob: Scripting Tutorial Ship, https://steamcommunity.com/sharedfiles/filedetails/?id=2817433272
-* Workshop von ASTIC, Vega AI, https://steamcommunity.com/sharedfiles/filedetails/?id=2227639387
-
-## Beispiele
-Allgemein: 
-Benötigt werden mindestens 2 LCD und mindestens 1 Container
-1. LCD 1 (Eingabe) wird mit der Abfrage programmiert siehe Beispiele unten. Der Namen des LCDs im ControlPanel MUSS mit "Script:" beginnen.
-1. LCD 2 (Ausgabe) Muss eindeutigen Namen haben z.B. "LCD Alle Erze"
-1. Jeder Kontainer der eine Information ausgeben soll, muss einen eindeutigen Namen haben
-
-Unten stehen die ID Nummer für Erze und Barren.<br/>
-Einige Funktionen benötigen ein Komma"," andere benötigen Simikolon ";".<br/>
-Alles in "" sind Texte und nicht mit anzugeben.<br/>
-Einzelne ' sind mit anzugeben.<br/>
-Man kann eine Information auch auf 2 LCD's anzeigen lassen dannsortedeach bei Targets:Name LCD;Name LCD2<br/>
-Man kann eine Information auch auf n LCD's anzeigen lassen dann bei Targets:LCDAusgabe*<br/>
-Man kann eine Information auch auf n LCD's anzeigen lassen welche schon im ScriptLCD Namen angegeben sind Script:LCDAusgabe*<br/>
-Man kann auf einem LCD auch den Inhalt verschiedner Kisten anzeigen lassen!<br/>
- 
- ---
-
-## Sprache, Format, Zeit der Ausgaben
-Die Sprache, Uhrzeitoffset und Anzeigeformate kann man mit einem LCD einstellen welches man
-'CultureInfo' benennt. Etwaige Fehler bei der Angabe werden in einem LCD mit dem Namen 'CultureInfoDebug' angezeigt.
-
-Dabei kann man in der 'CultureInfo' folgendes angeben:
 ```
+Script-LCD Name:    Script:TankStatus
+Ausgabe-LCD Name:   LCD Tanks
+```
+
+### Targets: – Ausgabeziele festlegen
+
+Die erste Zeile eines Scripts definiert die Ausgabe-LCDs:
+
+```
+Targets:LCD Ausgabe               ← Ein einzelnes LCD
+Targets:LCD Eins;LCD Zwei         ← Mehrere LCDs (durch ; getrennt)
+Targets:LCD Ausgabe*              ← Alle LCDs, deren Name mit "LCD Ausgabe" beginnt (Wildcard *)
+Script:LCD Ausgabe*               ← Zielname wird direkt aus dem Script-LCD-Namen entnommen
+```
+
+### Wichtige Kontext-Variablen
+
+| Variable | Beschreibung |
+|----------|-------------|
+| `E.S` | Die aktuelle Struktur (Schiff/Basis), auf der das Script läuft |
+| `E.S.Items` | Alle Items aller Container der aktuellen Struktur |
+| `E.S.Pilot` | Der aktuelle Pilot der Struktur |
+| `E.Faction` | Die Fraktion der Struktur |
+| `P.Players` | Alle Spieler die gerade auf der Struktur aktiv sind |
+| `@root` | Zugriff auf den Root-Kontext (z.B. `@root.Ids.Ore`) |
+
+### Handlebars-Syntax Grundlagen
+
+EmpyrionScripting nutzt [Handlebars.Net](https://github.com/rexm/Handlebars.Net):
+
+| Syntax | Bedeutung |
+|--------|-----------| 
+| `{{Variable}}` | Gibt den Wert einer Variable aus |
+| `{{#block}}...{{/block}}` | Block-Helper (Schleife oder Bedingung) |
+| `{{#block}}...{{else}}...{{/block}}` | Block mit Alternativ-Zweig |
+| `{{helper arg1 arg2}}` | Helper mit Parametern |
+| `@root.Data.key` | Auf gespeicherte Daten zugreifen |
+
+---
+
+## Sprache & Zeitzone
+
+Erstelle ein LCD mit dem Namen **`CultureInfo`** und gib folgenden JSON-Inhalt ein:
+
+```json
 {
-  "LanguageTag": "de-EN",
-  "i18nDefault": "English",
-  "UTCplusTimezone": 2
+  "LanguageTag": "de-DE",
+  "i18nDefault": "Deutsch",
+  "UTCplusTimezone": 1
 }
 ```
-LanguageTag: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c
 
-## Was ist in der Kiste/Container/ContainerController/MunitionsKiste/Kühlschrank
+| Parameter | Beschreibung | Beispiel |
+|-----------|-------------|---------|
+| `LanguageTag` | Sprachcode nach [LCID-Standard](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c) | `"de-DE"`, `"en-US"` |
+| `i18nDefault` | Standard-Sprache für Item-Namen | `"Deutsch"`, `"English"` |
+| `UTCplusTimezone` | Zeitzone als UTC-Offset | `1` für MEZ, `2` für MESZ |
 
-Eingabe im LCD 1 (alles ohne "")
+> Fehler bei der Konfiguration werden in einem LCD namens `CultureInfoDebug` angezeigt.
+
+---
+
+## Inventar & Container
+
+### Container-Inhalt anzeigen: `items`
+
+Zeigt Inhalt eines oder mehrerer Container an:
+
 ```
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT Optional"
-{{items E.S '"Name der Kiste"'}}
-{{Count}}{{Name}}
+Targets:LCD Inventar
+=== Container-Inhalt ===
+{{#items E.S 'MeinContainer'}}
+{{Count}}x {{i18n Key}}
 {{/items}}
 ```
-Bsp:
+
+**Mehrere Container oder Wildcards:**
+
 ```
-Targets:LCD Alle Erze
-Meine Erze
-{{#items E.S 'Alle Erze'}}
-{{Count}}{{i18 Key}}
+{{#items E.S 'Kiste1;Kiste2;Kühlschrank*'}}
+{{Count}}x {{i18n Key}}
 {{/items}}
 ```
----
-## Ausgabe aller Erze in der Basis/Schiff/HV/CV
 
-Eingabe im LCD (alles ohne "")
+### Alle Items der Struktur: `each E.S.Items`
+
 ```
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT optional"
-{{#test ID in '4296,4297,4298,4299,4300,4301,4302,4317,4318,4332,4341,4345'}}
-{{Count}} {{i18n Key}}
-{{/test}}
+Targets:LCD Alle Items
+Alle Items auf dem Schiff:
+{{#each E.S.Items}}
+ - {{Count}}x {{i18n Key}} (ID: {{Id}})
 {{/each}}
 ```
-Bsp:
+
+### Items abrufen und weiterverarbeiten: `getitems`
+
+Gibt eine Liste zurück, die mit anderen Befehlen weiterverarbeitet werden kann:
+
+```
+{{#getitems E.S 'Lager1;Lager2'}}
+{{Count}}x {{i18n Key}}
+{{/getitems}}
+```
+
+---
+
+## Items filtern & suchen
+
+### Nach ID filtern: `itemlist`
+
+Zeigt nur Items mit bestimmten IDs an. Nicht vorhandene Items erscheinen mit Anzahl 0:
+
+```
+Targets:LCD Erze
+Meine Erze:
+{{#itemlist E.S.Items '4297,4298,4299'}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+```
+
+**Mit vordefinierten Listen** (empfohlen):
+
 ```
 Targets:LCD Alle Erze
-Meine Erze
-{{#each E.S.Items}}
-{{#test Id in '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
-{{Count}} {{i18n Key}}
-{{/test}}
-{{/each}}
+{{#itemlist E.S.Items @root.Ids.Ore}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
 ```
----
-## Ausgabe aller Barren in der Basis/Schiff/HV/CV
 
-Eingabe im LCD (alles ohne "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT optional"
-{{#each E.S.Items}}
-{{#test Id in '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
-{{Count}} {{i18n Key}}
-{{/test}}
-{{/each}}
-```
-Bsp:
-```
-Targets:LCD Barren
-Alle meine Barren in der Basis:
-{{#each E.S.Items}}
-{{#test Id in '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
-{{Count}} {{i18n Key}}
-{{/test}}
-{{/each}}
-```
------------------------------------------------------------------------------------------
-## Ausgabe dieser per ID festgelegten Produkte (hier sind es alle Barren die es gibt im Spiel)
-Eingabe im LCD (alles ohne "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT optional"
-{{#itemlist E.S.Items '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
-{{Count}} {{i18n Key}}
-{{/itemlist}}
-```
-Bsp:
-```
-Targets:LCD Alle Barren im Spiel
-Alle Barren im Spiel:
-{{#itemlist E.S.Items '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
-{{Count}} {{i18n Key}}
-{{/itemlist}}
-```
------------------------------------------------------
-## Anzeige eines bestimmten Produktes in der Basis/Schiff/HV/CV
-```
-Eingabe im LCD (alles ohne "")
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT optional"
-{{#itemlist E.S.Items '4297'}}
-{{Count}} {{i18n Key}}
-{{/itemlist}}
-```
-Bsp:
-```
-Targets:LCD EISEN ERZ
-Meine EisenErz und Barren
-{{#itemlist E.S.Items '4297,4320'}}
-{{Count}} {{i18n Key}}
-{{/itemlist}}
-```
-------------------------------------------------------------------
-## Welche Erze sind alle, bzw. nur noch X Anzahl über
+**Listen kombinieren mit `concat`:**
 
-Hier werden alle Erze angezeigt wo nur 1-1000 auf der Basis vorhanden ist.
 ```
-{{#itemlist E.S.Items '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
-{{#test Count geq 1}}
-{{#test Count leq 1000}}
-{{Count}} {{i18n Key}}
+{{#itemlist E.S.Items (concat @root.Ids.WeaponSV @root.Ids.WeaponHV)}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+```
+
+### Items sortieren: `orderedeach`
+
+```
+Targets:LCD Inventar sortiert
+{{#orderedeach E.S.Items '-Count'}}
+{{Count}}x {{i18n Key}}
+{{/orderedeach}}
+```
+
+> `-Count` = absteigend, `+Count` = aufsteigend. Mehrere Felder: `'-Count,+Key'`
+
+### Items nach ID sortieren: `orderbylist`
+
+```
+{{#orderbylist E.S.Items '4297;4298;4299'}}
+{{Count}}x {{i18n Key}}
+{{/orderbylist}}
+```
+
+### Items als Array filtern: `itemlistarray`
+
+`itemlistarray` verhält sich wie `itemlist`, übergibt aber das gefilterte Ergebnis als **Array** an den inneren Block — damit können weitere Verarbeitungen (z.B. mit `orderedeach`) darauf angewendet werden:
+
+```
+{{#itemlistarray E.S.Items '4297;4298;4299'}}
+{{#orderedeach this '-Count'}}
+{{Count}}x {{i18n Key}}
+{{/orderedeach}}
+{{/itemlistarray}}
+```
+
+> Unterschied zu `itemlist`: `itemlist` iteriert direkt über Items (Element für Element), `itemlistarray` liefert das gesamte Array auf einmal für weitere Verarbeitung.
+
+---
+
+## Bedingungen & Logik
+
+### Vergleiche: `test`
+
+```
+{{#test Count geq 100}}
+Mehr als 100 vorhanden!
+{{else}}
+Weniger als 100 vorhanden.
 {{/test}}
+```
+
+| Operator | Bedeutung | Beispiel |
+|----------|-----------|---------|
+| `eq` oder `=` | Gleich | `{{#test Name eq 'IronOre'}}` |
+| `neq` oder `!=` | Ungleich | `{{#test Count neq 0}}` |
+| `leq` oder `<=` | Kleiner oder gleich | `{{#test Count leq 1000}}` |
+| `le` oder `<` | Kleiner | `{{#test Count le 100}}` |
+| `geq` oder `>=` | Größer oder gleich | `{{#test Count geq 500}}` |
+| `ge` oder `>` | Größer | `{{#test TankFuel ge 50}}` |
+| `in` | In einer Liste | `{{#test Id in '4297,4298'}}` |
+
+**Bereichsprüfung mit `in`:**
+
+```
+{{#test Id in '4296-4302'}}
+Erz-ID zwischen 4296 und 4302
+{{/test}}
+```
+
+**Erze die weniger als 500 Stück vorhanden sind:**
+
+```
+Targets:LCD Warnung
+Niedrige Bestände:
+{{#itemlist E.S.Items @root.Ids.Ore}}
+{{#test Count le 500}}
+⚠️ {{Count}}x {{i18n Key}}
 {{/test}}
 {{/itemlist}}
 ```
----
-## Hier werden alle Erze angezeigt die nicht mehr auf der Basis sind
+
+**Leere Erze anzeigen:**
+
 ```
-{#itemlist E.S.Items '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
+{{#itemlist E.S.Items @root.Ids.Ore}}
 {{#test Count leq 0}}
-{{Count}} {{i18n Key}}
+❌ {{i18n Key}} – LEER!
 {{/test}}
 {{/itemlist}}
 ```
 
-## Vordefinierte ID Listen
+### `if` und `ok`
 
-Diese Listen können geändert werden oder durch neue Einträge erweitert werden.
-Dazu kann einfach der Abschnitt "Ids" in der Datei \[EGS\]\Saves\Games\\[SaveGameName\]\Mods\EmpyrionScripting\Configuration.json
-geändert werden.
-
-Hinweis: Um den Originalzustand wieder herzustellen kann der Abschnitt "Ids" aus der Datei geöscht werden. Die Mod trägt dann hier die im Programm hinterlegte Standardkonfiguration wieder ein.
-
-Folgende Listen können über "Ids.\[NameDerListe\] im Standard abgerufen werden.
-
-- "Ore"                   = ",AluminiumOre,CobaltOre,CopperOre,ErestrumOre,GoldOre,IronOre,MagnesiumOre,NeodymiumOre,PentaxidOre,PromethiumOre,SiliconOre,TitanOre,ZascosiumOre,SathiumOre,",
-- "Ingot"                 = ",CobaltIngot,CopperIngot,CrushedStone,ErestrumIngot,GoldIngot,IronIngot,MagnesiumPowder,NeodymiumIngot,PentaxidCrystal,PlatinBar,PromethiumPellets,RockDust,SathiumIngot,SiliconIngot,ZascosiumIngot,",
-- "BlockL"                = ",AlienBlocks,AlienLargeBlocks,ConcreteArmoredBlocks,ConcreteBlocks,ConcreteDestroyedBlocks,GrowingPot,GrowingPotConcrete,GrowingPotWood,HeavyWindowBlocks,HullArmoredLargeBlocks,HullCombatFullLarge,HullCombatLargeBlocks,HullFullLarge,HullLargeBlocks,HullLargeDestroyedBlocks,HullThinLarge,LadderBlocks,PlasticLargeBlocks,StairsBlocks,StairsBlocksConcrete,StairsBlocksWood,TrussLargeBlocks,WindowArmoredLargeBlocks,WindowLargeBlocks,WindowShutterLargeBlocks,WoodBlocks,HeavyWindowDetailedBlocks,SteelRampBlocksL,HardenedRampBlocksL,CombatRampBlocksL,PassengerSeatMS,WalkwayLargeBlocks,",
-- "BlockS"                = ",ArtMassBlocks,HullArmoredSmallBlocks,HullSmallBlocks,HullSmallDestroyedBlocks,ModularWingBlocks,PlasticSmallBlocks,TrussSmallBlocks,VentilatorCubeQuarter,WindowArmoredSmallBlocks,WindowShutterSmallBlocks,WindowSmallBlocks,WingBlocks,HullCombatSmallBlocks,WalkwaySmallBlocks,HeavyWindowBlocksSmall,SteelRampBlocksS,HardenedRampBlocksS,CombatRampBlocksS,",
-- "Medic"                 = ",AlienParts03,AntibioticInjection,AntibioticPills,Medikit01,Medikit02,Medikit03,Medikit04,RadiationImmunityShot,RadiationPills,StomachPills,Bandages,EnergyPills,AntibioticOintment,AdrenalineShot,AntiRadiationOintment,AntiToxicOintment,AntiToxicPills,AntiParasitePills,AntiToxicInjection,AntiParasiteInjection,AntiRadiationInjection,EnergyDrink,AblativeSpray,BugSpray,Medikit05,Eden_EmergencyLifeSupport,Eden_RegenKit,Eden_StaminaRegenKit,Eden_ImmunityShield,Eden_RegenKitT2,Eden_StaminaRegenKitT2,Eden_RadiationRegenKit,Eden_Implant1,Eden_Implant2,Eden_Implant3,Eden_Implant4,Eden_Implant5,Eden_Implant6,Eden_BandagesT2,",
-- "Food"                  = ",AkuaWine,AnniversaryCake,Beer,BerryJuice,Bread,Cheese,EmergencyRations,FruitJuice,FruitPie,HotBeverage,MeatBurger,Milk,Pizza,Sandwich,Steak,Stew,VegetableJuice,VeggieBurger,",
-- "Ingredient"            = ",5312,AlienParts01,AlienParts02,AlienParts03,AlienThorn,AlienTooth,AloeVera,BerryJuice,Cheese,ConfettiMossScrapings,Eden_SilverIngot,Egg,ErestrumGel,Fiber,FireMossScrapings,FishMeat,Flour,Fruit,FruitJuice,Ham,HerbalLeaves,HWSFish,Meat,Milk,NCPowder,NutrientSolution,PentaxidElement,PlantProtein,PlasticMaterial,PlatinOunce,PromethiumPellets,Ratatouille,RockDust,RottenFood,Salami,Spice,TrumpetGreens,VegetableJuice,Vegetables,WaterBottle,XenoSubstrate,",
-- "Sprout"                = ",AlienPalmTreeStage1,AlienPlantTube2Stage1,AlienplantWormStage1,BigFlowerStage1,BulbShroomYoungStage1,CobraLeavesPlantStage1,CoffeePlantStage1,CornStage1,DesertPlant20Stage1,DurianRoot,ElderberryStage1,InsanityPepperStage1,MushroomBellBrown01Stage1,PearthingStage1,PumpkinStage1,SnakeweedStage1,TomatoStage1,WheatStage1,",
-- "Tools"                 = ",Chainsaw,ColorTool,ConcreteBlocks,ConstructorSurvival,DrillT2,Explosives,Flashlight,LightWork,LightWork02,MobileAirCon,MultiTool,MultiToolT2,OreScanner,OxygenGeneratorSmall,PlayerBike,RadarSuitT1,TextureTool,WaterGenerator,AutoMiningDeviceT1,AutoMiningDeviceT2,AutoMiningDeviceT3,Eden_AutoMiningDeviceT4,DrillEpic,TextureColorTool,NightVision,SurvivalTent,OxygenGenerator,OxygenHydrogenGenerator,Drill,SurvivalTool,DrillEpic,MedicGun,Eden_DrillVoidium,Eden_VoidiumScanner,Eden_VoidiumScannerT2,",
-- "ArmorMod"              = ",ArmorBoost,ArmorBoostEpic,Eden_ArmorBoostAbyss,Eden_ArmorBoostAugmented,Eden_ColdBoostAbyss,Eden_ColdBoostAugmented,Eden_HeatBoostAbyss,Eden_HeatBoostAugmented,Eden_JetpackBoostAbyss,Eden_JetpackBoostAugmented,Eden_RadiationBoostAbyss,Eden_RadiationBoostAugmented,Eden_TransportationBoostAugmented,EVABoost,InsulationBoost,InsulationBoostEpic,JetpackBoost,JetpackBoostEpic,MobilityBoost,MobilityBoostEpic,MultiBoost,MultiBoostEpic,OxygenBoost,RadiationBoost,RadiationBoostEpic,TransportationBoost,",
-- "DeviceL"               = ",AlienNPCBlocks,ArmorLocker,ATM,BlastDoorLargeBlocks,BoardingRampBlocks,CloneChamber,CockpitBlocksCV,ConstructorT0,ConstructorT1V2,ConstructorT2,ContainerAmmoControllerLarge,ContainerAmmoLarge,ContainerControllerLarge,ContainerExtensionLarge,ContainerLargeBlocks,ContainerPersonal,Core,CoreNoCPU,CPUExtenderBAT2,CPUExtenderBAT3,CPUExtenderBAT4,Deconstructor,DetectorCV,DoorArmoredBlocks,DoorBlocks,ElevatorMS,ExplosiveBlocks,ExplosiveBlocks2,Flare,FoodProcessorV2,ForcefieldEmitterBlocks,FridgeBlocks,FuelTankMSLarge,FuelTankMSLargeT2,FuelTankMSSmall,Furnace,GeneratorBA,GeneratorMS,GeneratorMST2,GravityGeneratorMS,HangarDoorBlocks,HumanNPCBlocks,LandClaimDevice,LandinggearBlocksCV,LCDScreenBlocks,LightLargeBlocks,LightPlant01,MedicalStationBlocks,OfflineProtector,OxygenStation,OxygenTankMS,OxygenTankSmallMS,PentaxidTank,Portal,RampLargeBlocks,RCSBlockMS,RCSBlockMS_T2,RemoteConnection,RepairBayBA,RepairBayBAT2,RepairBayConsole,RepairBayCVT2,RepairStation,SensorTriggerBlocks,ShieldGeneratorBA,ShieldGeneratorBAT2,ShieldGeneratorPOI,ShutterDoorLargeBlocks,SolarGenerator,SolarPanelBlocks,SolarPanelSmallBlocks,SpotlightBlocks,TeleporterBA,ThrusterMSDirectional,ThrusterMSRound2x2Blocks,ThrusterMSRound3x3Blocks,ThrusterMSRoundBlocks,VentilatorBlocks,PassengerSeatMS,CPUExtenderLargeT5,WarpDrive,RepairBayCV,TeleporterCV,ContainerHarvestControllerLarge,ShieldGeneratorCV,ShieldGeneratorCVT2,CPUExtenderCVT2,CPUExtenderCVT3,CPUExtenderCVT4,WarpDriveT2,DetectorCVT2,ShieldGeneratorT0,ShieldChargerLarge,FusionReactorLarge,ShieldCapacitorT2Large,ShieldCapacitorT3Large,ShieldChargerT2Large,ShieldChargerT3Large,Eden_LiftLargeBlocks,Eden_AuxillaryDummy,Eden_ShieldGeneratorAugmentedCV,Eden_AntimatterTank,Eden_WarpDriveAntimatter,Eden_ShieldGeneratorRegenerateCV,Eden_HydroponicsGrain,Eden_HydroponicsFruit,Eden_HydroponicsVegetables,Eden_HydroponicsNaturalStimulant,Eden_HydroponicsHerbalLeaves,Eden_HydroponicsPlantProtein,Eden_HydroponicsNaturalSweetener,Eden_HydroponicsFiber,Eden_HydroponicsMushroomBrown,Eden_HydroponicsSpice,Eden_HydroponicsBuds,Eden_HydroponicsBerries,Eden_HydroponicsPentaxid,Eden_ExplorationScannerCV,CVSmallSolarPanelBlocks,CVLargeSolarPanelBlocks,ShieldCapacitorLarge,Eden_ScienceStation,AsgardPassGen,AsgardThrusterCV,HWSLiftBlocks,AsgardExtensionLarge,AsgardExplosiveBlock,ThrusterMSRoundLarge,",
-- "DeviceS"               = ",ArmorLockerSV,CloneChamberHV,ConstructorHV,ConstructorSV,Core,CPUExtenderHVT2,CPUExtenderHVT3,CPUExtenderHVT4,DetectorHVT1,DoorBlocksSV,Flare,ForcefieldEmitterBlocks,FridgeSV,FuelTankSV,FuelTankSVSmall,GeneratorSV,GeneratorSVSmall,HoverBooster,HoverEngineLarge,HoverEngineSmall,HoverEngineThruster,LightSS01,MedicStationHV,OxygenTankSV,PentaxidTankSV,RCSBlockGV,RCSBlockSV,RemoteConnection,ShieldGeneratorHV,ThrusterGVJetRound1x3x1,ThrusterGVRoundBlocks,ThrusterGVRoundLarge,ThrusterGVRoundLargeT2,ThrusterGVRoundNormalT2,ThrusterJetRound1x3x1,ThrusterJetRound2x5x2,ThrusterJetRound2x5x2V2,ThrusterJetRound3x10x3,ThrusterJetRound3x10x3V2,ThrusterJetRound3x13x3,ThrusterJetRound3x13x3V2,ThrusterJetRound3x7x3,ThrusterSVDirectional,ThrusterSVRoundBlocks,ThrusterSVRoundLarge,ThrusterSVRoundLargeT2,ThrusterSVRoundNormalT2,VentilatorBlocks,WarpDriveSV,GeneratorSVT2,ThrusterSVRoundT2Blocks,DetectorSVT2,ShieldGeneratorSVT0,ShieldGeneratorSVT2,CPUExtenderSmallT5,LargeCargoContainer,LargeHarvestContainer,ShieldCapacitorSmall,ShieldChargerSmall,FoodProcessorSmall,Eden_AuxillaryCPUSV,Eden_ShieldGeneratorAugmentedSV,Eden_WarpDriveAntimatterSV,AsgardContainerExtensionHVSV,AsgardFuelTankSVHV,AsgardExplosiveBlock,AsgardWarpDriveSV,AsgardGeneratorSVHV,ThrusterGVSuperRound2x4x2,PassengerSeatSV,PassengerSeat2SV,OxygenStationSV,ShutterDoorSmallBlocks,CockpitBlocksSV,LandinggearBlocksSV,LandinggearBlocksHeavySV,SensorTriggerBlocksSV,DetectorSVT1,ContainerControllerSmall,ContainerExtensionSmall,ContainerHarvestControllerSmall,ContainerAmmoControllerSmall,LandinggearBlocksHeavySV,RampSmallBlocks,ContainerSmallBlocks,CockpitBlocksSVT2,ShieldGeneratorSV,CPUExtenderSVT2,CPUExtenderSVT3,CPUExtenderSVT4,",
-- "WeaponPlayer"          = ",AssaultRifle,AssaultRifleEpic,AssaultRifleT2,Chainsaw,ColorTool,DrillT2,Explosives,LaserPistol,LaserPistolT2,LaserRifle,LaserRifleEpic,Minigun,MinigunEpic,MultiTool,Pistol,PistolEpic,PistolT2,PulseRifle,RocketLauncher,RocketLauncherEpic,RocketLauncherT2,ScifiCannon,ScifiCannonEpic,Shotgun,Shotgun2,Shotgun2Epic,Sniper,Sniper2,Sniper2Epic,TextureTool,PulseRifleT2,SubmachineGunT1,SpecOpsRifle,SubmachineGunT2,GrenadeLauncher,TalonRepeatingCrossbow,",
-- "WeaponHV"              = ",DrillAttachment,DrillAttachmentLarge,DrillAttachmentT2,SawAttachment,TurretGVArtilleryBlocks,TurretGVMinigunBlocks,TurretGVPlasmaBlocks,TurretGVRocketBlocks,TurretGVToolBlocks,WeaponSV02,TurretGVRocketBlocksT2,TurretGVArtilleryBlocksT2,WeaponSV09,WeaponSV11,",
-- "WeaponSV"              = ",WeaponSV01,WeaponSV02,WeaponSV03,WeaponSV04,WeaponSV05,WeaponSV05Homing,TurretSVSmall,DrillAttachmentSVT2,TurretSVPulseLaserT2,TurretGVProjectileBlocksT2,TurretGVPlasmaBlocksT2,WeaponSV06,WeaponSV07,WeaponSV08,TurretGVBeamLaserBlocksT2, Eden_TurretVulcanSmall,Eden_ModularPulseLaserSVIR,Eden_ModularPulseLaserSVUV,Eden_ModularPulseLaserSVGamma,Eden_ShieldBoosterSV,AsgardDrillSV,",
-- "WeaponCV"              = ",DrillAttachmentCV,SentryGunBlocks,TurretMSArtilleryBlocks,TurretMSLaserBlocks,TurretMSProjectileBlocks,TurretMSRocketBlocks,TurretMSToolBlocks,TurretZiraxMSLaser,TurretZiraxMSPlasma,TurretZiraxMSRocket,WeaponMS01,WeaponMS02,TurretAlien,TurretEnemyBallista,TurretMSProjectileBlocksT2,TurretMSRocketBlocksT2,TurretMSLaserBlocksT2,TurretMSArtilleryBlocksT2,WeaponMS03,TurretZiraxMSPlasmaArtillery,TurretZiraxMSLaserT2,TurretZiraxMSPlasmaT2,TurretZiraxMSRocketT2,Eden_TurretBolterCV,Eden_TurretMissileLight,Eden_TurretMissileLightT2,Eden_BlasterCV,Eden_RailgunCVSpinal_Kit,Eden_CVTorpedoRapid,Eden_TurretVulcanCV,Eden_DrillIceCV,Eden_DrillRichCV,Eden_DrillIceTurretCV,Eden_DrillTurretAutoCV,Eden_DrillTurretAutoCVT2,Eden_TurretLaserBeamCV,Eden_TurretLaserBeamCVT2,Eden_TurretLaserBeamCVT3,Eden_TurretBeamHeavyT1,Eden_TurretMissileCruiseCV,Eden_TurretMissileCruiseEMPCV,Eden_TurretMissileSwarmCV,Eden_TurretLaserT4,Eden_TurretAlienVulcan,Eden_TurretFlakClose,Eden_TurretRailgun,Eden_TurretRailgunHeavy,Eden_DrillIceTurretCVAlien,Eden_DrillTurretAutoCVAlien,AsgardDrillCV,",
-- "WeaponBA"              = ",SentryGunBlocks,TurretBaseArtilleryBlocks,TurretBaseLaserBlocks,TurretBaseProjectileBlocks,TurretBaseRocketBlocks,TurretBaseProjectileBlocksT2,TurretBaseRocketBlocksT2,TurretBaseLaserBlocksT2,TurretBaseArtilleryBlocksT2,TurretBABeamLaserBlocksT2,",
-- "AmmoPlayer"            = ",12.7mmBullet,5.8mmBullet,50Caliber,8.3mmBullet,DrillCharge,MultiCharge,PulseLaserChargePistol,PulseLaserChargeRifle,SciFiCannonPlasmaCharge,ShotgunShells,SlowRocket,SlowRocketHoming,",
-- "AmmoHV"                = ",15mmBullet,ArtilleryRocket,FastRocket,TurretGVPlasmaCharge,",
-- "AmmoSV"                = ",15mmBullet,FastRocket,FastRocketHoming,PlasmaCannonChargeSS,PulseLaserChargeSS,RailgunBullet,",
-- "AmmoCV"                = ",15mmBullet,30mmBullet,5.8mmBullet,FastRocketMS,FlakRocketMS,LargeRocketMS,PulseLaserChargeMS,PulseLaserChargeMSWeapon,TurretMSPlasmaCharge,",
-- "AmmoBA"                = ",15mmBullet,30mmBullet,5.8mmBullet,FastRocketBA,FlakRocket,LargeRocket,PulseLaserChargeBA,TurretBAPlasmaCharge,",
-- "Gardeners"             = ",ConsoleSmallHuman,",
-- "Components"            = ",AluminiumCoil,AluminiumOre,AluminiumPowder,AutoMinerCore,CapacitorComponent,Cement,CobaltAlloy,Computer,Electronics,EnergyCell,EnergyMatrix,ErestrumGel,Fiber,FluxCoil,GlassPlate,GoldIngot,HydrogenBottle,IceBlocks,LargeOptronicBridge,LargeOptronicMatrix,MagnesiumPowder,MechanicalComponents,Motor,Nanotubes,NCPowder,OpticalFiber,Oscillator,PentaxidCrystal,PentaxidElement,PentaxidOre,PlasticMaterial,PowerCoil,PromethiumOre,PromethiumPellets,RawDiamond,RockDust,SmallOptronicBridge,SmallOptronicMatrix,SteelPlate,SteelPlateArmored,WaterJug,WoodLogs,WoodPlanks,XenoSubstrate,ZascosiumAlloy,",
-- "EdenComponents"        = ",AluminiumCoil,AluminiumOre,AluminiumPowder,Coolant,Eden_ComputerT2,Eden_DarkMatter,Eden_DarkMatterSmall,Eden_DiamondCut,Eden_DroneSalvageCore,Eden_DroneSalvageProcessor,Eden_Electromagnet,Eden_GaussRail,Eden_ModularPulseLaserLensLarge,Eden_ModularPulseLaserLensSmall,Eden_PlasmaCoil,Eden_PowerRegulator,Eden_ProgenitorArtifact,Eden_Semiconductor,Eden_Voidium,Fertilizer,HeatExchanger,HeliumBottle,NitrogenBottle,QuantumProcessor,RadiationShielding,ReactorCore,SolarCell,Superconductor,ThrusterComponents,XenonBottle,SmallUpgradeKit,LargeUpgradeKit,AdvancedUpgradeKit,Eden_MagmaciteIngot,Eden_MagmacitePlate,Eden_Deuterium,Eden_OreDenseT1Ingot,Eden_OreDenseT2Ingot,Eden_OreDenseT3Ingot,Eden_OreDenseT4Ingot,Eden_OreDenseT5Ingot,AncientRelics,LJArtifact1,LJArtifact2,LJArtifact3,LJArtifact4,NaqahdahOre,NaqahdahIngot,NaqahdahPlate,Naquadria,LJSandOre,LJEarthOre,Eden_MagmacitePlate,Eden_AugmentedMold,",
-- "Armor"                 = ",ArmorHeavy,ArmorHeavyEpic,ArmorLight,ArmorLightEpic,ArmorMedium,ArmorMediumEpic,Eden_ArmorAbyssLight,Eden_ArmorHeavyEpicReinforced,Eden_ArmorHeavyReinforced,Eden_ArmorLightAugmented,Eden_ArmorLightReinforced,Eden_ArmorMediumReinforced,AsgardArmor,AsgardArmorDonat",
-- "IngredientBasic"       = ",Meat,Spice,AlienParts01,AlienParts02,AlienParts03,Bread,Fruit,Grain,Egg,NaturalStimulant,AlienTooth,Milk,Cheese,RottenFood,HerbalLeaves,ConfettiMossScrapings,FireMossScrapings,PlantProtein,MushroomBrown,AloeVera,AlienThorn,Vegetables,Flour,Ham,Berries,Ratatouille,NaturalSweetener,FruitJuice,Buds,",
-- "IngredientExtra"       = ",PromethiumPellets,RockDust,PlasticMaterial,PentaxidElement,PlatinOunce,ErestrumGel,XenoSubstrate,NutrientSolution,WaterBottle,Eden_SilverIngot,",
-- "IngredientExtraMod"    = ",Medikit04,RadiationImmunityShot,Bandages,AdrenalineShot,AntiRadiationInjection,EnergyDrink,",
-- "OreFurnace"            = ",IronOre,CobaltOre,SiliconOre,NeodymiumOre,CopperOre,ErestrumOre,ZascosiumOre,SathiumOre,GoldOre,TitanOre,PlatinOre,Eden_MagmaciteOre,Eden_TungstenOre,",
-- "Deconstruct"           = ",Eden_IceDense,Eden_IceRich,Eden_IceHeavy,Eden_Salvage1,Eden_Salvage2,Eden_Salvage3,Eden_Salvage4,Eden_Salvage5,Eden_OreDenseT1,Eden_OreDenseT2,Eden_OreDenseT3,Eden_OreDenseT4,Eden_OreDenseT5,",
-- "AmmoAllEnergy"         = ",DrillCharge,PulseLaserChargePistol,PulseLaserChargeRifle,MultiCharge,SciFiCannonPlasmaCharge,PlasmaCannonAlienCharge,PlasmaCannonChargeSS,PulseLaserChargeSS,PulseLaserChargeMS,TurretGVPlasmaCharge,TurretMSPlasmaCharge,TurretEnemyLaserCharge,PulseLaserChargeBA,TurretBAPlasmaCharge,PulseLaserChargeMSWeapon,PlasmaCartridge,PulseLaserChargeMST2,TurretMSPlasmaChargeT2,PulseLaserChargeBAT2,TurretBAPlasmaChargeT2,TurretGVPlasmaChargeT2,PulseLaserChargeSST2,ZiraxMSPlasmaCharge,HeatSinkSmall,HeatSinkLarge,AsgardPlazmerAmmo,LJDrillChargeEpic,Eden_ModularPulseLaserSVIR_Ammo,Eden_ModularPulseLaserSVUV_Ammo,Eden_ModularPulseLaserSVGamma_Ammo,Eden_PlasmaChargeEntropic,Eden_PlasmaRifleXCorp_Ammo,Eden_BlasterCV_Ammo,Eden_ShieldBoosterSV_Ammo,Eden_PlasmaRifleRoyal_Ammo,",
-- "AmmoAllProjectile"     = ",50Caliber,8.3mmBullet,5.8mmBullet,12.7mmBullet,15mmBullet,ShotgunShells,FlameThrowerCanister,RailgunBullet,30mmBullet,FlamethrowerTank,CrossbowBoltPlayer,40mmBullet,20mmBullet,Eden_TurretRailgun_Ammo,Eden_TurretRailgunHeavy_Ammo,Eden_VulcanAmmo,Eden_TurretBolterBA_Ammo,Eden_TurretBolterCV_Ammo,Eden_TurretVulcanCV_Ammo,",
-- "AmmoAllRocket"         = ",SlowRocket,SlowRocketHoming,FastRocket,LargeRocket,FastRocketMS,FlakRocket,ArtilleryRocket,FastRocketHoming,FlakRocketMS,LargeRocketMS,FastRocketBA,TurretEnemyRocketAmmo,FastRocketGV,SVBomb,LightRocketCV,HeavyRocketMS,FlakRocketMST2,ArtilleryShellCVT2,FlakRocketBAT2,ArtilleryShellBAT2,SwarmRocketHV,ArtilleryShellHVT2,HeavyRocketBA,TorpedoSV,Eden_TurretFlakClose_Ammo,Eden_TurretRocketRapid_Ammo,Eden_TurretMissileLight_Ammo,Eden_TurretMissileLightT2_Ammo,Eden_TurretMissileCruiseCV_Ammo,Eden_TurretMissileCruiseEMPCV_Ammo,Eden_TurretMissileSwarmCV_Ammo,Eden_CVTorpedoRapid_Ammo,",
-- "WeaponPlayerUpgrades"  = ",PistolKit,RifleKit,SniperKit,ShotgunKit,HeavyWeaponKit,LaserKit,",
-- "WeaponPlayerEpic"      = ",PulseRifleEpic,PlasmaCannonAlien,MinigunT2,FlameThrowerT2,AsgardPlazmer,Eden_PlasmaRifleEntropic,Eden_MinigunIncendiary,Eden_LaserRifleEntropic,Eden_ShotgunGauss,Eden_ShotgunDouble,Eden_ScoutRifle,Eden_Uzi,Eden_LightRailgunRifle,Eden_IonRifle,Eden_FarrPlasmaCrossbow,Eden_RifleLightning,Eden_PlasmaRifleXCorp,Eden_PlasmaRifleRoyal,AssaultRifleT3,TalonCrossbowPlayer,HeavyPistol,SubmachineGunT3,LaserPistolT3,ZiraxBeamRifle,AsgardPlazmer,",
-- "Deco"                  = ",TurretRadar,AntennaBlocks,DecoBlocks,ConsoleBlocks,IndoorPlants,DecoBlocks2,DecoStoneBlocks,ChristmasTree,DecoVesselBlocks,DecoTribalBlocks,PosterARest,PosterBiker,PosterDontHide,PosterForeignWorld,PosterJump,PosterNewWorld,PosterSoleDesert,PosterStranger,PosterSurvivor,PosterTakingABreak,PosterTalon,PosterTrader,PosterZiraxAlienWorld,",
-- "DataPads"              = ",Eden_UnlockPoint,Eden_WarpUpgrade,Eden_DataChipT1,Eden_DataChipT2,Eden_DataChipT3,",
-- "Oxygen"                = ",OxygenBottleLarge,",
-- "Fuel"                  = ",EnergyCell,EnergyCellLarge,FusionCell,",
-- "Pentaxid"              = ",PentaxidCrystal,"
- 
-Für das deconstruct script zu löschende Blöcke:
-- "RemoveBlocks"          = ",ContainerUltraRare,AlienContainer,AlienContainerRare,AlienContainerVeryRare,AlienContainerUltraRare,AlienDeviceBlocks,Eden_AlienBlocksPOI,Eden_CoreNPCSpecial,Eden_CoreNPCFake,"
-
-Die Listen beginnen und enden mit einem Komma so das sie einfach mit dem Befehl `concat` kombiniert werden können.
 ```
-(concat @root.Ids.WeaponHV @root.Ids.WeaponSV @root.Ids.WeaponCV)
-oder
-(concat '1234,5568' @root.Ids.ArmorMod)
+{{#if E.S.Pilot.Id}}
+Pilot: {{E.S.Pilot.Name}}
+{{else}}
+Kein Pilot an Bord
+{{/if}}
 ```
 
+### Negation: `not`
 
------------------------------------------------------
-## Welcher Spieler ist auf der Basis/Schiff gerade aktiv
+```
+{{#if (not E.S.Pilot.Id)}}
+Kein Pilot an Bord
+{{/if}}
+```
 
-Eingabe im LCD (alles ohne "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"Eingabe im LCD (alles ohne "")
-"TEXT optional"
-{{#each P.Players}}
- "-" {{Name}}
-{{/each}}
-```
-Bsp.
-```
-Targets:LCD Info W1
-Player:
-{{#each P.Players}}
- - {{Name}}
-{{/each}}
-```
-------------------------------------------------------
-## Datum und Uhrzeit anzeigen lassen
+### Reguläre Ausdrücke: `regex`
 
-Eingabe im LCD (alles ohne "")
 ```
-Targets:"NAME DES ANZUZEIGENDEN LCD"Eingabe im LCD (alles ohne "")
-"TEXT optional"
-{{datetime}}
+{{#regex Name 'Iron.*'}}
+Gefunden: {{.}}
+{{/regex}}
+```
 
-{{datetime 'HH:mm'}}
+---
 
-{{datetime 'dd MMM HH:mm:ss' '+7'}}
-```
-Bsp.
-```
-Targets:LCD UHRZEIT
-Wie spät ist es?
-{{datetime}}
+## Anzeige-Features
 
-{{datetime 'HH:mm'}}
+### Datum & Uhrzeit: `datetime`
 
-{{datetime 'dd MMM HH:mm:ss' '+7'}}
 ```
-----------------------------------------------------
-## SCROLLEN:
-Wenn zu viele Produkte nicht angzeigt werden können, dann kann man auch Scrollen
-Hier werden 5 Produkte angezeigt mit 2 Sekunden Scrollgeschwindigkeit, wenn mehr als 5 Items zur Verfügung stehen. 
+Targets:LCD Zeit
+Aktuelle Zeit:
+{{datetime}}                        ← Datum und Uhrzeit (Standard)
+{{datetime 'HH:mm'}}                ← Nur Uhrzeit (z.B. 14:30)
+{{datetime 'dd.MM.yyyy'}}           ← Nur Datum (z.B. 24.12.2024)
+{{datetime 'dd MMM HH:mm:ss'}}      ← Kombiniert (z.B. 24 Dez 14:30:00)
+{{datetime 'HH:mm' '+2'}}           ← Mit +2 Stunden Offset
 ```
-{{#scroll 5 2}}
-{{#items E.S '"Name der Kiste"'}}
-{{Count}} {{i18n Key}}
+
+[DateTime Format-Strings Dokumentation](https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8)
+
+### Scrollen: `scroll`
+
+Wenn zu viele Items gleichzeitig auf einem LCD nicht passen:
+
+```
+Targets:LCD Inventar
+{{#scroll 8 3}}
+{{#items E.S 'Grosses Lager'}}
+{{Count}}x {{i18n Key}}
 {{/items}}
-```
-Bsp.
-```
-{{#scroll 5 2}}
-{{#items E.S 'Kühlschrank 1'}}
-{{Count}} {{i18n Key}}
-{{/items}}
-
-{{#scroll 10 1}}
-{{#each E.S.Items}}
- - [{{Id}}]:{{Name}}
-{{/each}}
 {{/scroll}}
 ```
-----------------------------------------------------
-## Intervalle:
-Es kann alles in Intervallen angezeigt werden. Hier im Beispiel wäre es ein Pfeil
-Man kann auch den Inhalt von 2 Kisten anzeigen lassen
-```
-{{#intervall 1}}
-= = = = = = = = = = = = = = = = >
-{{else}}
- = = = = = = = = = = = = = = = =>
-{{/intervall}}
-```
-oder hier sind sind 2 Kisten die abwechselnd angezeigt werden.
-```
-{{#intervall 2}}
-"Text optional"
-{{#items E.S '"Name der Kiste"'}}
-{{Count}} {{i18n Key}}
-{{/items}}
-{{else}}
-"Text optional"
-{{#items E.S '"Name der Kiste2"'}}
-{{Count}} {{i18n Key}}
-{{/items}}
-{{/intervall}}
-```
-Bsp.
-```
-{{#intervall 2}}
 
+Parameter: `{{#scroll AnzahlZeilen VerzögerungSekunden [SchrittweiteZeilen]}}`
+
+```
+{{#scroll 5 2 2}}    ← 5 sichtbare Zeilen, 2 Sekunden Pause, 2 Zeilen pro Schritt
+```
+
+### Intervalle: `intervall`
+
+Wechselt zwischen Inhalten in einem Zeitintervall (in Sekunden):
+
+```
+Targets:LCD Status
+{{#intervall 5}}
+Inhalt A (5 Sekunden)
+{{else}}
+Inhalt B (5 Sekunden)
+{{/intervall}}
+```
+
+**Zwei Container abwechselnd anzeigen:**
+
+```
+Targets:LCD Kühlschränke
+{{#intervall 3}}
 Kühlschrank 1:
-
 {{#items E.S 'Kühlschrank 1'}}
-{{Count}} {{i18n Key}}
+{{Count}}x {{i18n Key}}
 {{/items}}
 {{else}}
-
 Kühlschrank 2:
-
 {{#items E.S 'Kühlschrank 2'}}
-{{Count}} {{i18n Key}}
+{{Count}}x {{i18n Key}}
 {{/items}}
 {{/intervall}}
 ```
-----------------------------------------------------
-## Farbe Schrift und Hintergrund, Schriftgrösse und Intervall
-Im folgendem Beispiel wechselt alle 5 Sekunden das Wort "Hallo" und "Welt"
-dann wechselt auch alle 5 Sekunden die Schriftgrösse
-Es wechselt jede Sekunde die Schriftfarbe und jede Sekunde der Hintergrund
+
+### Schriftfarbe: `color`
+
 ```
-{{#intervall 5}}
-Hallo
-{{else}}
-Welt
-{{/intervall}}
-
-{{#intervall 5}}
-{{fontsize 8}}
-{{else}}
-{{fontsize 15}}
-{{/intervall}}
-
-{{#intervall 1}}
-{{color 'ff0000'}}
-{{else}}
-{{color '00ff00'}}
-{{/intervall}}
-
-{{#intervall 1}}
-{{bgcolor 'ffff00'}}
-{{else}}
-{{bgcolor '000000'}}
-{{/intervall}}
+{{color 'ff0000'}}    ← Rot
+{{color '00ff00'}}    ← Grün
+{{color '0000ff'}}    ← Blau
+{{color 'ffffff'}}    ← Weiß
+{{color 'ffff00'}}    ← Gelb
 ```
-----------------------------------------------------
-## ERZE und BARREN IDENTIFIKATIONS NUMMER:
-@root.Ids.Ore
 
-+ Item Id: 4296, Name: Magnesiumerz
-+ Item Id: 4297, Name: Eisenerz
-+ Item Id: 4298, Name: Kobalterz
-+ Item Id: 4299, Name: Siliziumerz
-+ Item Id: 4300, Name: Neodymiumerz
-+ Item Id: 4301, Name: Kupfererz
-+ Item Id: 4302, Name: Promethium
-+ Item Id: 4317, Name: Erestrumerz
-+ Item Id: 4318, Name: Zascosiumerz
-+ Item Id: 4332, Name: Sathiumerz
-+ Item Id: 4341, Name: Pentaxiderz
-+ Item Id: 4345, Name: Golderz
-+ Item Id: 4359, Name: Titanerz
+### Hintergrundfarbe: `bgcolor`
+
+```
+{{bgcolor '000000'}}    ← Schwarz
+{{bgcolor '1a1a1a'}}    ← Dunkelgrau
+```
+
+### Schriftgröße: `fontsize`
+
+```
+{{fontsize 8}}     ← Klein
+{{fontsize 15}}    ← Mittel (Standard)
+{{fontsize 25}}    ← Groß
+```
+
+### Fortschrittsbalken: `bar`
+
+```
+{{bar TankFuel 0 1000 20}}              ← Einfacher Balken (20 Zeichen breit)
+{{bar TankFuel 0 1000 20 '█' '░'}}     ← Mit eigenen Füll-/Hintergrundzeichen
+{{bar Count 0 500 15 '|' '-' 'r'}}     ← Rechtsbündig ('r')
+```
+
+### Praxisbeispiel: Blinkalarm bei niedrigem Treibstoff
+
+```
+Targets:LCD Alarm
+{{#test TankFuel le 20}}
+{{#intervall 1}}
+{{color 'ff0000'}}⚠️ TREIBSTOFF KRITISCH!
+{{else}}
+{{color 'ffff00'}}⚠️ TREIBSTOFF KRITISCH!
+{{/intervall}}
+{{else}}
+{{color '00ff00'}}✓ Treibstoff OK
+{{/test}}
+```
+
+### Schrittweise Anzeige: `steps`
+
+```
+{{#steps 0 100 10 2}}
+Fortschritt: {{this}}%
+{{/steps}}
+```
+
+### Zufallswerte: `random`
+
+```
+{{#random 1 6}}
+Würfelergebnis: {{this}}
+{{/random}}
+```
 
 ---
-@root.Ids.Ingots
 
-+ Item Id: 4319, Name: Magnesiumpulver
-+ Item Id: 4320, Name: Eisen Barren
-+ Item Id: 4321, Name: Kobalt Barren
-+ Item Id: 4322, Name: Silizium Barren
-+ Item Id: 4323, Name: Neodymium Barren
-+ Item Id: 4324, Name: Kupfer Barren
-+ Item Id: 4325, Name: Promethium Pallets
-+ Item Id: 4326, Name: Erestrum Barren
-+ Item Id: 4327, Name: Zascosium Barren
-+ Item Id: 4328, Name: Stein
-+ Item Id: 4329, Name: Steinstaub
-+ Item Id: 4333, Name: Sathium Barren
-+ Item Id: 4342, Name: Pentaxid Kristalle
-+ Item Id: 4346, Name: Gold Barren
-+ Item Id: 4360, Name: Titanstäbe
+## Berechnungen
+
+### Grundrechenarten: `math` und `calc`
+
+`math` gibt das Ergebnis direkt aus. `calc` kann inline in anderen Ausdrücken verwendet werden:
+
+```
+{{math Count * 5}}                          ← Ausgabe: Ergebnis
+{{math TankFuel / TankFuelMax 2}}           ← Division, 2 Nachkommastellen
+{{bar (calc TankFuel / TankMax * 100) 0 100 20}}   ← calc inline
+```
+
+| Operator | Bedeutung |
+|----------|-----------|
+| `+` | Addition |
+| `-` | Subtraktion |
+| `*` | Multiplikation |
+| `/` | Division |
+| `%` | Modulo |
+
+### Weitere Mathematik-Funktionen
+
+```
+{{min A B}}       ← Kleinerer Wert der beiden
+{{max A B}}       ← Größerer Wert der beiden
+{{abs Value}}     ← Absoluter Wert
+{{int Value}}     ← Ganzzahliger Anteil (Abrunden)
+```
+
+### Distanz: `distance`
+
+```
+{{distance PosA PosB}}            ← Distanz zwischen zwei Vektoren
+{{distance PosA PosB '0.0'}}      ← Mit Formatstring (eine Nachkommastelle)
+```
+
+### Vektoren: `vector`
+
+```
+{{#use (vector 100 200 300)}}
+Mein Vektor: {{X}} / {{Y}} / {{Z}}
+{{/use}}
+```
+
+### Spielzeit: `gameticks`
+
+```
+Spielzeit: {{gameticks}} Ticks
+= {{math gameticks / 20 0}} Sekunden
+= {{math gameticks / 1200 1}} Minuten
+```
 
 ---
-# Technical
-Syntaxdocu:
-+ http://handlebarsjs.com/
-+ http://handlebarsjs.com/guide/
-+ https://zordius.github.io/HandlebarsCookbook/index.html
-+ https://zordius.github.io/HandlebarsCookbook/0014-path.html
-+ https://github.com/rexm/Handlebars.Net
-
-## Items
-Items habe folgende Basisdaten
-
-* Id : Vollständige eineindeutige Zahl. Für Tokens ist es eine Kombination aus 'TokenId * 100000 + ItemId'
-* IsToken: 'true' wenn es sich um eine Token handelt sonst 'false'
-* ItemId: Der Tokenunabhänige Teil der Id (dies entwpricht dem Tokenitem in Empyrion)
-* TokenId: Die Id des Tokens wenn es sich um ein Token handelt
-
-## Bedingungen
-* {{#test Select Op Value}}
-  * Op: eq is =
-  * Op: neq is <> or !=
-  * Op: leq is <=
-  * Op: le is <
-  * Op: geq is >=
-  * Op: ge is >
-  * Op: in  (Trennzeichen sind: ,;#+ )
-    * Value: '1,2,3,42'
-    * Value: '1-3,42'
-    * Value: 'A,xyz,mag'
-
-* {{regex value regex}}
-    * Prüft den Wert 'value' mit dem regulären Ausdruck 'regex' bei Erfolg/Misserfolg wird das Ergebnis des Ausdrucks in den nächsten Abschnitt als '.' übergeben
-
-* {{#ok data}}
-  * Block ausführen wenn (data) einen Wert (ungleich '') hat oder (data) gleich 'true' oder ungleich 0 ist
-  * anderfalls wird der {{else}} Teil ausgeführt
-
-* {{#if data}}
-  * Block ausführen wenn (data) einen Wert ungleich '' oder (data) gleich 'true' oder ungleich 0 ist
-  * anderfalls wird der {{else}} Teil ausgeführt
-
-* {{not data}}
-  * Negation von (data)
-
-## Inhalte
-+ {{#items structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln
-
-+ {{#getitems structure 'box1;box2;fridge*;...'}} = Alle Items aus den Containers (names)='box1;box2;fridge*;...' ermitteln und als Liste liefern z.B. für itemlist
-
-* {{#itemlist list 'id1;id2;id3,...'}}
-  * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
-    Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
-
-* {{#itemlistarray list 'id1;id2;id3,...'}}
-  * Liste der Items (list) auf die Items mit den Ids 'id1;id2;id3,...' filtern. 
-    Falls eine Id nicht vorhanden ist wird diese mit einer Anzahl 0 eingefügt.
-    Liefert das Ergebnis als Liste zurück welche per foreach oder anderen Listenfunktionen weiterverarbeitet werden kann
-
-+ {{#orderbylist list 'id1;id2;id3,...'}}
-  + Liste (list) von Items an Hand der Idliste sortieren. Items welche nicht in der Liste sind werden ans Ende sortiert
-
-+ {{configid name}}
-  + Liest aus Konfiguration des Block/Items 'name' das Attribut 'id'
-
-+ {{configattr id attrname}}
-  + Liest aus Konfiguration des Block/Items 'id' das Attribut 'attrname'
-
-+ {{configattrbyname name attrname}}
-  + Liest aus Konfiguration des Block/Items 'name' das Attribut 'attrname'
-
-+ {{configbyid id}}
-  + Liest aus Konfiguration den Abschnitt für den Block/Item mit der 'id'
-
-+ {{configbyname name}}
-  + Liest aus Konfiguration den Abschnitt für den Block/Item mit dem 'name'
-
-+ {{resourcesforid id}}
-  + Liste der benötigten Ressourcen für den Block/Item mit der 'id'
-
-## Verschieben/Auffüllen/Verarbeiten
-+ {{move item structure names \[maxLimit\]}}
-  + Item (item) in die Struktur (structure) in die Container mit den Namen (names) verschieben
-  + \[maxLimit\] ist ein optionaler Parameter der die Anzahl im Zielcontainer begrenzt
-
-+ {{fill item structure tank \[max\]}}
-  + Füllt in der Struktur (structure) den Tank (tank) = Fuel/Pxygen/Pentaxid mit dem Item (item) auf. Der prozentuale Füllstand kann mit (max) optional limitiert werden. Standard ist 100.
-
-+ {{deconstruct entity container \[CorePrefix\] \[RemoveItemsIds1,Id2,...\]}}
-  + Baut die Struktur 'entity' ab und befördert die Teile in den Container mit dem Namen welcher mit 'container' angegben wird
-  + Hinweis: Der Kern der Struktur muss 'Core-Destruct-ID' (wobei ID für die Id der Struktur steht) heißen
-  + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
-  + Die Kosten pro 'AmountPerNumberOfBlocks' kann per 'DeconstructSalary' in der Konfigurationsdatei konfiguriert werden. Standard: pro 10 Blöcke werden 100 Geldkarten fällig
-
-+ {{recycle entity container \[CorePrefix\]}}
-  + Baut die Struktur 'entity' ab und befördert die Rohstoffe (der bekannten Rezepten) in den Container mit dem Namen welcher mit 'container' angegben wird
-  + Hinweis: Der Kern der Struktur muss 'Core-Recycle-ID' (wobei ID für die Id der Struktur steht) heißen
-  + Mit der Konfigurationseinstellung DeconstructBlockSubstitution kann eine Ersetzung(durch eine anderen BlockTyp)/Löschung (durch 0) von BlockTypen definiert werden
-  + Die Kosten pro 'AmountPerNumberOfBlocks' kann per 'RecycleSalary' in der Konfigurationsdatei konfiguriert werden. Standard: pro 10 Blöcke werden 200 Geldkarten fällig
-
-+ {{harvest structure block's target gx gy gz \[removeDeadPlants\]}}
-  + Mit dem Befehl können Pflanzen geernet werden. Dazu ist ein "Gärtner" (NPC Crew) und Geld (als Bezahlung) im Kühlschrank notwendig. 
-    Auf Wunsch können auch die toten Planzen entsorgt werden. Dies kostet jedoch den 100 fachen Preis
-
-+ {{pickupplants structure block's target gx gy gz \[removeDeadPlants\]}}
-  + Mit dem Befehl können Pflanzen abgebaut werden. Dazu ist ein "Gärtner" (NPC Crew) und Geld (als Bezahlung) im Kühlschrank notwendig. 
-    Auf Wunsch können auch die toten Planzen entsorgt werden. Dies kostet jedoch den 100 fachen Preis
-
-+ {{replantplants structure target}}
-  + Mit dem Befehl können die mit 'pickupplants' abgebauten Pflanzen wieder angebaut werden. 
-    Hinweis: Dies ist jedoch nur möglich wenn kein Wechsel des Playfields oder ein Logout stattgefunden hat.
-
-## Lichter
-+ {{lights structure names}}
-  + Lichter der Struktur (structure) mit den Namen (names) auswählen
-
-+ {{lightcolor light color}}
-  + Bei Licht (light) die Farbe (color rgb hex) auswählen
-
-+ {{lightblink light interval length offset}}
-  + Bei Licht (light) das Intervall (intervall) die Intervalllänge (length) und den Intervalloffset (offset) einstellen
-
-+ {{lightintensity light intensity}}
-  + Bei Licht (light) die Lichtintensität (intensity) einstellen
-
-+ {{lightrange light range}}
-  + Bei Licht (light) die Lichtreichweite (range) einstellen
-
-+ {{lightspotangle light spotangle}}
-  + Bei Licht (light) die Lichtspotwinkel (spotangle) einstellen
-
-+ {{lighttype light type}}
-  + Bei Licht (light) die Lichttyp (type) einstellen
-	+	Spot
-	+	Directional
-	+	Point
-	+	Area
-	+	Rectangle
-	+	Disc
-
-## Geräte
-+ {{devices structure customnames}}
-  + (structure) (name;name*;*;name)
-
-+ {{devicesoftype structure type}}
-  + (structure) (type)
-
-+ {{setactive block|device active}}
-
-+ {{islocked structure x y z}}
-  + Prüft bei der Struktur (structure) ob das Device (device) oder das Device an der Position (x) (y) (z) gesperrt ist.
-
-+ {{trashcontainer structure containername}}
-  + Löscht unwiderruflich ALLE Items welche sich in dem Container 'containername' befinden. Für den Containernamen sind KEINE Wildcards '*' erlaubt
-
-## Datenaufbereitung
-* {{#intervall sec}}
-  * Intervall in (sec) Sekunden
 
-* {{#scroll lines delay \[step\]}}
-  * Text scrollen mit (lines) Zeilen und einer Verzögerung von (delay) Sekunden
-  * Optional mit (step) Zeilen Schritten
+## Automatisierung: Verschieben & Befüllen
 
-* {{#i18n Select \['Language'\]}}
-  * Language: English,Deutsch,Français,Italiano,Spanish,...
-    das Sprachkürzel kann hier, aus der ersten Zeile, entnommen werden \[ESG\]\\Content\\Extras\\Localization.csv
-    wird sonst aus dem CultureInfo LCD genommen
+### Items verschieben: `move`
 
-* {{#toid Name[;Name2;...]}}
-  * Wandelte die symbolischen Namen in die aktuelle IDs um
+Verschiebt Items von einem Container in einen anderen (innerhalb oder zwischen Strukturen):
 
-* {{#toname id[;id2;...]}}
-  * Wandelte die IDs in symbolischen Namen um
+```
+{{move Item E.S 'Ziellager'}}
+{{move Item E.S 'Ziellager' 500}}    ← Maximal 500 im Zielcontainer lassen
+```
 
-+ {{datetime}} = Datum und Uhrzeit anzeigen
-+ {{datetime 'format'}} = gemäß dem 'format' ausgeben
-+ {{datetime 'format' '+5'}} = N Stunden addieren
-   + DateTime format:<br/>
-    https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8#System_DateTime_ToString_System_String_
+### Tanks befüllen: `fill`
 
-+ {{format data format}} = Daten (data) gemäß dem Format (format) ausgeben
-  + https://docs.microsoft.com/de-de/dotnet/api/system.string.format?view=netframework-4.8#remarks-top
+Füllt Treibstoff-, O2- oder Pentaxid-Tanks auf:
 
-+ {{steps start end \[step\] \[delay\]}}
-  + Von (start) nach (end) mit optional einer Schrittweite von (step) und einer (delay)-Sekunden geänderten Zeitbasis
+```
+{{fill Item E.S 'FuelTank'}}        ← Auf 100% auffüllen
+{{fill Item E.S 'FuelTank' 80}}     ← Maximal auf 80% auffüllen
+```
 
-+ {{sortedeach array sortedBy}}
-  + Sortiert das Array nach (+/-sortedBy) und iteriert über die einzelen Element
-  
-+ {{sort array sortedBy}}
-  + Sortiert das Array nach (+/-sortedBy)
-  
-+ {{orderedeach array '+/-sortedBy1,+/-sortedBy2,...'}}
-  + Sortiert das Array nach (sortedBy1) dann nach 'sortedBy2' usw. bei '+' aufsteigend, bei '-' absteigend nach dem jeweiligen Feld 
-  + iteriert danach über jedes Element
-  
-+ {{order array '+/-sortedBy1,+/-sortedBy2,...'}}
-  + Sortiert das Array nach (sortedBy1) dann nach 'sortedBy2' usw. bei '+' aufsteigend, bei '-' absteigend nach dem jeweiligen Feld 
-  
-+ {{split string separator \[removeemptyentries\] \[trimchars\]}}
-  + (string) mit dem Trennzeichen (separator) zerteilen.
-  + \[removeemptyentries\] falls leere Einträge entfernt werden sollen 'true'
-  + \[trimchars\] Zeichen die vorne und hinten entfernt werden sollen
+**Praxisbeispiel: Automatische Treibstoff-Auffüllung**
 
-+ {{trim string \[trimchars\]}}
-  + (string) Text
-  + \[trimchars\] Zeichen die vorne und hinten entfernt werden sollen
+```
+Targets:LCD Tankstatus
+=== Tankstatus ===
+{{#items E.S 'Versorgungscontainer'}}
+{{#test Key eq 'EnergyCell'}}
+{{fill this E.S 'Haupttank'}}
+Treibstoff wird nachgefüllt…
+{{/test}}
+{{/items}}
+```
 
-+ {{random start end}}
-  + Zufallswert zwischen (start) und (end) liefern und in den Block als {{this}} hereinreichen
+### Struktur abbauen: `deconstruct`
 
-+ {{bar data min max length \[char\] \[bgchar\] \[l|r\]}}
-  + Erzeugt eine Balkenanzeige für (data) in dem Bereich von (min) bis (max) mit der Länge (length)
-  + Der Balkensymbole für "gefüllt" (char) und den Hintergrund (bgchar) sind optional 
+Baut eine Struktur ab und befördert die Teile in einen Container:
 
-+ {{use data}}
-  + Diesen Datensatz im Inhalt zum direkten Zugriff bereitstellen
-  + der {{else}} fall wird aufgerufen wenn data == null ist
+```
+{{deconstruct Entity 'Schrottlager'}}
+```
 
-+ {{set key data}}
-  + Die Daten (data) hinterlegen so dass sie per @root.Data.(key) jederzeit wieder abgerufen werden können
+> ⚠️ Der Kern der Struktur muss `Core-Destruct-[ID]` heißen (ID = Entity-ID der Struktur).  
+> Kosten: Standard 100 Geldkarten pro 10 Blöcke (`DeconstructSalary` in Configuration.json).
 
-+ {{setblock key}}
-  + Die Daten des Blockes hinterlegen so dass sie per @root.Data.(key) jederzeit wieder abgerufen werden können
+### Recycling: `recycle`
 
-+ {{setcache key data}}
-  + Die Daten (data) hinterlegen so dass sie per @root.CacheData.(key) jederzeit wieder abgerufen werden können. 
-  + Diese werden für die Entität gespeichert und stehen beim nächsten Scriptaufruf wieder zur Verfügung können jedoch durch Playfieldwechel oder ähnliches verworfen werden.
+Wie `deconstruct`, gibt aber Rohstoffe laut Rezepten zurück:
 
-+ {{setcacheblock key}}
-  + Die Daten des Blockes hinterlegen so dass sie per @root.CacheData.(key) jederzeit wieder abgerufen werden können
-  + Diese werden für die Entität gespeichert und stehen beim nächsten Scriptaufruf wieder zur Verfügung können jedoch durch Playfieldwechel oder ähnliches verworfen werden.
+```
+{{recycle Entity 'Recyclinglager'}}
+```
 
-+ {{concat a1 a2 a3 ...}}
-  + Fügt die Werte a1 .. aN zusammen
-  + Wenn ein Wert ein Array von Texten (string\[\]) ist wird der nächste Parameter als Trennzeichen für diese Einträge gewertet
+> ⚠️ Kern muss `Core-Recycle-[ID]` heißen. Kosten: Standard 200 Geldkarten pro 10 Blöcke.
 
-+ {{substring text startindex \[length\]}}
-  + Teiltext von dem Text (text) von Index (startindex) mit einer optionalen maximalen Länge von (length) Zeichen
+### Container leeren: `trashcontainer`
 
-+ {{replace text find replaceto}}
-  + Ersetzt die (find) durch (replaceto) in dem Text (text)
-  
-+ {{startswith text starts \[ignoreCase\]}}
-  + Beginnt der Text (text) mit dem Text (starts) optional unabhängige Groß/Kleinschreibung
+Löscht **unwiderruflich** alle Items in einem Container:
 
-+ {{endswith text ends \[ignoreCase\]}}
-  + Endet der Text (text) mit dem Text (ends) optional unabhängige Groß/Kleinschreibung
+```
+{{trashcontainer E.S 'Müll'}}
+```
 
-+ {{chararray text}}
-  + Text als Array von Zeichen liefern
+> ⚠️ Keine Wildcards erlaubt. Exakter Container-Name erforderlich!
 
-+ {{selectlines lines from to}}
-  + Liefert die Zeilen (from) bis (to) aus dem Text (lines)
+### Pflanzen ernten: `harvest`
 
-+ {{lookup array index}} und + {{lookupblock array index}}
-  + Liefert das Element an der Position (index) beginnend mit 0
+```
+{{harvest E.S Device gx gy gz}}
+{{harvest E.S Device gx gy gz true}}    ← true = tote Pflanzen ebenfalls entfernen
+```
 
-+ {{concatarrays (array1,array2,array3,...)}}
-  + Kombiniert Arrays oder Dictionaries zu einem (bei Dictionaries werden vorhandene Elemente überschrieben)
+> Benötigt einen Gärtner-NPC (Crew) und Geld im Kühlschrank als Bezahlung.
 
-+ {{loop array/dictionary}}
-  + Iteriert über die einzelenen Elemente des Arrays oder Dictionaries
+### Pflanzen aufnehmen & wieder einpflanzen
 
-+ {{createdictionary}}
-  + Erzeugt ein Dictionary welches mit 'addkeyvalue' befüllt werden kann
+```
+{{pickupplants E.S Device gx gy gz}}      ← Pflanzen aufnehmen
+{{replantplants E.S Target}}              ← Wieder einpflanzen (nur ohne Playfield-Wechsel!)
+```
 
-+ {{set dictionary key value}} | {{setblock dictionary key}}
-  + Fügt Key/Value dem Dictionary hinzu
+---
 
-+ {{removekey dictionary key}}
-  + Löscht den Eintrag key aus dem Dictionary
+## Lichter steuern
 
-+ {{createarray}}
-  + Erzeugt ein Array welches mit 'additem' befüllt werden kann
+### Lichter auswählen: `lights`
 
-+ {{set array value}} | {{setblock array}}
-  + Fügt value dem Array hinzu
+```
+{{#lights E.S 'AlarmLicht*'}}
+  {{lightcolor this 'ff0000'}}
+{{/lights}}
+```
 
-+ {{removeitem array value}}
-  + Löscht den Eintrag value aus dem Array
+### Licht-Einstellungen im Überblick
 
-## Block
-+ {{block structure x y z}}
-  + Liefert den Block/Device der (structure) von der Position (x) (y) (z) 
-
-+ {{gettexture block pos}}
-  + Liefert die TexturId des Blocks von der Seite T=Top, B=Bottom,, N=North, S=South, W=West, E=East
-
-+ {{settexture block textureid [pos]}}
-  + Setzt die TexturId des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden, wenn keine Position angegeben wird wird der ganze Block gesetzt
-
-+ {{setcolor block colorid [pos]}}
-  + Setzt die Farbe des Blocks an den Seiten T=Top, B=Bottom,, N=North, S=South, W=West, E=East es können mehrere durch Komma getrennt angegeben werden, wenn keine Position angegeben wird wird der ganze Block gesetzt
-
-+ {{blocks structure fromX fromY fromZ toX toY toZ}}
-  + Liefert in Paketen von 100 Blöcken alle Blöckte des angegeben Bereiches für eine weitere verarbeitung z.B. mit dem 'harvest' Befehl
-  
-## Rechnen
-+ {{math (lvalue) op (rvalue) [digits]}}
-  + op = +, -, *, /, %
-  + optional [digits] um das Ergebnis auf [digits] Stellen zu runden
-
-+ {{calc (lvalue) op (rvalue) [digits]}}
-  + op = +, -, *, /, %
-  + optional [digits] um das Ergebnis auf [digits] Stellen zu runden
-  + Kann mit () inline in anderen Kommandos benutzt werden
-
-+ {{distance (lVector) (rVector) [format]}}
-  + Abstand zwischen (lVector) und (rVector)
-  + Optional ein format
-
-+ {{vector x y z}}
-  + Erzeugt einen Vektor aus x y z
-
-+ {{min (lValue) (rValue)}}
-  + Liefert den kleineren Wert der beiden
-
-+ {{max (lValue) (rValue)}}
-  + Liefert den größeren Wert der beiden
-
-+ {{int (value)}}
-  + Liefert den ganzzahligen Anteil des Wertes
-
-+ {{abs (value)}}
-  + Liefert den absoluten Wert
-
-+ {{gameticks}}
-  + Aktuelle Spielzeit in Ticks (20 Ticks sind eine Echtzeitsekunde)
-
- 
-## LCD
-+ {{gettext lcddevice}}
-  + Liefert den Text des LCD (lcddevice)
-
-+ {{settext lcddevice text}}
-  + Setzt den Text des LCD (lcddevice) mit dem Text (text)
-
-+ {{settextblock lcddevice}}
-  + Setzt den Text des LCD (lcddevice) mit dem Text des innenliegenden Blockes
-
-+ {{setcolor lcddevice (rgb hex)}}
-  + Setzt die Farbe des LCD (lcddevice) auf (rgb hex)
-
-+ {{setbrcolor lcddevice (rgb hex)}}
-  + Setzt die Hintergrundfarbe des LCD (lcddevice) auf (rgb hex)
-
-## Strukturen
-+ {{entitybyname name \[maxdistance\]}}
-  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Name (name) und der, optionalen, maximalen Entfernung \[maxdistance\]
-
-+ {{entitiesbyname names \[maxdistance\] \[types\]}}
-  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Namen in (name;name*;*) und der, optionalen, maximalen Entfernung \[maxdistance\]
-  + \[types\] ist nur in 'Elevated Scripten' erlaubt und liefert alle Objkete mit den Typen aus (Z.B. auch Proxy und Asteroid)
-
-+ {{entitybyid id}}
-  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit Id (id)
-
-+ {{entitiesbyid ids}}
-  + Liefert die Entiäten, in der Nähe und mit der selben Fraktion, mit IDs in (id1;id2;id3)
+| Befehl | Beschreibung |
+|--------|-------------|
+| `{{lightcolor light 'ff0000'}}` | Farbe setzen (RGB Hex) |
+| `{{lightblink light 1 0.5 0}}` | Blinken: Intervall(s), Länge(s), Offset(s) |
+| `{{lightintensity light 1.5}}` | Helligkeit setzen |
+| `{{lightrange light 10}}` | Reichweite setzen |
+| `{{lightspotangle light 45}}` | Spotwinkel setzen |
+| `{{lighttype light 'Spot'}}` | Typ: `Spot`, `Directional`, `Point`, `Area`, `Rectangle`, `Disc` |
+
+### Praxisbeispiel: Alarm-Beleuchtung
+
+```
+Targets:LCD LichtStatus
+{{#test TankFuel le 100}}
+{{#lights E.S 'AlarmLicht*'}}
+{{lightcolor this 'ff0000'}}
+{{lightblink this 1 0.5 0}}
+{{/lights}}
+⚠️ Treibstoff niedrig!
+{{else}}
+{{#lights E.S 'AlarmLicht*'}}
+{{lightcolor this '00ff00'}}
+{{lightblink this 0 0 0}}
+{{/lights}}
+✓ Alles OK
+{{/test}}
+```
+
+---
+
+## Geräte steuern
+
+### Geräte nach Namen auswählen: `devices`
+
+```
+{{#devices E.S 'Generator*'}}
+{{setactive this true}}
+{{/devices}}
+```
+
+### Geräte nach Typ: `devicesoftype`
+
+```
+{{#devicesoftype E.S 'Generator'}}
+{{setactive this false}}
+{{/devicesoftype}}
+```
+
+### Gerät ein-/ausschalten: `setactive`
+
+```
+{{setactive Device true}}     ← Einschalten
+{{setactive Device false}}    ← Ausschalten
+```
+
+### Gerät gesperrt prüfen: `islocked`
+
+```
+{{#islocked E.S 'MeinContainer'}}
+Container ist gesperrt
+{{else}}
+Container ist frei
+{{/islocked}}
+```
+
+---
 
 ## Signale
-+ {{signalevents names}} 
-  + die letzten Signalevents mit den namen (name1;name2...)
 
-+ {{triggerifsignalgoes names boolstate}}
-  + triggert wenn eines der Signale 'names' auf den Status 'boolstate' wechselt
-  
-+ {{signals structure names}}
-  + Liefert die Signale (names) der Struktur
+### Alle Signale einer Struktur: `signals`
 
-+ {{getsignal structure name}}
-  + Liefert den Status true/false des Signal (name)
+```
+{{#signals E.S 'Signal*'}}
+Signal: {{Name}} — Status: {{State}}
+{{/signals}}
+```
 
-+ {{setswitch structure name state}}
-  + Setzt den Schalter (name) auf (state) = true/false. Der Name darf der Name des Schalter im ControlPanel oder der Name seines Signales sein
+Gibt alle Signale (ControlPanel + Block-Signale) zurück, die dem Namensmuster entsprechen. Jedes Signal hat die Eigenschaften `Name`, `State`, `Index` und `BlockPos`.
 
-+ {{getswitch structure name}}
-  + Liefert den Status true/false des Schalters (name). Der Name darf der Name des Schalter im ControlPanel oder der Name seines Signales sein
+### Signalstatus lesen: `getsignal`
 
-+ {{getswitches structure name}}
-  + Liefert alle Schalte die im ControlPanel auf dem Namen (name) passen
+```
+Signal Status: {{getsignal E.S 'MeinSignal'}}
+```
 
-+ {{stopwatch startsignal stopsignal \[resetsignal\]}}
-  + Eine einfache Stopuhr (für Rennstrecken) mit einem Startsignal, einem Stopsignal und für das Zurücksetzten der Ergebnisse optionalem Resetsignal
+### Schalter lesen/setzen
 
-## Positionen (Struktur und Welt)
-+ {{structtoglobalpos structure (vector | x y z)}}
-  + Liefert die Weltkoorinaten der Strukturpostion (vector | x y z)
+```
+Schalter: {{getswitch E.S 'MeinSchalter'}}
+Alle passenden: {{getswitches E.S 'Schalter*'}}
+{{setswitch E.S 'MeinSchalter' true}}
+{{setswitch E.S 'MeinSchalter' false}}
+```
 
-+ {{globaltostructpos structure (vector | x y z)}}
-  + Liefert die Position (vector | x y z) der Weltkoordinaten aus sicht der Struktur
+### Signal-Events abfragen: `signalevents`
 
-## Chat
-+ {{chatbysignal SignalName sender}}message{{/chatbysignal}}
-  + Sendet die Chatmeldung "message" an den Spieler welcher das Signal auslöst. In dem Block steht der Spieler Mit Id und Namen zur Verfügung
+```
+{{#signalevents 'Signal1;Signal2'}}
+Signal ausgelöst von: {{Player.Name}} um {{Time}}
+{{/signalevents}}
+```
 
-+ {{char sender text}}
-  + Sendet eine Chatmeldung an den Inhaber der Stuktur (Fraktion oder Spieler) mit dem Text 'text' und dem Absender 'sender'
+### Trigger wenn Signal wechselt: `triggerifsignalgoes`
 
-## Chat (Admin only)
-+ {{chatglobal sender text}}
-  + Sendet eine globale Chatmeldung mit dem Text 'text' und dem Absender 'sender'
+```
+{{#triggerifsignalgoes 'Türsensor' true}}
+Tür wurde geöffnet von {{Name}}!
+{{/triggerifsignalgoes}}
+```
 
-+ {{chatserver sender text}}
-  + Sendet eine server Chatmeldung mit dem Text 'text' und dem Absender 'sender'
+### Stoppuhr: `stopwatch`
 
-+ {chatplayer playerId sender text}}
-  + Sendet eine private Chatmeldung an dem Spieler 'playerId' mit dem Text 'text' und dem Absender 'sender'
+```
+Targets:LCD Rennzeit
+{{#stopwatch 'RennStart' 'RennZiel' 'Reset'}}
+Letzte Zeit: {{.}}
+{{/stopwatch}}
+```
 
-+ {{chatfaction factionId sender text}}
-  + Sendet eine fraktions Chatmeldung an die Fraktion 'facrionId' mit dem Text 'text' und dem Absender 'sender'
+---
 
-## Teleport
-+ {{teleportplayer player (device | toPos | x y z)}}
- + Teleportiert den Spieler zu dem Device/Block der Struktur
- + 'toPos' und 'x y z' sind nur in Adminscripten erlaubt
+## Teleporter-Steuerung
 
-## JSON
-+ {{jsontodictionary string}}
-  + gibt eine Dictionary-Datenstruktur zurück, die sich aus dem JSON-'String' ergibt.
+Teleporter-Geräte können per Script ausgelesen und konfiguriert werden.
 
-+ {{fromjson string}}
-  + liefert eine aus dem JSON 'string' resultierende Datenstruktur
+> ⚠️ Alle `set*`-Teleporter-Befehle sind nur in **Elevated Scripts** erlaubt!
 
-{{tojson object}}
-  + erzeugt aus dem Objket 'object' einen JSON Datenstring
+### Teleporter auflisten: `teleporters`
+
+```
+{{#teleporters E.S 'Teleporter*'}}
+Name: {{DeviceName}}
+Ziel: {{Destination}}
+Playfield: {{Playfield}}
+{{/teleporters}}
+```
+
+Jedes Teleporter-Objekt hat folgende Eigenschaften aus `ITeleporterData`:
+
+| Eigenschaft | Beschreibung |
+|-------------|-------------|
+| `DeviceName` | Name des Teleporter-Geräts |
+| `Destination` | Zielname |
+| `Target` | Ziel-Entity-Name |
+| `Playfield` | Ziel-Playfield |
+| `SolarSystemName` | Ziel-Sonnensystem |
+| `Origin` | Herkunfts-Byte |
+
+### Teleporter konfigurieren (nur Elevated)
+
+```
+{{setteleporter E.S 'Teleporter1' 'ZielName'}}
+{{setteleporterdevicename E.S 'Teleporter1' 'NeuerGeräteName'}}
+{{setteleportertarget E.S 'Teleporter1' 'ZielEntity'}}
+{{setteleporterplayfield E.S 'Teleporter1' 'Akua'}}
+{{setteleporterorigin E.S 'Teleporter1' 3}}
+```
+
+| Befehl | Argumente | Beschreibung |
+|--------|-----------|-------------|
+| `setteleporter` | structure name destination | Teleporter-Ziel setzen |
+| `setteleporterdevicename` | structure name devicename | Gerätename ändern |
+| `setteleportertarget` | structure name target | Ziel-Entity setzen |
+| `setteleporterplayfield` | structure name playfield | Ziel-Playfield setzen |
+| `setteleporterorigin` | structure name origin | Origin-Byte setzen |
+
+---
+
+## Chat & Teleport
+
+### Chat-Nachricht an Strukturbesitzer
+
+```
+{{chat 'Server' 'Dein Treibstoff ist fast leer!'}}
+```
+
+### Chat bei Signal: `chatbysignal`
+
+```
+{{#chatbysignal 'EintrittsSensor' 'Basis'}}
+Willkommen auf unserer Basis, {{Name}}!
+{{/chatbysignal}}
+```
+
+### Admin-Chat (nur Elevated/Admin-Scripte)
+
+```
+{{chatglobal 'Servermeldung' 'Wartung in 10 Minuten!'}}
+{{chatserver 'System' 'Server läuft normal'}}
+{{chatplayer PlayerId 'System' 'Private Nachricht'}}
+{{chatfaction FactionId 'System' 'Fraktionsmeldung'}}
+```
+
+### Spieler teleportieren: `teleportplayer`
+
+```
+{{teleportplayer Player 'TeleportPad'}}             ← Zu einem Device auf der Struktur
+```
+
+> `x y z` Weltkoordinaten sind nur in Elevated Scripts erlaubt.
+
+---
+
+## Dialoge
+
+### Einfacher Dialog: `dialog`
+
+```
+{{#dialog Player 'Titel' 'Nachricht'}}
+OK|Abbrechen
+{{/dialog}}
+```
+
+### Dialog als Block: `dialogbox`
+
+```
+{{#dialogbox 'TürSignal'}}
+Bitte wählen:
+Möchtest du eintreten?
+Ja|Nein|Abbrechen
+{{/dialogbox}}
+```
+
+Die erste Zeile des `{{else}}`-Blocks = Titel, letzte Zeile = Schaltflächen, Zeilen dazwischen = Text.
+
+---
+
+## JSON & Datenstrukturen
+
+```
+{{#use (fromjson '{"name":"Test","value":42}')}}
+Name: {{name}}, Wert: {{value}}
+{{/use}}
+
+{{tojson SomeObject}}         ← Objekt als JSON-String ausgeben
+{{jsontodictionary jsonStr}}  ← JSON in Dictionary umwandeln
+```
+
+### Daten zwischenspeichern
+
+```
+{{set 'meinKey' SomeData}}                ← Temporär (aktueller Script-Durchlauf)
+{{#use @root.Data.meinKey}}...{{/use}}    ← Abrufen
+
+{{setcache 'meinKey' SomeData}}           ← Persistiert zwischen Aufrufen
+{{#use @root.CacheData.meinKey}}...       ← Abrufen
+```
+
+**Block-Inhalt als Datenwert speichern:**
+
+```
+{{#setblock 'meinKey'}}
+Berechneter Inhalt: {{math TankFuel / TankFuelMax * 100 1}}%
+{{/setblock}}
+{{#use @root.Data.meinKey}}...{{/use}}
+
+{{#setcacheblock 'meinKey'}}
+{{i18n Key}}
+{{/setcacheblock}}
+{{#use @root.CacheData.meinKey}}...{{/use}}
+```
+
+`setblock` und `setcacheblock` sind wie `set`/`setcache`, speichern aber den **gerenderten Inhalt** des inneren Blocks statt eines übergbenen Werts.
+
+### Arrays und Dictionaries
+
+```
+{{#use (createarray)}}
+{{set this 'Wert1'}}
+{{set this 'Wert2'}}
+Erster Wert: {{lookup this 0}}
+{{/use}}
+
+{{#use (createdictionary)}}
+{{set this 'schlüssel' 'wert'}}
+{{/use}}
+
+{{concatarrays Array1 Array2}}    ← Arrays kombinieren
+{{loop Array}}...{{/loop}}        ← Über Array/Dictionary iterieren
+```
+
+### Array-Eintrag abrufen: `lookupblock`
+
+`lookupblock` ist wie `lookup`, übergibt aber den Eintrag als Objekt in einen Template-Block:
+
+```
+{{#use (createarray)}}
+{{set this 'Alpha'}}
+{{set this 'Beta'}}
+{{#lookupblock this 0}}
+Erster Eintrag: {{.}}
+{{/lookupblock}}
+{{/use}}
+```
+
+---
 
 ## Fliegen
-Hinweis: Fliegen funktioniert nur wenn kein Pilot das Schiff steuert und die Triebwerke eingeschaltet sind
 
-+ {{movestop}}
-    + Stoppt den Flug
-+ {{moveto vektor3 | x y z}}
-    + Flugrichtung festlegen
-+ {{moveforward speed}}
-    + Fluggeschwindigkeit festlegen
+> ⚠️ Funktioniert nur, wenn **kein Pilot** das Schiff steuert und die **Triebwerke eingeschaltet** sind.
 
-## Dialogfenster
-+ {{dialog player|Id|SignalName title body}} 
-  + Zeigt einen Dialog dem Spieler an (bei SignalName wenn eines dieser Signale ausgelöst wird): (player | playerId | SignalName) (title) (body) [ButtonTexts] [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
-
-+ {{dialogbox player|Id|SignalName}} 
-  + Zeigt einen Dialog dem Spieler an (bei SignalName wenn eines dieser Signale ausgelöst wird): (player | playerId | SignalName) [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
-  + (title) (body) (ButtonTexts) werden aus dem {{else}} ermittelt bei dem die Playerdaten als this zur Verfügung stehen 1.Zeile=Titel, Letzte Zeile=Buttons, die Zeilen dazwischen = Body
-
-## DB Zugriff
-+ {{db queryname [top] [orderBy] [additionalWhereAnd] [parameters]}}
-  + 'queryname' der Name der SQL Query welche über die Konfiguration zur Verfügung gestellt wird
-  + 'top' nur die ersten X Einträge liefern
-  + 'orderby' Abfrage mit dem Feld sortieren. Standardmässig aufsteigend 'feldname asc' kann aber auch absteigend 'feldname desc' eingestellt werden
-  + 'additionalWhereAnd' zusätzliche 'where' Bedingung
-  + 'parameter' falls das Script weitere Parameter erforder können deren Werte hier angegeben werden die Parameter stehen dann unter @1..N der Abfrage zur Verfügung
-
-Um die 'global.db' Datenbank des EmpyrionSavegames zu durchforsten und eigene Queries der Konfiguration hinzuzufügen bietet sich der SQLiteBrowser https://sqlitebrowser.org/ an.
-
-Der Query stehen Standardmäßig folgende Parameter zur Verfügung:
- + @PlayerId             = @root.E.S.Pilot.Id   
- + @FactionId            = @root.E.Faction.Id   
- + @FactionGroup  (int)  = @root.E.Faction.Group
- + @EntityId             = @root.E.Id           
-
-Folgende Queries stehen zur Verfügung:
-
-### Entities
 ```
+{{moveto 1000 200 -500}}    ← Zur Weltposition (X Y Z) fliegen
+{{moveforward 10}}          ← Mit Geschwindigkeit 10 vorwärts fliegen
+{{movestop}}                ← Stoppen
+```
+
+---
+
+## Datenbankzugriff
+
+Zugriff auf die `global.db` SQLite-Datenbank des Savegames:
+
+```
+{{#db 'Entities' 5 '+name'}}
+{{name}} ({{entityid}})
+{{/db}}
+```
+
+**Syntax:** `{{#db QueryName [Top] [OrderBy] [AdditionalWhereAnd] [Parameter]}}`
+
+**Vordefinierte Abfragen:**
+
+| Query | Inhalt |
+|-------|--------|
+| `Entities` | Eigene Strukturen |
+| `DiscoveredPOIs` | Entdeckte POIs |
+| `TerrainPlaceables` | Platzierte Terrain-Objekte |
+| `TerrainPlaceablesRes` | Terrain-Objekte mit Ressourcen |
+| `Playfields` | Bekannte Playfields |
+| `PlayfieldResources` | Ressourcen auf Playfields |
+| `PlayerData` | Spieler-Daten |
+| `Bookmarks` | Lesezeichen |
+
+**Standard-Parameter in Queries:**
+
+| Parameter | Wert |
+|-----------|------|
+| `@PlayerId` | ID des Piloten |
+| `@FactionId` | Fraktions-ID |
+| `@FactionGroup` | Fraktionsgruppe (int) |
+| `@EntityId` | Struktur-ID |
+
+Zum Erkunden der `global.db` empfiehlt sich der [SQLiteBrowser](https://sqlitebrowser.org/).
+
+### Eigene Queries
+
+In der Konfigurationsdatei können eigene SQL-Queries definiert werden. Beispiel:
+
+```sql
 SELECT * FROM Structures 
 JOIN Entities ON Structures.entityid = Entities.entityid
 JOIN Playfields ON Entities.pfid = Playfields.pfid
 JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId)) {additionalWhereAnd}
+WHERE (isremoved = 0 AND facid = @FactionId) {additionalWhereAnd}
 ```
 
-### DiscoveredPOIs
-```
-SELECT * FROM DiscoveredPOIs
-JOIN Entities ON DiscoveredPOIs.poiid = Entities.entityid
-JOIN Playfields ON Entities.pfid = Playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (Entities.isremoved = 0 AND (DiscoveredPOIs.facgroup = 0 OR DiscoveredPOIs.facgroup = 1) AND (DiscoveredPOIs.facid = @PlayerId OR DiscoveredPOIs.facid = @FactionId)) {additionalWhereAnd}
-```
+---
 
-### TerrainPlaceables
-```
-SELECT * FROM TerrainPlaceables 
-JOIN Entities ON TerrainPlaceables.entityid = Entities.entityid
-JOIN Playfields ON TerrainPlaceables.pfid = Playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId OR TerrainPlaceables.entityid = @PlayerId OR TerrainPlaceables.entityid = @FactionId)) {additionalWhereAnd}
-```
+## Externe Daten (AddOn DLLs)
 
-### TerrainPlaceablesRes
-```
-SELECT * FROM TerrainPlaceables
-JOIN PlayfieldResources ON (PlayfieldResources.pfid = TerrainPlaceables.pfid AND abs(PlayfieldResources.blockx - TerrainPlaceables.blockx) <= 20 AND abs(TerrainPlaceables.blockz - PlayfieldResources.blockz) <= 20)
-JOIN Entities ON TerrainPlaceables.entityid = Entities.entityid
-JOIN Playfields ON TerrainPlaceables.pfid = Playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId OR TerrainPlaceables.entityid = @PlayerId OR TerrainPlaceables.entityid = @FactionId)) {additionalWhereAnd}
-```
+Externe Daten aus anderen Mods oder DLLs abrufen:
 
-
-### Playfields
-```
-SELECT * FROM Playfields
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE playfields.ssid IN (
-SELECT ssid FROM Playfields
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-WHERE (DiscoveredPlayfields.facgroup = 0 OR DiscoveredPlayfields.facgroup = 1) AND (DiscoveredPlayfields.facid = @PlayerId OR DiscoveredPlayfields.facid = @FactionId)
-GROUP BY playfields.ssid
-) {additionalWhereAnd}
-```
-
-### PlayfieldResources
-```
-SELECT * FROM Playfields
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-JOIN PlayfieldResources ON PlayfieldResources.pfid = Playfields.pfid
-WHERE playfields.ssid IN (
-SELECT ssid FROM Playfields
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-WHERE (DiscoveredPlayfields.facgroup = 0 OR DiscoveredPlayfields.facgroup = 1) AND (DiscoveredPlayfields.facid = @PlayerId OR DiscoveredPlayfields.facid = @FactionId)
-GROUP BY playfields.ssid
-) {additionalWhereAnd}
-```
-
-### PlayerData
-```
-SELECT * FROM PlayerData 
-JOIN Entities ON Entities.entityid = PlayerData.entityid
-JOIN Playfields ON Playfields.pfid = PlayerData.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE ((Entities.facgroup = 0 OR Entities.facgroup = 1 OR facgroup = 0 OR facgroup = 1) AND (Entities.facid = @PlayerId OR facid = @PlayerId OR Entities.facid = @FactionId OR facid = @FactionId)) {additionalWhereAnd}
-```
-
-### Bookmarks
-```
-SELECT * FROM Bookmarks
-JOIN Entities ON Bookmarks.entityid = Entities.entityid
-JOIN Playfields ON Bookmarks.pfid = Playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE ((Bookmarks.facgroup = 0 OR Bookmarks.facgroup = 1) AND (Bookmarks.facid = @PlayerId OR Bookmarks.facid = @FactionId)) {additionalWhereAnd}
-```
-
-## Externe Daten
-+ {{external 'Key' [args]}}
-  + 'Key' Schlüssel für den Zugriff auf die externen Daten
-  + [args] Zuätzliche Parameter welche die externe Datenzugriffsmethode benötigt
-    
-Hier mit ist es möglich externe Daten aus den AddOnAssemblys abzurufen. Welche Parameter zusätzlich benötigt werden müssen der Dokumentation 
-der jeweiligen externen Datenquelle entnommen werden.
-
-### Bereitstellung einer DLL für die externen Daten (mit einem Beispiel aus dem EmpyrionGalaxyNavtigator)
-Diese Dll muss eine Klasse welche das IMod Interface implementiert besitzen. Außerdem muss die ein Property 'ScriptExternalDataAccess' implementieren.
-```
-public class ExternalDataAccess : IMod
-{
-    public IDictionary<string, Func<IEntity, object[], object>> ScriptExternalDataAccess { get; }
-
-    public ExternalDataAccess()
-    {
-        ScriptExternalDataAccess = new Dictionary<string, Func<IEntity, object[], object>>()
-        {
-            ["Navigation"] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ?         Navigation(entity) : null,
-            ["MaxWarp"   ] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ? (object)MaxWarp   (entity) : null,
-        };
-    }
-```
-
-Des weiteren muss der Pfad zu der DLL in der Konfigurationsdatei des EmpyrionScripting angegeben werden. (Basis ist das Modverzeichnis des EmpyrionScripting im Savegame)
-```
-"AddOnAssemblies": [
-    "..\\EmpyrionGalaxyNavigator\\EmpyrionGalaxyNavigatorDataAccess.dll"
-],
-```
-
-Und die DLL muss an ihrem vorgesehen Platz kopiert werden (im Fall des EmyprionGalaxyNavigators in dessen Modverzeichins im Savegame)
-![](Screenshots/AddOnAssembly.png)
-Die DLL befindet sich in dieser Datei 'EmpyrionGalaxyNavigatorDataAccess.zip' welche im ModLoaderpaket enthalten ist oder unter https://github.com/GitHub-TC/EmpyrionGalaxyNavigator/releases heruntergeladen weden kann. 
-
-Beim Aufruf der Funktionen werden die aktuelle Entität sowie die übergebenen 'args' mit übergeben.
-(in diesem Fall werden keine weiteren Parameter für den Zugriff auf den GalaxyNavigator benötigt)
 ```
 {{#external 'MaxWarp'}}
 Maximale Sprungreichweite: {{.}}
 {{/external}}
 ```
 
+### DLL bereitstellen
 
-## Elevated Scripte (Savegame oder Adm-Strukturen)
-+ {{lockdevice structure device|x y z}}
-  + Sperrt ein Device
+Die DLL muss das `IMod`-Interface mit einem `ScriptExternalDataAccess`-Property implementieren:
 
-+ {{additems container itemid count}}
-  + Fügt (itemid) (count) mal dem container hinzu (dieser sollte gelocked sein)
-
-+ {{removeitems container itemid maxcount}}
-  + Entfernt (itemid) (count) aus dem container hinzu (dieser sollte gelocked sein)
-
-+ {{replaceblocks entity RemoveItemsIds1,Id2,... ReplaceId}}
-  + Tauscht die Blöcke mit 'RemoveItemsIds1,Id2,...' gegen den Block 'ReplaceId'
-  + Replace = 0 entfernt den Block einfach
-
-## SaveGame Scripte
-Diese besondere Form von Scripten kann im SaveGame hinterlegt werden. Der BasisPfad dafür ist der
-\[SaveGame\]\\Mods\\EmpyrionScripting\\Scripts
-
-Dieser Pfad ist auch über @root.MainScriptPath zu erreichen.
-
-in diesem Verzeichnis werden nach folgendem Muster Scriptdateien mit der Endung *.hbs gesucht
-* EntityType
-* EntityName
-* PlayfieldName
-* PlayfieldName\\EntityType
-* PlayfieldName\\EntityName
-* EntityId
-* im Verzeichnis selber
-
-Hinweis: EntityType ist BA,CV,SV or HV
-
-### CustomHelpers-SaveGameScripts
-+ {{readfile dir filename}} 
-  + (dir)\\(filename) Dateiinhalt wird als ZeilenArray geliefert
-  + Falls die Datei nicht existiert wird der {{else}} Teil ausgeführt
-
-+ {{writefile dir filename}} 
-  + (dir)\\(filename) Inhalt des Blockes wird in die Datei geschrieben
-
-+ {{fileexists dir filename}}
-  + Wenn die Datei existiert dann das Innere ausführen ansonsten den exec Teil auswerten
-
-+ {{filelist dir filename \[recursive\]}}
-  + Liste der Dateien (optional rekursiv amit allen Unterverzeichnissen) in dem Verzeichnis (dir) auf, welche dem Pattern (filename) entsprechen
-
-+ {{settype block typeid}}
-  + Den Block (austauschen) zu (typeid)
-
-+ {{setdamage block damage}}
-  + Schaden des Blockes setzen
-
-## Priorisierung von Scripten
-Wenn viele Scripte eingebaut sind macht es Sinn, die jenigen welche nicht so häufig ausgeführt werden brauchen, 
-herabzustufen damit die anderen Scripte häufiger ausgeführt werden.
-Dazu kann man VOR dem Namen eines Scripte eine Zahl von 0-9 schreiben so dass dieseses Script nur alle N Zyklen ausgeführt wird.
-z.B.
-1Script:abc
-3Script:uvw
-4Script:xyz
-
-1: abc
-2: abc
-3: abc, uvw
-4: abc, xyz
-5: abc
-6: abc, uvw
-7: abc
-8: abc, xyz
-...
-
-Der Unterschied zwischen einem Script OHNE Nummer oder 0 und einem Script mit einer '1' ist der das Scripte
-mit einer Priorität >= 1 unabhängig davon laufen ob das ScriptLCD ausgeschaltet ist.
-
-Scripte mit 0 oder ohne Nummer werden nur ausgeführt wenn das LCD eingeschaltet ist. 
-(Hinweis: man kann die Schriftfarbe (bei Projektoren) auf transparent setzen um es "unsichtbar" zu machen)
-
-## Automatische Amount Anpassungen
-Für Fuel, O2,... kann es sinvoll sein die aktuellen Werte aus der Ecf-Konfiguration (des Szenarios) zu verwenden
-Hierfür kann der Eintrag "EcfAmountTag" angegeben werden. Der Wert für "Amount" wird dann automatisch aus dem Item mit dem Wert des Tags ermittelt.
-Soll der Wert nicht automatisch ermittelt werden kann EcfAmountTag:"" angegeben werden.
-
-Beispiele für eine automatische Ermittlung
-```
-{
-    "ItemName": "EnergyCellLarge",
-    "Amount": 250,
-    "EcfAmountTag": "FuelValue"
-}
-...
-{
-  "ItemName": "OxygenBottleLarge",
-  "Amount": 250,
-  "EcfAmountTag": "O2Value"
-}
-```
-
-keine automatische Ermittung
-```
-{
-    "ItemName": "EnergyCellLarge",
-    "Amount": 250,
-    "EcfAmountTag": ""
-}
-```
-
-
-## Allgemeines
-Wenn die Struktur ausgeschaltet ist oder keinen Strom hat werden keine InGameScripte von ihr ausgeführt.
-Somit verbrauchen "alte" oder nicht mehr benutze Strukturen auch keine Leistung der Scriptengine.
-
-## Ausführung und Leistung der Scripts einstellen
-+ "InGameScriptsIntervallMS": 2000,
-  In welchen Intervallen wird die Scriptausführung im Hintergrund gestartet
-+ "DeviceLockOnlyAllowedEveryXCycles": 10,
-  Scripte welche ein "DeviceLock" benötigen werden nur alle X Zyklen ausgeführt
-+ "SaveGameScriptsIntervallMS": 10000,
-  In welchen Intervallen wird die Scriptausführung der Savegamescripte im Hintergrund gestartet
-+ "UseEveryNthGameUpdateCycle": 10,
-  Nur jeder N te GameUpdate Aufruf wird für die Scriptausführung benutzt
-+ "ScriptsSyncExecution": 2,
-  Wie viele Scripte werden pro Zyklus im GameUpdate ausgeführt
-+ "ScriptsParallelExecution": 4,
-  Wie viele Scripte werden pro Zyklus in der Hintergrundverarbeitung ausgeführt
-
-
-## Hint: ...\Saves\Games\[Savegamename]\Mods\EmpyrionScripting\Configuration.json
-```
-"SaveGameScriptsIntervallMS": 10000,
-"ScriptsSyncExecution": 2,
-"ScriptsParallelExecution": 4,
-...
-"ProcessMaxBlocksPerCycle": 200,
-```
-Are set VERY conservatively by default so as not to put the server (and the game) under load.
-Double the values (SaveGameScriptsIntervallMS must lower) and the scripts will run more "smoothly", but there may be micro-jerks in the game.
-
-### Whats next?
-
-
-ASTIC/TC
-
-***
-
-# English Version
-
----
-
-# Empyrion Scripting
-## Installation
-1. Download the EmpyrionScripting.zip file from the current https://github.com/GitHub-TC/EmpyrionScripting/releases
-1. unzip the file in the Content\\Mods directory
-
-#### Installation for SinglePlayer
-1. Download the EmpyrionScripting.zip file from the current https://github.com/GitHub-TC/EmpyrionScripting/releases
-1. UnZip the file in the directory Content\\Mods directory
-1. The game MUST then be started without EAC so the mods are loaded
-
-### Whats for?
-![](Screenshots/DemoShipScreen.png)
-
-Displays various informations directly and live on LCD screens.
-
-Get the demo structure 'LCDInfo-Demo' from the workshop
-https://steamcommunity.com/workshop/filedetails/?id=1751409371
-
-#### Help
-![](Screenshots/RedAlert.png)
-![](Screenshots/LCD1.png)
-
-YouTube video;
-* https://youtu.be/Wm_09Q-cvh0 (thanks to Olly :-) )
-* https://youtu.be/8MzjdeYlzPU
-* https://youtu.be/gPp5CGJusr4
-* https://youtu.be/9601vpeLJAI
-* https://youtu.be/V1w2A3LAZCs
-* https://youtu.be/O89NQJjbQuw
-* https://youtu.be/uTgXwrlCfNQ
-* https://youtu.be/qhYmJWHk8ec
-
-* https://youtu.be/XzYKNevK0bs
-* https://youtu.be/SOnZ_mzytA4
-* https://youtu.be/oDOSbllwqSw
-* https://youtu.be/qhOnj2D3ejo
-
-* Changes with the A11: https://youtu.be/hxvKs5U1I6I
-
-Beginners guide (english):
-* https://steamcommunity.com/workshop/filedetails/discussion/1751409371/3191368095147121750/
-* https://youtu.be/IjJTNp_ZYUI
-
-## Tutorials
-* Workshop von Sephrajin: DSEV LCD Script Tutorial, https://steamcommunity.com/sharedfiles/filedetails/?id=2863240303
-* Workshop von Noob: Scripting Tutorial Ship, https://steamcommunity.com/sharedfiles/filedetails/?id=2817433272
-* Workshop von ASTIC, Vega AI, https://steamcommunity.com/sharedfiles/filedetails/?id=2227639387
-
-## Examples
-General:
-At least 2 LCDs and at least 1 container are required
-1. LCD 1 (input) is programmed with the query see examples below
-1. LCD 2 (output) Must have unique name, e.g. "LCD All ores"
-1. Each container that is to output information must have a unique name
-
-Below is the ID number for ores and ingots.<br/>
-Some functions require a comma "," others require a simcard ";".<br/>
-Everything in "" are texts and not to be specified.<br/>
-Individuals are to be indicated.<br/>
-One can also display an information on 2 LCD's then at Targets: "Name LCD"; "Name LCD2"<br/>
-You can also display the content of various boxes on an LCD!<br/>
-
----
-
-## Language, format, time of the outputs
-The language, time offset and display formats can be set with an LCD which is called
-named 'CultureInfo'. Any errors in the specification are displayed in an LCD named 'CultureInfoDebug'.
-
-You can specify the following in the 'CultureInfo':
-```
-{
-  "LanguageTag: "en-EN",
-  "i18nDefault": "English",
-  "UTCplusTimezone": 2
-}
-```
-
-LanguageTag: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c
-
-## What's in the box / container / container controller / ammo box / refrigerator
-
-Eingabe im LCD 1 (alles ohne "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT Optional"
-{{items E.S '"Name der Kiste"'}}
-{{Count}}{{Name}}
-{{/items}}
-```
-Bsp:
-```
-Targets:LCD Alle Erze
-Meine Erze
-{{#items E.S 'Alle Erze'}}
-{{Count}}{{i18 Key 'Deutsch'}}
-{{/items}}
-```
----
-## Output of all ores in the base / ship / HV / CV
-
-Input on the LCD (everything without "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT optional"
-{{#test ID in '4296,4297,4298,4299,4300,4301,4302,4317,4318,4332,4341,4345'}}
-{{Count}} {{i18n Key}}
-{{/test}}
-{{/each}}
-```
-Bsp:
-```
-Targets:LCD Alle Erze
-Meine Erze
-{{#each E.S.Items}}
-{{#test Id in '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
-{{Count}} {{i18n Key}}
-{{/test}}
-{{/each}}
-```
----
-## Output of all bars in the base / ship / HV / CV
-
-Input on the LCD (everything without "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT optional"
-{{#each E.S.Items}}
-{{#test Id in '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
-{{Count}} {{i18n Key}}
-{{/test}}
-{{/each}}
-```
-Bsp:
-```
-Targets:LCD Barren
-Alle meine Barren in der Basis:
-{{#each E.S.Items}}
-{{#test Id in '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
-{{Count}} {{i18n Key}}
-{{/test}}
-{{/each}}
-```
------------------------------------------------------------------------------------------
-## Output of these ID-defined products (here are all ingots in the game)
-Input on the LCD (everything without "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT optional"
-{{#itemlist E.S.Items '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
-{{Count}} {{i18n Key}}
-{{/itemlist}}
-```
-Bsp:
-```
-Targets:LCD Alle Barren im Spiel
-Alle Barren im Spiel:
-{{#itemlist E.S.Items '4319,4320,4321,4322,4323,4324,4325,4326,4327,4328,4329,4333,4342,4346'}}
-{{Count}} {{i18n Key}}
-{{/itemlist}}
-```
------------------------------------------------------
-## Display of a specific product in the base / ship / HV / CV
-
-Input on the LCD (everything without "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"
-"TEXT optional"
-{{#itemlist E.S.Items '4297'}}
-{{Count}} {{i18n Key}}
-{{/itemlist}}
-```
-Bsp:
-```
-Targets:LCD EISEN ERZ
-Meine EisenErz und Barren
-{{#itemlist E.S.Items '4297,4320'}}
-{{Count}} {{i18n Key}}
-{{/itemlist}}
-```
-------------------------------------------------------------------
-## Which ores are all, or only X number over
-
-Here all ores are displayed where only 1-1000 exists on the basis.
-```
-{{#itemlist E.S.Items '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
-{{#test Count geq 1}}
-{{#test Count leq 1000}}
-{{Count}} {{i18n Key}}
-{{/test}}
-{{/test}}
-{{/itemlist}}
-```
----
-## Here all ores are displayed that are no longer based
-```
-{#itemlist E.S.Items '4296,4297,4298,4299,4300,4301,4317,4318,4332,4345,4328,4302'}}
-{{#test Count leq 0}}
-{{Count}} {{i18n Key}}
-{{/test}}
-{{/itemlist}}
-```
-
-## Predefined ID lists
-
-These lists can be changed or expanded with new entries.
-To do this, simply use the section "Ids" in the file \[EGS\]\Saves\Games\\[SaveGameName\]\Mods\EmpyrionScripting\Configuration.json
-be changed.
-
-Note: To restore the original state, the section "Ids" can be deleted from the file. The mod then enters the standard configuration stored in the program again.
-
-The following lists can be called up via "Ids.\[NameDerListe\] in the standard system.
-
-- "Ore"                   = ",AluminiumOre,CobaltOre,CopperOre,ErestrumOre,GoldOre,IronOre,MagnesiumOre,NeodymiumOre,PentaxidOre,PromethiumOre,SiliconOre,TitanOre,ZascosiumOre,SathiumOre",
-- "Ingot"                 = ",CobaltIngot,CopperIngot,CrushedStone,ErestrumIngot,GoldIngot,IronIngot,MagnesiumPowder,NeodymiumIngot,PentaxidCrystal,PlatinBar,PromethiumPellets,RockDust,SathiumIngot,SiliconIngot,ZascosiumIngot,",
-- "BlockL"                = ",AlienBlocks,AlienLargeBlocks,ConcreteArmoredBlocks,ConcreteBlocks,ConcreteDestroyedBlocks,GrowingPot,GrowingPotConcrete,GrowingPotWood,HeavyWindowBlocks,HullArmoredLargeBlocks,HullCombatFullLarge,HullCombatLargeBlocks,HullFullLarge,HullLargeBlocks,HullLargeDestroyedBlocks,HullThinLarge,LadderBlocks,PlasticLargeBlocks,StairsBlocks,StairsBlocksConcrete,StairsBlocksWood,TrussLargeBlocks,WindowArmoredLargeBlocks,WindowLargeBlocks,WindowShutterLargeBlocks,WoodBlocks,HeavyWindowDetailedBlocks,SteelRampBlocksL,HardenedRampBlocksL,CombatRampBlocksL,PassengerSeatMS,WalkwayLargeBlocks,",
-- "BlockS"                = ",ArtMassBlocks,HullArmoredSmallBlocks,HullSmallBlocks,HullSmallDestroyedBlocks,ModularWingBlocks,PlasticSmallBlocks,TrussSmallBlocks,VentilatorCubeQuarter,WindowArmoredSmallBlocks,WindowShutterSmallBlocks,WindowSmallBlocks,WingBlocks,HullCombatSmallBlocks,WalkwaySmallBlocks,HeavyWindowBlocksSmall,SteelRampBlocksS,HardenedRampBlocksS,CombatRampBlocksS,",
-- "Medic"                 = ",AlienParts03,AntibioticInjection,AntibioticPills,Medikit01,Medikit02,Medikit03,Medikit04,RadiationImmunityShot,RadiationPills,StomachPills,Bandages,EnergyPills,AntibioticOintment,AdrenalineShot,AntiRadiationOintment,AntiToxicOintment,AntiToxicPills,AntiParasitePills,AntiToxicInjection,AntiParasiteInjection,AntiRadiationInjection,EnergyDrink,AblativeSpray,BugSpray,Medikit05,Eden_EmergencyLifeSupport,Eden_RegenKit,Eden_StaminaRegenKit,Eden_ImmunityShield,Eden_RegenKitT2,Eden_StaminaRegenKitT2,Eden_RadiationRegenKit,Eden_Implant1,Eden_Implant2,Eden_Implant3,Eden_Implant4,Eden_Implant5,Eden_Implant6,Eden_BandagesT2,",
-- "Food"                  = ",AkuaWine,AnniversaryCake,Beer,BerryJuice,Bread,Cheese,EmergencyRations,FruitJuice,FruitPie,HotBeverage,MeatBurger,Milk,Pizza,Sandwich,Steak,Stew,VegetableJuice,VeggieBurger,",
-- "Ingredient"            = ",5312,AlienParts01,AlienParts02,AlienParts03,AlienThorn,AlienTooth,AloeVera,BerryJuice,Cheese,ConfettiMossScrapings,Eden_SilverIngot,Egg,ErestrumGel,Fiber,FireMossScrapings,FishMeat,Flour,Fruit,FruitJuice,Ham,HerbalLeaves,HWSFish,Meat,Milk,NCPowder,NutrientSolution,PentaxidElement,PlantProtein,PlasticMaterial,PlatinOunce,PromethiumPellets,Ratatouille,RockDust,RottenFood,Salami,Spice,TrumpetGreens,VegetableJuice,Vegetables,WaterBottle,XenoSubstrate,",
-- "Sprout"                = ",AlienPalmTreeStage1,AlienPlantTube2Stage1,AlienplantWormStage1,BigFlowerStage1,BulbShroomYoungStage1,CobraLeavesPlantStage1,CoffeePlantStage1,CornStage1,DesertPlant20Stage1,DurianRoot,ElderberryStage1,InsanityPepperStage1,MushroomBellBrown01Stage1,PearthingStage1,PumpkinStage1,SnakeweedStage1,TomatoStage1,WheatStage1,",
-- "Tools"                 = ",Chainsaw,ColorTool,ConcreteBlocks,ConstructorSurvival,DrillT2,Explosives,Flashlight,LightWork,LightWork02,MobileAirCon,MultiTool,MultiToolT2,OreScanner,OxygenGeneratorSmall,PlayerBike,RadarSuitT1,TextureTool,WaterGenerator,AutoMiningDeviceT1,AutoMiningDeviceT2,AutoMiningDeviceT3,Eden_AutoMiningDeviceT4,DrillEpic,TextureColorTool,NightVision,SurvivalTent,OxygenGenerator,OxygenHydrogenGenerator,Drill,SurvivalTool,DrillEpic,MedicGun,Eden_DrillVoidium,Eden_VoidiumScanner,Eden_VoidiumScannerT2,",
-- "ArmorMod"              = ",ArmorBoost,ArmorBoostEpic,Eden_ArmorBoostAbyss,Eden_ArmorBoostAugmented,Eden_ColdBoostAbyss,Eden_ColdBoostAugmented,Eden_HeatBoostAbyss,Eden_HeatBoostAugmented,Eden_JetpackBoostAbyss,Eden_JetpackBoostAugmented,Eden_RadiationBoostAbyss,Eden_RadiationBoostAugmented,Eden_TransportationBoostAugmented,EVABoost,InsulationBoost,InsulationBoostEpic,JetpackBoost,JetpackBoostEpic,MobilityBoost,MobilityBoostEpic,MultiBoost,MultiBoostEpic,OxygenBoost,RadiationBoost,RadiationBoostEpic,TransportationBoost,",
-- "DeviceL"               = ",AlienNPCBlocks,ArmorLocker,ATM,BlastDoorLargeBlocks,BoardingRampBlocks,CloneChamber,CockpitBlocksCV,ConstructorT0,ConstructorT1V2,ConstructorT2,ContainerAmmoControllerLarge,ContainerAmmoLarge,ContainerControllerLarge,ContainerExtensionLarge,ContainerLargeBlocks,ContainerPersonal,Core,CoreNoCPU,CPUExtenderBAT2,CPUExtenderBAT3,CPUExtenderBAT4,Deconstructor,DetectorCV,DoorArmoredBlocks,DoorBlocks,ElevatorMS,ExplosiveBlocks,ExplosiveBlocks2,Flare,FoodProcessorV2,ForcefieldEmitterBlocks,FridgeBlocks,FuelTankMSLarge,FuelTankMSLargeT2,FuelTankMSSmall,Furnace,GeneratorBA,GeneratorMS,GeneratorMST2,GravityGeneratorMS,HangarDoorBlocks,HumanNPCBlocks,LandClaimDevice,LandinggearBlocksCV,LCDScreenBlocks,LightLargeBlocks,LightPlant01,MedicalStationBlocks,OfflineProtector,OxygenStation,OxygenTankMS,OxygenTankSmallMS,PentaxidTank,Portal,RampLargeBlocks,RCSBlockMS,RCSBlockMS_T2,RemoteConnection,RepairBayBA,RepairBayBAT2,RepairBayConsole,RepairBayCVT2,RepairStation,SensorTriggerBlocks,ShieldGeneratorBA,ShieldGeneratorBAT2,ShieldGeneratorPOI,ShutterDoorLargeBlocks,SolarGenerator,SolarPanelBlocks,SolarPanelSmallBlocks,SpotlightBlocks,TeleporterBA,ThrusterMSDirectional,ThrusterMSRound2x2Blocks,ThrusterMSRound3x3Blocks,ThrusterMSRoundBlocks,VentilatorBlocks,PassengerSeatMS,CPUExtenderLargeT5,WarpDrive,RepairBayCV,TeleporterCV,ContainerHarvestControllerLarge,ShieldGeneratorCV,ShieldGeneratorCVT2,CPUExtenderCVT2,CPUExtenderCVT3,CPUExtenderCVT4,WarpDriveT2,DetectorCVT2,ShieldGeneratorT0,ShieldChargerLarge,FusionReactorLarge,ShieldCapacitorT2Large,ShieldCapacitorT3Large,ShieldChargerT2Large,ShieldChargerT3Large,Eden_LiftLargeBlocks,Eden_AuxillaryDummy,Eden_ShieldGeneratorAugmentedCV,Eden_AntimatterTank,Eden_WarpDriveAntimatter,Eden_ShieldGeneratorRegenerateCV,Eden_HydroponicsGrain,Eden_HydroponicsFruit,Eden_HydroponicsVegetables,Eden_HydroponicsNaturalStimulant,Eden_HydroponicsHerbalLeaves,Eden_HydroponicsPlantProtein,Eden_HydroponicsNaturalSweetener,Eden_HydroponicsFiber,Eden_HydroponicsMushroomBrown,Eden_HydroponicsSpice,Eden_HydroponicsBuds,Eden_HydroponicsBerries,Eden_HydroponicsPentaxid,Eden_ExplorationScannerCV,CVSmallSolarPanelBlocks,CVLargeSolarPanelBlocks,ShieldCapacitorLarge,Eden_ScienceStation,AsgardPassGen,AsgardThrusterCV,HWSLiftBlocks,AsgardExtensionLarge,AsgardExplosiveBlock,ThrusterMSRoundLarge,",
-- "DeviceS"               = ",ArmorLockerSV,CloneChamberHV,ConstructorHV,ConstructorSV,Core,CPUExtenderHVT2,CPUExtenderHVT3,CPUExtenderHVT4,DetectorHVT1,DoorBlocksSV,Flare,ForcefieldEmitterBlocks,FridgeSV,FuelTankSV,FuelTankSVSmall,GeneratorSV,GeneratorSVSmall,HoverBooster,HoverEngineLarge,HoverEngineSmall,HoverEngineThruster,LightSS01,MedicStationHV,OxygenTankSV,PentaxidTankSV,RCSBlockGV,RCSBlockSV,RemoteConnection,ShieldGeneratorHV,ThrusterGVJetRound1x3x1,ThrusterGVRoundBlocks,ThrusterGVRoundLarge,ThrusterGVRoundLargeT2,ThrusterGVRoundNormalT2,ThrusterJetRound1x3x1,ThrusterJetRound2x5x2,ThrusterJetRound2x5x2V2,ThrusterJetRound3x10x3,ThrusterJetRound3x10x3V2,ThrusterJetRound3x13x3,ThrusterJetRound3x13x3V2,ThrusterJetRound3x7x3,ThrusterSVDirectional,ThrusterSVRoundBlocks,ThrusterSVRoundLarge,ThrusterSVRoundLargeT2,ThrusterSVRoundNormalT2,VentilatorBlocks,WarpDriveSV,GeneratorSVT2,ThrusterSVRoundT2Blocks,DetectorSVT2,ShieldGeneratorSVT0,ShieldGeneratorSVT2,CPUExtenderSmallT5,LargeCargoContainer,LargeHarvestContainer,ShieldCapacitorSmall,ShieldChargerSmall,FoodProcessorSmall,Eden_AuxillaryCPUSV,Eden_ShieldGeneratorAugmentedSV,Eden_WarpDriveAntimatterSV,AsgardContainerExtensionHVSV,AsgardFuelTankSVHV,AsgardExplosiveBlock,AsgardWarpDriveSV,AsgardGeneratorSVHV,ThrusterGVSuperRound2x4x2,PassengerSeatSV,PassengerSeat2SV,OxygenStationSV,ShutterDoorSmallBlocks,CockpitBlocksSV,LandinggearBlocksSV,LandinggearBlocksHeavySV,SensorTriggerBlocksSV,DetectorSVT1,ContainerControllerSmall,ContainerExtensionSmall,ContainerHarvestControllerSmall,ContainerAmmoControllerSmall,LandinggearBlocksHeavySV,RampSmallBlocks,ContainerSmallBlocks,CockpitBlocksSVT2,ShieldGeneratorSV,CPUExtenderSVT2,CPUExtenderSVT3,CPUExtenderSVT4,",
-- "WeaponPlayer"          = ",AssaultRifle,AssaultRifleEpic,AssaultRifleT2,Chainsaw,ColorTool,DrillT2,Explosives,LaserPistol,LaserPistolT2,LaserRifle,LaserRifleEpic,Minigun,MinigunEpic,MultiTool,Pistol,PistolEpic,PistolT2,PulseRifle,RocketLauncher,RocketLauncherEpic,RocketLauncherT2,ScifiCannon,ScifiCannonEpic,Shotgun,Shotgun2,Shotgun2Epic,Sniper,Sniper2,Sniper2Epic,TextureTool,PulseRifleT2,SubmachineGunT1,SpecOpsRifle,SubmachineGunT2,GrenadeLauncher,TalonRepeatingCrossbow,",
-- "WeaponHV"              = ",DrillAttachment,DrillAttachmentLarge,DrillAttachmentT2,SawAttachment,TurretGVArtilleryBlocks,TurretGVMinigunBlocks,TurretGVPlasmaBlocks,TurretGVRocketBlocks,TurretGVToolBlocks,WeaponSV02,TurretGVRocketBlocksT2,TurretGVArtilleryBlocksT2,WeaponSV09,WeaponSV11,",
-- "WeaponSV"              = ",WeaponSV01,WeaponSV02,WeaponSV03,WeaponSV04,WeaponSV05,WeaponSV05Homing,TurretSVSmall,DrillAttachmentSVT2,TurretSVPulseLaserT2,TurretGVProjectileBlocksT2,TurretGVPlasmaBlocksT2,WeaponSV06,WeaponSV07,WeaponSV08,TurretGVBeamLaserBlocksT2, Eden_TurretVulcanSmall,Eden_ModularPulseLaserSVIR,Eden_ModularPulseLaserSVUV,Eden_ModularPulseLaserSVGamma,Eden_ShieldBoosterSV,AsgardDrillSV,",
-- "WeaponCV"              = ",DrillAttachmentCV,SentryGunBlocks,TurretMSArtilleryBlocks,TurretMSLaserBlocks,TurretMSProjectileBlocks,TurretMSRocketBlocks,TurretMSToolBlocks,TurretZiraxMSLaser,TurretZiraxMSPlasma,TurretZiraxMSRocket,WeaponMS01,WeaponMS02,TurretAlien,TurretEnemyBallista,TurretMSProjectileBlocksT2,TurretMSRocketBlocksT2,TurretMSLaserBlocksT2,TurretMSArtilleryBlocksT2,WeaponMS03,TurretZiraxMSPlasmaArtillery,TurretZiraxMSLaserT2,TurretZiraxMSPlasmaT2,TurretZiraxMSRocketT2,Eden_TurretBolterCV,Eden_TurretMissileLight,Eden_TurretMissileLightT2,Eden_BlasterCV,Eden_RailgunCVSpinal_Kit,Eden_CVTorpedoRapid,Eden_TurretVulcanCV,Eden_DrillIceCV,Eden_DrillRichCV,Eden_DrillIceTurretCV,Eden_DrillTurretAutoCV,Eden_DrillTurretAutoCVT2,Eden_TurretLaserBeamCV,Eden_TurretLaserBeamCVT2,Eden_TurretLaserBeamCVT3,Eden_TurretBeamHeavyT1,Eden_TurretMissileCruiseCV,Eden_TurretMissileCruiseEMPCV,Eden_TurretMissileSwarmCV,Eden_TurretLaserT4,Eden_TurretAlienVulcan,Eden_TurretFlakClose,Eden_TurretRailgun,Eden_TurretRailgunHeavy,Eden_DrillIceTurretCVAlien,Eden_DrillTurretAutoCVAlien,AsgardDrillCV,",
-- "WeaponBA"              = ",SentryGunBlocks,TurretBaseArtilleryBlocks,TurretBaseLaserBlocks,TurretBaseProjectileBlocks,TurretBaseRocketBlocks,TurretBaseProjectileBlocksT2,TurretBaseRocketBlocksT2,TurretBaseLaserBlocksT2,TurretBaseArtilleryBlocksT2,TurretBABeamLaserBlocksT2,",
-- "AmmoPlayer"            = ",12.7mmBullet,5.8mmBullet,50Caliber,8.3mmBullet,DrillCharge,MultiCharge,PulseLaserChargePistol,PulseLaserChargeRifle,SciFiCannonPlasmaCharge,ShotgunShells,SlowRocket,SlowRocketHoming,",
-- "AmmoHV"                = ",15mmBullet,ArtilleryRocket,FastRocket,TurretGVPlasmaCharge,",
-- "AmmoSV"                = ",15mmBullet,FastRocket,FastRocketHoming,PlasmaCannonChargeSS,PulseLaserChargeSS,RailgunBullet,",
-- "AmmoCV"                = ",15mmBullet,30mmBullet,5.8mmBullet,FastRocketMS,FlakRocketMS,LargeRocketMS,PulseLaserChargeMS,PulseLaserChargeMSWeapon,TurretMSPlasmaCharge,",
-- "AmmoBA"                = ",15mmBullet,30mmBullet,5.8mmBullet,FastRocketBA,FlakRocket,LargeRocket,PulseLaserChargeBA,TurretBAPlasmaCharge,",
-- "Gardeners"             = ",ConsoleSmallHuman,",
-- "Components"            = ",AluminiumCoil,AluminiumOre,AluminiumPowder,AutoMinerCore,CapacitorComponent,Cement,CobaltAlloy,Computer,Electronics,EnergyCell,EnergyMatrix,ErestrumGel,Fiber,FluxCoil,GlassPlate,GoldIngot,HydrogenBottle,IceBlocks,LargeOptronicBridge,LargeOptronicMatrix,MagnesiumPowder,MechanicalComponents,Motor,Nanotubes,NCPowder,OpticalFiber,Oscillator,PentaxidCrystal,PentaxidElement,PentaxidOre,PlasticMaterial,PowerCoil,PromethiumOre,PromethiumPellets,RawDiamond,RockDust,SmallOptronicBridge,SmallOptronicMatrix,SteelPlate,SteelPlateArmored,WaterJug,WoodLogs,WoodPlanks,XenoSubstrate,ZascosiumAlloy,",
-- "EdenComponents"        = ",AluminiumCoil,AluminiumOre,AluminiumPowder,Coolant,Eden_ComputerT2,Eden_DarkMatter,Eden_DarkMatterSmall,Eden_DiamondCut,Eden_DroneSalvageCore,Eden_DroneSalvageProcessor,Eden_Electromagnet,Eden_GaussRail,Eden_ModularPulseLaserLensLarge,Eden_ModularPulseLaserLensSmall,Eden_PlasmaCoil,Eden_PowerRegulator,Eden_ProgenitorArtifact,Eden_Semiconductor,Eden_Voidium,Fertilizer,HeatExchanger,HeliumBottle,NitrogenBottle,QuantumProcessor,RadiationShielding,ReactorCore,SolarCell,Superconductor,ThrusterComponents,XenonBottle,SmallUpgradeKit,LargeUpgradeKit,AdvancedUpgradeKit,Eden_MagmaciteIngot,Eden_MagmacitePlate,Eden_Deuterium,Eden_OreDenseT1Ingot,Eden_OreDenseT2Ingot,Eden_OreDenseT3Ingot,Eden_OreDenseT4Ingot,Eden_OreDenseT5Ingot,AncientRelics,LJArtifact1,LJArtifact2,LJArtifact3,LJArtifact4,NaqahdahOre,NaqahdahIngot,NaqahdahPlate,Naquadria,LJSandOre,LJEarthOre,Eden_MagmacitePlate,Eden_AugmentedMold,",
-- "Armor"                 = ",ArmorHeavy,ArmorHeavyEpic,ArmorLight,ArmorLightEpic,ArmorMedium,ArmorMediumEpic,Eden_ArmorAbyssLight,Eden_ArmorHeavyEpicReinforced,Eden_ArmorHeavyReinforced,Eden_ArmorLightAugmented,Eden_ArmorLightReinforced,Eden_ArmorMediumReinforced,AsgardArmor,AsgardArmorDonat",
-- "IngredientBasic"       = ",Meat,Spice,AlienParts01,AlienParts02,AlienParts03,Bread,Fruit,Grain,Egg,NaturalStimulant,AlienTooth,Milk,Cheese,RottenFood,HerbalLeaves,ConfettiMossScrapings,FireMossScrapings,PlantProtein,MushroomBrown,AloeVera,AlienThorn,Vegetables,Flour,Ham,Berries,Ratatouille,NaturalSweetener,FruitJuice,Buds,",
-- "IngredientExtra"       = ",PromethiumPellets,RockDust,PlasticMaterial,PentaxidElement,PlatinOunce,ErestrumGel,XenoSubstrate,NutrientSolution,WaterBottle,Eden_SilverIngot,",
-- "IngredientExtraMod"    = ",Medikit04,RadiationImmunityShot,Bandages,AdrenalineShot,AntiRadiationInjection,EnergyDrink,",
-- "OreFurnace"            = ",IronOre,CobaltOre,SiliconOre,NeodymiumOre,CopperOre,ErestrumOre,ZascosiumOre,SathiumOre,GoldOre,TitanOre,PlatinOre,Eden_MagmaciteOre,Eden_TungstenOre,",
-- "Deconstruct"           = ",Eden_IceDense,Eden_IceRich,Eden_IceHeavy,Eden_Salvage1,Eden_Salvage2,Eden_Salvage3,Eden_Salvage4,Eden_Salvage5,Eden_OreDenseT1,Eden_OreDenseT2,Eden_OreDenseT3,Eden_OreDenseT4,Eden_OreDenseT5,",
-- "AmmoAllEnergy"         = ",DrillCharge,PulseLaserChargePistol,PulseLaserChargeRifle,MultiCharge,SciFiCannonPlasmaCharge,PlasmaCannonAlienCharge,PlasmaCannonChargeSS,PulseLaserChargeSS,PulseLaserChargeMS,TurretGVPlasmaCharge,TurretMSPlasmaCharge,TurretEnemyLaserCharge,PulseLaserChargeBA,TurretBAPlasmaCharge,PulseLaserChargeMSWeapon,PlasmaCartridge,PulseLaserChargeMST2,TurretMSPlasmaChargeT2,PulseLaserChargeBAT2,TurretBAPlasmaChargeT2,TurretGVPlasmaChargeT2,PulseLaserChargeSST2,ZiraxMSPlasmaCharge,HeatSinkSmall,HeatSinkLarge,AsgardPlazmerAmmo,LJDrillChargeEpic,Eden_ModularPulseLaserSVIR_Ammo,Eden_ModularPulseLaserSVUV_Ammo,Eden_ModularPulseLaserSVGamma_Ammo,Eden_PlasmaChargeEntropic,Eden_PlasmaRifleXCorp_Ammo,Eden_BlasterCV_Ammo,Eden_ShieldBoosterSV_Ammo,Eden_PlasmaRifleRoyal_Ammo,",
-- "AmmoAllProjectile"     = ",50Caliber,8.3mmBullet,5.8mmBullet,12.7mmBullet,15mmBullet,ShotgunShells,FlameThrowerCanister,RailgunBullet,30mmBullet,FlamethrowerTank,CrossbowBoltPlayer,40mmBullet,20mmBullet,Eden_TurretRailgun_Ammo,Eden_TurretRailgunHeavy_Ammo,Eden_VulcanAmmo,Eden_TurretBolterBA_Ammo,Eden_TurretBolterCV_Ammo,Eden_TurretVulcanCV_Ammo,",
-- "AmmoAllRocket"         = ",SlowRocket,SlowRocketHoming,FastRocket,LargeRocket,FastRocketMS,FlakRocket,ArtilleryRocket,FastRocketHoming,FlakRocketMS,LargeRocketMS,FastRocketBA,TurretEnemyRocketAmmo,FastRocketGV,SVBomb,LightRocketCV,HeavyRocketMS,FlakRocketMST2,ArtilleryShellCVT2,FlakRocketBAT2,ArtilleryShellBAT2,SwarmRocketHV,ArtilleryShellHVT2,HeavyRocketBA,TorpedoSV,Eden_TurretFlakClose_Ammo,Eden_TurretRocketRapid_Ammo,Eden_TurretMissileLight_Ammo,Eden_TurretMissileLightT2_Ammo,Eden_TurretMissileCruiseCV_Ammo,Eden_TurretMissileCruiseEMPCV_Ammo,Eden_TurretMissileSwarmCV_Ammo,Eden_CVTorpedoRapid_Ammo,",
-- "WeaponPlayerUpgrades"  = ",PistolKit,RifleKit,SniperKit,ShotgunKit,HeavyWeaponKit,LaserKit,",
-- "WeaponPlayerEpic"      = ",PulseRifleEpic,PlasmaCannonAlien,MinigunT2,FlameThrowerT2,AsgardPlazmer,Eden_PlasmaRifleEntropic,Eden_MinigunIncendiary,Eden_LaserRifleEntropic,Eden_ShotgunGauss,Eden_ShotgunDouble,Eden_ScoutRifle,Eden_Uzi,Eden_LightRailgunRifle,Eden_IonRifle,Eden_FarrPlasmaCrossbow,Eden_RifleLightning,Eden_PlasmaRifleXCorp,Eden_PlasmaRifleRoyal,AssaultRifleT3,TalonCrossbowPlayer,HeavyPistol,SubmachineGunT3,LaserPistolT3,ZiraxBeamRifle,AsgardPlazmer,",
-- "Deco"                  = ",TurretRadar,AntennaBlocks,DecoBlocks,ConsoleBlocks,IndoorPlants,DecoBlocks2,DecoStoneBlocks,ChristmasTree,DecoVesselBlocks,DecoTribalBlocks,PosterARest,PosterBiker,PosterDontHide,PosterForeignWorld,PosterJump,PosterNewWorld,PosterSoleDesert,PosterStranger,PosterSurvivor,PosterTakingABreak,PosterTalon,PosterTrader,PosterZiraxAlienWorld,",
-- "DataPads"              = ",Eden_UnlockPoint,Eden_WarpUpgrade,Eden_DataChipT1,Eden_DataChipT2,Eden_DataChipT3,",
-- "Oxygen"                = ",OxygenBottleLarge,",
-- "Fuel"                  = ",EnergyCell,EnergyCellLarge,FusionCell,",
-- "Pentaxid"              = ",PentaxidCrystal,"
-
- 
-Für das deconstruct script zu löschende Blöcke:
-- "RemoveBlocks"          = ",ContainerUltraRare,AlienContainer,AlienContainerRare,AlienContainerVeryRare,AlienContainerUltraRare,AlienDeviceBlocks,Eden_AlienBlocksPOI,Eden_CoreNPCSpecial,Eden_CoreNPCFake,"
-
-The lists begin and end with a comma so that they can be easily combined with the command `concat`.
-```
-(concat @root.Ids.WeaponHV @root.Ids.WeaponSV @root.Ids.WeaponCV)
-or
-(concat '1234.5568' @root.Ids.ArmorMod)
-```
-
------------------------------------------------------
-## Which player is currently active on the base / ship
-
-Input on the LCD (everything without "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"Input on the LCD (everything without "")
-"TEXT optional"
-{{#each P.Players}}
- "-" {{Name}}
-{{/each}}
-```
-Bsp.
-```
-Targets:LCD Info W1
-Player:
-{{#each P.Players}}
- - {{Name}}
-{{/each}}
-```
-------------------------------------------------------
-## Display date and time
-
-Input on the LCD (everything without "")
-```
-Targets:"NAME DES ANZUZEIGENDEN LCD"Input on the LCD (everything without "")
-"TEXT optional"
-{{datetime}}
-
-{{datetime 'HH:mm'}}
-
-{{datetime 'dd MMM HH:mm:ss' '+7'}}
-```
-Bsp.
-```
-Targets:LCD UHRZEIT
-Wie spät ist es?
-{{datetime}}
-
-{{datetime 'HH:mm'}}
-
-{{datetime 'dd MMM HH:mm:ss' '+7'}}
-```
-----------------------------------------------------
-## SCROLLEN:
-If too many products can not be displayed, then you can also scroll
-5 products are shown here with 2 seconds scrolling speed if more than 5 items are available.
-```
-{{#scroll 5 2}}
-{{#items E.S '"Name der Kiste"'}}
-{{Count}} {{i18n Key}}
-{{/items}}
-```
-Bsp.
-```
-{{#scroll 5 2}}
-{{#items E.S 'Kühlschrank 1'}}
-{{Count}} {{i18n Key}}
-{{/items}}
-
-{{#scroll 10 1}}
-{{#each S.Items}}
- - [{{Id}}]:{{Name}}
-{{/each}}
-{{/scroll}}
-```
-----------------------------------------------------
-## Intervalle:
-Everything can be displayed at intervals. Here in the example it would be an arrow
-You can also display the contents of 2 boxes
-```
-{{#intervall 1}}
-= = = = = = = = = = = = = = = = >
-{{else}}
- = = = = = = = = = = = = = = = =>
-{{/intervall}}
-```
-or here are 2 boxes that are displayed alternately.
-```
-{{#intervall 2}}
-"Text optional"
-{{#items E.S '"Name der Kiste"'}}
-{{Count}} {{i18n Key}}
-{{/items}}
-{{else}}
-"Text optional"
-{{#items E.S '"Name der Kiste2"'}}
-{{Count}} {{i18n Key}}
-{{/items}}
-{{/intervall}}
-```
-Bsp.
-```
-{{#intervall 2}}
-
-Kühlschrank 1:
-
-{{#items E.S 'Kühlschrank 1'}}
-{{Count}} {{i18n Key}}
-{{/items}}
-{{else}}
-
-Kühlschrank 2:
-
-{{#items E.S 'Kühlschrank 2'}}
-{{Count}} {{i18n Key}}
-{{/items}}
-{{/intervall}}
-```
-----------------------------------------------------
-## Color font and background, font size and interval
-In the following example, the word "Hello" and "World" changes every 5 seconds.
-then the font size also changes every 5 seconds
-The font color changes every second and the background every second
-```
-{{#intervall 5}}
-Hallo
-{{else}}
-Welt
-{{/intervall}}
-
-{{#intervall 5}}
-{{fontsize 8}}
-{{else}}
-{{fontsize 15}}
-{{/intervall}}
-
-{{#intervall 1}}
-{{color 'ff0000'}}
-{{else}}
-{{color '00ff00'}}
-{{/intervall}}
-
-{{#intervall 1}}
-{{bgcolor 'ffff00'}}
-{{else}}
-{{bgcolor '000000'}}
-{{/intervall}}
-```
-----------------------------------------------------
-## ERZE und BARREN IDENTIFIKATIONS NUMMER:
-
-@root.Ids.Ore
-
-+ Item Id: 4296, Name: MagnesiumOre
-+ Item Id: 4297, Name: IronOre
-+ Item Id: 4298, Name: CobaltOre
-+ Item Id: 4299, Name: SiliconOre
-+ Item Id: 4300, Name: NeodymiumOre
-+ Item Id: 4301, Name: CopperOre
-+ Item Id: 4302, Name: PromethiumOre
-+ Item Id: 4317, Name: ErestrumOre
-+ Item Id: 4318, Name: ZascosiumOre
-+ Item Id: 4332, Name: SathiumOre
-+ Item Id: 4341, Name: PentaxidOre
-+ Item Id: 4345, Name: GoldOre
-+ Item Id: 4359, Name: TitaniumOre
-
----
-@root.Ids.Ingot
-
-+ Item Id: 4319, Name: MagnesiumPowder
-+ Item Id: 4320, Name: IronIngot
-+ Item Id: 4321, Name: CobaltIngot
-+ Item Id: 4322, Name: SiliconIngot
-+ Item Id: 4323, Name: NeodymiumIngot
-+ Item Id: 4324, Name: CopperIngot
-+ Item Id: 4325, Name: PromethiumPellets
-+ Item Id: 4326, Name: ErestrumIngot
-+ Item Id: 4327, Name: ZascosiumIngot
-+ Item Id: 4328, Name: CrushedStone
-+ Item Id: 4329, Name: RockDust
-+ Item Id: 4333, Name: SathiumIngot
-+ Item Id: 4342, Name: PentaxidCrystal
-+ Item Id: 4346, Name: GoldIngot
-+ Item Id: 4360, Name: TitaniumRods
-
----
-# Technical
-Syntaxdocu:
-+ http://handlebarsjs.com/
-+ http://handlebarsjs.com/reference.html#data
-+ https://zordius.github.io/HandlebarsCookbook/index.html
-+ https://zordius.github.io/HandlebarsCookbook/0014-path.html
-+ https://github.com/rexm/Handlebars.Net
-
-## Items
-Items have the following basic data
-
-* Id : Complete one-to-one number. For tokens it is a combination of 'TokenId * 100000 + ItemId'.
-* IsToken: 'true' if it is a token otherwise 'false'.
-* ItemId: The token-independent part of the Id (this is equivalent to the token item in Empyrion).
-* TokenId: The Id of the token if it is a token.
-
-## Conditions
-* {{#test Select Op Value}}
-  * Op: eq is =
-  * Op: neq is <> or !=
-  * Op: leq is <=
-  * Op: le is <
-  * Op: geq is >=
-  * Op: ge is >
-  * Op: in (Delimitters are: ,;#+ )
-    * Value: '1,2,3,42'
-    * Value: '1-3,42'
-    * Value: 'A,xyz,mag'
-
-* {{regex value regex}}
-    * Checks the value 'value' with the regular expression 'regex' on success/failure the result of the expression is passed to the next section as '.'.
-
-## Items
-+ {{configid name}}
-   + Reads the attribute 'id' from the configuration of the block/item 'name'
-
-+ {{configattr id attrname}}
-   + Reads the attribute 'attrname' from the configuration of the block/item 'id'
-
-+ {{configattrbyname name attrname}}
-   + Reads the attribute 'attrname' from the configuration of the block/item 'name'
-   
-+ {{configbyid id}}
-  + Reads the config section block/item for 'id'
-
-+ {{configbyname name}}
-  + Reads the config section block/item for 'name'
-
-+ {{resourcesforid id}}
-   + List of the required resources for the block / item with the 'id'
-
-### Logiccheck
-* {{#ok data}}
-   * Execute block if (data) has a value (not equal to '') or (data) is equal to 'true' or not equal to 0
-   * otherwise the {{else}} part is executed
-
-* {{#if data}}
-   * Execute block if (data) has a value not equal to '' or 0 (data) or is equal to 'true'
-   * otherwise the {{else}} part is executed
-
-* {{not data}}
-   * Negation of (data)
-   
-### (intervall)
-* {{#intervall sec}}
-  * intervall in seconds
-
-### (scroll)
-* {{#scroll lines delay \[step\]}}
-  * Text scroll block with (lines) od text, scrolls with (delay) seconds
-  * optional (step) lines per step
-
-+ {{#getitems structure 'box1; box2; fridge *; ...'}} = Determine all items from the containers (names) = 'box1; box2; fridge *; ...' and deliver them as a list e.g. for itemlist
-
-* {{#itemlist list 'id1;id2;id3'}}
-  * Itemlist the the selected items (ids) even if they don't in the list (list)
-
-* {{#itemlistarray list 'id1;id2;id3,...'}}
-  * Filter the list of items (list) to the items with the IDs 'id1;id2;id3,...'. 
-    If an id is not available, it is inserted with a number 0.
-    Returns the result as a list which can be further processed using foreach or other list functions
-
-+ {{#orderbylist list 'id1;id2;id3,...'}}
-  + sort list of items based on the idlist. Items that are not in the list are sorted to the end
-
-### (i18n)
-* {{#i18n Select \['Language'\]}}
-  * Language: English,Deutsch,Français,Italiano,Spanish,...
-    look at \[ESG\]\\Content\\Extras\\Localization.csv at the first line
-    from default it's get from the CultureInfo lcd.
-
-* {{#toid Name[;Name2;...]}}
-  * Converted the symbolic names to the current ids
-
-* {{#toname id[;id2;...]}}
-  * Converted the ids to the symbolic names
-
-### (datetime)
-+ {{datetime}} = Display the Datetime
-+ {{datetime 'format'}} = uses the formatstring
-+ {{datetime 'format' '+5'}} = adds N hours
-
-DateTime format:
-+ https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8#System_DateTime_ToString_System_String_
-
-### (move)
-+ {{move item structure names [maxLimit]}}
-  + Item (item) into the structure (structure) in the container with the names (names) move
-  + [maxLimit] is an optional parameter which one is limited the amount in the target container
-
-### (lights)
-+ {lightsign names}}
-  + Select lights of the structure with names
-
-### (lightcolor)
-+ {{light color light color}}
-  + For light, select the color (color rgb hex)
-
-### (lightblink)
-+ {{lightblink light interval length offset}}
-  + In the case of light, set the interval (interval), the interval length (length) and the interval offset (offset)
-
-### (light intensity)
-+ {{light intensity light}
-  + Set the light intensity for light
-
-### (lightrange)
-+ {{lightrange light range}}
-  + In the case of light, set the light range
-
-### (lightspotangle)
-+ {{lightspotangle light spotangle}}
-  + Set the light spot angle (spotangle) for light
-
-### (lighttype)
-+ {{lighttype light type}}
-  + For light, set the type of light
-  + spot
-  + Directional
-  + Point
-  + Area
-  + rectangle
-  + disc
-
-### (devices)
-+ {{devices structure customnames}}
-  + (structure) (name;name*;*;name)
-
-### (devicesoftype)
-+ {{devicesoftype structure type}}
-  + (structure) (type)
-
-### (setactive)
-+ {{setactive block|device active}}
-
-### (steps)
-+ {{steps start end \[step\] \[delay\]}}
-  + From (start) to (end) with optional (step)-width and (delay) extends the 1 second per 1 counter add
-
-+ {{sortedeach array sortedBy}}
-  + Sorts the array by (+/-sortedBy) and iterates over the individual elements.
-  
-+ {{sort array sortedBy}}
-  + Sorts the array by (+/-sortedBy)
-  
-+ {{orderedeach array '+/-sortedBy1,+/-sortedBy2,...'}}
-  + sorts the array by (sortedBy1) then by 'sortedBy2' etc. with '+' ascending, with '-' descending by the respective field. 
-  + iterates over each element
-  
-+ {{order array '+/-sortedBy1,+/-sortedBy2,...'}}
-  + Sorts the array by (sortedBy1) then by 'sortedBy2' etc. with '+' ascending, with '-' descending by the respective field. 
-
-+ {{random start end}}
-   + Deliver a random value between (start) and (end) and submit to the block as {{this}}
-
-### Stringfunctions
-+ {{split string separator [removeemptyentries]}}
-  + (string) split with the delimiter (separator).
-  + \[removeemptyentries\] if empty entries should be removed 'true'
-
-+ {{substring text startindex [length]}}
-  + Substring from the Text (text) from Index (startindex) with optional maximum (length) characters
-
-+ {{startswith text starts \[ignoreCase\]}}
-   + If the text (text) begins with the text (starts), optionally independent upper / lower case
-
-+ {{endswith text ends \[ignoreCase\]}}
-   + If the text (text) ends with the text (ends), optionally independent upper / lower case
- 
-+ {{replace text find replaceto}}
-  + replace the (find) into the (replaceto) in the (text)
-   
-### (chararray)
-+ {{chararray text}}
-  + Split the Text into an array of characters
-
-+ {{selectlines lines from to}}
-  + Returns the lines (from) to (to) from the text (lines)
-
-+ {{lookup array index}} and {{lookupblock array index}}
-  + Returns the element at the position (index) starting with 0
-
-+ {{concatarrays (array1,array2,array3,...)}}
-  + Combines arrays or dictionaries into one (for dictionaries existing elements are overwritten).
-
-+ {{loop array/dictionary}}
-  + iterates over the individual elements of the array or dictionary
-
-+ {{bar data min max length \[char\] \[bgchar\] \[l|r\]}}
-  + Displays a bar for (data) in the rage of (min) to (max) with the total bar length of (length)
-  + The string for filled signs (char) and background signs (bgchar) are optional 
-
-+ {{use data}}
-  + Use this data for direct access
-  + the {{else}} case will call when data == null is
-
-### (set)
-+ {{set key data}}
-   + The data (data) are stored so that they can be recalled at any time via @root.Data.(Key)
-
-+ {{setblock key}}
-   + The data of the block are stored so that they can be recalled at any time via @root.Data.(Key)
-
-+ {{setcache key data}}
-   + Store the data (data) so that they can be called up again at any time via @root.CacheData.(Key).
-   + These are saved for the entity and are available again the next time the script is called, but can be discarded by changing the playfield or similar.
-
-+ {{setcacheblock key}}
-   + Store the data of the block so that it can be called up at any time via @root.CacheData.(Key)
-   + These are saved for the entity and are available again the next time the script is called, but can be discarded by changing the playfield or similar.
-
-### (math)
-+ {{math (lvalue) op (rvalue) [digits]}}
-  + op = +, -, *, /, %
-  + digits round number
-
-+ {{calc (lvalue) op (rvalue) [digits]}}
-  + op = +, -, *, /, %
-  + digits round number
-  + Can be used with () inline in other commands
-
-+ {{min (lValue) (rValue)}}
-   + Returns the smaller of the two
-
-+ {{max (lValue) (rValue)}}
-   + Returns the larger of the two
-
-+ {{int (value)}}
-   + Returns the integer part of the value
-   
-+ {{abs (value)}}
-   + Returns the absoulute value
-   
-+ {{distance (lVector) (rVector) [format]}}
-  + Distance between (lVector) and (rVector)
-  + Optional a format
-
-+ {{gameticks}}
-  + Get current game run time as ticks (20 ticks is one real-time second)
-  
-### (data)
-+ {{createdictionary}}
-  + Creates a dictionary which can be filled with 'addkeyvalue'.
-
-+ {{set dictionary key value}} | {{setblock dictionary key}}
-  + Adds/Update key/value to the dictionary
-
-+ {{removekey dictionary key}}
-  + Deletes the entry key from the dictionary
-
-+ {{createarray}}
-  + Creates an array which can be filled with 'additem'.
-
-+ {{set array value}} | {{setblock array}}
-  + Adds value to the array
-
-+ {{removeitem array value}}
-  + Deletes the entry value from the array
-
-### (blocks)
-+ {{block structure x y z}}
-
-+ {{blocks structure fromX fromY fromZ toX toY toZ}}
-  + Returns in packets of 100 blocks all blocks of the specified range for further processing, e.g. with the 'harvest' command.
-  
-### (concat)
-+ {{concat a1 a2 a3 ...}}
-  + Concatenate the values of a1 .. aN 
-  + If a value is an array of texts (string []), the next parameter is considered the separator for those entries
-
-### Devices
-+ {{islocked structure device|x y z}}
-  + Checks at the structure whether the device (device) or the device is locked at the position (x) (y) (z).
-
-+ {{trashcontainer structure containername}}
-  + Deletes irrevocably ALL items which are in the container 'containername'. For the container name NO wildcards '*' are allowed.
-
-### (gettexture)
-+ {{gettexture block pos}}
-  + Get the TexturId of the block from the side T=Top, B=Bottom,, N=North, S=South, W=West, E=East
-
-+ {{settexture block textureid [pos]}}
-  + Sets the texture ID of the block on the sides T = Top, B = Bottom, N = North, S = South, W = West, E = East several can be specified separated by commas, if no position is given the whole Block set
-
-+ {{setcolor block colorid [pos]}}
-  + Sets the color of the block on the sides T = Top, B = Bottom, N = North, S = South, W = West, E = East several can be specified separated by commas, if no position is given the whole Block set
-
-### (gettext)
-+ {{gettext lcddevice}}
-  + Gets the text from the  LCD (lcddevice)
-
-### (settext)
-+ {{settext lcddevice text}}
-  + Set the text of the LCD (lcddevice) with (text)
-
-### (settextblock)
-+ {{settextblock lcddevice}}
-  + Set the text of the LCD (lcddevice) from the nested block
-
-### (setcolor)
-+ {{setcolor lcddevice (rgb hex)}}
-  + Set the color of the LCD (lcddevice) with (rgb hex)
-
-### (setbgcolor)
-+ {{setbrcolor lcddevice (rgb hex)}}
-  + Set the bgcolor of the LCD (lcddevice) with (rgb hex)
-
-### (entitybyname)
-+ {{entitybyname name \[maxdistance\]}}
-  + Returns the entities nearby and with the same fraction, with name (name) and the, optional, maximum distance \[maxdistance\]
-
-+ {{entitiesbyname names \[maxdistance\] \[types\]}}
-  + Returns the entities nearby and with the same fraction, with names in (name; name *; *) and the, optional, maximum distance \[maxdistance\]
-  + \[types\] is only allowed in 'Elevated Scripts' and delivers all objects with the types (e.g. proxy and asteroid)
-
-### (entitybyid)
-+ {{entitybyid id}}
-  + Get nearby Entity (with same faction) with (id)
-
-### (entitiesbyid)
-+ {{entitiesbyid ids}}
-  + Get nearby Entity (with same faction) with IDs in (id1;id2;id3)
-
-## Move/Fill/Process
-+ {{move item structure names \[maxLimit\]}}
-  + Move item (item) to the structure (structure) to the containers with the names (names).
-  + \[maxLimit\] is an optional parameter that limits the number in the target container
-
-+ {{fill item structure tank \[max\]}}
-  + Fills up the tank = fuel/oxygen/pentaxide with the item in the structure. The percentage fill level can be optionally limited with (max). Default is 100.
-
-+ {{deconstruct entity container \[CorePrefix\] \[RemoveItemsIds1,Id2,...\]}}
-   + Deconstruct the entity 'entity' and moves parts to container named as 'container''
-   + Note: The core of the structure must be called 'Core-Destruct-ID' (where ID stands for the id of the structure)
-   + With the configuration setting DeconstructBlockSubstitution a replacement (by another block type) / deletion (by 0) of block types can be defined
-   + The costs per 'AmountPerNumberOfBlocks' can be configured via 'DeconstructSalary' in the configuration file. Default: 100 money cards are due per 10 blocks
-
-+ {{recycle entity container \[CorePrefix\]}}
-   + Dismantles the 'entity' structure and transports the raw materials (of the known recipes) into the container with the name given by 'container'
-   + Note: The core of the structure must be called 'Core-Recycle-ID' (where ID stands for the ID of the structure)
-   + With the configuration setting DeconstructBlockSubstitution, a replacement (by another block type) / deletion (by 0) of block types can be defined
-   + The costs per 'AmountPerNumberOfBlocks' can be configured via 'RecycleSalary' in the configuration file. Standard: 200 money cards are due per 10 blocks    
-
-+ {{harvest structure block's target gx gy gz \[removeDeadPlants\]}}
-  + The command can be used to mine plants. This requires a "gardener" (NPC crew) and money (as payment) in the refrigerator. 
-    If desired, the dead plants can also be disposed of. However, this costs 100 times the price
-
-+ {{pickupplants structure block's target gx gy gz \[removeDeadPlants\]}}
-  + With this command, plants can be removed. This requires a "gardener" (NPC crew) and money (as payment) in the fridge. 
-    If desired, the dead plants can also be disposed of. However, this costs 100 times the price
-
-+ {{replantplants structure target}}
-  + With this command, the plants removed with 'pickupplants' can be replanted. 
-    Note: This is only possible if the playfield has not been changed or a logout has not taken place.
-
-## Positions (structure and world)
-+ {{vector x y z}}
-  + Creates a vector from x y z
-
-+ {{structtoglobalpos structure (vector | x y z)}}
-  + Returns the world coorinates of structurepos structure (vector | x y z)
-
-+ {{globaltostructpos structure (vector | x y z)}}
-  + Returns the position (vector | x y z) of the world coordinates from the point of view of the structure
-
-## Chat
-+ {{chatbysignal SignalName sender}}message{{/chatbysignal}}
-  + Sends the chat message to the player who triggers the signal. In the block, the player is available with Id and name
-
-+ {{char sender text}}
-  + Sends a chat message to the owner of the structure (faction or player) with the text 'text' and the sender 'sender'
-
-## Chat (Admin only)
-+ {{chatglobal sender text}}
-  + Sends a global chat message with the text 'text' and the sender 'sender'
-
-+ {{chatserver sender text}}
-  + Sends a server chat message with the text 'text' and the sender 'sender'
-
-+ {chatplayer playerId sender text}}
-  + Sends a private chat message to the player 'playerId' with the text 'text' and the sender 'sender'
-
-+ {{chatfaction factionId sender text}}
-  + Sends a faction chat message to the faction 'facrionId' with the text 'text' and the sender 'sender'
-
-## Teleport
-+ {{teleportplayer player (device | toPos | x y z)}}
- + Teleports the player to the device/block of the structure.
- + 'toPos' and 'x y z' are only allowed in elevated scripts
-
-## JSON
-+ {{jsontodictionary string}}
-  + returns a dictionary data structure resulting from the JSON 'string'.
-
-+ {{fromjson string}}
-  + returns a data structure resulting from the JSON 'string'.
-
-{{tojson object}}
-  + creates a JSON data string from the object
-
-## Flying
-Note: Flying only works when there is no pilot controlling the ship and the engines are switched on.
-
-+ {{movestop}}
-    + Stop flight
-+ {{moveto vector3 | x y z}}
-    + Set flight direction
-+ {{moveforward speed}}
-    + Set flight speed
-
-## Dialog windows
-+ {{dialog player|Id|SignalName title body}} 
-  + Displays a dialog to the player (at SignalName when one of these signals is triggered): [player | playerId | SignalName] [title] [body] [ButtonTexts] [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
-
-+ {{dialogbox player|Id|SignalName}} 
-  + Displays a dialog to the player (at SignalName when one of these signals is triggered): (player | playerId | SignalName) [ButtonIdxForEnter] [ButtonIdxForEsc] [MaxChars] [InitialPlayerInput] [closeOnLinkClick] [DialogData] [Placeholder]
-  + (title) (body) (ButtonTexts) are determined from the {{else}} where the player data is available as this 1st line=title, last line=buttons, the lines in between = body
-
-## DB Access
-+ {{db queryname [top] [orderBy] [additionalWhereAnd] [parameters]}}
-  + 'queryname' the name of the SQL query which is provided by the configuration.
-  + 'top' provide only the first X entries
-  + 'orderby' query with the field sort. By default ascending 'fieldname asc' but can also be set to descending 'fieldname desc'.
-  + 'additionalWhereAnd' additional 'where' condition
-  + 'parameter' if the script requires additional parameters their values can be specified here the parameters are then available under @1..N of the query
-
-To search the 'global.db' database of the EmpyrionSavegame and to add own queries to the configuration you can use the SQLiteBrowser https://sqlitebrowser.org/.
-
-By default the following parameters are available for the query:
- + @PlayerId = @root.E.S.Pilot.Id   
- + @FactionId = @root.E.Faction.Id   
- + @FactionGroup (int) = @root.E.Faction.Group
- + @EntityId = @root.E.Id           
-
-The following queries are available:
-
-### Entities
-```
-SELECT * FROM Structures 
-JOIN Entities ON Structures.entityid = Entities.entityid
-JOIN Playfields ON Entities.pfid = Playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId)) {additionalWhereAnd}
-```
-
-### DiscoveredPOIs
-```
-SELECT * FROM DiscoveredPOIs
-JOIN Entities ON DiscoveredPOIs.poiid = Entities.entityid
-JOIN Playfields ON Entities.pfid = Playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (Entities.isremoved = 0 AND (DiscoveredPOIs.facgroup = 0 OR DiscoveredPOIs.facgroup = 1) AND (DiscoveredPOIs.facid = @PlayerId OR DiscoveredPOIs.facid = @FactionId)) {additionalWhereAnd}
-```
-
-### TerrainPlaceables
-```
-SELECT * FROM TerrainPlaceables 
-JOIN Entities ON TerrainPlaceables.entityid = Entities.entityid
-JOIN Playfields ON TerrainPlaceables.pfid = Playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId OR TerrainPlaceables.entityid = @PlayerId OR TerrainPlaceables.entityid = @FactionId)) {additionalWhereAnd}
-```
-
-### TerrainPlaceablesRes
-```
-SELECT * FROM TerrainPlaceables
-JOIN PlayfieldResources ON (PlayfieldResources.pfid = TerrainPlaceables.pfid AND abs(PlayfieldResources.blockx - TerrainPlaceables.blockx) <= 20 AND abs(TerrainPlaceables.blockz - PlayfieldResources.blockz) <= 20)
-JOIN Entities ON TerrainPlaceables.entityid = Entities.entityid
-JOIN Playfields ON TerrainPlaceables.pfid = Playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId OR TerrainPlaceables.entityid = @PlayerId OR TerrainPlaceables.entityid = @FactionId)) {additionalWhereAnd}
-```
-
-
-### Playfields
-```
-SELECT * FROM Playfields
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE playfields.ssid IN (
-SELECT ssid FROM Playfields
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-WHERE (DiscoveredPlayfields.facgroup = 0 OR DiscoveredPlayfields.facgroup = 1) AND (DiscoveredPlayfields.facid = @PlayerId OR DiscoveredPlayfields.facid = @FactionId)
-GROUP BY playfields.ssid
-) {additionalWhereAnd}
-```
-
-### PlayfieldResources
-```
-SELECT * FROM Playfields
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-JOIN PlayfieldResources ON PlayfieldResources.pfid = Playfields.pfid
-WHERE playfields.ssid IN (
-SELECT ssid FROM Playfields
-LEFT JOIN DiscoveredPlayfields ON DiscoveredPlayfields.pfid = playfields.pfid
-WHERE (DiscoveredPlayfields.facgroup = 0 OR DiscoveredPlayfields.facgroup = 1) AND (DiscoveredPlayfields.facid = @PlayerId OR DiscoveredPlayfields.facid = @FactionId)
-GROUP BY playfields.ssid
-) {additionalWhereAnd}
-```
-
-### PlayerData
-```
-SELECT * FROM PlayerData 
-JOIN Entities ON Entities.entityid = PlayerData.entityid
-JOIN Playfields ON Playfields.pfid = PlayerData.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE ((Entities.facgroup = 0 OR Entities.facgroup = 1 OR facgroup = 0 OR facgroup = 1) AND (Entities.facid = @PlayerId OR facid = @PlayerId OR Entities.facid = @FactionId OR facid = @FactionId)) {additionalWhereAnd}
-```
-
-### Bookmarks
-```
-SELECT * FROM Bookmarks
-JOIN Entities ON Bookmarks.entityid = Entities.entityid
-JOIN Playfields ON Bookmarks.pfid = Playfields.pfid
-JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
-WHERE ((Bookmarks.facgroup = 0 OR Bookmarks.facgroup = 1) AND (Bookmarks.facid = @PlayerId OR Bookmarks.facid = @FactionId)) {additionalWhereAnd}
-```
-
-## External data
-+ {{external 'Key' [args]}}
-  + 'Key' Key for accessing the external data.
-  + [args] Additional parameters needed by the external data access method.
-    
-Here with it is possible to retrieve external data from the AddOnAssemblys. Which parameters are additionally required must be taken from the documentation 
-of the respective external data source.
-
-### Providing a DLL for the external data (with an example from the EmpyrionGalaxyNavtigator).
-This Dll must have a class which implements the IMod interface. Also, the must implement a property 'ScriptExternalDataAccess'.
-```
+```csharp
 public class ExternalDataAccess : IMod
 {
     public IDictionary<string, Func<IEntity, object[], object>> ScriptExternalDataAccess { get; }
@@ -2179,159 +1087,2285 @@ public class ExternalDataAccess : IMod
     {
         ScriptExternalDataAccess = new Dictionary<string, Func<IEntity, object[], object>>()
         {
-            ["Navigation"] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ?         Navigation(entity) : null,
-            ["MaxWarp" ]   = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ? (object)MaxWarp   (entity) : null,
+            ["Navigation"] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ? Navigation(entity) : null,
+            ["MaxWarp"   ] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ? (object)MaxWarp(entity) : null,
         };
     }
+}
 ```
 
-Furthermore the path to the DLL must be specified in the configuration file of the EmpyrionScripting. (Basis is the mod directory of the EmpyrionScripting in the savegame).
-```
+DLL-Pfad in der Konfigurationsdatei registrieren (Basispfad = Mod-Verzeichnis im Savegame):
+
+```json
 "AddOnAssemblies": [
     "..\\EmpyrionGalaxyNavigator\\EmpyrionGalaxyNavigatorDataAccess.dll"
-],
+]
 ```
 
-And the DLL must be copied to its intended place (in the case of EmyprionGalaxyNavigator in its mod directory in the savegame)
 ![](Screenshots/AddOnAssembly.png)
-The DLL can be found in this file 'EmpyrionGalaxyNavigatorDataAccess.zip' which is included in the ModLoaderpaket or can be downloaded from https://github.com/GitHub-TC/EmpyrionGalaxyNavigator/releases. 
 
-When the functions are called, the current entity and the passed 'args' are also passed.
-(in this case no further parameters are needed to access the GalaxyNavigator).
+---
+
+## SaveGame-Scripte
+
+Scripte können direkt im SaveGame-Verzeichnis hinterlegt werden:
+
+`[SaveGame]\Mods\EmpyrionScripting\Scripts\`
+
+Dieser Pfad ist über `@root.MainScriptPath` abrufbar.
+
+**Script-Auflösung nach Priorität:**
+
+1. `EntityId` (z.B. `12345.hbs`)
+2. `PlayfieldName\EntityName` (z.B. `Akua\MeinSchiff.hbs`)
+3. `PlayfieldName\EntityType` (z.B. `Akua\CV.hbs`)
+4. `EntityName` (z.B. `MeinSchiff.hbs`)
+5. `EntityType` (z.B. `BA.hbs`)
+6. `PlayfieldName` (z.B. `Akua.hbs`)
+7. Direkt im Verzeichnis
+
+> EntityType: `BA` (Base), `CV` (Capital Vessel), `SV` (Small Vessel), `HV` (Hover Vessel)
+
+### Datei-Operationen (nur SaveGame-Scripte)
+
+```
+{{#readfile @root.MainScriptPath 'config.txt'}}
+Zeile 1: {{lookup this 0}}
+{{else}}
+Datei nicht gefunden
+{{/readfile}}
+
+{{#writefile @root.MainScriptPath 'ausgabe.txt'}}
+Inhalt der Datei
+{{/writefile}}
+
+{{#fileexists @root.MainScriptPath 'config.txt'}}
+Datei existiert!
+{{/fileexists}}
+
+{{#filelist @root.MainScriptPath '*.hbs' true}}
+{{this}}
+{{/filelist}}
+```
+
+### Nachricht an Spieler senden: `sendmessagetoplayer`
+
+Sendet eine Server-Chatnachricht direkt an einen einzelnen Spieler (nur SaveGame-Scripte):
+
+```
+{{#sendmessagetoplayer PlayerId}}
+Hallo, dein Schiff ist in einer Gefahrenzone!
+{{/sendmessagetoplayer}}
+```
+
+Der innere Block wird als Nachrichtentext gerendert. `PlayerId` ist die numerische Entity-ID des Spielers.
+
+### Block-Eigenschaften ändern (nur SaveGame-Scripte)
+
+```
+{{setdamage Block 100}}     ← Schaden eines Blocks auf 100 setzen
+{{settype Block 4297}}      ← Block-Typ-ID ändern
+```
+
+---
+
+## Elevated Scripte
+
+Erweiterte Berechtigungen für Scripte in SaveGame-Verzeichnissen oder auf Admin-Strukturen:
+
+```
+{{lockdevice E.S 'MeinContainer'}}
+{{additems Container 4297 100}}        ← 100x IronOre hinzufügen
+{{removeitems Container 4297 50}}      ← 50x IronOre entfernen
+{{replaceblocks Entity '4297' 0}}      ← Block entfernen (0 = löschen)
+{{settype Block TypeId}}               ← Block-Typ ändern (nur SaveGame)
+{{setdamage Block 100}}                ← Schaden setzen (nur SaveGame)
+```
+
+---
+
+## Script-Priorisierung
+
+Wenn viele Scripte auf einer Struktur laufen, kann die Ausführungshäufigkeit gesteuert werden:
+
+```
+Script:MeinScript         ← Jeder Zyklus (nur wenn LCD eingeschaltet)
+0Script:MeinScript        ← Wie oben
+1Script:MeinScript        ← Jeder Zyklus (auch wenn LCD ausgeschaltet!)
+3Script:MeinScript        ← Jeden 3. Zyklus
+5Script:MeinScript        ← Jeden 5. Zyklus
+```
+
+**Ausführungsreihenfolge mit Prioritäten 1, 3, 4:**
+
+```
+Zyklus 1: Script(1), Script(3), Script(4) — alle laufen
+Zyklus 2: Script(1)
+Zyklus 3: Script(1), Script(3)
+Zyklus 4: Script(1), Script(4)
+Zyklus 5: Script(1)
+Zyklus 6: Script(1), Script(3)
+...
+```
+
+| Priorität | Ausführung | LCD muss eingeschaltet sein |
+|-----------|-----------|--------------------------|
+| 0 oder keine | Jeden Zyklus | **Ja** |
+| 1–9 | Jeden N-ten Zyklus | **Nein** |
+
+---
+
+## Konfiguration & Performance
+
+Konfigurationsdatei: `[SaveGame]\Mods\EmpyrionScripting\Configuration.json`
+
+| Einstellung | Standard | Beschreibung |
+|-------------|---------|-------------|
+| `InGameScriptsIntervallMS` | 2000 | Scriptausführungsintervall in Millisekunden |
+| `SaveGameScriptsIntervallMS` | 10000 | Intervall für SaveGame-Scripte (ms) |
+| `ScriptsSyncExecution` | 2 | Scripte pro Zyklus (synchron im Spielthread) |
+| `ScriptsParallelExecution` | 4 | Scripte pro Zyklus (parallel im Hintergrund) |
+| `UseEveryNthGameUpdateCycle` | 10 | Nur jeden N-ten GameUpdate-Aufruf nutzen |
+| `DeviceLockOnlyAllowedEveryXCycles` | 10 | DeviceLock-Scripte nur alle X Zyklen |
+| `ProcessMaxBlocksPerCycle` | 200 | Maximale Blöcke pro Zyklus |
+
+> 💡 **Tipp:** Die Standardwerte sind sehr konservativ. Werte verdoppeln (und `SaveGameScriptsIntervallMS` halbieren) für flüssigere Script-Ausführung — kann jedoch zu Micro-Rucklern führen.
+
+### Automatische Mengenanpassung (`EcfAmountTag`)
+
+Für Treibstoff, O2 etc. kann die Menge automatisch aus der ECF-Konfiguration des Szenarios ermittelt werden:
+
+```json
+{
+    "ItemName": "EnergyCellLarge",
+    "Amount": 250,
+    "EcfAmountTag": "FuelValue"
+},
+{
+    "ItemName": "OxygenBottleLarge",
+    "Amount": 250,
+    "EcfAmountTag": "O2Value"
+}
+```
+
+Automatische Ermittlung deaktivieren: `"EcfAmountTag": ""`
+
+---
+
+## Vordefinierte ID-Listen
+
+Diese Listen können in Scripts über `@root.Ids.ListenName` verwendet werden.
+
+Konfigurationspfad: `[SaveGame]\Mods\EmpyrionScripting\Configuration.json` (Abschnitt `"Ids"`)
+
+> **Hinweis:** Abschnitt `"Ids"` aus der Configuration.json löschen, um Originalzustand wiederherzustellen.
+
+**Verwendung in Scripts:**
+
+```
+{{#itemlist E.S.Items @root.Ids.Ore}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+
+{{#itemlist E.S.Items (concat @root.Ids.WeaponSV @root.Ids.WeaponHV)}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+```
+
+| Liste | Inhalt |
+|-------|--------|
+| `Ore` | Alle Erze |
+| `Ingot` | Alle Barren / Verarbeitete Erze |
+| `Components` | Baukomponenten (Vanilla) |
+| `EdenComponents` | Eden-Mod Komponenten |
+| `Medic` | Medizinische Items |
+| `Food` | Lebensmittel |
+| `Ingredient` | Zutaten (alle) |
+| `IngredientBasic` | Basis-Zutaten |
+| `IngredientExtra` | Extra-Zutaten |
+| `IngredientExtraMod` | Zusätzliche Mod-Zutaten |
+| `Tools` | Werkzeuge |
+| `Armor` | Rüstungen |
+| `ArmorMod` | Rüstungsmodifikationen |
+| `Sprout` | Setzlinge / Pflanzensamen |
+| `BlockL` | Große Blöcke (CV/BA) |
+| `BlockS` | Kleine Blöcke (SV/HV) |
+| `DeviceL` | Geräte (CV/BA) |
+| `DeviceS` | Geräte (SV/HV) |
+| `WeaponPlayer` | Spieler-Waffen |
+| `WeaponHV` | HV-Waffen |
+| `WeaponSV` | SV-Waffen |
+| `WeaponCV` | CV-Waffen |
+| `WeaponBA` | BA-Waffen |
+| `WeaponPlayerUpgrades` | Waffen-Upgrades |
+| `WeaponPlayerEpic` | Epic-Waffen |
+| `AmmoPlayer` | Spieler-Munition |
+| `AmmoHV` | HV-Munition |
+| `AmmoSV` | SV-Munition |
+| `AmmoCV` | CV-Munition |
+| `AmmoBA` | BA-Munition |
+| `AmmoAllEnergy` | Alle Energie-Munition |
+| `AmmoAllProjectile` | Alle Projektil-Munition |
+| `AmmoAllRocket` | Alle Raketen |
+| `Deco` | Dekorations-Blöcke |
+| `DataPads` | Data Pads / Chips |
+| `Oxygen` | Sauerstoffflaschen |
+| `Fuel` | Treibstoffzellen |
+| `Pentaxid` | Pentaxid-Kristalle |
+| `OreFurnace` | Im Ofen schmelzbare Erze |
+| `Deconstruct` | Für Dekonstruktion vorgesehene Blöcke |
+| `Gardeners` | Gärtner-NPC |
+
+**Für das Deconstruct-Script zu löschende Blöcke:**
+
+```
+"RemoveBlocks" = ",ContainerUltraRare,AlienContainer,AlienContainerRare,..."
+```
+
+Die Listen beginnen und enden mit einem Komma, damit sie mit `concat` kombiniert werden können:
+
+```
+(concat @root.Ids.WeaponHV @root.Ids.WeaponSV @root.Ids.WeaponCV)
+(concat '1234,5568' @root.Ids.ArmorMod)
+```
+
+---
+
+## Erz- und Barren-IDs
+
+### Erze (`@root.Ids.Ore`)
+
+| ID | Interner Name | Deutsch |
+|----|--------------|---------|
+| 4296 | MagnesiumOre | Magnesiumerz |
+| 4297 | IronOre | Eisenerz |
+| 4298 | CobaltOre | Kobalterz |
+| 4299 | SiliconOre | Siliziumerz |
+| 4300 | NeodymiumOre | Neodymiumerz |
+| 4301 | CopperOre | Kupfererz |
+| 4302 | PromethiumOre | Promethiumerz |
+| 4317 | ErestrumOre | Erestrumerz |
+| 4318 | ZascosiumOre | Zascosiumerz |
+| 4332 | SathiumOre | Sathiumerz |
+| 4341 | PentaxidOre | Pentaxiderz |
+| 4345 | GoldOre | Golderz |
+| 4359 | TitaniumOre | Titanerz |
+
+### Barren (`@root.Ids.Ingot`)
+
+| ID | Interner Name | Deutsch |
+|----|--------------|---------|
+| 4319 | MagnesiumPowder | Magnesiumpulver |
+| 4320 | IronIngot | Eisenbarren |
+| 4321 | CobaltIngot | Kobaltbarren |
+| 4322 | SiliconIngot | Siliziumbarren |
+| 4323 | NeodymiumIngot | Neodymiumbarren |
+| 4324 | CopperIngot | Kupferbarren |
+| 4325 | PromethiumPellets | Promethium-Pellets |
+| 4326 | ErestrumIngot | Erestrumbarren |
+| 4327 | ZascosiumIngot | Zascosiumbarren |
+| 4328 | CrushedStone | Zerkleinerter Stein |
+| 4329 | RockDust | Steinstaub |
+| 4333 | SathiumIngot | Sathiumbarren |
+| 4342 | PentaxidCrystal | Pentaxid-Kristalle |
+| 4346 | GoldIngot | Goldbarren |
+| 4360 | TitaniumRods | Titanstäbe |
+
+---
+
+## Technische Referenz
+
+### Syntax-Dokumentation
+
+- [Handlebars.js Guide](http://handlebarsjs.com/guide/)
+- [Handlebars Cookbook](https://zordius.github.io/HandlebarsCookbook/index.html)
+- [Handlebars.Net](https://github.com/rexm/Handlebars.Net)
+
+### Item-Eigenschaften
+
+| Eigenschaft | Beschreibung |
+|-------------|-------------|
+| `Id` | Eindeutige ID (Token: `TokenId * 100000 + ItemId`) |
+| `IsToken` | `true` wenn Token |
+| `ItemId` | Token-unabhängiger Teil der ID |
+| `TokenId` | Token-ID (falls zutreffend) |
+| `Count` | Anzahl |
+| `Key` | Interner Item-Name |
+| `Name` | Anzeigename |
+
+### String-Funktionen
+
+| Funktion | Beschreibung |
+|----------|-------------|
+| `{{concat a b c}}` | Werte zusammenfügen |
+| `{{substring text 0 10}}` | Teilstring ab Index 0, max. 10 Zeichen |
+| `{{replace text 'alt' 'neu'}}` | Text ersetzen |
+| `{{split text ',' true}}` | Text aufteilen, leere Einträge entfernen |
+| `{{trim text}}` | Leerzeichen/Zeichen am Rand entfernen |
+| `{{startswith text 'abc'}}` | Beginnt mit 'abc'? |
+| `{{endsswith text 'xyz'}}` | Endet mit 'xyz'? (Hinweis: doppeltes 's' ist korrekt) |
+| `{{chararray text}}` | Text als Zeichen-Array |
+| `{{selectlines text 0 5}}` | Zeilen 0–5 aus Text |
+| `{{format data '0.00'}}` | Formatierte Ausgabe |
+| `{{i18n Key 'English'}}` | Item-Name in Sprache |
+
+### Positions-Funktionen
+
+```
+{{structtoglobalpos E.S (vector 10 0 5)}}    ← Strukturposition → Weltkoordinaten
+{{globaltostructpos E.S GlobalPos}}           ← Weltkoordinaten → Strukturposition
+```
+
+### Block-/Textur-Funktionen
+
+```
+{{#use (block E.S 10 0 5)}}
+  Block an Position 10/0/5: {{Type}}
+{{/use}}
+
+{{gettexture Block 'T'}}             ← Textur der Oberseite lesen (T=Top, B=Bottom, N/S/W/E)
+{{settexture Block 123 'T,B'}}       ← Textur von Ober- und Unterseite setzen
+{{getcolor Block 'T'}}               ← Farb-ID der Oberseite lesen
+{{setcolor Block 5 'N,S'}}           ← Farbe von Nord- und Südseite setzen
+
+{{setlockcode Block 1234}}           ← Sperr-Code eines Containers/Geräts setzen
+
+{{#blocks E.S 0 0 0 10 10 10}}       ← Alle Blöcke im Bereich (0,0,0) bis (10,10,10)
+{{/blocks}}
+```
+
+### LCD direkt steuern
+
+```
+{{#devices E.S 'AnzeigePanel'}}
+{{settext this 'Hallo Welt!'}}
+{{setcolor this 'ff0000'}}
+{{setbgcolor this '000000'}}
+{{setfontsize this 20}}
+{{/devices}}
+
+{{gettext LcdDevice}}                ← Text eines LCD lesen
+{{settext LcdDevice 'Text'}}         ← Text setzen
+{{settextblock LcdDevice}}           ← Text aus innenliegendem Block setzen
+{{setcolor LcdDevice 'ff0000'}}      ← Textfarbe setzen (RGB Hex)
+{{setbgcolor LcdDevice '000000'}}    ← Hintergrundfarbe setzen (RGB Hex)
+{{setfontsize LcdDevice 20}}         ← Schriftgröße des LCD-Geräts direkt setzen
+```
+
+### Item-ID Konvertierung
+
+```
+{{#toid 'IronOre;CobaltOre'}}         ← Namen → IDs
+...
+{{/toid}}
+
+{{#toname '4297;4298'}}               ← IDs → Namen
+...
+{{/toname}}
+
+{{configid 'IronOre'}}                ← Konfigurations-ID für Item-Name
+{{configattr 4297 'Mass'}}            ← Attribut für Item-ID
+{{configattrbyname 'IronOre' 'Mass'}} ← Attribut für Item-Name
+{{resourcesforid 4297}}               ← Rezept-Ressourcen für Item
+```
+
+---
+
+***
+
+## C# Scripting Interface
+
+Neben Handlebars-Templates können Scripte auch in **C#** geschrieben werden. Dafür muss die Dateiendung `.cs` statt `.hbs` verwendet werden.
+
+### Script-Typen
+
+| Dateiendung | Sprache | Beschreibung |
+|-------------|---------|-------------|
+| `.hbs` | Handlebars-Template | Standard-Scripting |
+| `.cs` | C# (Roslyn-kompiliert) | Vollständige C#-Logik |
+| `.dll` | Kompilierte Assembly | Vorkompilierte DLL |
+
+> 💡 **Vorteil von C#-Scripten:** Komplexe Logik, Schleifen, eigene Klassen, Typ-Sicherheit. **Nachteil:** Benötigt Grundkenntnisse in C#.
+
+### C#-Script Grundstruktur
+
+Ein C#-Script implementiert eine `Run`-Methode, die von der Mod aufgerufen wird:
+
+```csharp
+using EmpyrionScripting.Interface;
+
+public class MyScript
+{
+    public static void Run(IScriptModData root)
+    {
+        var csRoot = root.CsRoot;
+
+        // Alle Items im Container lesen
+        var items = csRoot.Items(root.E.S, "MeinContainer");
+
+        // Ausgabe auf LCD
+        var output = new System.Text.StringBuilder();
+        foreach (var item in items)
+            output.AppendLine($"{item.Count}x {item.Name}");
+
+        // Auf allen LCD-Panels mit passendem Namen anzeigen
+        var displays = csRoot.Devices(root.E.S, "LCD*");
+        foreach (var lcd in csRoot.GetDevices<Eleon.Modding.ILcd>(displays))
+            lcd.SetText(output.ToString());
+    }
+}
+```
+
+### `IScriptModData` — Der Root-Context (`@root`)
+
+Jedes C#-Script erhält ein `IScriptModData`-Objekt als Einstiegspunkt:
+
+| Eigenschaft | Typ | Beschreibung |
+|-------------|-----|-------------|
+| `E` | `IEntityData` | Die aktuelle Entität (Schiff/Basis) |
+| `P` | `IPlayfieldData` | Das aktuelle Playfield |
+| `CsRoot` | `ICsScriptFunctions` | C#-Hilfsfunktionen (Äquivalent zu Handlebars-Helfern) |
+| `Data` | `ConcurrentDictionary<string,object>` | Temporärer Datenspeicher (wie `{{set}}`) |
+| `CacheData` | `ConcurrentDictionary<string,object>` | Persistenter Cache (wie `{{setcache}}`) |
+| `Ids` | `Dictionary<string,string>` | Vordefinierte ID-Listen |
+| `GameTicks` | `ulong` | Aktuelle Spielzeit in Ticks |
+| `CycleCounter` | `int` | Script-Ausführungszähler |
+| `IsElevatedScript` | `bool` | Ob das Script Elevated-Rechte hat |
+| `ConfigEcfAccess` | `IConfigEcfAccess` | Zugriff auf ECF-Konfiguration |
+| `GameOptionsYamlSettings` | `IDictionary<string,object>` | Spieloptionen aus YAML |
+| `DateTimeNow` | `DateTime` | Aktuelle Datum/Uhrzeit |
+| `Version` | `string` | Mod-Version |
+| `Console` | `IConsoleMock` | Konsolenausgabe für Debugging |
+| `SignalEventStore` | `IEventStore` | Signal-Event-Speicher |
+
+### `IEntityData` — Entitäts-Daten (`root.E`)
+
+| Eigenschaft | Beschreibung |
+|-------------|-------------|
+| `Id` | Entity-ID |
+| `Name` | Name der Entität |
+| `EntityType` | Typ (BA, CV, SV, HV, …) |
+| `Faction` | Fraktionsdaten |
+| `Pos` | Position im Weltkoordinatensystem |
+| `Forward` | Vorwärtsvektor |
+| `S` | `IStructureData` — Strukturdaten |
+| `IsLocal` / `IsPoi` / `IsProxy` | Entitäts-Flags |
+| `BelongsTo` | ID der übergeordneten Entität |
+| `DockedTo` | ID der Dock-Zielstruktur |
+| `ScriptInfos` | Informationen über laufende Scripte |
+| `IsElevated` | Ob Elevated-Rechte vorhanden |
+
+Methoden: `MoveForward(speed)`, `MoveTo(direction)`, `MoveStop()`, `GetCurrent()`, `GetCurrentPlayfield()`
+
+### `IStructureData` — Strukturdaten (`root.E.S`)
+
+| Eigenschaft | Beschreibung |
+|-------------|-------------|
+| `AllCustomDeviceNames` | Alle benutzerdefinierten Gerätenamen |
+| `Items` | Alle Item-Stacks (alle Container) |
+| `ControlPanelSignals` | Signale aus dem Control Panel |
+| `BlockSignals` | Block-Signale |
+| `Passengers` | Alle Passagiere |
+| `Pilot` | Aktueller Pilot |
+| `Players` | Alle Spieler auf der Struktur |
+| `DockedE` | Angedockte Entitäten |
+| `OxygenTank` / `FuelTank` / `PentaxidTank` | Tank-Wrapper |
+| `DamageLevel` | Schadensgrad (0–1) |
+| `IsPowerd` | Ist die Struktur mit Strom versorgt? |
+| `IsReady` | Ist die Struktur bereit? |
+| `IsShieldActive` / `ShieldLevel` | Schildstatus |
+| `BlockCount` / `TriangleCount` / `LightCount` | Statistiken |
+| `TotalMass` | Gesamtmasse |
+| `HasLandClaimDevice` | Hat ein Land Claim Device? |
+| `MinPos` / `MaxPos` | Begrenzungsquader |
+| `SizeClass` | Größenklasse |
+| `LastVisitedTicks` | Letzte Besucher-Zeit |
+| `PlayerCreatedSteamId` | SteamID des Erstellers |
+
+Methoden: `GlobalToStructPos(pos)`, `StructToGlobalPos(pos)`, `GetCurrent()`
+
+### `IPlayerData` — Spieler-Daten
+
+| Eigenschaft | Beschreibung |
+|-------------|-------------|
+| `Id` | Spieler-ID |
+| `Name` | Spielername |
+| `Health` / `HealthMax` | Gesundheit |
+| `Oxygen` / `OxygenMax` | Sauerstoff |
+| `Stamina` / `StaminaMax` | Ausdauer |
+| `Food` / `FoodMax` | Nahrung |
+| `BodyTemp` | Körpertemperatur |
+| `Radiation` | Strahlungslevel |
+| `Credits` | Guthaben |
+| `ExperiencePoints` | Erfahrungspunkte |
+| `Kills` / `Died` | Statistiken |
+| `FactionData` / `FactionRole` | Fraktionsdaten |
+| `Origin` | Herkunfts-Byte |
+| `Bag` / `Toolbar` | Inventar (ItemStack-Liste) |
+| `IsPilot` | Ist gerade Pilot? |
+| `DrivingEntity` / `CurrentStructure` | Aktuelle Entität |
+| `SteamId` / `SteamOwnerId` | Steam-IDs |
+| `HomeBaseId` | Heimatbasis-ID |
+| `Ping` | Ping in ms |
+| `UpgradePoints` | Upgrade-Punkte |
+
+Methoden: `Teleport(pos)`, `Teleport(playfieldName, pos, rot)`
+
+### `ICsScriptFunctions` — C#-Hilfsfunktionen (`root.CsRoot`)
+
+| Methode | Beschreibung |
+|---------|-------------|
+| `Items(structure, names)` | Items aus Containern lesen |
+| `Move(item, structure, names, maxLimit?)` | Items verschieben |
+| `Fill(item, structure, type, maxLimit?)` | Tank befüllen |
+| `Devices(structure, names)` | Geräte nach Namen suchen |
+| `DevicesOfType(structure, type)` | Geräte nach Typ suchen |
+| `GetDevices<T>(block[])` | Geräte als typisiertes Interface |
+| `GetBlockDevices<T>(structure, names)` | Block+Gerät-Tupel liefern |
+| `Block(structure, x, y, z)` | Einzelnen Block abrufen |
+| `EntitiesById(ids)` | Entitäten nach IDs suchen |
+| `EntitiesByName(names)` | Entitäten nach Namen suchen |
+| `Scroll(content, lines, delay, step?)` | Scroll-Puffer berechnen |
+| `Bar(data, min, max, length, barChar?, bgChar?)` | Fortschrittsbalken erzeugen |
+| `Format(data, format)` | Wert formatieren |
+| `I18n(id)` / `I18n(id, language)` | Item-Name übersetzen |
+| `ToId(names)` | Item-Namen → IDs |
+| `ToName(ids)` | IDs → Item-Namen |
+| `ConfigById(id)` | ECF-Block nach ID |
+| `ConfigByName(name)` | ECF-Block nach Name |
+| `ConfigFindAttribute(id, name)` | ECF-Attribut abrufen |
+| `ResourcesForBlockById(id)` | Rezept-Ressourcen für Item |
+| `ShowDialog(playerId, config, handler, value)` | Dialog anzeigen |
+| `WithLockedDevice(structure, block, action, lockFailed?)` | Mit gegesperrtem Gerät arbeiten |
+| `IsLocked(structure, block)` | Gerät gesperrt? |
+| `FunctionNeedsMainThread(error)` | Main-Thread prüfen |
+| `I18nDefaultLanguage` | Standard-Übersetzungssprache |
+
+### SaveGame C#-Scripte: `IScriptSaveGameRootData`
+
+SaveGame-Scripte (in `[SaveGame]\Mods\EmpyrionScripting\Scripts\`) verwenden `IScriptSaveGameRootData` (erweitert `IScriptModData`):
+
+| Eigenschaft | Beschreibung |
+|-------------|-------------|
+| `MainScriptPath` | Pfad zum Script-Verzeichnis |
+| `ModApi` | Zugriff auf die Mod-API |
+| `ScriptPath` | Pfad des aktuellen Scripts |
+
+```csharp
+using EmpyrionScripting.Interface;
+
+public class MySaveGameScript
+{
+    public static void Run(IScriptSaveGameRootData root)
+    {
+        // Spieler-Liste aus der Datenbank abrufen ist hier möglich
+        var modApi = root.ModApi;
+        // ... erweiterte Funktionen
+    }
+}
+```
+
+### Beispiel: Vollständiges C#-Script
+
+```csharp
+using EmpyrionScripting.Interface;
+using System.Text;
+
+public class FuelMonitor
+{
+    public static void Run(IScriptModData root)
+    {
+        var csRoot = root.CsRoot;
+        var structure = root.E.S;
+
+        // Treibstoff-Items suchen
+        var items = csRoot.Items(structure, "Treibstoffcontainer");
+        var sb = new StringBuilder();
+        sb.AppendLine("=== Treibstoffstatus ===");
+
+        foreach (var item in items)
+        {
+            if (item.Key == "EnergyCell")
+            {
+                sb.AppendLine($"Treibstoff: {item.Count} Zellen");
+
+                // Warnung bei weniger als 100
+                if (item.Count < 100)
+                    sb.AppendLine("⚠️ TREIBSTOFF KRITISCH!");
+            }
+        }
+
+        // Auf LCD ausgeben
+        var lcds = csRoot.GetDevices<Eleon.Modding.ILcd>(
+            csRoot.Devices(structure, "LCD Status"));
+        foreach (var lcd in lcds)
+            lcd.SetText(sb.ToString());
+    }
+}
+```
+
+---
+
+***
+
+<a name="-english-version"></a>
+
+# 🇬🇧 English Version
+
+[Deutsche Version oben](#empyrion-scripting) | [Workshop Demo](https://steamcommunity.com/workshop/filedetails/?id=1751409371) | [Releases](https://github.com/GitHub-TC/EmpyrionScripting/releases)
+
+## Table of Contents
+
+- [What is EmpyrionScripting?](#what-is-empyrionscripting)
+- [🚀 Quickstart: Your first script in 5 minutes](#-quickstart-your-first-script-in-5-minutes)
+- [Installation](#installation-1)
+- [Core Concepts](#core-concepts)
+- [Language & Timezone](#language--timezone)
+- [Inventory & Containers](#inventory--containers)
+- [Filtering & Searching Items](#filtering--searching-items)
+- [Conditions & Logic](#conditions--logic)
+- [Display Features](#display-features)
+- [Math & Calculations](#math--calculations)
+- [Automation: Moving & Filling](#automation-moving--filling)
+- [Controlling Lights](#controlling-lights)
+- [Controlling Devices](#controlling-devices)
+- [Signals](#signals-1)
+- [Teleporter Control](#teleporter-control)
+- [Chat & Teleport](#chat--teleport-1)
+- [Dialogs](#dialogs)
+- [JSON & Data Structures](#json--data-structures)
+- [Flying](#flying)
+- [Database Access](#database-access)
+- [External Data (AddOn DLLs)](#external-data-addon-dlls)
+- [SaveGame Scripts](#savegame-scripts)
+- [Elevated Scripts](#elevated-scripts)
+- [Script Prioritization](#script-prioritization)
+- [C# Scripting Interface](#c-scripting-interface-1)
+- [Configuration & Performance](#configuration--performance)
+- [Predefined ID Lists](#predefined-id-lists)
+- [Ore and Ingot IDs](#ore-and-ingot-ids)
+
+---
+
+## What is EmpyrionScripting?
+
+EmpyrionScripting is a mod for **Empyrion: Galactic Survival** that allows displaying real-time game information dynamically on LCD screens in ships and bases. It uses the [Handlebars](http://handlebarsjs.com/) template language.
+
+**What is possible?**
+
+- 📦 Display live inventory of all containers
+- ⚠️ Show warnings when resources run low
+- 💡 Automatically switch lights on/off
+- 🔄 Automatically move items between containers
+- ⛽ Automatically fill fuel and O2 tanks
+- 📡 Trigger and monitor signals
+- 💬 Send chat messages
+- 🤖 Autonomous flight (no pilot required)
+- And much more…
+
+**Tutorials & Videos:**
+
+| Link | Description |
+|------|-------------|
+| [YouTube (Olly)](https://youtu.be/Wm_09Q-cvh0) | Introductory video |
+| [YouTube](https://youtu.be/8MzjdeYlzPU) | Tutorial 2 |
+| [YouTube](https://youtu.be/gPp5CGJusr4) | Tutorial 3 |
+| [YouTube (A11 changes)](https://youtu.be/hxvKs5U1I6I) | What's new in A11 |
+| [YouTube](https://youtu.be/V1w2A3LAZCs) | Tutorial 5 |
+| [YouTube](https://youtu.be/O89NQJjbQuw) | Tutorial 6 |
+| [Workshop Sephrajin](https://steamcommunity.com/sharedfiles/filedetails/?id=2863240303) | DSEV LCD Script Tutorial |
+| [Workshop Noob](https://steamcommunity.com/sharedfiles/filedetails/?id=2817433272) | Scripting Tutorial Ship |
+| [Workshop ASTIC](https://steamcommunity.com/sharedfiles/filedetails/?id=2227639387) | Vega AI example ship |
+| [Beginners Guide](https://steamcommunity.com/workshop/filedetails/discussion/1751409371/3191368095147121750/) | Beginners guide |
+| [Beginners Guide Video](https://youtu.be/IjJTNp_ZYUI) | Beginners guide video |
+
+---
+
+## 🚀 Quickstart: Your first script in 5 minutes
+
+### Step 1: Install the Mod
+
+1. Download [EmpyrionScripting.zip](https://github.com/GitHub-TC/EmpyrionScripting/releases)
+2. Extract to `[Empyrion]\Content\Mods\`
+3. **Important for Singleplayer:** Start the game **without EAC** (select "Start without EAC" in the Steam launcher)
+
+### Step 2: Prepare the LCD screens
+
+You need **at least 2 LCD screens** on your ship or base:
+
+| LCD | Name in Control Panel | Purpose |
+|-----|----------------------|---------|
+| **Script LCD** (Input) | Must start with `Script:`, e.g. `Script:MyScript` | Contains the script code |
+| **Output LCD** (Display) | Any unique name, e.g. `LCD Inventory` | Shows the result |
+
+> 💡 **Tip:** The Script LCD can be made invisible (set font color to transparent). It doesn't need to be visible.
+
+### Step 3: Write your first script
+
+Open the **Script LCD** (right-click → Manage → Text) and enter:
+
+```
+Targets:LCD Inventory
+=== My Inventory ===
+{{#items E.S 'My Container'}}
+{{Count}}x {{i18n Key}}
+{{/items}}
+```
+
+| Element | Meaning |
+|---------|---------|
+| `Targets:LCD Inventory` | Result is displayed on the LCD named "LCD Inventory" |
+| `{{#items E.S 'My Container'}}` | Reads the contents of the container "My Container" |
+| `{{Count}}x {{i18n Key}}` | Outputs count and localized item name |
+| `{{/items}}` | End of block |
+
+### Step 4: Name the container
+
+Click on the container in the Control Panel and give it the exact name `My Container`.
+
+### Step 5: Done!
+
+The "LCD Inventory" output LCD will now automatically display the container contents and update periodically.
+
+### Common Beginner Mistakes
+
+| Problem | Solution |
+|---------|----------|
+| LCD shows nothing | Script LCD name must start with `Script:` |
+| Container not found | Name must match **exactly** (case-sensitive!) |
+| No updates | Structure needs power and must be switched on |
+| Stale content | Script LCD must be switched on (or use priority ≥ 1) |
+
+### Complete Example: Ore Inventory on a Base
+
+**Preparation:**
+- Name a container: `Ore Storage`
+- Name a Script LCD: `Script:OreDisplay`
+- Name an Output LCD: `LCD Ores`
+
+**Script content (into the Script LCD):**
+
+```
+Targets:LCD Ores
+=== Ores in Storage ===
+{{#items E.S 'Ore Storage'}}
+{{Count}}x {{i18n Key}}
+{{/items}}
+```
+
+---
+
+## Installation
+
+### Multiplayer / Dedicated Server
+
+1. Download [EmpyrionScripting.zip](https://github.com/GitHub-TC/EmpyrionScripting/releases)
+2. Extract to `[Empyrion]\Content\Mods\`
+
+### Singleplayer
+
+1. Download [EmpyrionScripting.zip](https://github.com/GitHub-TC/EmpyrionScripting/releases)
+2. Extract to `[Empyrion]\Content\Mods\`
+3. Start the game **without EAC** (Steam launcher)
+
+---
+
+## Core Concepts
+
+### Script LCD and Output LCD
+
+The system separates logic (Script LCD) from display (Output LCD):
+
+- **Script LCD:** Name must begin with `Script:`. Contains the Handlebars template code.
+- **Output LCD:** Any unique name. Referenced in `Targets:`.
+
+```
+Script LCD name:    Script:TankStatus
+Output LCD name:    LCD Tanks
+```
+
+### Targets: — Defining output destinations
+
+The first line of a script defines which LCDs receive the output:
+
+```
+Targets:LCD Output              ← A single LCD
+Targets:LCD One;LCD Two         ← Multiple LCDs (separated by ;)
+Targets:LCD Output*             ← All LCDs whose name starts with "LCD Output" (wildcard *)
+Script:LCD Output*              ← Target name taken from the Script LCD name
+```
+
+### Important context variables
+
+| Variable | Description |
+|----------|-------------|
+| `E.S` | The current structure (ship/base) the script runs on |
+| `E.S.Items` | All items from all containers of the current structure |
+| `E.S.Pilot` | The current pilot of the structure |
+| `E.Faction` | The faction of the structure |
+| `P.Players` | All players currently active on the structure |
+| `@root` | Access to the root context (e.g. `@root.Ids.Ore`) |
+
+### Handlebars syntax basics
+
+EmpyrionScripting uses [Handlebars.Net](https://github.com/rexm/Handlebars.Net):
+
+| Syntax | Meaning |
+|--------|---------| 
+| `{{Variable}}` | Outputs a variable's value |
+| `{{#block}}...{{/block}}` | Block helper (loop or condition) |
+| `{{#block}}...{{else}}...{{/block}}` | Block with alternative branch |
+| `{{helper arg1 arg2}}` | Helper with parameters |
+| `@root.Data.key` | Access stored data |
+
+---
+
+## Language & Timezone
+
+Create an LCD named **`CultureInfo`** and enter the following JSON content:
+
+```json
+{
+  "LanguageTag": "en-US",
+  "i18nDefault": "English",
+  "UTCplusTimezone": 0
+}
+```
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `LanguageTag` | Language code per [LCID standard](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c) | `"en-US"`, `"de-DE"` |
+| `i18nDefault` | Default language for item names | `"English"`, `"Deutsch"` |
+| `UTCplusTimezone` | Timezone as UTC offset in hours | `0` for UTC, `-5` for EST |
+
+> Errors in the configuration are displayed in an LCD named `CultureInfoDebug`.
+
+---
+
+## Inventory & Containers
+
+### Display container contents: `items`
+
+```
+Targets:LCD Inventory
+=== Container Contents ===
+{{#items E.S 'MyContainer'}}
+{{Count}}x {{i18n Key}}
+{{/items}}
+```
+
+**Multiple containers or wildcards:**
+
+```
+{{#items E.S 'Box1;Box2;Fridge*'}}
+{{Count}}x {{i18n Key}}
+{{/items}}
+```
+
+### All items in the structure: `each E.S.Items`
+
+```
+Targets:LCD All Items
+All items on the ship:
+{{#each E.S.Items}}
+ - {{Count}}x {{i18n Key}} (ID: {{Id}})
+{{/each}}
+```
+
+### Retrieve items and process further: `getitems`
+
+Returns a list that can be further processed by other commands:
+
+```
+{{#getitems E.S 'Storage1;Storage2'}}
+{{Count}}x {{i18n Key}}
+{{/getitems}}
+```
+
+---
+
+## Filtering & Searching Items
+
+### Filter by ID: `itemlist`
+
+Shows only items with specific IDs. Missing items appear with count 0:
+
+```
+Targets:LCD Ores
+My Ores:
+{{#itemlist E.S.Items '4297,4298,4299'}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+```
+
+**With predefined lists** (recommended):
+
+```
+Targets:LCD All Ores
+{{#itemlist E.S.Items @root.Ids.Ore}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+```
+
+**Combining lists with `concat`:**
+
+```
+{{#itemlist E.S.Items (concat @root.Ids.WeaponSV @root.Ids.WeaponHV)}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+```
+
+### Sort items: `orderedeach`
+
+```
+Targets:LCD Sorted Inventory
+{{#orderedeach E.S.Items '-Count'}}
+{{Count}}x {{i18n Key}}
+{{/orderedeach}}
+```
+
+> `-Count` = descending, `+Count` = ascending. Multiple fields: `'-Count,+Key'`
+
+### Sort items by ID list: `orderbylist`
+
+```
+{{#orderbylist E.S.Items '4297;4298;4299'}}
+{{Count}}x {{i18n Key}}
+{{/orderbylist}}
+```
+
+### Filter items as array: `itemlistarray`
+
+`itemlistarray` works like `itemlist` but passes the filtered result as an **array** to the inner block — allowing further processing (e.g. with `orderedeach`):
+
+```
+{{#itemlistarray E.S.Items '4297;4298;4299'}}
+{{#orderedeach this '-Count'}}
+{{Count}}x {{i18n Key}}
+{{/orderedeach}}
+{{/itemlistarray}}
+```
+
+> Difference from `itemlist`: `itemlist` iterates directly over items one-by-one, `itemlistarray` delivers the whole array at once for further processing.
+
+### Comparisons: `test`
+
+```
+{{#test Count geq 100}}
+More than 100 available!
+{{else}}
+Less than 100 available.
+{{/test}}
+```
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| `eq` or `=` | Equal | `{{#test Name eq 'IronOre'}}` |
+| `neq` or `!=` | Not equal | `{{#test Count neq 0}}` |
+| `leq` or `<=` | Less than or equal | `{{#test Count leq 1000}}` |
+| `le` or `<` | Less than | `{{#test Count le 100}}` |
+| `geq` or `>=` | Greater than or equal | `{{#test Count geq 500}}` |
+| `ge` or `>` | Greater than | `{{#test TankFuel ge 50}}` |
+| `in` | In a list | `{{#test Id in '4297,4298'}}` |
+
+**Range check with `in`:**
+
+```
+{{#test Id in '4296-4302'}}
+Ore ID is between 4296 and 4302
+{{/test}}
+```
+
+**Ores below 500 units:**
+
+```
+Targets:LCD Warnings
+Low stock:
+{{#itemlist E.S.Items @root.Ids.Ore}}
+{{#test Count le 500}}
+⚠️ {{Count}}x {{i18n Key}}
+{{/test}}
+{{/itemlist}}
+```
+
+**Show depleted ores:**
+
+```
+{{#itemlist E.S.Items @root.Ids.Ore}}
+{{#test Count leq 0}}
+❌ {{i18n Key}} – EMPTY!
+{{/test}}
+{{/itemlist}}
+```
+
+### `if` and `ok`
+
+```
+{{#if E.S.Pilot.Id}}
+Pilot: {{E.S.Pilot.Name}}
+{{else}}
+No pilot on board
+{{/if}}
+```
+
+### Negation: `not`
+
+```
+{{#if (not E.S.Pilot.Id)}}
+No pilot on board
+{{/if}}
+```
+
+### Regular expressions: `regex`
+
+```
+{{#regex Name 'Iron.*'}}
+Found: {{.}}
+{{/regex}}
+```
+
+---
+
+## Display Features
+
+### Date & Time: `datetime`
+
+```
+Targets:LCD Time
+Current time:
+{{datetime}}                        ← Date and time (default)
+{{datetime 'HH:mm'}}                ← Time only (e.g. 14:30)
+{{datetime 'MM/dd/yyyy'}}           ← Date only (e.g. 12/24/2024)
+{{datetime 'dd MMM HH:mm:ss'}}      ← Combined (e.g. 24 Dec 14:30:00)
+{{datetime 'HH:mm' '+2'}}           ← With +2 hours offset
+```
+
+[DateTime format strings documentation](https://docs.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=netframework-4.8)
+
+### Scrolling: `scroll`
+
+When too many items don't fit on the LCD at once:
+
+```
+Targets:LCD Inventory
+{{#scroll 8 3}}
+{{#items E.S 'Large Storage'}}
+{{Count}}x {{i18n Key}}
+{{/items}}
+{{/scroll}}
+```
+
+Parameters: `{{#scroll Lines Delay [StepSize]}}`
+
+```
+{{#scroll 5 2 2}}    ← 5 visible lines, 2 second pause, 2 lines per step
+```
+
+### Intervals: `intervall`
+
+Alternates between content at a time interval (in seconds):
+
+```
+Targets:LCD Status
+{{#intervall 5}}
+Content A (shown for 5 seconds)
+{{else}}
+Content B (shown for 5 seconds)
+{{/intervall}}
+```
+
+**Alternating two containers:**
+
+```
+Targets:LCD Fridges
+{{#intervall 3}}
+Fridge 1:
+{{#items E.S 'Fridge 1'}}
+{{Count}}x {{i18n Key}}
+{{/items}}
+{{else}}
+Fridge 2:
+{{#items E.S 'Fridge 2'}}
+{{Count}}x {{i18n Key}}
+{{/items}}
+{{/intervall}}
+```
+
+### Font color: `color`
+
+```
+{{color 'ff0000'}}    ← Red
+{{color '00ff00'}}    ← Green
+{{color '0000ff'}}    ← Blue
+{{color 'ffffff'}}    ← White
+{{color 'ffff00'}}    ← Yellow
+```
+
+### Background color: `bgcolor`
+
+```
+{{bgcolor '000000'}}    ← Black
+{{bgcolor '1a1a1a'}}    ← Dark gray
+```
+
+### Font size: `fontsize`
+
+```
+{{fontsize 8}}     ← Small
+{{fontsize 15}}    ← Medium (default)
+{{fontsize 25}}    ← Large
+```
+
+### Progress bar: `bar`
+
+```
+{{bar TankFuel 0 1000 20}}              ← Simple bar (20 chars wide)
+{{bar TankFuel 0 1000 20 '█' '░'}}     ← Custom fill/background chars
+{{bar Count 0 500 15 '|' '-' 'r'}}     ← Right-aligned ('r')
+```
+
+### Alarm display example (Red/Green)
+
+```
+Targets:LCD Alarm
+{{#test TankFuel le 20}}
+{{#intervall 1}}
+{{color 'ff0000'}}⚠️ FUEL CRITICAL!
+{{else}}
+{{color 'ffff00'}}⚠️ FUEL CRITICAL!
+{{/intervall}}
+{{else}}
+{{color '00ff00'}}✓ Fuel OK
+{{/test}}
+```
+
+### Stepped display: `steps`
+
+```
+{{#steps 0 100 10 2}}
+Progress: {{this}}%
+{{/steps}}
+```
+
+### Random values: `random`
+
+```
+{{#random 1 6}}
+Dice roll: {{this}}
+{{/random}}
+```
+
+---
+
+## Math & Calculations
+
+### Basic arithmetic: `math` and `calc`
+
+`math` outputs the result directly. `calc` can be used inline in other expressions:
+
+```
+{{math Count * 5}}                          ← Output: result
+{{math TankFuel / TankFuelMax 2}}           ← Division, 2 decimal places
+{{bar (calc TankFuel / TankMax * 100) 0 100 20}}   ← calc used inline
+```
+
+| Operator | Meaning |
+|----------|---------|
+| `+` | Addition |
+| `-` | Subtraction |
+| `*` | Multiplication |
+| `/` | Division |
+| `%` | Modulo |
+
+### Other math functions
+
+```
+{{min A B}}       ← Smaller of the two values
+{{max A B}}       ← Larger of the two values
+{{abs Value}}     ← Absolute value
+{{int Value}}     ← Integer part (floor)
+```
+
+### Distance: `distance`
+
+```
+{{distance PosA PosB}}            ← Distance between two vectors
+{{distance PosA PosB '0.0'}}      ← With format string (one decimal place)
+```
+
+### Vectors: `vector`
+
+```
+{{#use (vector 100 200 300)}}
+My vector: {{X}} / {{Y}} / {{Z}}
+{{/use}}
+```
+
+### Game ticks: `gameticks`
+
+```
+Game time: {{gameticks}} ticks
+= {{math gameticks / 20 0}} seconds
+= {{math gameticks / 1200 1}} minutes
+```
+
+---
+
+## Automation: Moving & Filling
+
+### Move items: `move`
+
+Moves items from one container to another (within or between structures):
+
+```
+{{move Item E.S 'TargetStorage'}}
+{{move Item E.S 'TargetStorage' 500}}    ← Maximum 500 items in target container
+```
+
+### Fill tanks: `fill`
+
+Fills fuel, O2, or pentaxid tanks:
+
+```
+{{fill Item E.S 'FuelTank'}}        ← Fill to 100%
+{{fill Item E.S 'FuelTank' 80}}     ← Fill to maximum 80%
+```
+
+**Practical example: Automatic fuel refilling**
+
+```
+Targets:LCD Tank Status
+=== Tank Status ===
+{{#items E.S 'Supply Container'}}
+{{#test Key eq 'EnergyCell'}}
+{{fill this E.S 'Main Tank'}}
+Filling fuel…
+{{/test}}
+{{/items}}
+```
+
+### Deconstruct a structure: `deconstruct`
+
+Dismantles a structure and puts the parts in a container:
+
+```
+{{deconstruct Entity 'ScrapStorage'}}
+```
+
+> ⚠️ The core of the structure must be named `Core-Destruct-[ID]` (where ID is the entity ID of the structure).  
+> Costs: default 100 credits per 10 blocks (`DeconstructSalary` in Configuration.json).
+
+### Recycling: `recycle`
+
+Like `deconstruct`, but returns raw materials based on recipes:
+
+```
+{{recycle Entity 'RecycleStorage'}}
+```
+
+> ⚠️ Core must be named `Core-Recycle-[ID]`. Costs: default 200 credits per 10 blocks.
+
+### Empty container: `trashcontainer`
+
+**Permanently** deletes all items in a container:
+
+```
+{{trashcontainer E.S 'Trash'}}
+```
+
+> ⚠️ No wildcards allowed. Exact container name required!
+
+### Harvest plants: `harvest`
+
+```
+{{harvest E.S Device gx gy gz}}
+{{harvest E.S Device gx gy gz true}}    ← true = also remove dead plants
+```
+
+> Requires a Gardener NPC (crew) and money in the fridge as payment.
+
+### Pick up and replant
+
+```
+{{pickupplants E.S Device gx gy gz}}      ← Pick up plants
+{{replantplants E.S Target}}              ← Replant (only without playfield change!)
+```
+
+---
+
+## Controlling Lights
+
+### Select lights: `lights`
+
+```
+{{#lights E.S 'AlarmLight*'}}
+  {{lightcolor this 'ff0000'}}
+{{/lights}}
+```
+
+### Light settings overview
+
+| Command | Description |
+|---------|-------------|
+| `{{lightcolor light 'ff0000'}}` | Set color (RGB hex) |
+| `{{lightblink light 1 0.5 0}}` | Blink: interval(s), length(s), offset(s) |
+| `{{lightintensity light 1.5}}` | Set brightness |
+| `{{lightrange light 10}}` | Set range |
+| `{{lightspotangle light 45}}` | Set spot angle |
+| `{{lighttype light 'Spot'}}` | Type: `Spot`, `Directional`, `Point`, `Area`, `Rectangle`, `Disc` |
+
+### Practical example: Alarm lighting
+
+```
+Targets:LCD Light Status
+{{#test TankFuel le 100}}
+{{#lights E.S 'AlarmLight*'}}
+{{lightcolor this 'ff0000'}}
+{{lightblink this 1 0.5 0}}
+{{/lights}}
+⚠️ Fuel low!
+{{else}}
+{{#lights E.S 'AlarmLight*'}}
+{{lightcolor this '00ff00'}}
+{{lightblink this 0 0 0}}
+{{/lights}}
+✓ All OK
+{{/test}}
+```
+
+---
+
+## Controlling Devices
+
+### Select devices by name: `devices`
+
+```
+{{#devices E.S 'Generator*'}}
+{{setactive this true}}
+{{/devices}}
+```
+
+### Devices by type: `devicesoftype`
+
+```
+{{#devicesoftype E.S 'Generator'}}
+{{setactive this false}}
+{{/devicesoftype}}
+```
+
+### Activate/deactivate device: `setactive`
+
+```
+{{setactive Device true}}     ← Turn on
+{{setactive Device false}}    ← Turn off
+```
+
+### Check if device is locked: `islocked`
+
+```
+{{#islocked E.S 'MyContainer'}}
+Container is locked
+{{else}}
+Container is available
+{{/islocked}}
+```
+
+---
+
+## Signals
+
+### List all signals of a structure: `signals`
+
+```
+{{#signals E.S 'Signal*'}}
+Signal: {{Name}} — State: {{State}}
+{{/signals}}
+```
+
+Returns all signals (ControlPanel + block signals) matching the name pattern. Each signal has properties `Name`, `State`, `Index`, and `BlockPos`.
+
+### Read signal state: `getsignal`
+
+```
+Signal state: {{getsignal E.S 'MySignal'}}
+```
+
+### Read/set switches
+
+```
+Switch: {{getswitch E.S 'MySwitch'}}
+All matching: {{getswitches E.S 'Switch*'}}
+{{setswitch E.S 'MySwitch' true}}
+{{setswitch E.S 'MySwitch' false}}
+```
+
+### Query signal events: `signalevents`
+
+```
+{{#signalevents 'Signal1;Signal2'}}
+Signal triggered by: {{Player.Name}} at {{Time}}
+{{/signalevents}}
+```
+
+### Trigger when signal changes: `triggerifsignalgoes`
+
+```
+{{#triggerifsignalgoes 'DoorSensor' true}}
+Door was opened by {{Name}}!
+{{/triggerifsignalgoes}}
+```
+
+### Stopwatch: `stopwatch`
+
+```
+Targets:LCD Race Time
+{{#stopwatch 'RaceStart' 'RaceFinish' 'Reset'}}
+Last time: {{.}}
+{{/stopwatch}}
+```
+
+---
+
+## Teleporter Control
+
+Teleporter devices can be read and configured via script.
+
+> ⚠️ All `set*` teleporter commands require **Elevated Scripts**!
+
+### List teleporters: `teleporters`
+
+```
+{{#teleporters E.S 'Teleporter*'}}
+Name: {{DeviceName}}
+Destination: {{Destination}}
+Playfield: {{Playfield}}
+{{/teleporters}}
+```
+
+Each teleporter object exposes the following `ITeleporterData` properties:
+
+| Property | Description |
+|----------|-------------|
+| `DeviceName` | Device name of the teleporter |
+| `Destination` | Destination name |
+| `Target` | Target entity name |
+| `Playfield` | Target playfield |
+| `SolarSystemName` | Target solar system |
+| `Origin` | Origin byte |
+
+### Configure teleporters (Elevated only)
+
+```
+{{setteleporter E.S 'Teleporter1' 'TargetName'}}
+{{setteleporterdevicename E.S 'Teleporter1' 'NewDeviceName'}}
+{{setteleportertarget E.S 'Teleporter1' 'TargetEntity'}}
+{{setteleporterplayfield E.S 'Teleporter1' 'Akua'}}
+{{setteleporterorigin E.S 'Teleporter1' 3}}
+```
+
+| Command | Arguments | Description |
+|---------|-----------|-------------|
+| `setteleporter` | structure name destination | Set teleporter destination |
+| `setteleporterdevicename` | structure name devicename | Change device name |
+| `setteleportertarget` | structure name target | Set target entity |
+| `setteleporterplayfield` | structure name playfield | Set target playfield |
+| `setteleporterorigin` | structure name origin | Set origin byte |
+
+---
+
+## Chat & Teleport
+
+### Chat message to structure owner
+
+```
+{{chat 'Server' 'Your fuel is almost empty!'}}
+```
+
+### Chat on signal: `chatbysignal`
+
+```
+{{#chatbysignal 'EntrySensor' 'Base'}}
+Welcome to our base, {{Name}}!
+{{/chatbysignal}}
+```
+
+### Admin chat (elevated/admin scripts only)
+
+```
+{{chatglobal 'ServerMsg' 'Maintenance in 10 minutes!'}}
+{{chatserver 'System' 'Server is running normally'}}
+{{chatplayer PlayerId 'System' 'Private message'}}
+{{chatfaction FactionId 'System' 'Faction message'}}
+```
+
+### Teleport player: `teleportplayer`
+
+```
+{{teleportplayer Player 'TeleportPad'}}             ← To a device on the structure
+```
+
+> `x y z` world coordinates are only allowed in elevated scripts.
+
+---
+
+## Dialogs
+
+### Simple dialog: `dialog`
+
+```
+{{#dialog Player 'Title' 'Message'}}
+OK|Cancel
+{{/dialog}}
+```
+
+### Dialog as block: `dialogbox`
+
+```
+{{#dialogbox 'DoorSignal'}}
+Please choose:
+Do you want to enter?
+Yes|No|Cancel
+{{/dialogbox}}
+```
+
+First line of the `{{else}}` block = title, last line = buttons, lines in between = body.
+
+---
+
+## JSON & Data Structures
+
+```
+{{#use (fromjson '{"name":"Test","value":42}')}}
+Name: {{name}}, Value: {{value}}
+{{/use}}
+
+{{tojson SomeObject}}         ← Output object as JSON string
+{{jsontodictionary jsonStr}}  ← Convert JSON to dictionary
+```
+
+### Caching data
+
+```
+{{set 'myKey' SomeData}}                  ← Temporary (current script run)
+{{#use @root.Data.myKey}}...{{/use}}      ← Retrieve
+
+{{setcache 'myKey' SomeData}}             ← Persists between script runs
+{{#use @root.CacheData.myKey}}...         ← Retrieve
+```
+
+**Store rendered block content as data value:**
+
+```
+{{#setblock 'myKey'}}
+Calculated: {{math TankFuel / TankFuelMax * 100 1}}%
+{{/setblock}}
+{{#use @root.Data.myKey}}...{{/use}}
+
+{{#setcacheblock 'myKey'}}
+{{i18n Key}}
+{{/setcacheblock}}
+{{#use @root.CacheData.myKey}}...{{/use}}
+```
+
+`setblock` and `setcacheblock` are like `set`/`setcache` but store the **rendered content** of the inner block instead of a passed value.
+
+### Arrays and Dictionaries
+
+```
+{{#use (createarray)}}
+{{set this 'Value1'}}
+{{set this 'Value2'}}
+First value: {{lookup this 0}}
+{{/use}}
+
+{{#use (createdictionary)}}
+{{set this 'key' 'value'}}
+{{/use}}
+
+{{concatarrays Array1 Array2}}    ← Combine arrays
+{{loop Array}}...{{/loop}}        ← Iterate over array/dictionary
+```
+
+### Retrieve array entry as block: `lookupblock`
+
+`lookupblock` is like `lookup` but passes the entry as an object into a template block:
+
+```
+{{#use (createarray)}}
+{{set this 'Alpha'}}
+{{set this 'Beta'}}
+{{#lookupblock this 0}}
+First entry: {{.}}
+{{/lookupblock}}
+{{/use}}
+```
+
+---
+
+## Flying
+
+> ⚠️ Only works when **no pilot** is controlling the ship and the **engines are switched on**.
+
+```
+{{moveto 1000 200 -500}}    ← Fly to world position (X Y Z)
+{{moveforward 10}}          ← Fly forward at speed 10
+{{movestop}}                ← Stop
+```
+
+---
+
+## Database Access
+
+Access the savegame's `global.db` SQLite database:
+
+```
+{{#db 'Entities' 5 '+name'}}
+{{name}} ({{entityid}})
+{{/db}}
+```
+
+**Syntax:** `{{#db QueryName [Top] [OrderBy] [AdditionalWhereAnd] [Parameter]}}`
+
+**Predefined queries:**
+
+| Query | Contents |
+|-------|---------|
+| `Entities` | Own structures |
+| `DiscoveredPOIs` | Discovered POIs |
+| `TerrainPlaceables` | Placed terrain objects |
+| `TerrainPlaceablesRes` | Terrain objects with resources |
+| `Playfields` | Known playfields |
+| `PlayfieldResources` | Resources on playfields |
+| `PlayerData` | Player data |
+| `Bookmarks` | Bookmarks |
+
+**Default query parameters:**
+
+| Parameter | Value |
+|-----------|-------|
+| `@PlayerId` | Pilot ID |
+| `@FactionId` | Faction ID |
+| `@FactionGroup` | Faction group (int) |
+| `@EntityId` | Structure ID |
+
+Use [SQLiteBrowser](https://sqlitebrowser.org/) to explore the `global.db` and add custom queries to the configuration.
+
+### Example predefined queries
+
+**Entities:**
+```sql
+SELECT * FROM Structures 
+JOIN Entities ON Structures.entityid = Entities.entityid
+JOIN Playfields ON Entities.pfid = Playfields.pfid
+JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE (isremoved = 0 AND (facgroup = 0 OR facgroup = 1) AND (facid = @PlayerId OR facid = @FactionId)) {additionalWhereAnd}
+```
+
+**PlayerData:**
+```sql
+SELECT * FROM PlayerData 
+JOIN Entities ON Entities.entityid = PlayerData.entityid
+JOIN Playfields ON Playfields.pfid = PlayerData.pfid
+JOIN SolarSystems ON SolarSystems.ssid = Playfields.ssid
+WHERE ((Entities.facgroup = 0 OR Entities.facgroup = 1 OR facgroup = 0 OR facgroup = 1)
+  AND (Entities.facid = @PlayerId OR facid = @PlayerId OR Entities.facid = @FactionId OR facid = @FactionId))
+  {additionalWhereAnd}
+```
+
+---
+
+## External Data (AddOn DLLs)
+
+Retrieve external data from other mods or DLLs:
+
 ```
 {{#external 'MaxWarp'}}
 Maximum jump range: {{.}}
 {{/external}}
 ```
 
-## Elevated scripts (Savegame or Adm structures)
-+ {{lockdevice structure device | x y z}}
-  + Locks a device
+### Providing a DLL for external data
 
-+ {{additems container item id count}}
-  + Add (itemid) (count) times to the container (this should be locked)
+The DLL must implement the `IMod` interface with a `ScriptExternalDataAccess` property:
 
-+ {{removeitems container itemid maxcount}}
-  + Removes (itemid) (count) from the container (it should be locked)
-
-+ {{replaceblocks entity RemoveItemsIds1,Id2,... ReplaceId}}
-  + Replace the block with the id 'RemoveItemsIds1,Id2,...' to 'ReplaceId'
-  + Replace = 0 remove the block
-
-## SaveGame scripts
-This special form of scripts can be stored in the SaveGame. The basic path for this is the
-\[Savegame\]\\Mods\\EmpyrionScripting\\Scripts
-
-This path is avaiable with @root.MainScriptPath
-
-in this directory script files with the extension *.hbs are searched for according to the following pattern
-* EntityType
-* EntityName
-* PlayfieldName
-* PlayfieldName\\EntityType
-* PlayfieldName\\EntityName
-* EntityId
-* in the directory itself
-
-Note: EntityType is BA,CV,SV or HV
-
-### CustomHelpers-SaveGameScripts (readfile)
-+ {{readfile dir filename}}
-   + (dir)\\(filename) file content is supplied as a LineArray
-   + If the file does not exist, the {{else}} part will be executed
-
-### CustomHelpers-SaveGameScripts (writefile)
-+ {{writefile dir filename}}
-   + (dir)\\(filename) Content of the block is written to the file
-
-### CustomHelpers-SaveGameScripts (fileexists)
-+ {{fileexists dir filename}}
-  + If exists then templane oterwirse exec else part
-
-## Prioritization of scripts
-If many scripts are built in it makes sense to downgrade the ones that don't need to be executed so often, 
-so that the other scripts are executed more often.
-To do this, you can write a number from 0-9 BEFORE the name of a script, so that this script is executed only every N cycles.
-e.g.
-1Script:abc
-3Script:uvw
-4Script:xyz
-
-1: abc
-2: abc
-3: abc, uvw
-4: abc, xyz
-5: abc
-6: abc, uvw
-7: abc
-8: abc, xyz
-...
-
-The difference between a script WITHOUT a number or 0 and a script with a '1' is that scripts with a priority
-with a priority >= 1 will run regardless if the ScriptLCD is switched off.
-
-Scripts with 0 or no number will only be executed if the LCD is on. 
-(Note: you can set the font color (for projectors) to transparent to make it "invisible")
-
-## Automatic Amount Adjustments
-For Fuel, O2,... it can be useful to use the current values from the Ecf configuration (of the scenario)
-The “EcfAmountTag” entry can be specified for this purpose. The value for “Amount” is then automatically determined from the item with the value of the tag.
-If the value is not to be determined automatically, “EcfAmountTag:”” can be specified.
-
-Examples of automatic determination
-```
+```csharp
+public class ExternalDataAccess : IMod
 {
-    “ItemName": ‘EnergyCellLarge’,
-    “Amount": 250,
-    “EcfAmountTag": ”FuelValue”
-}
-...
-{
-  “ItemName": ‘OxygenBottleLarge’,
-  “Amount": 250,
-  “EcfAmountTag": ”O2Value”
+    public IDictionary<string, Func<IEntity, object[], object>> ScriptExternalDataAccess { get; }
+
+    public ExternalDataAccess()
+    {
+        ScriptExternalDataAccess = new Dictionary<string, Func<IEntity, object[], object>>()
+        {
+            ["Navigation"] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ? Navigation(entity) : null,
+            ["MaxWarp"   ] = (entity, args) => entity?.Structure?.Pilot?.Id > 0 ? (object)MaxWarp(entity) : null,
+        };
+    }
 }
 ```
 
-no automatic determination
+Register the DLL path in the EmpyrionScripting configuration file (base path = mod directory in savegame):
+
+```json
+"AddOnAssemblies": [
+    "..\\EmpyrionGalaxyNavigator\\EmpyrionGalaxyNavigatorDataAccess.dll"
+]
 ```
+
+![](Screenshots/AddOnAssembly.png)
+
+The DLL can be found in `EmpyrionGalaxyNavigatorDataAccess.zip` included in the ModLoader package, or downloaded from [EmpyrionGalaxyNavigator releases](https://github.com/GitHub-TC/EmpyrionGalaxyNavigator/releases).
+
+---
+
+## SaveGame Scripts
+
+Scripts can also be stored directly in the SaveGame directory:
+
+`[SaveGame]\Mods\EmpyrionScripting\Scripts\`
+
+This path is accessible via `@root.MainScriptPath`.
+
+**Script resolution priority:**
+
+1. `EntityId` (e.g. `12345.hbs`)
+2. `PlayfieldName\EntityName` (e.g. `Akua\MyShip.hbs`)
+3. `PlayfieldName\EntityType` (e.g. `Akua\CV.hbs`)
+4. `EntityName` (e.g. `MyShip.hbs`)
+5. `EntityType` (e.g. `BA.hbs`)
+6. `PlayfieldName` (e.g. `Akua.hbs`)
+7. In the directory itself
+
+> EntityType: `BA` (Base), `CV` (Capital Vessel), `SV` (Small Vessel), `HV` (Hover Vessel)
+
+### File operations (SaveGame scripts only)
+
+```
+{{#readfile @root.MainScriptPath 'config.txt'}}
+Line 1: {{lookup this 0}}
+{{else}}
+File not found
+{{/readfile}}
+
+{{#writefile @root.MainScriptPath 'output.txt'}}
+File content
+{{/writefile}}
+
+{{#fileexists @root.MainScriptPath 'config.txt'}}
+File exists!
+{{/fileexists}}
+
+{{#filelist @root.MainScriptPath '*.hbs' true}}
+{{this}}
+{{/filelist}}
+```
+
+### Send message to player: `sendmessagetoplayer`
+
+Sends a server chat message directly to a single player (SaveGame scripts only):
+
+```
+{{#sendmessagetoplayer PlayerId}}
+Hello, your ship is in a danger zone!
+{{/sendmessagetoplayer}}
+```
+
+The inner block is rendered as the message text. `PlayerId` is the numeric entity ID of the player.
+
+### Change block properties (SaveGame scripts only)
+
+```
+{{setdamage Block 100}}     ← Set damage of a block to 100
+{{settype Block 4297}}      ← Change block type ID
+```
+
+---
+
+## Elevated Scripts
+
+Extended permissions for scripts running in SaveGame directories or on admin structures:
+
+```
+{{lockdevice E.S 'MyContainer'}}
+{{additems Container 4297 100}}        ← Add 100x IronOre
+{{removeitems Container 4297 50}}      ← Remove 50x IronOre
+{{replaceblocks Entity '4297' 0}}      ← Remove block (0 = delete)
+{{settype Block TypeId}}               ← Change block type (SaveGame only)
+{{setdamage Block 100}}                ← Set damage (SaveGame only)
+```
+
+---
+
+## Script Prioritization
+
+When many scripts run on a structure, control execution frequency:
+
+```
+Script:MyScript         ← Every cycle (only when LCD is on)
+0Script:MyScript        ← Same as above
+1Script:MyScript        ← Every cycle (even when LCD is off!)
+3Script:MyScript        ← Every 3rd cycle
+5Script:MyScript        ← Every 5th cycle
+```
+
+**Execution order with priorities 1, 3, 4:**
+
+```
+Cycle 1: Script(1), Script(3), Script(4) — all run
+Cycle 2: Script(1)
+Cycle 3: Script(1), Script(3)
+Cycle 4: Script(1), Script(4)
+Cycle 5: Script(1)
+Cycle 6: Script(1), Script(3)
+...
+```
+
+| Priority | Execution | LCD must be on |
+|----------|-----------|----------------|
+| 0 or none | Every cycle | **Yes** |
+| 1–9 | Every Nth cycle | **No** |
+
+---
+
+## C# Scripting Interface
+
+In addition to Handlebars templates, scripts can be written in **C#**. Use the `.cs` extension instead of `.hbs`.
+
+### Script Types
+
+| Extension | Language | Description |
+|-----------|----------|-------------|
+| `.hbs` | Handlebars template | Standard scripting |
+| `.cs` | C# (Roslyn-compiled) | Full C# logic |
+| `.dll` | Compiled assembly | Pre-compiled DLL |
+
+> 💡 **Advantage of C# scripts:** Complex logic, loops, custom classes, type safety. **Disadvantage:** Requires basic C# knowledge.
+
+### C# Script Structure
+
+A C# script implements a `Run` method called by the mod:
+
+```csharp
+using EmpyrionScripting.Interface;
+
+public class MyScript
 {
-    “ItemName": ‘EnergyCellLarge’,
-    “Amount": 250,
-    “EcfAmountTag": ””
+    public static void Run(IScriptModData root)
+    {
+        var csRoot = root.CsRoot;
+
+        // Read all items in a container
+        var items = csRoot.Items(root.E.S, "MyContainer");
+
+        // Build output
+        var output = new System.Text.StringBuilder();
+        foreach (var item in items)
+            output.AppendLine($"{item.Count}x {item.Name}");
+
+        // Display on all LCDs with matching name
+        var displays = csRoot.Devices(root.E.S, "LCD*");
+        foreach (var lcd in csRoot.GetDevices<Eleon.Modding.ILcd>(displays))
+            lcd.SetText(output.ToString());
+    }
 }
 ```
 
-## General
-If the structure is turned off or has no power, no ingame scripts will be executed from it.
-So "old" or no longer used structures do not consume any power of the script engine.
+### `IScriptModData` — Root Context (`@root` equivalent)
 
-## Set execution and performance of the scripts
-+ "InGameScriptsIntervallMS": 2000,
-  At what intervals is the script execution started in the background
-+ "DeviceLockOnlyAllowedEveryXCycles": 10,
-  Scripts that require a "DeviceLock" are only executed every X cycles
-+ "SaveGameScriptsIntervallMS": 10000,
-  At what intervals is the script execution of the savegamescripts started in the background
-+ "UseEveryNthGameUpdateCycle": 10,
-  Only every Nth GameUpdate call is used for script execution
-+ "ScriptsSyncExecution": 2,
-  How many scripts are executed per cycle in the GameUpdate
-+ "ScriptsParallelExecution": 2,
-  How many scripts are executed per cycle in background processing
+Every C# script receives an `IScriptModData` object as entry point:
 
-## Hint: ...\Saves\Games\[Savegamename]\Mods\EmpyrionScripting\Configuration.json
+| Property | Type | Description |
+|----------|------|-------------|
+| `E` | `IEntityData` | The current entity (ship/base) |
+| `P` | `IPlayfieldData` | The current playfield |
+| `CsRoot` | `ICsScriptFunctions` | C# helper functions |
+| `Data` | `ConcurrentDictionary<string,object>` | Temp data store (like `{{set}}`) |
+| `CacheData` | `ConcurrentDictionary<string,object>` | Persistent cache (like `{{setcache}}`) |
+| `Ids` | `Dictionary<string,string>` | Predefined ID lists |
+| `GameTicks` | `ulong` | Current game time in ticks |
+| `CycleCounter` | `int` | Script execution counter |
+| `IsElevatedScript` | `bool` | Whether script has elevated rights |
+| `ConfigEcfAccess` | `IConfigEcfAccess` | Access to ECF configuration |
+| `GameOptionsYamlSettings` | `IDictionary<string,object>` | Game options from YAML |
+| `DateTimeNow` | `DateTime` | Current date/time |
+| `Version` | `string` | Mod version |
+| `Console` | `IConsoleMock` | Console output for debugging |
+| `SignalEventStore` | `IEventStore` | Signal event storage |
+
+### `IEntityData` — Entity Data (`root.E`)
+
+| Property | Description |
+|----------|-------------|
+| `Id` | Entity ID |
+| `Name` | Entity name |
+| `EntityType` | Type (BA, CV, SV, HV, …) |
+| `Faction` | Faction data |
+| `Pos` | World coordinate position |
+| `Forward` | Forward vector |
+| `S` | `IStructureData` — structure data |
+| `IsLocal` / `IsPoi` / `IsProxy` | Entity flags |
+| `BelongsTo` | Parent entity ID |
+| `DockedTo` | Docked-to structure ID |
+| `ScriptInfos` | Running scripts info |
+| `IsElevated` | Whether elevated rights are active |
+
+Methods: `MoveForward(speed)`, `MoveTo(direction)`, `MoveStop()`, `GetCurrent()`, `GetCurrentPlayfield()`
+
+### `IStructureData` — Structure Data (`root.E.S`)
+
+| Property | Description |
+|----------|-------------|
+| `AllCustomDeviceNames` | All custom device names |
+| `Items` | All item stacks (all containers) |
+| `ControlPanelSignals` | Control panel signals |
+| `BlockSignals` | Block signals |
+| `Passengers` | All passengers |
+| `Pilot` | Current pilot |
+| `Players` | All players on structure |
+| `DockedE` | Docked entities |
+| `OxygenTank` / `FuelTank` / `PentaxidTank` | Tank wrappers |
+| `DamageLevel` | Damage level (0–1) |
+| `IsPowerd` | Is structure powered? |
+| `IsReady` | Is structure ready? |
+| `IsShieldActive` / `ShieldLevel` | Shield status |
+| `BlockCount` / `TriangleCount` / `LightCount` | Statistics |
+| `TotalMass` | Total mass |
+| `HasLandClaimDevice` | Has a land claim device? |
+| `MinPos` / `MaxPos` | Bounding box |
+| `SizeClass` | Size class |
+| `LastVisitedTicks` | Last visitor time |
+| `PlayerCreatedSteamId` | Creator's Steam ID |
+
+Methods: `GlobalToStructPos(pos)`, `StructToGlobalPos(pos)`, `GetCurrent()`
+
+### `ICsScriptFunctions` — C# Helper Functions (`root.CsRoot`)
+
+| Method | Description |
+|--------|-------------|
+| `Items(structure, names)` | Read items from containers |
+| `Move(item, structure, names, maxLimit?)` | Move items |
+| `Fill(item, structure, type, maxLimit?)` | Fill a tank |
+| `Devices(structure, names)` | Find devices by name |
+| `DevicesOfType(structure, type)` | Find devices by type |
+| `GetDevices<T>(block[])` | Get devices as typed interface |
+| `GetBlockDevices<T>(structure, names)` | Get block+device tuples |
+| `Block(structure, x, y, z)` | Get a single block |
+| `EntitiesById(ids)` | Find entities by IDs |
+| `EntitiesByName(names)` | Find entities by name |
+| `Scroll(content, lines, delay, step?)` | Calculate scroll buffer |
+| `Bar(data, min, max, length, barChar?, bgChar?)` | Create progress bar string |
+| `Format(data, format)` | Format a value |
+| `I18n(id)` / `I18n(id, language)` | Translate item name |
+| `ToId(names)` | Item names → IDs |
+| `ToName(ids)` | IDs → item names |
+| `ConfigById(id)` | ECF block by ID |
+| `ConfigByName(name)` | ECF block by name |
+| `ConfigFindAttribute(id, name)` | Get ECF attribute |
+| `ResourcesForBlockById(id)` | Recipe resources for item |
+| `ShowDialog(playerId, config, handler, value)` | Show dialog |
+| `WithLockedDevice(structure, block, action, lockFailed?)` | Work with locked device |
+| `IsLocked(structure, block)` | Is device locked? |
+| `FunctionNeedsMainThread(error)` | Check if main thread required |
+| `I18nDefaultLanguage` | Default translation language |
+
+### SaveGame C# Scripts: `IScriptSaveGameRootData`
+
+SaveGame scripts (in `[SaveGame]\Mods\EmpyrionScripting\Scripts\`) use `IScriptSaveGameRootData` (extends `IScriptModData`):
+
+| Property | Description |
+|----------|-------------|
+| `MainScriptPath` | Path to the scripts directory |
+| `ModApi` | Access to the Mod API |
+| `ScriptPath` | Path of the current script |
+
+### Complete C# Script Example
+
+```csharp
+using EmpyrionScripting.Interface;
+using System.Text;
+
+public class FuelMonitor
+{
+    public static void Run(IScriptModData root)
+    {
+        var csRoot = root.CsRoot;
+        var structure = root.E.S;
+
+        // Find fuel items
+        var items = csRoot.Items(structure, "FuelContainer");
+        var sb = new StringBuilder();
+        sb.AppendLine("=== Fuel Status ===");
+
+        foreach (var item in items)
+        {
+            if (item.Key == "EnergyCell")
+            {
+                sb.AppendLine($"Fuel: {item.Count} cells");
+
+                if (item.Count < 100)
+                    sb.AppendLine("⚠️ FUEL CRITICAL!");
+            }
+        }
+
+        // Write to LCD
+        var lcds = csRoot.GetDevices<Eleon.Modding.ILcd>(
+            csRoot.Devices(structure, "LCD Status"));
+        foreach (var lcd in lcds)
+            lcd.SetText(sb.ToString());
+    }
+}
 ```
-"SaveGameScriptsIntervallMS": 10000,
-"ScriptsSyncExecution": 2,
-"ScriptsParallelExecution": 4,
+
+---
+
+## Configuration & Performance
+
+Configuration file: `[SaveGame]\Mods\EmpyrionScripting\Configuration.json`
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `InGameScriptsIntervallMS` | 2000 | Script execution interval in milliseconds |
+| `SaveGameScriptsIntervallMS` | 10000 | Interval for SaveGame scripts (ms) |
+| `ScriptsSyncExecution` | 2 | Scripts per cycle (synchronous in game thread) |
+| `ScriptsParallelExecution` | 4 | Scripts per cycle (parallel in background) |
+| `UseEveryNthGameUpdateCycle` | 10 | Only use every Nth GameUpdate call |
+| `DeviceLockOnlyAllowedEveryXCycles` | 10 | DeviceLock scripts only every X cycles |
+| `ProcessMaxBlocksPerCycle` | 200 | Maximum blocks per cycle |
+
+> 💡 **Tip:** Default values are very conservative. Doubling them (and halving `SaveGameScriptsIntervallMS`) makes scripts run more smoothly — but may cause micro-stutters.
+
+### Automatic Amount Adjustment (`EcfAmountTag`)
+
+For fuel, O2, etc., the amount can be automatically determined from the ECF configuration of the scenario:
+
+```json
+{
+    "ItemName": "EnergyCellLarge",
+    "Amount": 250,
+    "EcfAmountTag": "FuelValue"
+},
+{
+    "ItemName": "OxygenBottleLarge",
+    "Amount": 250,
+    "EcfAmountTag": "O2Value"
+}
+```
+
+Disable automatic determination: `"EcfAmountTag": ""`
+
+---
+
+## Predefined ID Lists
+
+These lists can be used in scripts via `@root.Ids.ListName`.
+
+Configuration path: `[SaveGame]\Mods\EmpyrionScripting\Configuration.json` (section `"Ids"`)
+
+> **Note:** Delete the `"Ids"` section from Configuration.json to restore the original lists.
+
+**Usage in scripts:**
+
+```
+{{#itemlist E.S.Items @root.Ids.Ore}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+
+{{#itemlist E.S.Items (concat @root.Ids.WeaponSV @root.Ids.WeaponHV)}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+```
+
+| List | Contents |
+|------|---------|
+| `Ore` | All ores |
+| `Ingot` | All ingots / processed ores |
+| `Components` | Crafting components (vanilla) |
+| `EdenComponents` | Eden mod components |
+| `Medic` | Medical items |
+| `Food` | Food items |
+| `Ingredient` | Ingredients (all) |
+| `IngredientBasic` | Basic ingredients |
+| `IngredientExtra` | Extra ingredients |
+| `IngredientExtraMod` | Additional mod ingredients |
+| `Tools` | Tools |
+| `Armor` | Armor sets |
+| `ArmorMod` | Armor modifications |
+| `Sprout` | Seedlings / plant seeds |
+| `BlockL` | Large blocks (CV/BA) |
+| `BlockS` | Small blocks (SV/HV) |
+| `DeviceL` | Devices (CV/BA) |
+| `DeviceS` | Devices (SV/HV) |
+| `WeaponPlayer` | Player weapons |
+| `WeaponHV` | HV weapons |
+| `WeaponSV` | SV weapons |
+| `WeaponCV` | CV weapons |
+| `WeaponBA` | BA weapons |
+| `WeaponPlayerUpgrades` | Weapon upgrade kits |
+| `WeaponPlayerEpic` | Epic weapons |
+| `AmmoPlayer` | Player ammo |
+| `AmmoHV` | HV ammo |
+| `AmmoSV` | SV ammo |
+| `AmmoCV` | CV ammo |
+| `AmmoBA` | BA ammo |
+| `AmmoAllEnergy` | All energy ammo |
+| `AmmoAllProjectile` | All projectile ammo |
+| `AmmoAllRocket` | All rockets |
+| `Deco` | Decoration blocks |
+| `DataPads` | Data pads / chips |
+| `Oxygen` | Oxygen bottles |
+| `Fuel` | Fuel cells |
+| `Pentaxid` | Pentaxid crystals |
+| `OreFurnace` | Ores that can be smelted |
+| `Deconstruct` | Blocks designated for deconstruction |
+| `Gardeners` | Gardener NPCs |
+
+Lists begin and end with a comma so they can be combined with `concat`:
+
+```
+(concat @root.Ids.WeaponHV @root.Ids.WeaponSV @root.Ids.WeaponCV)
+(concat '1234,5568' @root.Ids.ArmorMod)
+```
+
+---
+
+## Ore and Ingot IDs
+
+### Ores (`@root.Ids.Ore`)
+
+| ID | Internal Name | English |
+|----|--------------|---------|
+| 4296 | MagnesiumOre | Magnesium Ore |
+| 4297 | IronOre | Iron Ore |
+| 4298 | CobaltOre | Cobalt Ore |
+| 4299 | SiliconOre | Silicon Ore |
+| 4300 | NeodymiumOre | Neodymium Ore |
+| 4301 | CopperOre | Copper Ore |
+| 4302 | PromethiumOre | Promethium Ore |
+| 4317 | ErestrumOre | Erestrum Ore |
+| 4318 | ZascosiumOre | Zascosium Ore |
+| 4332 | SathiumOre | Sathium Ore |
+| 4341 | PentaxidOre | Pentaxid Ore |
+| 4345 | GoldOre | Gold Ore |
+| 4359 | TitaniumOre | Titanium Ore |
+
+### Ingots (`@root.Ids.Ingot`)
+
+| ID | Internal Name | English |
+|----|--------------|---------|
+| 4319 | MagnesiumPowder | Magnesium Powder |
+| 4320 | IronIngot | Iron Ingot |
+| 4321 | CobaltIngot | Cobalt Ingot |
+| 4322 | SiliconIngot | Silicon Ingot |
+| 4323 | NeodymiumIngot | Neodymium Ingot |
+| 4324 | CopperIngot | Copper Ingot |
+| 4325 | PromethiumPellets | Promethium Pellets |
+| 4326 | ErestrumIngot | Erestrum Ingot |
+| 4327 | ZascosiumIngot | Zascosium Ingot |
+| 4328 | CrushedStone | Crushed Stone |
+| 4329 | RockDust | Rock Dust |
+| 4333 | SathiumIngot | Sathium Ingot |
+| 4342 | PentaxidCrystal | Pentaxid Crystal |
+| 4346 | GoldIngot | Gold Ingot |
+| 4360 | TitaniumRods | Titanium Rods |
+
+---
+
+## Technical Reference
+
+### Syntax documentation
+
+- [Handlebars.js Guide](http://handlebarsjs.com/guide/)
+- [Handlebars Cookbook](https://zordius.github.io/HandlebarsCookbook/index.html)
+- [Handlebars.Net](https://github.com/rexm/Handlebars.Net)
+
+### Item properties
+
+| Property | Description |
+|----------|-------------|
+| `Id` | Unique ID (tokens: `TokenId * 100000 + ItemId`) |
+| `IsToken` | `true` if it's a token |
+| `ItemId` | Token-independent part of the ID |
+| `TokenId` | Token ID (if applicable) |
+| `Count` | Quantity |
+| `Key` | Internal item name |
+| `Name` | Display name |
+
+### String functions
+
+| Function | Description |
+|----------|-------------|
+| `{{concat a b c}}` | Concatenate values |
+| `{{substring text 0 10}}` | Substring from index 0, max 10 chars |
+| `{{replace text 'old' 'new'}}` | Replace text |
+| `{{split text ',' true}}` | Split text, remove empty entries |
+| `{{trim text}}` | Remove whitespace/chars from edges |
+| `{{startswith text 'abc'}}` | Does text start with 'abc'? |
+| `{{endsswith text 'xyz'}}` | Does text end with 'xyz'? (note: double 's' is intentional) |
+| `{{chararray text}}` | Text as character array |
+| `{{selectlines text 0 5}}` | Lines 0–5 from text |
+| `{{format data '0.00'}}` | Formatted output |
+| `{{i18n Key 'English'}}` | Item name in specified language |
+
+### Position functions
+
+```
+{{structtoglobalpos E.S (vector 10 0 5)}}    ← Structure pos → World coordinates
+{{globaltostructpos E.S GlobalPos}}           ← World coordinates → Structure pos
+```
+
+### Block and texture functions
+
+```
+{{#use (block E.S 10 0 5)}}
+  Block at position 10/0/5: {{Type}}
+{{/use}}
+
+{{gettexture Block 'T'}}             ← Get texture ID of top face (T=Top, B=Bottom, N/S/W/E)
+{{settexture Block 123 'T,B'}}       ← Set texture on top and bottom face
+{{getcolor Block 'T'}}               ← Get color ID of top face
+{{setcolor Block 5 'N,S'}}           ← Set color on north and south face
+
+{{setlockcode Block 1234}}           ← Set lock code on a container/device
+
+{{#blocks E.S 0 0 0 10 10 10}}       ← All blocks in range (0,0,0) to (10,10,10)
+{{/blocks}}
+```
+
+### Directly control LCDs
+
+```
+{{#devices E.S 'DisplayPanel'}}
+{{settext this 'Hello World!'}}
+{{setcolor this 'ff0000'}}
+{{setbgcolor this '000000'}}
+{{setfontsize this 20}}
+{{/devices}}
+
+{{gettext LcdDevice}}                ← Read text of an LCD
+{{settext LcdDevice 'Text'}}         ← Set text
+{{settextblock LcdDevice}}           ← Set text from nested block
+{{setcolor LcdDevice 'ff0000'}}      ← Set text color (RGB hex)
+{{setbgcolor LcdDevice '000000'}}    ← Set background color (RGB hex)
+{{setfontsize LcdDevice 20}}         ← Set font size on LCD device directly
+```
+
+### Item ID conversion
+
+```
+{{#toid 'IronOre;CobaltOre'}}         ← Names → IDs
 ...
-"ProcessMaxBlocksPerCycle": 200,
+{{/toid}}
+
+{{#toname '4297;4298'}}               ← IDs → Names
+...
+{{/toname}}
+
+{{configid 'IronOre'}}                ← Config ID for item name
+{{configattr 4297 'Mass'}}            ← Attribute for item ID
+{{configattrbyname 'IronOre' 'Mass'}} ← Attribute for item name
+{{resourcesforid 4297}}               ← Recipe resources for item
 ```
-Are set VERY conservatively by default so as not to put the server (and the game) under load.
-Double the values (SaveGameScriptsIntervallMS must lower) and the scripts will run more "smoothly", but there may be micro-jerks in the game.
 
-### Whats next?
-
+---
 
 ASTIC/TC
