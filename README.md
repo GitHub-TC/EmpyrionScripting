@@ -198,6 +198,8 @@ Targets:LCD Ausgabe*              ← Alle LCDs, deren Name mit "LCD Ausgabe" be
 Script:LCD Ausgabe*               ← Zielname wird direkt aus dem Script-LCD-Namen entnommen
 ```
 
+> 💡 **Kurzform ohne `Targets:`-Zeile:** Wenn das Script-LCD selbst den Namen `Script:Targetpattern` trägt, wird der Teil nach `Script:` automatisch als Zielpattern verwendet – eine separate `Targets:`-Zeile ist dann nicht nötig. Wildcards (`*`) werden dabei vollständig unterstützt, sodass z.B. ein Script-LCD namens `Script:Anzeige*` alle LCDs adressiert, deren Name mit `Anzeige` beginnt.
+
 ### Wichtige Kontext-Variablen
 
 | Variable | Beschreibung |
@@ -1913,6 +1915,8 @@ Targets:LCD One;LCD Two         ← Multiple LCDs (separated by ;)
 Targets:LCD Output*             ← All LCDs whose name starts with "LCD Output" (wildcard *)
 Script:LCD Output*              ← Target name taken from the Script LCD name
 ```
+
+> 💡 **Shorthand without a `Targets:` line:** If the Script LCD itself is named `Script:Targetpattern`, the part after `Script:` is automatically used as the target pattern — no separate `Targets:` line needed. Wildcards (`*`) are fully supported, so a Script LCD named `Script:Display*` will address all LCDs whose name starts with `Display`.
 
 ### Important context variables
 
