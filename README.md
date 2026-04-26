@@ -1230,18 +1230,84 @@ Zyklus 6: Script(1), Script(3)
 
 Konfigurationsdatei: `[SaveGame]\Mods\EmpyrionScripting\Configuration.json`
 
+### Performance & Ausführung
+
 | Einstellung | Standard | Beschreibung |
 |-------------|---------|-------------|
-| `InGameScriptsIntervallMS` | 2000 | Scriptausführungsintervall in Millisekunden |
+| `InGameScriptsIntervallMS` | 1000 | Scriptausführungsintervall in Millisekunden |
 | `SaveGameScriptsIntervallMS` | 10000 | Intervall für SaveGame-Scripte (ms) |
+| `UseEveryNthGameUpdateCycle` | 10 | Nur jeden N-ten GameUpdate-Aufruf verarbeiten |
 | `ScriptsSyncExecution` | 2 | Scripte pro Zyklus (synchron im Spielthread) |
-| `ScriptsParallelExecution` | 4 | Scripte pro Zyklus (parallel im Hintergrund) |
-| `UseEveryNthGameUpdateCycle` | 10 | Nur jeden N-ten GameUpdate-Aufruf nutzen |
-| `DeviceLockOnlyAllowedEveryXCycles` | 10 | DeviceLock-Scripte nur alle X Zyklen |
+| `ScriptsParallelExecution` | 2 | Scripte pro Zyklus (parallel im Hintergrund) |
+| `ScriptLoopSyncTimeLimiterMS` | 200 | Maximale Laufzeit pro Zyklus für synchrone Scripte (ms) |
+| `ScriptLoopBackgroundTimeLimiterMS` | 2000 | Maximale Laufzeit pro Zyklus für Hintergrund-Scripte (ms) |
+| `DeviceLockOnlyAllowedEveryXCycles` | 10 | DeviceLock-Scripte nur alle X Zyklen ausführen |
 | `ProcessMaxBlocksPerCycle` | 200 | Maximale Blöcke pro Zyklus |
-| `OverrideScenarioPath` | _(leer)_ | Pfad zum Szenario-Verzeichnis (erforderlich für Custom Scenarios im Singleplayer, z.B. ReforgedEden) |
+| `ExecMethod` | `ThreadPool` | Ausführungsmethode: `None`, `ThreadPool`, `Direct`, `BackgroundWorker` |
+| `DelayStartForNSecondsOnPlayfieldLoad` | 30 | Verzögerung beim Spielfeldladen in Sekunden |
 
 > 💡 **Tipp:** Die Standardwerte sind sehr konservativ. Werte verdoppeln (und `SaveGameScriptsIntervallMS` halbieren) für flüssigere Script-Ausführung — kann jedoch zu Micro-Rucklern führen.
+
+### Diagnose & Debugging
+
+| Einstellung | Standard | Beschreibung |
+|-------------|---------|-------------|
+| `LogLevel` | `Message` | Log-Level: `None`, `Message`, `Debug` |
+| `ScriptTracking` | `false` | Script-Ausführungszeiten tracken (Ausgabe in `ScriptTrackingDebug`-LCD) |
+| `ScriptTrackingError` | `false` | Fehler-Tracking für Scripte aktivieren |
+| `DetailedScriptsInfoData` | `false` | Detaillierte Script-Infodaten erfassen |
+
+### Zugriff & Sicherheit
+
+| Einstellung | Standard | Beschreibung |
+|-------------|---------|-------------|
+| `CsScriptsAllowedFor` | `Player` | Wer C#-Scripte ausführen darf: `Player`, `Moderator`, `GameMaster`, `Admin` |
+| `EntityAccessMaxDistance` | 500 | Maximale Entfernung (in Blöcken) für den Zugriff auf andere Strukturen |
+
+### Signale & Events
+
+| Einstellung | Standard | Beschreibung |
+|-------------|---------|-------------|
+| `MaxStoredEventsPerSignal` | 10 | Maximale Anzahl gespeicherter Events pro Signal |
+
+### Szenario & Erweiterungen
+
+| Einstellung | Standard | Beschreibung |
+|-------------|---------|-------------|
+| `OverrideScenarioPath` | _(leer)_ | Pfad zum Szenario-Verzeichnis (erforderlich für Custom Scenarios im Singleplayer, z.B. ReforgedEden) |
+| `AddOnAssemblies` | `[]` | Liste von zusätzlichen DLL-Pfaden (relativ zum Mod-Verzeichnis im Savegame) |
+
+### Wirtschaft / Gehälter
+
+| Einstellung | Standard | Beschreibung |
+|-------------|---------|-------------|
+| `GardenerSalary` | 10× `MoneyCard` | Bezahlung pro Gardener-Aktion |
+| `DeconstructSalary` | 10× `MoneyCard` | Bezahlung pro Dekonstruktions-Aktion |
+| `RecycleSalary` | 20× `MoneyCard` | Bezahlung pro Recycling-Aktion |
+| `AmountPerNumberOfBlocks` | 10 | Anzahl der Blöcke pro Gehaltseinheit |
+| `DeconstructBlockSubstitutions` | _(Liste)_ | Blöcke, die beim Dekonstruieren durch 0 ersetzt werden (z.B. Alien-Container) |
+
+### Anzeige
+
+| Einstellung | Standard | Beschreibung |
+|-------------|---------|-------------|
+| `NumberSpaceReplace` | `" "` | Zeichen als Leerzeichen-Ersatz in Zahlenausgaben |
+| `BarStandardValueSign` | `█` | Zeichen für den gefüllten Teil eines Balkens |
+| `BarStandardSpaceSign` | `░` | Zeichen für den leeren Teil eines Balkens |
+
+### Tanks (`StructureTank`)
+
+Definiert welche Items in Struktur-Tanks gefüllt werden können und in welchen Mengen:
+
+```json
+"StructureTank": {
+    "Oxygen":   [{ "ItemName": "OxygenBottleLarge",  "Amount": 250, "EcfAmountTag": "O2Value"   }],
+    "Fuel":     [{ "ItemName": "FusionCell",          "Amount": 300, "EcfAmountTag": "FuelValue" },
+                 { "ItemName": "EnergyCellLarge",     "Amount": 150, "EcfAmountTag": "FuelValue" },
+                 { "ItemName": "EnergyCell",           "Amount":  30, "EcfAmountTag": "FuelValue" }],
+    "Pentaxid": [{ "ItemName": "PentaxidCrystal",     "Amount":   1 }]
+}
+```
 
 ### Automatische Mengenanpassung (`EcfAmountTag`)
 
@@ -3145,18 +3211,84 @@ public class FuelMonitor
 
 Configuration file: `[SaveGame]\Mods\EmpyrionScripting\Configuration.json`
 
+### Performance & Execution
+
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `InGameScriptsIntervallMS` | 2000 | Script execution interval in milliseconds |
+| `InGameScriptsIntervallMS` | 1000 | Script execution interval in milliseconds |
 | `SaveGameScriptsIntervallMS` | 10000 | Interval for SaveGame scripts (ms) |
+| `UseEveryNthGameUpdateCycle` | 10 | Only process every Nth GameUpdate call |
 | `ScriptsSyncExecution` | 2 | Scripts per cycle (synchronous in game thread) |
-| `ScriptsParallelExecution` | 4 | Scripts per cycle (parallel in background) |
-| `UseEveryNthGameUpdateCycle` | 10 | Only use every Nth GameUpdate call |
-| `DeviceLockOnlyAllowedEveryXCycles` | 10 | DeviceLock scripts only every X cycles |
-| `ProcessMaxBlocksPerCycle` | 200 | Maximum blocks per cycle |
-| `OverrideScenarioPath` | _(empty)_ | Path to the scenario directory (required for custom scenarios in singleplayer, e.g. ReforgedEden) |
+| `ScriptsParallelExecution` | 2 | Scripts per cycle (parallel in background) |
+| `ScriptLoopSyncTimeLimiterMS` | 200 | Maximum runtime per cycle for synchronous scripts (ms) |
+| `ScriptLoopBackgroundTimeLimiterMS` | 2000 | Maximum runtime per cycle for background scripts (ms) |
+| `DeviceLockOnlyAllowedEveryXCycles` | 10 | DeviceLock scripts only run every X cycles |
+| `ProcessMaxBlocksPerCycle` | 200 | Maximum blocks processed per cycle |
+| `ExecMethod` | `ThreadPool` | Execution method: `None`, `ThreadPool`, `Direct`, `BackgroundWorker` |
+| `DelayStartForNSecondsOnPlayfieldLoad` | 30 | Delay on playfield load in seconds |
 
 > 💡 **Tip:** Default values are very conservative. Doubling them (and halving `SaveGameScriptsIntervallMS`) makes scripts run more smoothly — but may cause micro-stutters.
+
+### Diagnostics & Debugging
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `LogLevel` | `Message` | Log level: `None`, `Message`, `Debug` |
+| `ScriptTracking` | `false` | Track script execution times (output in `ScriptTrackingDebug` LCD) |
+| `ScriptTrackingError` | `false` | Enable error tracking for scripts |
+| `DetailedScriptsInfoData` | `false` | Collect detailed script info data |
+
+### Access & Security
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `CsScriptsAllowedFor` | `Player` | Who may run C# scripts: `Player`, `Moderator`, `GameMaster`, `Admin` |
+| `EntityAccessMaxDistance` | 500 | Maximum distance (in blocks) for accessing other structures |
+
+### Signals & Events
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `MaxStoredEventsPerSignal` | 10 | Maximum number of stored events per signal |
+
+### Scenario & Extensions
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `OverrideScenarioPath` | _(empty)_ | Path to the scenario directory (required for custom scenarios in singleplayer, e.g. ReforgedEden) |
+| `AddOnAssemblies` | `[]` | List of additional DLL paths (relative to the mod directory in the savegame) |
+
+### Economy / Salaries
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `GardenerSalary` | 10× `MoneyCard` | Payment per Gardener action |
+| `DeconstructSalary` | 10× `MoneyCard` | Payment per deconstruct action |
+| `RecycleSalary` | 20× `MoneyCard` | Payment per recycle action |
+| `AmountPerNumberOfBlocks` | 10 | Number of blocks per salary unit |
+| `DeconstructBlockSubstitutions` | _(list)_ | Blocks replaced by 0 during deconstruction (e.g. alien containers) |
+
+### Display
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `NumberSpaceReplace` | `" "` | Character used as space replacement in number output |
+| `BarStandardValueSign` | `█` | Character for the filled part of a progress bar |
+| `BarStandardSpaceSign` | `░` | Character for the empty part of a progress bar |
+
+### Tanks (`StructureTank`)
+
+Defines which items can be used to fill structure tanks and in what quantities:
+
+```json
+"StructureTank": {
+    "Oxygen":   [{ "ItemName": "OxygenBottleLarge",  "Amount": 250, "EcfAmountTag": "O2Value"   }],
+    "Fuel":     [{ "ItemName": "FusionCell",          "Amount": 300, "EcfAmountTag": "FuelValue" },
+                 { "ItemName": "EnergyCellLarge",     "Amount": 150, "EcfAmountTag": "FuelValue" },
+                 { "ItemName": "EnergyCell",           "Amount":  30, "EcfAmountTag": "FuelValue" }],
+    "Pentaxid": [{ "ItemName": "PentaxidCrystal",     "Amount":   1 }]
+}
+```
 
 ### Automatic Amount Adjustment (`EcfAmountTag`)
 
