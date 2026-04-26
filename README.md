@@ -84,7 +84,7 @@ EmpyrionScripting ist eine Mod für **Empyrion: Galactic Survival**, die es erm�
 3. **Wichtig für Singleplayer:** Das Spiel **ohne EAC** starten (im Steam-Launcher „Start without EAC" wählen)
    - ⚠️ **Custom Scenario (z.B. ReforgedEden):** Bei Verwendung eines benutzerdefinierten     Szenarios muss in der Konfigurationsdatei `[SaveGame]\Mods\EmpyrionScripting\Configuration.json` der Pfad zum Szenario angegeben werden:
 > ```json
-> "OverrideScenarioPath": "\[Steam\]\\steamapps\\workshop\\content\\383120\\3143225812"
+> "OverrideScenarioPath": "[Steam]\\steamapps\\workshop\\content\\383120\\3143225812"
 > ```
 
 ### Schritt 2: LCD-Bildschirme vorbereiten
@@ -168,7 +168,7 @@ Targets:LCD Erze
 
 > ⚠️ **Custom Scenario (z.B. ReforgedEden):** Bei Verwendung eines benutzerdefinierten Szenarios muss in der Konfigurationsdatei `[SaveGame]\Mods\EmpyrionScripting\Configuration.json` der Pfad zum Szenario angegeben werden:
 > ```json
-> "OverrideScenarioPath": "\[Steam\]\\steamapps\\workshop\\content\\383120\\3143225812"
+> "OverrideScenarioPath": "[Steam]\\steamapps\\workshop\\content\\383120\\3143225812"
 > ```
 
 ---
@@ -1800,7 +1800,7 @@ EmpyrionScripting is a mod for **Empyrion: Galactic Survival** that allows displ
 3. **Important for Singleplayer:** Start the game **without EAC** (select "Start without EAC" in the Steam launcher)
    - ⚠️ **Custom Scenario (e.g. ReforgedEden):** When using a custom scenario, you must set the scenario path in `[SaveGame]\Mods\EmpyrionScripting\Configuration.json`:
 > ```json
-> "OverrideScenarioPath": \[Steam\]\\steamapps\\workshop\\content\\383120\\3143225812"
+> "OverrideScenarioPath": "[Steam]\\steamapps\\workshop\\content\\383120\\3143225812"
 > ```
 
 ### Step 2: Prepare the LCD screens
@@ -1884,7 +1884,7 @@ Targets:LCD Ores
 
 > ⚠️ **Custom Scenario (e.g. ReforgedEden):** When using a custom scenario, you must set the scenario path in `[SaveGame]\Mods\EmpyrionScripting\Configuration.json`:
 > ```json
-> "OverrideScenarioPath": \[Steam\]\\steamapps\\workshop\\content\\383120\\3143225812"
+> "OverrideScenarioPath": "[Steam]\\steamapps\\workshop\\content\\383120\\3143225812"
 > ```
 
 ---
