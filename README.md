@@ -1547,6 +1547,26 @@ Die Listen beginnen und enden mit einem Komma, damit sie mit `concat` kombiniert
 {{resourcesforid 4297}}               ← Rezept-Ressourcen für Item
 ```
 
+### Rezept-Ressourcen: `resourcesforid`
+
+Der Helper `resourcesforid` liefert die für einen Block/Item benötigten Ressourcen (Rezept) als Key/Value-Collection (ID => Menge). Er nimmt eine einzelne ID als Argument und erlaubt, im Inneren des Blocks mit den gefundenen Ressourcen zu arbeiten. Beispiel:
+
+```
+Targets:LCD Rezepte
+Rezept für {{configattr 4297 'Name'}}:
+{{#resourcesforid 4297}}
+{{#each this}}
+- {{this}}x {{configattr @key 'Name'}} (ID: {{@key}})
+{{/each}}
+{{else}}
+Keine Rohstoffe gefunden.
+{{/resourcesforid}}
+```
+
+Hinweise:
+- Die Menge ist vom Typ Zahl (double) und kann Bruchteile enthalten (z.B. bei Komponenten, die pro Output anteilig berechnet werden).
+- Innerhalb des Blocks ist der Context die Dictionary-Collection; deshalb wird mit `{{#each this}}` über die Einträge iteriert und `@key`/`this` verwendet.
+
 ---
 
 ***
@@ -3504,6 +3524,26 @@ Lists begin and end with a comma so they can be combined with `concat`:
 {{setbgcolor LcdDevice '000000'}}    ← Set background color (RGB hex)
 {{setfontsize LcdDevice 20}}         ← Set font size on LCD device directly
 ```
+
+### Recipe resources: `resourcesforid`
+
+The `resourcesforid` helper returns the required resources (recipe) for a block/item as a Key/Value collection (ID => amount). It accepts a single ID as argument and allows you to work with the found resources inside the block. Example:
+
+```
+Targets:LCD Recipes
+Recipe for {{configattr 4297 'Name'}}:
+{{#resourcesforid 4297}}
+{{#each this}}
+- {{this}}x {{configattr @key 'Name'}} (ID: {{@key}})
+{{/each}}
+{{else}}
+No resources found.
+{{/resourcesforid}}
+```
+
+Notes:
+- Amounts are numeric (double) and may contain fractions (for components calculated per output).
+- Inside the block the context is the dictionary collection; therefore use `{{#each this}}` to iterate and access `@key`/`this`.
 
 ### Item ID conversion
 
