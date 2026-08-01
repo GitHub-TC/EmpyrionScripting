@@ -50,8 +50,8 @@ namespace EmpyrionScripting
                         e.Set();
                     }
                 });
-                witherror = !e.WaitOne(EmpyrionScripting.Configuration.Current.DeviceLockTimeoutMS);
-                if (witherror) Log($"Lock:WaitOne:Error {playfield.Name} {structure.Id} {position} (timeout:{EmpyrionScripting.Configuration.Current.DeviceLockTimeoutMS}ms)", LogLevel.Debug);
+                witherror = !e.WaitOne(10000);
+                if (witherror) Log($"Lock:WaitOne:Error {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
 
                 if (Success) unlockAction = () =>
                  {
@@ -62,7 +62,7 @@ namespace EmpyrionScripting
                          if (id != structure.Id || pos != position) return;
                          e.Set();
                      });
-                     if (!e.WaitOne(EmpyrionScripting.Configuration.Current.DeviceLockTimeoutMS)) Log($"Unlock:Timeout {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
+                     if (!e.WaitOne(10000)) Log($"Unlock:Timeout {playfield.Name} {structure.Id} {position}", LogLevel.Debug);
                  };
             }
             catch (Exception error)

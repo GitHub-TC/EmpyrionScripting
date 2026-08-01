@@ -64,8 +64,6 @@ namespace EmpyrionScripting
         public CsModPermission CsScriptsAllowedFor { get; set; } = CsModPermission.Player;
         public int InGameScriptsIntervallMS { get; set; } = 1000;
         public int DeviceLockOnlyAllowedEveryXCycles { get; set; } = 10;
-        public int DeviceLockTimeoutMS { get; set; } = 2000;
-        public int MainThreadStreakThreshold { get; set; } = 5;
         public int SaveGameScriptsIntervallMS { get; set; } = 10000;
         public int UseEveryNthGameUpdateCycle { get; set; } = 10;
         public bool ScriptTracking { get; set; }

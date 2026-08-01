@@ -13,7 +13,6 @@ namespace EmpyrionScripting.Interface
         string ScriptId { get; set; }
         int TimeLimitReached { get; }
         bool NeedsMainThread { get; }
-        int MainThreadSuccessStreak { get; }
         bool IsElevatedScript { get; }
         ScriptLanguage ScriptLanguage { get; }
         bool NeedsDeviceLock { get; }
