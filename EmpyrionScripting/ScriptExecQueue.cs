@@ -217,7 +217,18 @@ namespace EmpyrionScripting
                 if (data.TimeCriticalScript) info.TimeCriticalScriptExecutions++;
                 info.NeedsMainThread    = data.ScriptNeedsMainThread;
                 info.NeedsDeviceLock    = data.ScriptNeedsDeviceLock;
-                ScriptNeedsMainThread.TryUpdate(data.ScriptId, data.ScriptNeedsMainThread, false);
+                // Smart retry: only flip back to background after N consecutive successful main-thread runs
+                if (data.ScriptNeedsMainThread)
+                {
+                    info.MainThreadSuccessStreak++;
+                    if (info.MainThreadSuccessStreak >= EmpyrionScripting.Configuration.Current.MainThreadStreakThreshold)
+                    {
+                        ScriptNeedsMainThread.TryUpdate(data.ScriptId, false, true);
+                        info.MainThreadSuccessStreak = 0;
+                    }
+                    else ScriptNeedsMainThread.TryAdd(data.ScriptId, true);
+                }
+                else ScriptNeedsMainThread.TryUpdate(data.ScriptId, false, true);
                 ScriptNeedsDeviceLock.TryUpdate(data.ScriptId, data.ScriptNeedsDeviceLock, false);
 
                 info.ExecTime += DateTime.Now - info.LastStart;
