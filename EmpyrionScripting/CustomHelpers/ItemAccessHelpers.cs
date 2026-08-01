@@ -299,7 +299,7 @@ namespace EmpyrionScripting.CustomHelpers
         [HandlebarTag("maptoid")]
         public static void MapToIdHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
         {
-            if (arguments.Length != 1) throw new HandlebarsException("{{maptoid names}} helper must have exactly one argument: (name1;name2,name3)");
+            if (arguments.Length != 1) throw new HandlebarsException("{{maptoid names}} helper must have exactly one argument: (names)");
 
             var root = rootObject as IScriptModData;
             var namesString = arguments[0]?.ToString();
