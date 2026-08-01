@@ -296,6 +296,37 @@ namespace EmpyrionScripting.CustomHelpers
             }
         }
 
+        [HandlebarTag("maptoid")]
+        public static void MapToIdHelper(TextWriter output, object rootObject, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 1) throw new HandlebarsException("{{maptoid names}} helper must have exactly one argument: (name1;name2,name3)");
+
+            var root = rootObject as IScriptModData;
+            var namesString = arguments[0]?.ToString();
+
+            try
+            {
+                var names = namesString
+                    .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(N => N.Trim())
+                    .Where(N => !string.IsNullOrEmpty(N))
+                    .ToArray();
+
+                var ids = new List<int>();
+                foreach (var name in names)
+                {
+                    if (root.ConfigEcfAccess.BlockIdMapping.TryGetValue(name, out var id))
+                        ids.Add(id);
+                }
+
+                output.Write(string.Join(";", ids));
+            }
+            catch (Exception error)
+            {
+                if (!CsScriptFunctions.FunctionNeedsMainThread(error, root)) output.Write("{{maptoid}} error " + EmpyrionScripting.ErrorFilter(error));
+            }
+        }
+
         [HandlebarTag("orderbylist")]
         public static void OrderByListBlockHelper(TextWriter output, object rootObject, HelperOptions options, dynamic context, object[] arguments)
         {

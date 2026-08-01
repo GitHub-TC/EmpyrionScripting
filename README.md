@@ -355,6 +355,26 @@ Targets:LCD Inventar sortiert
 
 > Unterschied zu `itemlist`: `itemlist` iteriert direkt über Items (Element für Element), `itemlistarray` liefert das gesamte Array auf einmal für weitere Verarbeitung.
 
+### Item-Namen zu IDs konvertieren: `maptoid`
+
+Wandelt eine Semikolon- oder Komma-getrennte Liste von Item-Namen in ihre numerischen IDs um:
+
+```
+{{maptoid 'IronOre;CopperOre;GoldOre'}}
+```
+**Ausgabe:** `4297;4298;4299`
+
+**Kombination mit `itemlist`:**
+
+```
+Targets:LCD Meine Items
+{{#itemlist E.S.Items (maptoid 'IronOre;CopperOre')}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+```
+
+> `maptoid` nutzt das gleiche Name-zu-ID-Mapping wie die vordefinierten Listen (`@root.Ids.*`). Nicht gefundene Namen werden still ignoriert.
+
 ---
 
 ## Bedingungen & Logik
@@ -2156,6 +2176,28 @@ Targets:LCD Sorted Inventory
 ```
 
 > Difference from `itemlist`: `itemlist` iterates directly over items one-by-one, `itemlistarray` delivers the whole array at once for further processing.
+
+### Convert item names to IDs: `maptoid`
+
+Converts a semicolon- or comma-separated list of item names into their numeric IDs:
+
+```
+{{maptoid 'IronOre;CopperOre;GoldOre'}}
+```
+**Output:** `4297;4298;4299`
+
+**Combined with `itemlist`:**
+
+```
+Targets:LCD My Items
+{{#itemlist E.S.Items (maptoid 'IronOre;CopperOre')}}
+{{Count}}x {{i18n Key}}
+{{/itemlist}}
+```
+
+> `maptoid` uses the same name-to-ID mapping as predefined lists (`@root.Ids.*`). Unknown names are silently ignored.
+
+---
 
 ### Comparisons: `test`
 
