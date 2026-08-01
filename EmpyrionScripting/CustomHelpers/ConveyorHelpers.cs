@@ -865,7 +865,7 @@ namespace EmpyrionScripting.CustomHelpers
 
             if (specialTransfer == null || !specialTransfer.AllowedItem(item.Id))
             {
-                Log($"Fill [{type}/{specialTransfer?.GetType().Name}] not allowed: #{item.Id} in {((StructureTank) specialTransfer).AllowedItems.Aggregate("", (s, i) => $"{s},{i.Key}")}", LogLevel.Debug);
+                Log($"Fill [{type}] not allowed: #{item.Id} in {((StructureTank) specialTransfer).AllowedItems.Aggregate("", (s, i) => $"{s},{i.Key}")}", LogLevel.Debug);
                 return ItemMoveInfo.Empty;
             }
 
@@ -904,12 +904,12 @@ namespace EmpyrionScripting.CustomHelpers
                             DestinationE = structure.E,
                             Destination = type.ToString(),
                         });
-                        Log($"Fill [{specialTransfer.GetType().Name}] AddItems {S.CustomName} {S.Id} #{startCount}->{S.Count}->{count}", LogLevel.Debug);
+                        Log($"Fill [{type}] AddItems {S.CustomName} {S.Id} #{startCount}->{S.Count}->{count}", LogLevel.Debug);
                     };
 
                     if (count > 0) {
                         count = S.Container.AddItems(S.Id, count);
-                        Log($"Back [{specialTransfer.GetType().Name}] AddItems {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
+                        Log($"Back [{type}] AddItems {S.CustomName} {S.Id} #{S.Count}->{count}", LogLevel.Debug);
                     }
                     if (count > 0 && currentMoveInfo != null)
                     {
