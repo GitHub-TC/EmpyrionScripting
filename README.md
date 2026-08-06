@@ -649,8 +649,8 @@ Spielzeit: {{gameticks}} Ticks
 Verschiebt Items von einem Container in einen anderen (innerhalb oder zwischen Strukturen):
 
 ```
-{{move Item E.S 'Ziellager'}}
-{{move Item E.S 'Ziellager' 500}}    ← Maximal 500 im Zielcontainer lassen
+{{move Item @root.E.S 'Ziellager'}}
+{{move Item @root.E.S 'Ziellager' 500}}    ← Maximal 500 im Zielcontainer lassen
 ```
 
 ### Tanks befüllen: `fill`
@@ -658,8 +658,8 @@ Verschiebt Items von einem Container in einen anderen (innerhalb oder zwischen S
 Füllt Treibstoff-, O2- oder Pentaxid-Tanks auf:
 
 ```
-{{fill Item E.S 'FuelTank'}}        ← Auf 100% auffüllen
-{{fill Item E.S 'FuelTank' 80}}     ← Maximal auf 80% auffüllen
+{{fill Item @root.E.S 'FuelTank'}}        ← Auf 100% auffüllen
+{{fill Item @root.E.S 'FuelTank' 80}}     ← Maximal auf 80% auffüllen
 ```
 
 **Praxisbeispiel: Automatische Treibstoff-Auffüllung**
@@ -669,7 +669,7 @@ Targets:LCD Tankstatus
 === Tankstatus ===
 {{#items E.S 'Versorgungscontainer'}}
 {{#test Key eq 'EnergyCell'}}
-{{fill this E.S 'Haupttank'}}
+{{fill this @root.E.S 'Haupttank'}}
 Treibstoff wird nachgefüllt…
 {{/test}}
 {{/items}}
@@ -2469,8 +2469,8 @@ Game time: {{gameticks}} ticks
 Moves items from one container to another (within or between structures):
 
 ```
-{{move Item E.S 'TargetStorage'}}
-{{move Item E.S 'TargetStorage' 500}}    ← Maximum 500 items in target container
+{{move Item @root.E.S 'TargetStorage'}}
+{{move Item @root.E.S 'TargetStorage' 500}}    ← Maximum 500 items in target container
 ```
 
 ### Fill tanks: `fill`
@@ -2478,8 +2478,8 @@ Moves items from one container to another (within or between structures):
 Fills fuel, O2, or pentaxid tanks:
 
 ```
-{{fill Item E.S 'FuelTank'}}        ← Fill to 100%
-{{fill Item E.S 'FuelTank' 80}}     ← Fill to maximum 80%
+{{fill Item @root.E.S 'FuelTank'}}        ← Fill to 100%
+{{fill Item @root.E.S 'FuelTank' 80}}     ← Fill to maximum 80%
 ```
 
 **Practical example: Automatic fuel refilling**
@@ -2489,7 +2489,7 @@ Targets:LCD Tank Status
 === Tank Status ===
 {{#items E.S 'Supply Container'}}
 {{#test Key eq 'EnergyCell'}}
-{{fill this E.S 'Main Tank'}}
+{{fill this @root.E.S 'Main Tank'}}
 Filling fuel…
 {{/test}}
 {{/items}}
