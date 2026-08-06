@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ASTIC/TC")]
 [assembly: AssemblyProduct("EmpyrionScripting")]
-[assembly: AssemblyCopyright("Copyright ©2025")]
+[assembly: AssemblyCopyright("Copyright ©2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("13.5.0.0")]
-[assembly: AssemblyFileVersion("13.5.0.0")]
+[assembly: AssemblyVersion("13.5.1.0")]
+[assembly: AssemblyFileVersion("13.5.1.0")]

@@ -234,8 +234,8 @@ namespace EmpyrionScripting.CustomHelpers
                 return ItemMoveInfo.Empty;
             }
 
-            var uniqueNames = structure.AllCustomDeviceNames.GetUniqueNames(namesSearch);
-            if(!uniqueNames.Any())
+            var uniqueNames = structure?.AllCustomDeviceNames?.GetUniqueNames(namesSearch);
+            if(uniqueNames?.Any() != true)
             {
                 Log($"NoDevicesFound: {namesSearch}", LogLevel.Debug);
                 return ItemMoveInfo.Empty;
